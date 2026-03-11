@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.31.109:5001/api";
+// const API_URL = "http://192.168.31.109:5001/api";
+const API_URL = "https://addressguru.ae/api";
 
 export const add_listings = async (payload, step) => {
   const token = localStorage.getItem("authToken");
