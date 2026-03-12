@@ -4,7 +4,7 @@ import axios from "axios";
 // const API_URL = "http://192.168.29.191:5001/api";
 const API_URL = "https://addressguru.ae/api";
 
-// const API_URL = "http://192.168.31.109:5001/api";
+// const API_URL = "http://192.168.31.108:5001/api";
 
 export const createOrUpdateCategory = async (payload) => {
   try {
@@ -18,7 +18,6 @@ export const createOrUpdateCategory = async (payload) => {
 
       data: {
         ...payload,
-        type: "business",
       },
 
       headers: {
@@ -56,6 +55,25 @@ export const getAllCategories = async () => {
       },
       withCredentials: true,
     });
+
+    console.table("get all categories response:", response?.data);
+    return response.data;
+  } catch (err) {
+    console.log("get all categories error", err?.response?.data || err.message);
+  }
+};
+
+export const getCategorybyType = async (type = "business") => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/categories/get-categories-by-type/${type}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      },
+    );
 
     console.table("get all categories response:", response?.data);
     return response.data;

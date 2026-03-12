@@ -6,6 +6,7 @@ import { Plus, ArrowLeft } from "lucide-react";
 import {
   createOrUpdateCategory,
   getAllCategories,
+  getCategorybyType,
 } from "@/api/uaeAdminCategories";
 
 import CategoryTable from "@/components/admin/categorypopup/categorytable";
@@ -22,6 +23,9 @@ export default function CategoryPage() {
   const [parentCategory, setParentCategory] = useState(null);
   const [modalType, setModalType] = useState("category");
   const [loading, setLoading] = useState(false);
+  const TABS = ["business", "marketplace", "job", "property"];
+
+  const [activeType, setActiveType] = useState("business");
 
   // 🔥 NEW
   const [activeSection, setActiveSection] = useState("list");
@@ -31,16 +35,19 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (type = activeType) => {
     try {
       setLoading(true);
-      const res = await getAllCategories();
-      if (res?.status) setCategories(res?.data || []);
+
+      const res = await getCategorybyType(type);
+
+      if (res?.status) {
+        setCategories(res.data || []);
+      }
     } finally {
       setLoading(false);
     }
   };
-
   /* ================= ACTIONS ================= */
 
   const handleEdit = (category) => {
@@ -50,15 +57,19 @@ export default function CategoryPage() {
     setActiveSection("edit-category"); // 🔥 KEY
   };
 
+  useEffect(() => {
+    fetchCategories(activeType);
+  }, [activeType]);
+
   const handleCreateOrUpdate = async (formData) => {
     try {
       setLoading(true);
       const payload = {
         ...formData,
+        type: activeType,
         parentId: modalType === "subcategory" ? parentCategory?._id : null,
         ...(selected && { id: selected._id }),
       };
-
       const res = await createOrUpdateCategory(payload);
       if (res?.status) {
         fetchCategories();
@@ -144,6 +155,23 @@ export default function CategoryPage() {
       {/* ================= CONTENT ================= */}
       <div className="rounded-2xl bg-white p-4 shadow">
         {/* LIST */}
+        <div className="mb-6 flex gap-2 border-b border-gray-200 pb-2">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveType(tab)}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition
+        ${
+          activeType === tab
+            ? "bg-indigo-600 text-white shadow-sm"
+            : "text-gray-600 hover:bg-gray-100"
+        }
+      `}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
         {activeSection === "list" && (
           <CategoryTable
             categories={categories}
@@ -158,6 +186,7 @@ export default function CategoryPage() {
             isOpen={true}
             category={selected}
             type="category"
+            categoryType={activeType}
             onCategoryCreated={fetchCategories}
             onSubmit={handleCreateOrUpdate}
             onClose={goBackToList}

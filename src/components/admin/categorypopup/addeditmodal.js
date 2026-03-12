@@ -123,8 +123,9 @@ function AssignStep({
                   <div
                     key={item._id}
                     onClick={() => onToggle(item._id)}
-                    className={`group flex cursor-pointer items-center gap-4 px-4 py-3.5 transition-all duration-200 ${isChecked ? "bg-slate-50/80" : "hover:bg-slate-50"
-                      }`}
+                    className={`group flex cursor-pointer items-center gap-4 px-4 py-3.5 transition-all duration-200 ${
+                      isChecked ? "bg-slate-50/80" : "hover:bg-slate-50"
+                    }`}
                     style={{
                       animationDelay: `${index * 20}ms`,
                     }}
@@ -132,10 +133,11 @@ function AssignStep({
                     <div
                       className={`
                       flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all duration-200
-                      ${isChecked
+                      ${
+                        isChecked
                           ? `${selectedColorClasses[color]} shadow-sm`
                           : "border-slate-300 group-hover:border-slate-400 bg-white"
-                        }
+                      }
                     `}
                     >
                       {isChecked && (
@@ -147,8 +149,9 @@ function AssignStep({
                       )}
                     </div>
                     <span
-                      className={`text-sm font-medium transition-colors ${isChecked ? "text-slate-900" : "text-slate-600"
-                        }`}
+                      className={`text-sm font-medium transition-colors ${
+                        isChecked ? "text-slate-900" : "text-slate-600"
+                      }`}
                     >
                       {item.name}
                     </span>
@@ -186,11 +189,12 @@ function Stepper({ steps, currentStep }) {
                 <div
                   className={`
                     flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-all duration-300
-                    ${isCompleted
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : isActive
-                        ? "border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/25"
-                        : "border-slate-200 bg-white text-slate-400"
+                    ${
+                      isCompleted
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : isActive
+                          ? "border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/25"
+                          : "border-slate-200 bg-white text-slate-400"
                     }
                   `}
                 >
@@ -201,18 +205,20 @@ function Stepper({ steps, currentStep }) {
                   )}
                 </div>
                 <span
-                  className={`mt-2 text-xs font-medium transition-colors ${isActive || isCompleted
-                    ? "text-slate-900"
-                    : "text-slate-400"
-                    }`}
+                  className={`mt-2 text-xs font-medium transition-colors ${
+                    isActive || isCompleted
+                      ? "text-slate-900"
+                      : "text-slate-400"
+                  }`}
                 >
                   {s.label}
                 </span>
               </div>
               {!isLast && (
                 <div
-                  className={`mx-2 h-0.5 flex-1 transition-all duration-500 ${isCompleted ? "bg-slate-900" : "bg-slate-200"
-                    }`}
+                  className={`mx-2 h-0.5 flex-1 transition-all duration-500 ${
+                    isCompleted ? "bg-slate-900" : "bg-slate-200"
+                  }`}
                 />
               )}
             </div>
@@ -224,7 +230,12 @@ function Stepper({ steps, currentStep }) {
 }
 
 /* ================= Main Component ================= */
-export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
+export default function AddEditForm({
+  isOpen,
+  onClose,
+  onCategoryCreated,
+  categoryType,
+}) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [categoryId, setCategoryId] = useState(null);
@@ -322,6 +333,7 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
       const res = await createOrUpdateCategory({
         name: form.name,
         iconSvg: form.iconSvg,
+        type: categoryType,
       });
 
       if (res?.status) {
@@ -336,8 +348,7 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
     } catch (err) {
       console.error("Create category error:", err);
 
-      const message =
-        err?.message || "Failed to create category";
+      const message = err?.message || "Failed to create category";
 
       setSubmitError(message);
     } finally {
@@ -455,9 +466,10 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
                     placeholder="e.g., Sports Complex"
                     className={`
                       w-full rounded-xl border bg-slate-50/50 px-4 py-3.5 text-sm outline-none transition-all
-                      ${errors.name
-                        ? "border-red-300 focus:border-red-400 focus:ring-4 focus:ring-red-100"
-                        : "border-slate-200 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      ${
+                        errors.name
+                          ? "border-red-300 focus:border-red-400 focus:ring-4 focus:ring-red-100"
+                          : "border-slate-200 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100"
                       }
                     `}
                   />
@@ -470,7 +482,8 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">
-                    Icon SVG <span className="text-slate-400 text-xs">(optional)</span>
+                    Icon SVG{" "}
+                    <span className="text-slate-400 text-xs">(optional)</span>
                   </label>
 
                   <div className="relative">
@@ -507,7 +520,6 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
 
             {step === 2 && (
               <div className="space-y-4">
-
                 <div className="flex justify-end">
                   <button
                     onClick={() => {
@@ -519,7 +531,6 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
                     + Add Facility
                   </button>
                 </div>
-
 
                 <AssignStep
                   title="Facilities"
@@ -542,7 +553,6 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
 
             {step === 3 && (
               <div className="space-y-4">
-
                 <div className="flex justify-end">
                   <button
                     onClick={() => {
@@ -554,7 +564,6 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
                     + Add Service
                   </button>
                 </div>
-
 
                 <AssignStep
                   title="Services"
@@ -577,7 +586,6 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
 
             {step === 4 && (
               <div className="space-y-4">
-
                 <div className="flex justify-end">
                   <button
                     onClick={() => {
@@ -625,9 +633,10 @@ export default function AddEditForm({ isOpen, onClose, onCategoryCreated }) {
             disabled={step === 1 || loading}
             className={`
               flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all
-              ${step === 1
-                ? "opacity-0 pointer-events-none"
-                : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+              ${
+                step === 1
+                  ? "opacity-0 pointer-events-none"
+                  : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
               }
             `}
           >
