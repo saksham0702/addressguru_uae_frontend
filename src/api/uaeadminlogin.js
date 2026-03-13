@@ -3,7 +3,7 @@ import axios from "axios";
 // const API_URL = "http://192.168.29.191:5001/api";
 const API_URL = "https://addressguru.ae/api";
 
-// const API_URL = "http://192.168.31.109:5001/api";
+// const API_URL = "http://192.168.31.107:5001";
 
 export const loginUser = async (payload) => {
   try {
@@ -35,4 +35,39 @@ export const logoutUser = async () => {
       withCredentials: true,
     },
   );
+};
+
+export const createUser = async (data) => {
+  const res = await axios.post(`${API_URL}/admin/users/create`, data);
+  return res.data;
+};
+
+export const updateUser = async (id, payload) => {
+  const res = await axios.patch(
+    `${API_URL}/admin/users/update/${id}`, // change if your backend route is different
+    payload,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return res.data;
+};
+
+export const getUsers = async () => {
+  const res = await axios.get(`${API_URL}/admin/users/get-all`);
+  return res.data;
+};
+
+export const getUserById = (id) => {
+  const res = axios.get(`${API_URL}/admin/users/get-one/${id}`);
+  return res;
+};
+
+export const deleteUser = async (id) => {
+  return axios.delete(`${API_URL}/admin/users/delete/${id}`);
+};
+
+export const loginAsUser = (id) => {
+  return axios.post(`${API_URL}/master/user-login/${id}`);
 };

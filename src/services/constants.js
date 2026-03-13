@@ -2,11 +2,11 @@ import {
   Layers2,
   LayoutDashboard,
   ShoppingCartIcon,
+  User,
   UserIcon,
   Users,
 } from "lucide-react";
 import { FaCity } from "react-icons/fa";
-
 
 export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 // mine
@@ -956,8 +956,13 @@ export const NAV_ROUTES = [
   {
     name: "Cities",
     icon: FaCity,
-    href: "/admin/cities"
-  }
+    href: "/admin/cities",
+  },
+  {
+    name: "Users",
+    icon: User,
+    href: "/admin/users",
+  },
   // {
   //   name: "Users",
   //   href: "/admin/#",
