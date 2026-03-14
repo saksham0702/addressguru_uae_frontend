@@ -55,7 +55,7 @@ export const forgot_password = async (payload) => {
 export const user_google_login = async (postdata) => {
   try {
     const response = await axios.get(`${API_URL}/google/redirect`);
-    console.log("res of get google", response)
+    console.log("res of get google", response);
     return response?.data;
   } catch (error) {
     console.log(error?.response?.data);
@@ -69,6 +69,6 @@ export const social_login = async (postdata) => {
     // console.log("social response",res);
     return res?.data;
   } catch (error) {
-    console.log("error of social", error)
+    console.log("error of social", error);
   }
-}
+};

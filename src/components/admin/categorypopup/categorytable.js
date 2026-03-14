@@ -53,7 +53,7 @@ export default function CategoryTable({
                 <th className="w-16 px-6 py-3 font-medium">#</th>
                 <th className="px-6 py-3 font-medium">Name</th>
                 <th className="w-32 px-8 py-3 font-medium">Icon</th>
-                <th className="w-40 px-10    py-3  font-medium">Type</th>
+                <th className="w-40 px-10 py-3 font-medium">Type</th>
                 <th className="w-40 px-6 py-3 text-center font-medium">
                   Actions
                 </th>

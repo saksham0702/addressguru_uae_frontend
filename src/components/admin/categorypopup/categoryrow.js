@@ -20,6 +20,12 @@ export default function CategoryRow({
 
   const children = subCategories.filter((sub) => sub.parentId === category._id);
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(category);
+    }
+  };
+
   return (
     <>
       <tr className="hover:bg-gray-50 transition">
@@ -81,7 +87,7 @@ export default function CategoryRow({
             </button>
 
             <button
-              onClick={() => onDelete(category)}
+              onClick={handleDelete}
               className="rounded-md border border-gray-200 p-2 hover:bg-red-50 text-red-600 transition"
             >
               <Trash2 size={16} />

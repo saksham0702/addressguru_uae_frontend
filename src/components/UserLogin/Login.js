@@ -63,7 +63,7 @@ const Login = ({ setShowLogin }) => {
         setResError(res?.error || "Invalid email or password");
       } else if (res?.status === 403) {
         setResError(
-          res?.error || "Your account is not verified. Please verify it first."
+          res?.error || "Your account is not verified. Please verify it first.",
         );
         setUserId(res?.user_id);
         setOtpPop(true);
@@ -296,20 +296,20 @@ const Login = ({ setShowLogin }) => {
 
             {/*google login button */}
             <div className="w-fit mx-auto  flex items-center justify-center ">
-            <GoogleLogin
-              onSuccess={(res) => {
-                // console.log(res);
+              <GoogleLogin
+                onSuccess={(res) => {
+                  // console.log(res);
 
-                const code = res?.credential;
-                const random = crypto.randomUUID(); // or any random string generator
+                  const code = res?.credential;
+                  const random = crypto.randomUUID(); // or any random string generator
 
-                // setGoogleCode(code);
-                handleGoogle(code, random); // <-- CALL THE FUNCTION HERE
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-            />
+                  // setGoogleCode(code);
+                  handleGoogle(code, random); // <-- CALL THE FUNCTION HERE
+                }}
+                onError={() => {
+                  console.log("Login Failed");
+                }}
+              />
             </div>
             <span className="flex gap-1 max-md:mt-3 text-center text-xs mt-2 font-[500]">
               <p>Not Registered Yet?</p>

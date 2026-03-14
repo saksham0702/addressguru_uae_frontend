@@ -33,7 +33,7 @@ export default function DeleteConfirmModal({
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-center text-lg font-semibold text-gray-800">
+                        <h3 className="text-center text-lg font-semibold text-gray-80   0">
                             {title}
                         </h3>
 

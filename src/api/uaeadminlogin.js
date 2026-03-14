@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// const API_URL = "http://192.168.29.191:5001/api";
+// const API_URL = "http://192.168.31.104:5001";
 const API_URL = "https://addressguru.ae/api";
 
 // const API_URL = "http://192.168.31.107:5001";

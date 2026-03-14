@@ -10,6 +10,7 @@ import { API_URL } from "@/services/constants";
 // all blogs =>  ('blogs/{category?}')
 
 //get all blogs
+
 export const getBlogs = async () => {
   try {
     const response = await axios.get(`${API_URL}/blogs`);
@@ -22,6 +23,7 @@ export const getBlogs = async () => {
 };
 
 //get single blog details
+
 export const getBlogDetails = async (slug) => {
   console.log("slug", slug);
   try {
@@ -35,6 +37,7 @@ export const getBlogDetails = async (slug) => {
 };
 
 // get categories
+
 export const getCategories = async () => {
   try {
     const response = await axios.get(`${API_URL}/blogs/categories`);
@@ -47,6 +50,7 @@ export const getCategories = async () => {
 };
 
 //get recent blogs
+
 export const getRecentBlogs = async () => {
   try {
     const response = await axios.get(`${API_URL}/blogs/recent`);
@@ -59,6 +63,7 @@ export const getRecentBlogs = async () => {
 };
 
 //get most viewed blogs
+
 export const getMostViewedBlogs = async () => {
   try {
     const response = await axios.get(`${API_URL}/blogs/most-viewed`);
@@ -71,6 +76,7 @@ export const getMostViewedBlogs = async () => {
 };
 
 //get all blogs by category
+
 export const getBlogsByCategory = async (category) => {
   try {
     const response = await axios.get(`${API_URL}/blogs/${category}`);

@@ -5,6 +5,7 @@ import { Plus, ArrowLeft } from "lucide-react";
 
 import {
   createOrUpdateCategory,
+  deleteCategory,
   getAllCategories,
   getCategorybyType,
 } from "@/api/uaeAdminCategories";
@@ -12,6 +13,7 @@ import {
 import CategoryTable from "@/components/admin/categorypopup/categorytable";
 import AddEditForm from "@/components/admin/categorypopup/addeditmodal";
 import { useError } from "@/context/ErrorContext";
+import DeleteConfirmModal from "@/components/admin/cities/deletemodal";
 // ⬇️ these are placeholders – keep your existing components
 // import FacilitiesSection from "@/components/admin/category/FacilitiesSection";
 // import ServicesSection from "@/components/admin/category/ServicesSection";
@@ -24,6 +26,8 @@ export default function CategoryPage() {
   const [modalType, setModalType] = useState("category");
   const [loading, setLoading] = useState(false);
   const TABS = ["business", "marketplace", "job", "property"];
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(null);
 
   const [activeType, setActiveType] = useState("business");
 
@@ -55,6 +59,27 @@ export default function CategoryPage() {
     setParentCategory(null);
     setModalType("category");
     setActiveSection("edit-category"); // 🔥 KEY
+  };
+
+  const handleDeleteClick = (category) => {
+    setDeleteItem(category);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setLoading(true);
+
+      const res = await deleteCategory(deleteItem._id);
+
+      if (res?.status) {
+        fetchCategories();
+        setDeleteOpen(false);
+        setDeleteItem(null);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -177,6 +202,7 @@ export default function CategoryPage() {
             categories={categories}
             onEdit={handleEdit}
             isLoading={loading}
+            onDelete={handleDeleteClick}
           />
         )}
 
@@ -218,6 +244,17 @@ export default function CategoryPage() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmModal
+        isOpen={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false);
+          setDeleteItem(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Category"
+        description={`Are you sure you want to delete "${deleteItem?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

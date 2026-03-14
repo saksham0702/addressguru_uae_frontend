@@ -1,4 +1,4 @@
-import { add_job_listing, get_company_data } from "@/api/forms";
+import { get_company_data } from "@/api/forms";
 import CheckBox from "@/components/Forms/CheckBox";
 import InputWithTitle from "@/components/Forms/InputWithTitle";
 import Navbar from "@/components/Forms/Navbar";
@@ -15,15 +15,16 @@ import {
   getFromSession,
   clearSession,
 } from "@/utils/sessionStorage";
-import {
-  get_job_categories,
-  get_job_edulvl,
-  get_job_type,
-} from "@/api/postAds";
+import { get_job_edulvl, get_job_type } from "@/api/postAds";
 import { get_job_details } from "@/api/listings";
 import axios from "axios";
 import { API_URL } from "@/services/constants";
 import Image from "next/image";
+import {
+  add_job_listing,
+  get_job_categories,
+  save_job_company,
+} from "@/api/uae-job-listing";
 
 // Import your API functions here
 // import { get_categories, get_job_types, get_education_levels } from "@/api/listings";
@@ -33,6 +34,35 @@ const JobListing = () => {
   const { jobId } = router.query;
   const { edit } = router.query;
 
+  const subCategoryOptions = [
+    { value: "frontend", label: "Frontend Development" },
+    { value: "backend", label: "Backend Development" },
+    { value: "fullstack", label: "Full Stack Development" },
+    { value: "mobile", label: "Mobile Development" },
+    { value: "devops", label: "DevOps" },
+  ];
+
+  const workModeOptions = [
+    { value: "on-site", label: "On Site" },
+    { value: "remote", label: "Remote" },
+    { value: "hybrid", label: "Hybrid" },
+  ];
+
+  const experienceLevelOptions = [
+    { value: "entry", label: "Entry Level" },
+    { value: "junior", label: "Junior" },
+    { value: "mid", label: "Mid Level" },
+    { value: "senior", label: "Senior" },
+    { value: "lead", label: "Lead" },
+    { value: "executive", label: "Executive" },
+  ];
+
+  const genderOptions = [
+    { value: "any", label: "Any" },
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+  ];
+
   const getCompanyData = async () => {
     try {
       const res = await get_company_data();
@@ -41,6 +71,7 @@ const JobListing = () => {
       if (res?.success) {
         setPostJobData((prev) => ({
           ...prev,
+          category_id: "",
           companyLogo: res.company?.logo || null,
           companyName: res.company?.name || "",
           companyDescription: res.company?.description || "",
@@ -48,6 +79,7 @@ const JobListing = () => {
           name: res.company?.contact_person || "",
           email: res.company?.email || "",
           phone: res.company?.phone || "",
+
           city: res.company?.city || "",
           address: res.company?.address || "",
           zipCode: res.company?.zip_code || "",
@@ -86,7 +118,7 @@ const JobListing = () => {
   const cityRef = useRef(null);
   const addressRef = useRef(null);
   const zipCodeRef = useRef(null);
-
+  const subCategoryRef = useRef(null);
   const [errors, setErrors] = useState({});
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -97,22 +129,46 @@ const JobListing = () => {
 
   // Dropdown data states
   const [categories, setCategories] = useState([]);
+  const [slug, setSlug] = useState("");
   const [jobTypes, setJobTypes] = useState([]);
   const [educationLevels, setEducationLevels] = useState([]);
 
   const [postJobData, setPostJobData] = useState({
-    jobType: "",
-    category: "",
-    qualification: [],
+    category_id: "",
+    sub_category_id: "",
+    slug: "",
+
     title: "",
     description: "",
+
+    requirements: [],
+    responsibilities: [],
+    benefits: [],
+    skills: [],
+
+    sector: "",
+    jobType: "",
+    workMode: "",
+    experienceLevel: "",
+
     salaryFrom: "",
     salaryTo: "",
-    experience: "",
+    salaryCurrency: "PKR",
+    salaryPeriod: "monthly",
+    salaryNegotiable: false,
+    salaryHidden: false,
+
+    experienceFrom: "",
+    experienceTo: "",
+
     openings: "",
-    skills: [],
-    roles: [],
-    keySkills: [],
+
+    location: "",
+    education: "",
+
+    gender: "",
+    ageRange: "",
+
     companyLogo: null,
     companyName: "",
     companyDescription: "",
@@ -142,6 +198,32 @@ const JobListing = () => {
     },
   ]);
 
+  const sectorOptions = [
+    { value: "it", label: "IT" },
+    { value: "commerce", label: "Commerce" },
+    { value: "finance", label: "Finance" },
+    { value: "healthcare", label: "Healthcare" },
+    { value: "education", label: "Education" },
+    { value: "engineering", label: "Engineering" },
+    { value: "marketing", label: "Marketing" },
+    { value: "legal", label: "Legal" },
+    { value: "hospitality", label: "Hospitality" },
+    { value: "construction", label: "Construction" },
+    { value: "media", label: "Media" },
+    { value: "ngo", label: "NGO" },
+    { value: "government", label: "Government" },
+    { value: "other", label: "Other" },
+  ];
+
+  const jobTypeOptions = [
+    { value: "full-time", label: "Full Time" },
+    { value: "part-time", label: "Part Time" },
+    { value: "contract", label: "Contract" },
+    { value: "freelance", label: "Freelance" },
+    { value: "internship", label: "Internship" },
+    { value: "temporary", label: "Temporary" },
+  ];
+
   // Fetch dropdown data on mount
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -150,9 +232,10 @@ const JobListing = () => {
         const categoriesData = await get_job_categories();
         const jobTypesData = await get_job_type();
         const educationData = await get_job_edulvl();
-        setCategories(categoriesData?.data?.categories);
+        setCategories(categoriesData);
         setJobTypes(jobTypesData?.data?.types);
         setEducationLevels(educationData?.data?.education_level);
+        console.log("job category response", categoriesData);
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -295,42 +378,36 @@ const JobListing = () => {
   // Scroll to error field
   const scrollToError = (errorKey) => {
     const errorRefMap = {
-      category: categoryRef,
+      category_id: categoryRef,
+      sub_category_id: subCategoryRef,
       jobType: jobTypeRef,
-      qualification: educationLevelRef,
+      education: educationLevelRef,
       title: titleRef,
       description: descriptionRef,
       salaryFrom: salaryFromRef,
       salaryTo: salaryToRef,
-      experience: experienceRef,
+      experienceFrom: experienceRef,
+      experienceTo: experienceRef,
       openings: openingsRef,
       skills: skillsRef,
-      roles: rolesRef,
-      keySkills: keySkillsRef,
       companyName: companyNameRef,
-      companyDescription: companyDescriptionRef,
-      companyWebsite: companyWebsiteRef,
-      companyLogo: companyLogoRef,
-      name: nameRef,
       email: emailRef,
       phone: phoneRef,
-      city: cityRef,
-      address: addressRef,
-      zipCode: zipCodeRef,
     };
 
     const ref = errorRefMap[errorKey];
-    if (ref?.current) {
-      ref.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-      if (ref.current.querySelector("input, textarea")) {
-        setTimeout(() => {
-          ref.current.querySelector("input, textarea")?.focus();
-        }, 500);
-      }
-    }
+
+    if (!ref?.current) return;
+
+    ref.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    setTimeout(() => {
+      const input = ref.current.querySelector("input, textarea, select");
+      if (input) input.focus();
+    }, 300);
   };
 
   const isBlank = (v) =>
@@ -343,14 +420,14 @@ const JobListing = () => {
   const validateStep = (step) => {
     let newErrors = {};
     if (step === 1) {
-      if (!postJobData.category) {
-        newErrors.category = "Job category is required";
+      if (!postJobData.category_id) {
+        newErrors.category_id = "Job category is required";
       }
       if (!postJobData.jobType) {
         newErrors.jobType = "Job type is required";
       }
-      if (postJobData.qualification.length === 0) {
-        newErrors.qualification = "Education level is required";
+      if (!postJobData.education) {
+        newErrors.education = "Education level is required";
       }
       if (!postJobData.title.trim()) {
         newErrors.title = "Job title is required";
@@ -358,13 +435,7 @@ const JobListing = () => {
       if (!postJobData.description.trim()) {
         newErrors.description = "Job description is required";
       }
-      if (isBlank(postJobData.experience)) {
-        newErrors.experience = "Experience is required";
-      } else if (
-        !/^\d+(\.\d+)?$/.test(postJobData.experience.toString().trim())
-      ) {
-        newErrors.experience = "Experience must be a number";
-      }
+
       if (isBlank(postJobData.salaryFrom)) {
         newErrors.salaryFrom = "Minimum salary is required";
       } else if (
@@ -386,7 +457,7 @@ const JobListing = () => {
         }
       }
       if (isBlank(postJobData.openings)) {
-        newErrors.openings = "Number of openings is required";
+        newErrors.openings = "Total positions is required";
       } else if (
         !/^\d+(\.\d+)?$/.test(postJobData.openings.toString().trim())
       ) {
@@ -394,12 +465,6 @@ const JobListing = () => {
       }
       if (postJobData.skills.length === 0) {
         newErrors.skills = "Please add at least one skill";
-      }
-      if (postJobData.roles.length === 0) {
-        newErrors.roles = "Please add at least one role";
-      }
-      if (postJobData.keySkills.length === 0) {
-        newErrors.keySkills = "Please add at least one key skill";
       }
     }
     if (step === 2) {
@@ -411,13 +476,13 @@ const JobListing = () => {
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(postJobData.email.trim())) {
         newErrors.email = "Invalid email format";
       }
-      if (!postJobData.phone.trim()) {
+      if (!postJobData.phone) {
         newErrors.phone = "Phone number is required";
-      } else if (!/^\d{10}$/.test(postJobData.phone.trim())) {
+      } else if (!/^\d{10}$/.test(postJobData.phone)) {
         newErrors.phone = "Phone number must be 10 digits";
       }
-      if (postJobData.zipCode && postJobData.zipCode.trim() !== "") {
-        if (!/^\d+$/.test(postJobData.zipCode.trim())) {
+      if (postJobData.zipCode && postJobData.zipCode !== "") {
+        if (!/^\d+$/.test(postJobData.zipCode)) {
           newErrors.zipCode = "Zip Code must be numeric";
         }
       }
@@ -439,7 +504,7 @@ const JobListing = () => {
         salary_from: "salaryFrom",
         salary_to: "salaryTo",
         experience: "experience",
-        openings: "openings",
+        total_positions: "openings",
         skills: "skills",
         roles: "roles",
         key_skills: "keySkills",
@@ -489,46 +554,108 @@ const JobListing = () => {
 
     switch (stepNumber) {
       case 1:
-        formData.append("job_type", postJobData.jobType);
-        formData.append("category", postJobData.category);
-        postJobData.qualification.forEach((q) =>
-          formData.append("qualification[]", q),
-        );
+        formData.append("category_id", postJobData.category_id);
+        formData.append("sub_category_id", postJobData.sub_category_id);
+
         formData.append("title", postJobData.title);
         formData.append("description", postJobData.description);
-        formData.append("salary_from", postJobData.salaryFrom);
-        formData.append("salary_to", postJobData.salaryTo);
-        formData.append("experience", postJobData.experience);
-        formData.append("openings", postJobData.openings);
-        postJobData.skills.forEach((s) => formData.append("skills[]", s));
-        postJobData.roles.forEach((r) => formData.append("roles[]", r));
-        postJobData.keySkills.forEach((k) =>
-          formData.append("key_skills[]", k),
+
+        // arrays → JSON string
+        formData.append(
+          "requirements",
+          JSON.stringify(postJobData.requirements),
         );
-        break;
+        formData.append(
+          "responsibilities",
+          JSON.stringify(postJobData.responsibilities),
+        );
+        formData.append("benefits", JSON.stringify(postJobData.benefits));
+        formData.append("skills", JSON.stringify(postJobData.skills));
 
+        formData.append("sector", postJobData.sector);
+        formData.append("jobType", postJobData.jobType);
+        formData.append("experienceLevel", postJobData.experienceLevel);
+
+        // openings → total_positions
+        formData.append("total_positions", postJobData.openings);
+
+        // salary JSON
+        const salaryObj = {
+          from: postJobData.salaryFrom ? Number(postJobData.salaryFrom) : null,
+          to: postJobData.salaryTo ? Number(postJobData.salaryTo) : null,
+          currency: postJobData.salaryCurrency || "PKR",
+          period: postJobData.salaryPeriod || "monthly",
+          isNegotiable: postJobData.salaryNegotiable || false,
+          isHidden: postJobData.salaryHidden || false,
+        };
+
+        formData.append("salary", JSON.stringify(salaryObj));
+
+        // location JSON
+        const locationObj = {
+          city: postJobData.location,
+          isRemote: postJobData.workMode === "remote",
+        };
+
+        formData.append("location", JSON.stringify(locationObj));
+
+        formData.append("education", postJobData.education);
+        const experienceObj = {
+          from: postJobData.experienceFrom
+            ? Number(postJobData.experienceFrom)
+            : 0,
+          to: postJobData.experienceTo
+            ? Number(postJobData.experienceTo)
+            : null,
+        };
+
+        formData.append("experienceYears", JSON.stringify(experienceObj));
+
+        formData.append("gender", postJobData.gender);
+        formData.append("ageRange", postJobData.ageRange);
+
+        break;
       case 2:
-        formData.append("job_id", jobListingId);
-        if (postJobData.companyLogo) {
-          formData.append("company_logo", postJobData.companyLogo);
-        }
-        formData.append("company_name", postJobData.companyName);
-        formData.append("company_description", postJobData.companyDescription);
-        formData.append("company_website", postJobData.companyWebsite);
-        formData.append("name", postJobData.name);
-        formData.append("email", postJobData.email);
-        formData.append("phone", postJobData.phone);
-        formData.append("city", postJobData.city);
-        formData.append("address", postJobData.address);
-        formData.append("zip_code", postJobData.zipCode);
-        break;
+        formData.append("slug", slug);
+        formData.append("folder", "Jobs");
 
-      default:
+        const contactObj = {
+          name: postJobData.name,
+          email: postJobData.email,
+          phone: String(postJobData.phone),
+        };
+
+        formData.append("contact", JSON.stringify(contactObj));
+
+        const companyObj = {
+          name: postJobData.companyName,
+          description: postJobData.companyDescription,
+          website: postJobData.companyWebsite,
+          address: postJobData.address,
+          city: postJobData.city,
+          zip_code: postJobData.zipCode,
+        };
+
+        formData.append("company", JSON.stringify(companyObj));
+
+        if (postJobData.companyLogo) {
+          formData.append("logo", postJobData.companyLogo);
+        }
+
         break;
     }
 
     try {
-      const res = await add_job_listing(formData);
+      let res;
+
+      if (stepNumber === 1) {
+        res = await add_job_listing(formData);
+      }
+
+      if (stepNumber === 2) {
+        res = await save_job_company(formData);
+      }
+
       console.log(`Step ${stepNumber} submitted:`, res);
 
       if (res?.errors && Object.keys(res.errors).length > 0) {
@@ -540,9 +667,12 @@ const JobListing = () => {
         return false;
       }
 
-      if (stepNumber === 1 && res?.job_id) {
-        console.log("jobid", res?.job_id);
-        setJobListingId(res?.job_id);
+      console.log("res of step 1", res);
+
+      if (stepNumber == 1) {
+        setJobListingId(res?.data?.id);
+
+        setSlug(res?.data?.slug);
       }
 
       if (stepNumber === 2) {
@@ -581,159 +711,216 @@ const JobListing = () => {
   };
 
   // Convert dropdown data to options format
-  const categoryOptions = categories?.map((cat) => ({
-    value: cat.id,
+  const categoryOptions = (categories || []).map((cat) => ({
+    value: cat._id,
     label: cat.name,
   }));
 
-  const jobTypeOptions = jobTypes?.map((type) => ({
-    value: type.id,
-    label: type.type,
-  }));
-
-  const educationOptions = educationLevels?.map((level) => ({
-    value: level.id,
-    label: level.level,
-  }));
+  const educationOptions = [
+    { value: "none", label: "None" },
+    { value: "matric", label: "Matriculation" },
+    { value: "intermediate", label: "Intermediate" },
+    { value: "bachelor", label: "Bachelor's Degree" },
+    { value: "master", label: "Master's Degree" },
+    { value: "phd", label: "PhD" },
+    { value: "any", label: "Any" },
+  ];
 
   const cityOptions = cities?.map((city) => ({
     value: city, // important → ID
     label: city, // display name
   }));
 
-  const getSelectedOption = (options, value) => {
-    if (!options || !value) return null;
-    return options.find((opt) => opt.value === value) || null;
+  const getSelectedOption = (options = [], value) => {
+    if (!value) return null;
+    return options.find((opt) => opt?.value === value) || null;
   };
 
   const jobInfoForms = [
     {
       id: 1,
-      name: "Job Category",
-      key: "category",
+      name: "Category",
+      key: "category_id",
       type: "dropdown",
-      placeholder: "Select job category",
-      required: true,
+      placeholder: "Select category",
       ref: categoryRef,
       options: categoryOptions,
     },
     {
       id: 2,
+      name: "Sub Category",
+      key: "sub_category_id",
+      type: "dropdown",
+      placeholder: "Select sub category",
+      ref: subCategoryRef,
+      options: subCategoryOptions,
+    },
+    {
+      id: 3,
+      name: "Job Title",
+      key: "title",
+      type: "text",
+      placeholder: "Enter job title",
+      ref: titleRef,
+    },
+    {
+      id: 4,
+      name: "Description",
+      key: "description",
+      type: "textarea",
+      placeholder: "Enter description",
+      ref: descriptionRef,
+    },
+    {
+      id: 5,
+      name: "Requirements",
+      key: "requirements",
+      type: "array",
+      placeholder: "Enter requirement",
+    },
+    {
+      id: 6,
+      name: "Responsibilities",
+      key: "responsibilities",
+      type: "array",
+      placeholder: "Enter responsibility",
+    },
+    {
+      id: 7,
+      name: "Benefits",
+      key: "benefits",
+      type: "array",
+      placeholder: "Enter benefit",
+    },
+    {
+      id: 8,
+      name: "Skills",
+      key: "skills",
+      type: "search",
+      placeholder: "Enter skill",
+      ref: skillsRef,
+    },
+    {
+      id: 9,
+      width: true,
+      name: "Sector",
+      key: "sector",
+      type: "dropdown",
+      placeholder: "Select sector",
+      options: sectorOptions,
+    },
+    {
+      id: 10,
       width: true,
       name: "Job Type",
       key: "jobType",
       type: "dropdown",
       placeholder: "Select job type",
-      required: true,
       ref: jobTypeRef,
       options: jobTypeOptions,
     },
     {
-      id: 3,
+      id: 11,
       width: true,
-      name: "Education Level",
-      key: "qualification",
+      name: "Work Mode",
+      key: "workMode",
       type: "dropdown",
-      placeholder: "Select education level",
-      required: true,
-      ref: educationLevelRef,
-      options: educationOptions,
+      placeholder: "Remote / Onsite / Hybrid",
+      options: workModeOptions,
     },
     {
-      id: 4,
-      name: "Title",
-      key: "title",
-      type: "text",
-      placeholder: "Enter job title",
-      required: true,
-      ref: titleRef,
+      id: 12,
+      width: true,
+      name: "Experience Level",
+      key: "experienceLevel",
+      type: "dropdown",
+      placeholder: "Select experience level",
+      options: experienceLevelOptions,
     },
     {
-      id: 5,
-      name: "Description",
-      key: "description",
-      type: "textarea",
-      placeholder: "Enter job description",
-      required: true,
-      ref: descriptionRef,
-    },
-    {
-      id: 6,
+      id: 13,
       width: true,
       name: "Salary From",
       key: "salaryFrom",
       type: "text",
-      placeholder: "Enter min salary",
-      required: true,
       ref: salaryFromRef,
     },
     {
-      id: 7,
+      id: 14,
       width: true,
       name: "Salary To",
       key: "salaryTo",
       type: "text",
-      placeholder: "Enter max salary",
-      required: true,
       ref: salaryToRef,
     },
     {
-      id: 8,
+      id: 15,
       width: true,
-      name: "Experience",
-      key: "experience",
+      name: "Location",
+      key: "location",
+      type: "dropdown",
+      options: cityOptions,
+    },
+    {
+      id: 16,
+      width: true,
+      name: "Education",
+      key: "education",
+      type: "dropdown",
+      ref: educationLevelRef,
+      options: educationOptions,
+    },
+    {
+      id: 17,
+      width: true,
+      name: "Experience From",
+      key: "experienceFrom",
       type: "text",
-      placeholder: "Enter required experience",
-      required: true,
       ref: experienceRef,
     },
     {
-      id: 9,
+      id: 18,
       width: true,
-      name: "Openings",
+      name: "Experience To",
+      key: "experienceTo",
+      type: "text",
+    },
+    {
+      id: 19,
+      width: true,
+      name: "Age Range",
+      key: "ageRange",
+      type: "text",
+    },
+    {
+      id: 20,
+      width: true,
+      name: "Total Positions",
       key: "openings",
       type: "text",
-      placeholder: "Enter number of openings",
-      required: true,
+      placeholder: "Enter number of positions",
       ref: openingsRef,
     },
     {
-      id: 10,
-      name: "Skills",
-      key: "skills",
-      type: "search",
-      placeholder: "Enter a skill",
-      required: true,
-      ref: skillsRef,
-    },
-    {
-      id: 11,
-      name: "Roles",
-      key: "roles",
-      type: "array",
-      placeholder: "Enter a role",
-      ref: rolesRef,
-    },
-    {
-      id: 12,
-      name: "Key Skills",
-      key: "keySkills",
-      type: "array",
-      placeholder: "Enter a key skill",
-      ref: keySkillsRef,
+      id: 21,
+      width: true,
+      name: "Gender",
+      key: "gender",
+      type: "dropdown",
+      options: genderOptions,
     },
   ];
 
   const companyForms = [
     {
-      id: 13,
+      id: 1,
       name: "Company Logo",
       key: "companyLogo",
       type: "file",
       ref: companyLogoRef,
     },
     {
-      id: 14,
+      id: 2,
       name: "Company Name",
       key: "companyName",
       type: "text",
@@ -742,7 +929,7 @@ const JobListing = () => {
       ref: companyNameRef,
     },
     {
-      id: 15,
+      id: 3,
       name: "Company Description",
       key: "companyDescription",
       type: "textarea",
@@ -750,7 +937,7 @@ const JobListing = () => {
       ref: companyDescriptionRef,
     },
     {
-      id: 16,
+      id: 4,
       name: "Company Website",
       key: "companyWebsite",
       type: "text",
@@ -758,7 +945,7 @@ const JobListing = () => {
       ref: companyWebsiteRef,
     },
     {
-      id: 17,
+      id: 5,
       width: true,
       name: "Name",
       key: "name",
@@ -767,7 +954,7 @@ const JobListing = () => {
       ref: nameRef,
     },
     {
-      id: 18,
+      id: 6,
       width: true,
       name: "Email",
       key: "email",
@@ -777,7 +964,7 @@ const JobListing = () => {
       ref: emailRef,
     },
     {
-      id: 19,
+      id: 7,
       width: true,
       name: "Phone",
       key: "phone",
@@ -787,7 +974,7 @@ const JobListing = () => {
       ref: phoneRef,
     },
     {
-      id: 20,
+      id: 8,
       width: true,
       name: "City",
       key: "city",
@@ -797,7 +984,7 @@ const JobListing = () => {
       options: cityOptions,
     },
     {
-      id: 21,
+      id: 9,
       name: "Address",
       key: "address",
       type: "textarea",
@@ -805,7 +992,7 @@ const JobListing = () => {
       ref: addressRef,
     },
     {
-      id: 22,
+      id: 10,
       width: true,
       name: "Zip Code",
       key: "zipCode",
@@ -829,10 +1016,10 @@ const JobListing = () => {
 
           {/* Auto-save indicator */}
           {/* {lastSaved && (
-            <div className="fixed top-20 right-8 bg-green-100 text-green-700 px-4 py-2 rounded-lg shadow-md z-50">
-              Auto-saved at {lastSaved}
-            </div>
-          )} */}
+              <div className="fixed top-20 right-8 bg-green-100 text-green-700 px-4 py-2 rounded-lg shadow-md z-50">
+                Auto-saved at {lastSaved}
+              </div>
+            )} */}
 
           {/* steps */}
           <section className="mt-26 w-[80%] flex justify-center">
@@ -875,17 +1062,20 @@ const JobListing = () => {
                             )}
                           </label>
                           <DropDown
-                            options={item.options}
+                            options={item.options || []}
                             placeholder={item.placeholder}
                             value={getSelectedOption(
-                              item.options,
+                              item.options || [],
                               postJobData[item.key],
                             )}
                             onChange={(option) => {
+                              if (!option) return;
+
                               setPostJobData({
                                 ...postJobData,
                                 [item.key]: option.value,
                               });
+
                               clearError(item.key);
                             }}
                           />
@@ -1004,12 +1194,12 @@ const JobListing = () => {
                                   clearError(item.key);
                                 }}
                                 className="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg
-                 file:mr-4 file:py-2 file:px-4
-                 file:rounded-md file:border-0
-                 file:text-sm file:font-semibold
-                 file:bg-gray-100 file:text-gray-700
-                 hover:file:bg-gray-200
-                 focus:outline-none focus:ring-2 focus:ring-[#FF6E04]"
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-gray-100 file:text-gray-700
+                  hover:file:bg-gray-200
+                  focus:outline-none focus:ring-2 focus:ring-[#FF6E04]"
                               />
                             </div>
 

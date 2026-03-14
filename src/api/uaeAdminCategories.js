@@ -2,9 +2,10 @@ import CategoryRow from "@/components/admin/categorypopup/categoryrow";
 import axios from "axios";
 
 // const API_URL = "http://192.168.29.191:5001/api";
+
 const API_URL = "https://addressguru.ae/api";
 
-// const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "http://192.168.31.108:5001";
 
 export const createOrUpdateCategory = async (payload) => {
   try {
@@ -165,6 +166,18 @@ export const getSubCategoriesByCategory = async (categoryId) => {
     return response.data;
   } catch (err) {
     console.log("get subcategories error", err);
+    throw err;
+  }
+};
+
+export const deleteCategory = async (id) => {
+  try {
+    const res = await axios.delete(
+      `${API_URL}/categories/delete-category/${id}`,
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Delete category error:", err);
     throw err;
   }
 };
@@ -480,12 +493,14 @@ export const deleteFeatureApi = async (id) => {
 };
 
 /* Get category assigned features */
+
 export const getCategoryFeaturesApi = async (categoryId) => {
   const res = await fetch(`${API_URL}/categories/${categoryId}/features`);
   return await res.json();
 };
 
 /* Assign features to category */
+
 export const assignFeaturesApi = async (categoryId, payload) => {
   return axios.post(
     `${API_URL}/features/category/${categoryId}/assign`,
