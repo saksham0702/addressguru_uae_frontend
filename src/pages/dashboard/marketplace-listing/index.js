@@ -1,5 +1,5 @@
 import { get_marketplace_subcategories } from "@/api/Categories";
-import { add_marketplace_listing } from "@/api/forms";
+
 import { get_plans } from "@/api/plans";
 import { get_marketplace_by_id } from "@/api/showlistings";
 import DropDown from "@/components/Forms/DropDown";
@@ -21,10 +21,12 @@ import {
 } from "@/utils/sessionStorage";
 import ContactDetails from "@/components/Forms/FormSections/ContactDetails";
 import { APP_URL } from "@/services/constants";
+import { add_marketplace_listing } from "@/api/uae-marketplace";
 
 const MarketPlaceListing = () => {
   const router = useRouter();
-  const categoryId = router?.query?.item;
+  const categoryId = router?.query.item;
+  console.log(categoryId);
 
   // ── Edit mode ──
   const isEditMode = router?.query?.edit === "true";
@@ -39,7 +41,7 @@ const MarketPlaceListing = () => {
   const [errors, setErrors] = useState({});
   const [lastSaved, setLastSaved] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
-
+  const [slug, setSlug] = useState(null);
   // Refs for error scrolling
   const conditionRef = useRef(null);
   const titleRef = useRef(null);
@@ -95,11 +97,12 @@ const MarketPlaceListing = () => {
     name: "",
     email: "",
     number: "",
-    countryCode: "+65",
-    altCountryCode: "+65",
+    countryCode: "+971",
+    altCountryCode: "+971",
     altNumber: "",
-    city: "",
-    landmark: "",
+    cityId: "",
+    locality: "",
+    address: "",
   });
 
   // Section 4: SEO Details
@@ -202,11 +205,12 @@ const MarketPlaceListing = () => {
           name: d.name || "",
           email: d.email || "",
           number: d.mobile_number || "",
-          countryCode: d.country_code || "+65",
-          altCountryCode: d.alt_country_code || "+65",
-          altNumber: d.secound_mobile_number || "",
-          city: d.city || "",
-          landmark: d.locality || "",
+          countryCode: d.country_code || "+971",
+          altCountryCode: d.alt_country_code || "+971",
+          altNumber: d.second_mobile_number || "",
+          cityId: d.city_id || "",
+          locality: d.locality || "",
+          address: d.address || "",
         });
 
         // Pre-fill step 4 — SEO
@@ -529,8 +533,8 @@ const MarketPlaceListing = () => {
       if (!adInfo.description.trim()) {
         newErrors.description = "Description is required";
       }
-      if (adInfo.priceType === "amount" && !adInfo.amount.trim()) {
-        newErrors.amount = "Amount is required";
+      if (adInfo.priceType === "amount" && !adInfo.amount) {
+        newErrors.amount = "Price amount is required";
       }
     }
 
@@ -541,19 +545,24 @@ const MarketPlaceListing = () => {
     }
 
     if (step === 3) {
-      if (!contact.name.trim()) {
+      if (!contact.name) {
         newErrors.contactName = "Contact name is required";
       }
-      if (!contact.email.trim()) {
+
+      if (!contact.email) {
         newErrors.contactEmail = "Email is required";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) {
-        newErrors.contactEmail = "Enter a valid email";
       }
-      if (!contact.city.trim()) {
-        newErrors.contactCity = "City is required";
-      }
-      if (!contact.number.trim()) {
+
+      if (!contact.number) {
         newErrors.contactNumber = "Mobile number is required";
+      }
+
+      // if (!contact.cityId) {
+      //   newErrors.contactCity = "City is required";
+      // }
+
+      if (!contact.address) {
+        newErrors.contactAddress = "Address is required";
       }
     }
 
@@ -611,38 +620,71 @@ const MarketPlaceListing = () => {
         formData.append("condition", adInfo.condition);
         formData.append("title", adInfo.title);
         formData.append("description", adInfo.description);
-        formData.append("price_type", adInfo.priceType);
-        if (adInfo.priceType === "amount") {
-          formData.append("amount", adInfo.amount);
-        }
+
         if (adInfo.subcategoryId) {
           formData.append("sub_category_id", adInfo.subcategoryId);
         }
-        break;
 
+        // ===== Price handling =====
+        formData.append("price_currency", "AED");
+
+        if (adInfo.priceType === "amount") {
+          formData.append("price_amount", adInfo.amount);
+          formData.append("price_fixed", true);
+          formData.append("price_negotiable", false);
+          formData.append("price_free", false);
+        }
+
+        if (adInfo.priceType === "free") {
+          formData.append("price_amount", 0);
+          formData.append("price_fixed", false);
+          formData.append("price_negotiable", false);
+          formData.append("price_free", true);
+        }
+
+        if (adInfo.priceType === "contact_for_sale") {
+          formData.append("price_amount", 0);
+          formData.append("price_fixed", false);
+          formData.append("price_negotiable", true);
+          formData.append("price_free", false);
+        }
+
+        if (adInfo.priceType === "swap_trade") {
+          formData.append("price_amount", 0);
+          formData.append("price_fixed", false);
+          formData.append("price_negotiable", true);
+          formData.append("price_free", false);
+        }
+
+        // additional fields
+        formData.append("additional_fields", JSON.stringify([]));
+
+        break;
       case 2:
-        formData.append("listing_id", listingId);
+        // formData.append("listing_id", listingId);
         // Only send new (non-existing) images as files
         const newImages = media.images.filter((img) => !img.isExisting);
         newImages.forEach((img) => {
-          formData.append("images[]", img.file);
+          formData.append("images", img.file);
         });
         break;
 
       case 3:
-        formData.append("listing_id", listingId);
         formData.append("name", contact.name);
         formData.append("email", contact.email);
-        formData.append("city", contact.city);
         formData.append("country_code", contact.countryCode);
-        formData.append("alt_country_code", contact.altCountryCode);
         formData.append("mobile_number", contact.number);
+
         if (contact.altNumber) {
           formData.append("second_mobile_number", contact.altNumber);
         }
-        formData.append("locality", contact.landmark);
-        break;
 
+        formData.append("alt_country_code", contact.altCountryCode);
+        formData.append("locality", contact.locality);
+        formData.append("address", contact.address);
+        formData.append("city_id", contact.cityId);
+
+        break;
       case 4:
         formData.append("listing_id", listingId);
         formData.append("seo_title", seo.title);
@@ -658,7 +700,12 @@ const MarketPlaceListing = () => {
     }
 
     try {
-      const response = await add_marketplace_listing(formData);
+      const response = await add_marketplace_listing({
+        payload: formData,
+        step: stepNumber,
+        slug: slug,
+      });
+
       console.log(`Step ${stepNumber} submitted:`, response);
 
       if (!response?.success && response?.message) {
@@ -675,16 +722,20 @@ const MarketPlaceListing = () => {
         setIsSubmitting(false);
         return false;
       }
+      console.log("response of step 1 is :", response?.data);
 
-      if (stepNumber === 1 && response?.data?.id) {
+      if (stepNumber == 1 && response?.data) {
         setListingId(response.data.id);
+      }
+      if (stepNumber == 1 && response?.data) {
+        setSlug(response.data.slug);
       }
 
       if (stepNumber === 5) {
         clearSession();
         router.push("/dashboard");
       } else {
-        if (response?.data?.success) {
+        if (response?.data) {
           setActiveStep(stepNumber + 1);
         }
       }
@@ -990,7 +1041,7 @@ const MarketPlaceListing = () => {
             business={{
               name: adInfo.title,
               description: adInfo.description,
-              address: contact.city + ", " + contact.landmark,
+              address: contact.locality + ", " + contact.address,
             }}
             setSeo={setSeo}
             error={errors}

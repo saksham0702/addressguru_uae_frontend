@@ -1,50 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import InputWithTitle from "../InputWithTitle";
 import axios from "axios";
-import { API_URL } from "@/services/constants";
-import { COUNTRY_CODES } from "@/services/constants";
+import { API_URL, COUNTRY_CODES } from "@/services/constants";
 
 const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
   const [cities, setCities] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isCountryCodeOpen, setIsCountryCodeOpen] = useState(false);
-  const [isAltCountryCodeOpen, setIsAltCountryCodeOpen] = useState(false);
-  const [countrySearchTerm, setCountrySearchTerm] = useState("");
-  const [altCountrySearchTerm, setAltCountrySearchTerm] = useState("");
+  const [cityOpen, setCityOpen] = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [altCountryOpen, setAltCountryOpen] = useState(false);
 
-  const [rawNumber, setRawNumber] = useState(() => {
-    if (contact?.number) {
-      return contact?.number?.toString()?.replace(/^\+\d+\s*/, "");
-    }
-    return "";
-  });
-  const [rawAltNumber, setRawAltNumber] = useState(() => {
-    if (contact?.altNumber) {
-      return contact?.altNumber?.toString()?.replace(/^\+\d+\s*/, "");
-    }
-    return "";
-  });
+  const cityRef = useRef(null);
+  const countryRef = useRef(null);
+  const altCountryRef = useRef(null);
 
-  // ── Sync rawNumber / rawAltNumber when contact prop is updated externally
-  // (e.g. edit mode prefill runs after component already mounted)
-  useEffect(() => {
-    if (contact?.number !== undefined) {
-      const digits = contact.number?.toString()?.replace(/^\+\d+\s*/, "") || "";
-      setRawNumber(digits);
-    }
-  }, [contact?.number]);
+  const [rawNumber, setRawNumber] = useState("");
+  const [rawAltNumber, setRawAltNumber] = useState("");
 
-  useEffect(() => {
-    if (contact?.altNumber !== undefined) {
-      const digits =
-        contact.altNumber?.toString()?.replace(/^\+\d+\s*/, "") || "";
-      setRawAltNumber(digits);
-    }
-  }, [contact?.altNumber]);
-
-  const dropdownRef = useRef();
-  const countryCodeRef = useRef();
-  const altCountryCodeRef = useRef();
+  /* ---------------- FETCH CITIES ---------------- */
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -52,45 +24,45 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
         const res = await axios.get(`${API_URL}/cities`);
         setCities(res?.data || []);
       } catch (err) {
-        console.error("Client-side error:", err);
+        console.error("City fetch error:", err);
       }
     };
     fetchCities();
   }, []);
 
+  /* ---------------- CLOSE DROPDOWNS ---------------- */
+
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-      if (
-        countryCodeRef.current &&
-        !countryCodeRef.current.contains(e.target)
-      ) {
-        setIsCountryCodeOpen(false);
-        setCountrySearchTerm("");
-      }
-      if (
-        altCountryCodeRef.current &&
-        !altCountryCodeRef.current.contains(e.target)
-      ) {
-        setIsAltCountryCodeOpen(false);
-        setAltCountrySearchTerm("");
-      }
+      if (cityRef.current && !cityRef.current.contains(e.target))
+        setCityOpen(false);
+
+      if (countryRef.current && !countryRef.current.contains(e.target))
+        setCountryOpen(false);
+
+      if (altCountryRef.current && !altCountryRef.current.contains(e.target))
+        setAltCountryOpen(false);
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  /* ---------------- HANDLE CHANGE ---------------- */
 
   const handleChange = (field, value, errorKey) => {
     setContact((prev) => ({ ...prev, [field]: value }));
     if (clearError && errorKey) clearError(errorKey);
   };
 
-  const handleCitySelect = (cityName) => {
-    handleChange("city", cityName, "contactCity");
-    setIsOpen(false);
+  /* ---------------- CITY SELECT ---------------- */
+
+  const handleCitySelect = (city) => {
+    handleChange("cityId", city.id, "contactCity");
+    setCityOpen(false);
   };
+
+  /* ---------------- PHONE HANDLING ---------------- */
 
   const handleNumberChange = (e) => {
     const digits = e.target.value.replace(/\D/g, "");
@@ -104,46 +76,30 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
     handleChange("altNumber", digits, "contactAltNumber");
   };
 
-  const handleCountryCodeSelect = (code, field) => {
-    console.log(code, field);
-    handleChange(field, code);
-    if (field === "countryCode") {
-      setIsCountryCodeOpen(false);
-      setCountrySearchTerm("");
-    } else {
-      setIsAltCountryCodeOpen(false);
-      setAltCountrySearchTerm("");
-    }
-  };
+  /* ---------------- UI ---------------- */
 
-  const getFilteredCountryCodes = (searchTerm) => {
-    if (!searchTerm) return COUNTRY_CODES;
-    const term = searchTerm.toLowerCase();
-    return COUNTRY_CODES.filter(
-      (item) =>
-        item.country.toLowerCase().includes(term) || item.code.includes(term),
-    );
-  };
+  const selectedCity = cities.find((c) => c.id === contact?.cityId);
 
   return (
-    <div className="pb-4 rounded-lg">
-      <h1 className="text-md font-semibold text-2xl text-gray-700 mb-8">
+    <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+      <h2 className="text-xl font-semibold text-gray-800 mb-8">
         Business Contact Details
-      </h1>
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Row 1: Full Name & Email */}
+        {/* NAME */}
         <InputWithTitle
           title="Full Name"
-          type="text"
           placeholder="Enter full name"
           value={contact?.name || ""}
           error={error?.contactName}
           onChange={(e) => handleChange("name", e.target.value, "contactName")}
         />
+
+        {/* EMAIL */}
         <InputWithTitle
-          title="Email"
-          type="email"
-          placeholder="Enter email"
+          title="Email Address"
+          placeholder="Enter email address"
           value={contact?.email || ""}
           error={error?.contactEmail}
           onChange={(e) =>
@@ -151,226 +107,164 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
           }
         />
 
-        {/* Row 2: Mobile Number */}
+        {/* MOBILE NUMBER */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
             Mobile Number *
           </label>
-          <div className="flex gap-2">
-            <div className="relative w-17" ref={countryCodeRef}>
+
+          <div className="flex">
+            <div
+              ref={countryRef}
+              className="relative w-24 border border-gray-300 rounded-l-lg bg-gray-50"
+            >
               <button
-                type="button"
-                onClick={() => setIsCountryCodeOpen(!isCountryCodeOpen)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 flex items-center justify-between"
+                onClick={() => setCountryOpen(!countryOpen)}
+                className="w-full py-2 text-sm font-medium text-gray-700"
               >
-                <span>{contact?.countryCode || "+65"}</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                {contact?.countryCode || "+971"}
               </button>
-              {isCountryCodeOpen && (
-                <div className="absolute z-50 mt-1 w-72 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
-                  <div className="p-2 border-b">
-                    <input
-                      type="text"
-                      placeholder="Search country..."
-                      value={countrySearchTerm}
-                      onChange={(e) => setCountrySearchTerm(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {getFilteredCountryCodes(countrySearchTerm).map(
-                      (item, index) => (
-                        <div
-                          key={index}
-                          onClick={() =>
-                            handleCountryCodeSelect(item.code, "countryCode")
-                          }
-                          className={`px-4 py-2 cursor-pointer hover:bg-orange-100 transition-colors flex items-center gap-2 ${
-                            contact?.countryCode === item.code
-                              ? "bg-orange-50 text-orange-600 font-semibold"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          <span className="text-xl">{item.flag}</span>
-                          <span className="flex-1">{item.country}</span>
-                          <span className="text-sm font-medium">
-                            {item.code}
-                          </span>
-                        </div>
-                      ),
-                    )}
-                  </div>
+
+              {countryOpen && (
+                <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-md w-64 max-h-60 overflow-y-auto">
+                  {COUNTRY_CODES.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        handleChange("countryCode", item.code);
+                        setCountryOpen(false);
+                      }}
+                      className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
+                    >
+                      <span>{item.flag}</span>
+                      <span>{item.country}</span>
+                      <span className="ml-auto">{item.code}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="flex-1">
-              <input
-                ref={refs?.number}
-                type="tel"
-                placeholder="Enter mobile number"
-                value={rawNumber}
-                onChange={handleNumberChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                  error?.contactNumber ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
+            <input
+              ref={refs?.number}
+              type="tel"
+              placeholder="Enter mobile number"
+              value={rawNumber}
+              onChange={handleNumberChange}
+              className={`flex-1 border border-l-0 border-gray-300 rounded-r-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none ${
+                error?.contactNumber ? "border-red-500" : ""
+              }`}
+            />
           </div>
+
           {error?.contactNumber && (
-            <p className="text-red-500 text-xs mt-1">{error.contactNumber}</p>
+            <p className="text-xs text-red-500 mt-1">{error.contactNumber}</p>
           )}
         </div>
 
-        {/* Row 2: Alternate Number */}
+        {/* ALT NUMBER */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
             Alternate Number
           </label>
-          <div className="flex gap-2">
-            <div className="relative w-17" ref={altCountryCodeRef}>
+
+          <div className="flex">
+            <div
+              ref={altCountryRef}
+              className="relative w-24 border border-gray-300 rounded-l-lg bg-gray-50"
+            >
               <button
-                type="button"
-                onClick={() => setIsAltCountryCodeOpen(!isAltCountryCodeOpen)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 flex items-center justify-between"
+                onClick={() => setAltCountryOpen(!altCountryOpen)}
+                className="w-full py-2 text-sm font-medium text-gray-700"
               >
-                <span>{contact?.altCountryCode || "+65"}</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                {contact?.altCountryCode || "+971"}
               </button>
-              {isAltCountryCodeOpen && (
-                <div className="absolute z-50 mt-1 w-72 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
-                  <div className="p-2 border-b">
-                    <input
-                      type="text"
-                      placeholder="Search country..."
-                      value={altCountrySearchTerm}
-                      onChange={(e) => setAltCountrySearchTerm(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {getFilteredCountryCodes(altCountrySearchTerm).map(
-                      (item, index) => (
-                        <div
-                          key={index}
-                          onClick={() =>
-                            handleCountryCodeSelect(item.code, "altCountryCode")
-                          }
-                          className={`px-4 py-2 cursor-pointer hover:bg-orange-100 transition-colors flex items-center gap-2 ${
-                            contact?.altCountryCode === item.code
-                              ? "bg-orange-50 text-orange-600 font-semibold"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          <span className="text-xl">{item.flag}</span>
-                          <span className="flex-1">{item.country}</span>
-                          <span className="text-sm font-medium">
-                            {item.code}
-                          </span>
-                        </div>
-                      ),
-                    )}
-                  </div>
+
+              {altCountryOpen && (
+                <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-md w-64 max-h-60 overflow-y-auto">
+                  {COUNTRY_CODES.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        handleChange("altCountryCode", item.code);
+                        setAltCountryOpen(false);
+                      }}
+                      className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
+                    >
+                      <span>{item.flag}</span>
+                      <span>{item.country}</span>
+                      <span className="ml-auto">{item.code}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="flex-1">
-              <input
-                ref={refs?.altNumber}
-                type="tel"
-                placeholder="Enter alternate number"
-                value={rawAltNumber}
-                onChange={handleAltNumberChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                  error?.contactAltNumber ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
+            <input
+              ref={refs?.altNumber}
+              type="tel"
+              placeholder="Enter alternate number"
+              value={rawAltNumber}
+              onChange={handleAltNumberChange}
+              className="flex-1 border border-l-0 border-gray-300 rounded-r-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+            />
           </div>
-          {error?.contactAltNumber && (
-            <p className="text-red-500 text-xs mt-1">
-              {error.contactAltNumber}
-            </p>
-          )}
         </div>
 
-        {/* Row 3: Locality/Landmark & City */}
+        {/* LOCALITY */}
         <InputWithTitle
           title="Locality / Landmark"
-          type="text"
-          placeholder="Enter locality or landmark"
-          value={contact?.landmark || ""}
+          placeholder="Enter locality"
+          value={contact?.locality || ""}
           error={error?.contactLandmark}
           onChange={(e) =>
-            handleChange("landmark", e.target.value, "contactLandmark")
+            handleChange("locality", e.target.value, "contactLandmark")
           }
         />
 
-        {/* City Dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        {/* ADDRESS */}
+        <InputWithTitle
+          title="Address"
+          placeholder="Enter full address"
+          value={contact?.address || ""}
+          error={error?.contactAddress}
+          onChange={(e) =>
+            handleChange("address", e.target.value, "contactAddress")
+          }
+        />
+
+        {/* CITY */}
+        <div className="relative md:col-span-2" ref={cityRef}>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
             City / Region *
           </label>
+
           <button
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            className={`w-full px-4 py-2 text-left border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-              error?.contactCity ? "border-red-500" : "border-gray-300"
-            } ${contact?.city ? "text-gray-900" : "text-gray-400"}`}
+            onClick={() => setCityOpen(!cityOpen)}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-left text-gray-700 hover:border-orange-400 focus:ring-2 focus:ring-orange-500"
           >
-            {contact?.city || "Select City"}
+            {selectedCity?.name || "Select City"}
           </button>
+
           {error?.contactCity && (
-            <p className="text-red-500 text-xs mt-1">{error.contactCity}</p>
+            <p className="text-xs text-red-500 mt-1">{error.contactCity}</p>
           )}
-          {isOpen && (
-            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {cities && cities.length > 0 ? (
-                cities.map((cityName, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleCitySelect(cityName)}
-                    className={`px-4 py-2 cursor-pointer font-medium hover:bg-orange-100 transition-colors ${
-                      contact?.city === cityName
-                        ? "bg-orange-50 text-orange-600 font-semibold"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {cityName}
-                  </div>
-                ))
-              ) : (
-                <div className="px-4 py-2 text-gray-500">
-                  No cities available
+
+          {cityOpen && (
+            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-md max-h-60 overflow-y-auto">
+              {cities.map((city) => (
+                <div
+                  key={city.id}
+                  onClick={() => handleCitySelect(city)}
+                  className={`px-4 py-2 cursor-pointer hover:bg-orange-50 ${
+                    contact?.cityId === city.id
+                      ? "bg-orange-50 text-orange-600 font-medium"
+                      : ""
+                  }`}
+                >
+                  {city.name}
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>

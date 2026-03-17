@@ -54,6 +54,7 @@ export const add_job_listing = async (formData) => {
 // };
 
 // add marketplace listing
+
 export const add_marketplace_listing = async (payload) => {
   const token = localStorage.getItem("authToken");
   console.log("payload of listing", payload);
@@ -72,6 +73,8 @@ export const add_marketplace_listing = async (payload) => {
     return error?.response?.data?.errors;
   }
 };
+
+
 // get facilities or properties
 export const get_service_facility = async (ID) => {
   const token = localStorage.getItem("authToken");

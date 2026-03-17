@@ -2,6 +2,7 @@ import {
   get_sub_category,
   get_sub_category_marketplace,
 } from "@/api/Categories";
+import { get_marketplace_category } from "@/api/uae-marketplace";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -803,7 +804,7 @@ import React, { useEffect, useState } from "react";
 const StuffForSale = () => {
   const [category, setCategory] = useState(null);
   const getCategoryMarketplace = async () => {
-    const res = await get_sub_category_marketplace();
+    const res = await get_marketplace_category();
     console.log(res);
     if (res) setCategory(res);
   };
@@ -815,7 +816,7 @@ const StuffForSale = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
       {category?.map((item) => (
         <Link
-          href={`/dashboard/marketplace-listing?item=${item?.id}`}
+          href={`/dashboard/marketplace-listing?item=${item?._id}`}
           key={item?.id}
           //   onClick={() => handleItemClick(item)}
           className=" px-4 h-14 py-2 cursor-pointer bg-white rounded-md flex items-center gap-5 hover:shadow-md transition-shadow"

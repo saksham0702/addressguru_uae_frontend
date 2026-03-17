@@ -178,6 +178,7 @@ export default function CategoryPage() {
       )}
 
       {/* ================= CONTENT ================= */}
+      
       <div className="rounded-2xl bg-white p-4 shadow">
         {/* LIST */}
         <div className="mb-6 flex gap-2 border-b border-gray-200 pb-2">

@@ -4,15 +4,23 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  getBlogs,
-  getCategories,
-  getRecentBlogs,
-  getMostViewedBlogs,
-  getBlogsByCategory,
-} from "@/api/blogs";
+// import {
+//   getBlogs,
+//   getCategories,
+//   getRecentBlogs,
+//   getMostViewedBlogs,
+//   getBlogsByCategory,
+// } from "@/api/blogs";
+
 import { APP_URL } from "@/services/constants";
 import Head from "next/head";
+import {
+  getBlogs,
+  getBlogsByCategory,
+  getCategories,
+  getMostViewedBlogs,
+  getRecentBlogs,
+} from "@/api/uae-blogs";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -25,11 +33,11 @@ const Blogs = () => {
     const fetchBlogs = async () => {
       try {
         const response = await getBlogs();
-        if (response?.success) {
-          setBlogs(response?.result);
-        }
+        console.log("blog response:", response);
+
+        setBlogs(response);
       } catch (error) {
-        console.error("Error fetching blogs:", error);
+        console.log("Error fetching blogs:", error);
       }
     };
     fetchBlogs();
@@ -37,11 +45,13 @@ const Blogs = () => {
     const fetchCategories = async () => {
       try {
         const response = await getCategories();
-        if (response?.success) {
-          setBlogCategories(response?.result);
+        console.log(response);
+
+        if (response?.status == true) {
+          setBlogCategories(response?.data);
         }
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.log("Error fetching categories:", error);
       }
     };
     fetchCategories();
@@ -49,11 +59,13 @@ const Blogs = () => {
     const fetchRecentBlogs = async () => {
       try {
         const response = await getRecentBlogs();
-        if (response?.success) {
-          setRecentBlogs(response?.result);
+        console.log("recent blog response", response);
+
+        if (response) {
+          setRecentBlogs(response?.data?.blogs);
         }
       } catch (error) {
-        console.error("Error fetching recent blogs:", error);
+        console.log("Error fetching recent blogs:", error);
       }
     };
     fetchRecentBlogs();
@@ -65,7 +77,7 @@ const Blogs = () => {
           setMostViewedBlogs(response?.result);
         }
       } catch (error) {
-        console.error("Error fetching most viewed blogs:", error);
+        console.log("Error fetching most viewed blogs:", error);
       }
     };
     fetchMostViewedBlogs();
@@ -77,13 +89,11 @@ const Blogs = () => {
           setBlogsByCategory(response?.result);
         }
       } catch (error) {
-        console.error("Error fetching blogs by category:", error);
+        console.log("Error fetching blogs by category:", error);
       }
     };
     fetchBlogsByCategory();
   }, []);
-
-
 
   // Slider settings for recent blogs
   const sliderSettings = {

@@ -7,7 +7,7 @@ const API_URL = "https://addressguru.ae/api";
 export const get_job_categories = async () => {
   try {
     const response = await axios.get(
-      `${API_URL1}/categories/get-categories-by-type/job`,
+      `${API_URL}/categories/get-categories-by-type/job`,
     );
     console.log(response);
 
@@ -65,3 +65,4 @@ export const save_job_company = async (formData) => {
     return error?.response?.data;
   }
 };
+

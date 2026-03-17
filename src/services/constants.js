@@ -6,7 +6,7 @@ import {
   UserIcon,
   Users,
 } from "lucide-react";
-import { FaCity } from "react-icons/fa";
+import { FaBlog, FaCity } from "react-icons/fa";
 
 export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 // mine
@@ -959,10 +959,22 @@ export const NAV_ROUTES = [
     href: "/admin/cities",
   },
   {
+    name: "Blogs",
+    icon: FaBlog,
+    children: [
+      { name: "Blog Categories", href: "/admin/blogs/blog-categories" },
+      { name: "Blogs", href: "/admin/blogs/list" },
+
+      // { name: 'Add Category', href: '/dashboard/categories/add' },
+      // { name: 'Subcategories', href: '/dashboard/categories/sub' },
+    ],
+  },
+  {
     name: "Users",
     icon: User,
     href: "/admin/users",
   },
+
   // {
   //   name: "Users",
   //   href: "/admin/#",
