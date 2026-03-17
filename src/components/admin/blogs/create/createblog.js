@@ -5,11 +5,6 @@ import { useState, useEffect } from "react";
 
 import Head from "next/head";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
-
-const JoditEditor = dynamic(() => import("@/components/admin/editor/editor"), {
-  ssr: false,
-});
 
 import {
   getCategories,
@@ -20,6 +15,7 @@ import {
 } from "@/api/uae-blogs";
 
 import { API_URL } from "@/services/constants";
+import TinyEditor from "../../editor/editor";
 
 // ── Image Preview component ───────────────────────────────────────────────────
 const ImagePicker = ({ label, name, preview, onChange }) => (
@@ -266,7 +262,9 @@ export default function CreateBlog() {
 
     setSubmitting(true);
     try {
-      const res = id ? await updateBlog(form?.blogid, fd) : await createBlog(fd);
+      const res = id
+        ? await updateBlog(form?.blogid, fd)
+        : await createBlog(fd);
       if (res?.success) {
         showToast("success", id ? "Blog updated!" : "Blog created!");
         setTimeout(() => router.push("/admin/blogs"), 1200);
@@ -384,7 +382,7 @@ export default function CreateBlog() {
                   </p>
                 </Field>
                 <Field label="Content" required>
-                  <JoditEditor
+                  <TinyEditor
                     value={form.content}
                     onChange={(value) =>
                       setForm((prev) => ({ ...prev, content: value }))

@@ -106,3 +106,16 @@ button{
   scrollbar-width: thin;
   scrollbar-color: #f97316 #fff7ed;
 }
+
+.btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #f3f4f6;
+}

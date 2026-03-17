@@ -13,7 +13,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import SideNav from "@/components/admin/sidebar/sidebar";
 import AdminHeader from "@/components/admin/header";
 import { ErrorProvider } from "@/context/ErrorContext";
-import "react-quill/dist/quill.snow.css";
+
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
