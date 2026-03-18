@@ -1,6 +1,7 @@
 import React from "react";
 
 const InputWithTitle = ({
+  type="text",
   title,
   value,
   onChange,
@@ -46,7 +47,7 @@ const InputWithTitle = ({
         />
       ) : (
         <input
-          type="text"
+          type={type}
           placeholder={placeholder}
           className={`border border-gray-200 ${
             width ? "w-[50%]" : "w-full"

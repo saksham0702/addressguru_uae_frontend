@@ -47,8 +47,8 @@
 
 import axios from "axios";
 
-const API_URL = "https://addressguru.ae/api";
-// const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "https://addressguru.ae/api";
+const API_URL = "http://192.168.31.107:5001";
 
 export const get_marketplace_category = async () => {
   try {
@@ -71,11 +71,11 @@ export const add_marketplace_listing = async ({ payload, step, slug }) => {
     if (step === 1) {
       // CREATE LISTING
       response = await axios.post(
-        `${API_URL}/marketplace/create-listing`,
+        `${API_URL}/marketplace/create-listing/step/${step}`,
         payload,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Accept: "application/json",
           },
         },

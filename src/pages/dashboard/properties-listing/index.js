@@ -27,6 +27,9 @@ import AdditionalPropertyFields, {
 } from "@/components/Forms/FormSections/AdditionalPropertyFields";
 import { APP_URL } from "@/services/constants";
 
+import axios from "axios";
+import { add_property_listing } from "@/api/uae-property";
+
 const PropertiesListing = () => {
   const router = useRouter();
   const categoryId = router?.query?.id;
@@ -638,7 +641,7 @@ const PropertiesListing = () => {
     if (isEditMode) {
       formData.append("property_id", listingId);
     } else {
-      formData.append("category_id", categoryId);
+      // formData.append("category_id", categoryId);
       formData.append("type", type);
       if (listingId) formData.append("property_id", listingId);
     }
@@ -647,27 +650,61 @@ const PropertiesListing = () => {
 
     switch (stepNumber) {
       case 1:
-        formData.append("sale_by", propertyInfo.rentBy);
-        formData.append("available", startDate.toISOString().split("T")[0]);
-        formData.append("size", propertyInfo.size);
-        if (propertyInfo.rentBy === "agency" && propertyInfo.caeNumber) {
-          formData.append("cae_number", propertyInfo.caeNumber);
+        // Required
+        formData.append("category_id", resolvedCategoryId);
+
+        // OPTIONAL: only if you actually have subcategory state
+        if (contact.subCategoryId) {
+          formData.append("sub_category_id", contact.subCategoryId);
         }
+
+        // MUST BE ID (not name)
+        formData.append("city_id", contact.city);
+
+        // Basic Info
         formData.append("title", propertyInfo.title);
         formData.append("description", propertyInfo.description);
-        formData.append("price_type", propertyInfo.priceType);
+
+        // Purpose (sale | rent | lease)
+        formData.append("purpose", resolvedType);
+
+        // PRICE
         if (propertyInfo.priceType === "amount") {
-          formData.append("amount", propertyInfo.amount);
+          formData.append("price_amount", propertyInfo.amount);
         }
+
+        formData.append("price_currency", "AED"); // can make dynamic later
+        formData.append("price_negotiable", "false"); // string required
+        formData.append("price_period", "one-time"); // or monthly/yearly
+
+        // AREA
+        formData.append("area_size", propertyInfo.size);
+        formData.append("area_unit", "sqft"); // TODO: make dynamic if needed
+
+        // formData.append("area_unit", propertyInfo.areaUnit || "sqft");
+
+        // PAYMENTS (plan)
+        if (selectedPlanId) {
+          formData.append("payments", selectedPlanId);
+        }
+
+        // FACILITIES & SERVICES (if backend supports)
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
+
         selectedServices.forEach((id) => formData.append("services[]", id));
+
+        // ADDITIONAL FIELDS (IMPORTANT FORMAT)
         if (additionalFields && Object.keys(additionalFields).length > 0) {
-          Object.entries(additionalFields).forEach(([key, value]) => {
-            if (value !== "" && value !== null && value !== undefined) {
-              formData.append(key, value);
-            }
-          });
+          const formattedFields = Object.entries(additionalFields)
+            .filter(([_, value]) => value !== "" && value !== null)
+            .map(([field_id, value]) => ({
+              field_id,
+              value: String(value),
+            }));
+
+          formData.append("additional_fields", JSON.stringify(formattedFields));
         }
+
         break;
 
       case 2:
@@ -709,10 +746,15 @@ const PropertiesListing = () => {
     }
 
     try {
-      const response = await add_properties_listing(formData);
+      const response = await add_property_listing({
+        payload: formData,
+        step: stepNumber,
+        listingId,
+      });
       console.log(`Step ${stepNumber} submitted:`, response);
+      console.log("response of step 1", response);
 
-      if (!response?.success && response?.message) {
+      if (!response?.status) {
         alert(response?.message || "Error Occurred");
       }
 
@@ -725,8 +767,8 @@ const PropertiesListing = () => {
         return false;
       }
 
-      if (stepNumber === 1 && response?.data?.id) {
-        setListingId(response.data.id);
+      if (stepNumber === 1 && response?.data?._id) {
+        setListingId(response.data._id);
       }
 
       if (stepNumber === 5) {
@@ -974,14 +1016,14 @@ const PropertiesListing = () => {
               </div>
             )}
 
-            <AdditionalPropertyFields
+            {/* <AdditionalPropertyFields
               categorySlug={resolvedCategory}
               values={additionalFields}
               onChange={setAdditionalFields}
               errors={errors}
               clearError={clearError}
               setErrors={setErrors}
-            />
+            /> */}
           </section>
         );
 

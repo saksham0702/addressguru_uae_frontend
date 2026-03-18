@@ -6,6 +6,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "addressguru.ae",
+      },
+      {
+        protocol: "https",
         hostname: "api.addressguru.sg",
       },
       {

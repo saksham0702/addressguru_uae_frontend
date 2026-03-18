@@ -42,7 +42,7 @@ export const getBlogs = async ({ page = 1, limit = 10, search = "" } = {}) => {
 };
 
 export const getBlogDetails = async (slug) => {
-  const { data } = await API.get(`/blogs/${slug}`);
+  const { data } = await API.get(`/blogs/get-blog-by-slug/${slug}`);
   return data;
 };
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.31.108:5001/api";
+const API_URL = "https://addressguru.ae/api";
 
 let globalErrorHandler;
 

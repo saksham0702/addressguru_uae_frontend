@@ -12,7 +12,6 @@ import Image from "next/image";
 //   getBlogsByCategory,
 // } from "@/api/blogs";
 
-import { APP_URL } from "@/services/constants";
 import Head from "next/head";
 import {
   getBlogs,
@@ -28,6 +27,7 @@ const Blogs = () => {
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [mostViewedBlogs, setMostViewedBlogs] = useState([]);
   const [blogsByCategory, setBlogsByCategory] = useState([]);
+  const APP_URL = "https://addressguru.ae/api";
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -73,8 +73,8 @@ const Blogs = () => {
     const fetchMostViewedBlogs = async () => {
       try {
         const response = await getMostViewedBlogs();
-        if (response?.success) {
-          setMostViewedBlogs(response?.result);
+        if (response?.status == true) {
+          setMostViewedBlogs(response?.data?.blogs);
         }
       } catch (error) {
         console.log("Error fetching most viewed blogs:", error);
@@ -251,25 +251,23 @@ const Blogs = () => {
             <div className="space-y-6">
               {blogs?.map((blog) => (
                 <div
-                  key={blog?.id}
+                  key={blog?._id}
                   className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col sm:flex-row"
                 >
                   <Link
                     href={`/blogs/${blog?.slug}`}
-                    className="sm:w-1/3 h-64 sm:h-auto overflow-hidden relative"
+                    className="sm:w-1/3 w-full aspect-[2/1] relative overflow-hidden bg-gray-100"
                   >
-                    <Image
-                      src={`${APP_URL}/${blog?.featured_image}`}
+                    <img
+                      src={`${APP_URL}/${blog?.coverImage}`}
                       alt={blog?.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
                   <div className="sm:w-2/3 p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-[#FF6E04] text-xs font-medium border border-[#FF6E04] px-3 py-1 rounded-full">
-                        {blog?.category?.name}
+                        {blog?.category_id?.name}
                       </span>
                       <span className="text-gray-500 text-xs">
                         {blog?.date}

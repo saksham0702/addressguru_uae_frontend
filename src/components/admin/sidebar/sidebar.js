@@ -37,7 +37,7 @@ export default function SideNav() {
         </div>
 
         <Link
-          href="https://addressguru.in"
+          href="https://addressguru.ae"
           target="_blank"
           className="w-full text-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-orange-600 shadow hover:bg-gray-100 transition-all duration-200"
         >

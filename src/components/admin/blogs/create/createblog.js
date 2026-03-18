@@ -101,6 +101,7 @@ const inputCls = `w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg
 // ─────────────────────────────────────────────────────────────────────────────
 export default function CreateBlog() {
   const router = useRouter();
+  const [errors, setErrors] = useState({});
   const { id } = router.query; // present when editing
   const API_URL = "https://addressguru.ae/api";
   const [categories, setCategories] = useState([]);
@@ -160,7 +161,7 @@ export default function CreateBlog() {
             title: blog.title || "",
             excerpt: blog.excerpt || "",
             content: blog.content || "",
-            category_id: blog.category?._id || "",
+            category_id: blog.category_id?._id || "",
             tags: blog.tags?.join(", ") || "",
             status: blog.status || "draft",
             featured: blog.featured || false,
@@ -180,9 +181,7 @@ export default function CreateBlog() {
 
           // ✅ Image previews
           if (blog.coverImage) {
-            setCoverPreview(
-              `${API_URL}/${process.env.NEXT_PUBLIC_IMAGE_URL}/${blog.coverImage}`,
-            );
+            setCoverPreview(`${API_URL}/${blog.coverImage}`);
           }
 
           if (blog.author?.avatar) {
@@ -218,19 +217,47 @@ export default function CreateBlog() {
     setAvatarPreview(URL.createObjectURL(file));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    if (!form.content || form.content.trim() === "<p><br></p>") {
+      newErrors.content = "Content is required";
+    }
+
+    if (!form.authorName.trim()) {
+      newErrors.authorName = "Author name is required";
+    }
+
+    if (!form.category_id) {
+      newErrors.category_id = "Category is required";
+    }
+
+    // Optional but professional checks
+    if (form.seoDescription.length > 160) {
+      newErrors.seoDescription = "Max 160 characters allowed";
+    }
+
+    return newErrors;
+  };
+
   // ── Submit ────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e, saveStatus) => {
     e.preventDefault();
 
-    if (!form.title.trim()) return showToast("error", "Title is required");
-    if (!form.content.trim()) return showToast("error", "Content is required");
-    if (!form.authorName.trim())
-      return showToast("error", "Author name is required");
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      return showToast("error", "Please fix form errors");
+    }
 
     const fd = new FormData();
-
-    // text fields
     const payload = { ...form, status: saveStatus || form.status };
+
     Object.entries(payload).forEach(([k, v]) => {
       if (k === "tags") {
         fd.append(
@@ -261,10 +288,12 @@ export default function CreateBlog() {
     if (avatarFile) fd.append("authorAvatar", avatarFile);
 
     setSubmitting(true);
+
     try {
       const res = id
         ? await updateBlog(form?.blogid, fd)
         : await createBlog(fd);
+
       if (res?.success) {
         showToast("success", id ? "Blog updated!" : "Blog created!");
         setTimeout(() => router.push("/admin/blogs"), 1200);
@@ -359,11 +388,16 @@ export default function CreateBlog() {
                 <Field label="Title" required>
                   <input
                     type="text"
-                    placeholder="Enter a compelling blog title…"
                     value={form.title}
-                    onChange={set("title")}
-                    className={inputCls}
+                    onChange={(e) => {
+                      set("title")(e);
+                      if (errors.title) setErrors((p) => ({ ...p, title: "" }));
+                    }}
+                    className={`${inputCls} ${errors.title ? "border-red-400 focus:ring-red-300" : ""}`}
                   />
+                  {errors.title && (
+                    <p className="text-xs text-red-500 mt-1">{errors.title}</p>
+                  )}
                 </Field>
                 <Field
                   label="Excerpt"
@@ -384,10 +418,18 @@ export default function CreateBlog() {
                 <Field label="Content" required>
                   <TinyEditor
                     value={form.content}
-                    onChange={(value) =>
-                      setForm((prev) => ({ ...prev, content: value }))
-                    }
+                    onChange={(value) => {
+                      setForm((prev) => ({ ...prev, content: value }));
+                      if (errors.content)
+                        setErrors((p) => ({ ...p, content: "" }));
+                    }}
                   />
+
+                  {errors.content && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.content}
+                    </p>
+                  )}
                 </Field>
               </Section>
 
@@ -404,16 +446,20 @@ export default function CreateBlog() {
                 </Field>
                 <Field label="Meta Description" hint="Max 160 characters">
                   <textarea
-                    rows={2}
-                    maxLength={160}
-                    placeholder="Brief description for search engines…"
                     value={form.seoDescription}
-                    onChange={set("seoDescription")}
-                    className={`${inputCls} resize-none`}
+                    onChange={(e) => {
+                      set("seoDescription")(e);
+                      if (errors.seoDescription)
+                        setErrors((p) => ({ ...p, seoDescription: "" }));
+                    }}
+                    className={`${inputCls} ${errors.seoDescription ? "border-red-400" : ""}`}
                   />
-                  <p className="text-xs text-gray-300 text-right mt-1">
-                    {form.seoDescription.length}/160
-                  </p>
+
+                  {errors.seoDescription && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.seoDescription}
+                    </p>
+                  )}
                 </Field>
                 <Field
                   label="SEO Keywords"
@@ -435,21 +481,47 @@ export default function CreateBlog() {
               {/* Publish settings */}
               <Section title="Publish">
                 <Field label="Status">
-                  <select
-                    value={form.status}
-                    onChange={set("status")}
-                    className={inputCls}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700 font-medium">
+                      {form.status === "published" ? "Published" : "Draft"}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((p) => ({
+                          ...p,
+                          status:
+                            p.status === "published" ? "draft" : "published",
+                        }))
+                      }
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        form.status === "published"
+                          ? "bg-green-500"
+                          : "bg-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-5 left-0 h-5 bg-white rounded-full shadow transition-transform
+        ${form.status === "published" ? "translate-x-5" : "translate-x-0.5"}`}
+                      />
+                    </button>
+                  </div>
                 </Field>
                 <Field label="Category">
                   <select
                     value={form.category_id}
-                    onChange={set("category_id")}
-                    className={inputCls}
+                    onChange={(e) => {
+                      set("category_id")(e);
+                      if (errors.category_id) {
+                        setErrors((p) => ({ ...p, category_id: "" }));
+                      }
+                    }}
+                    className={`${inputCls} ${
+                      errors.category_id
+                        ? "border-red-400 focus:ring-red-300"
+                        : ""
+                    }`}
                   >
                     <option value="">Select category…</option>
                     {categories.map((c) => (
@@ -458,6 +530,11 @@ export default function CreateBlog() {
                       </option>
                     ))}
                   </select>
+                  {errors.category_id && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.category_id}
+                    </p>
+                  )}
                 </Field>
                 <Field label="Tags" hint="Comma separated">
                   <input
@@ -508,11 +585,20 @@ export default function CreateBlog() {
                 <Field label="Full Name" required>
                   <input
                     type="text"
-                    placeholder="John Doe"
                     value={form.authorName}
-                    onChange={set("authorName")}
-                    className={inputCls}
+                    onChange={(e) => {
+                      set("authorName")(e);
+                      if (errors.authorName)
+                        setErrors((p) => ({ ...p, authorName: "" }));
+                    }}
+                    className={`${inputCls} ${errors.authorName ? "border-red-400" : ""}`}
                   />
+
+                  {errors.authorName && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.authorName}
+                    </p>
+                  )}
                 </Field>
                 <Field label="Designation">
                   <input

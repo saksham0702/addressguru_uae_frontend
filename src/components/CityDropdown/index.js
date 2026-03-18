@@ -10,7 +10,7 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
         className="text-[#FF6E04] font-bold flex gap-2 items-center cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <p>{city}</p>
+        <p> {city} </p>
         <svg
           className={`transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""

@@ -606,18 +606,19 @@ const MarketPlaceListing = () => {
     if (isEditMode) {
       formData.append("listing_id", listingId);
     } else {
-      formData.append("category_id", categoryId);
+      // formData.append("category_id", categoryId);
     }
 
-    formData.append("step", stepNumber);
+    // formData.append("step", stepNumber);
 
-    if (!isEditMode && listingId) {
-      formData.append("listing_id", listingId);
-    }
+    // if (!isEditMode && listingId) {
+    //   formData.append("listing_id", listingId);
+    // }
 
     switch (stepNumber) {
       case 1:
         formData.append("condition", adInfo.condition);
+        formData.append("category_id", categoryId);
         formData.append("title", adInfo.title);
         formData.append("description", adInfo.description);
 
@@ -663,6 +664,7 @@ const MarketPlaceListing = () => {
       case 2:
         // formData.append("listing_id", listingId);
         // Only send new (non-existing) images as files
+        formData.append("step", stepNumber);
         const newImages = media.images.filter((img) => !img.isExisting);
         newImages.forEach((img) => {
           formData.append("images", img.file);
@@ -672,6 +674,7 @@ const MarketPlaceListing = () => {
       case 3:
         formData.append("name", contact.name);
         formData.append("email", contact.email);
+        // formData.append("step", stepNumber);
         formData.append("country_code", contact.countryCode);
         formData.append("mobile_number", contact.number);
 
@@ -686,7 +689,7 @@ const MarketPlaceListing = () => {
 
         break;
       case 4:
-        formData.append("listing_id", listingId);
+        // formData.append("listing_id", listingId);
         formData.append("seo_title", seo.title);
         formData.append("seo_description", seo.description);
         break;
@@ -708,9 +711,9 @@ const MarketPlaceListing = () => {
 
       console.log(`Step ${stepNumber} submitted:`, response);
 
-      if (!response?.success && response?.message) {
-        alert(response?.message || "Error Occured");
-      }
+      // if (!response?.success && response?.message) {
+      //   alert(response?.message || "Error Occured");
+      // }
 
       if (response?.errors && Object.keys(response.errors).length > 0) {
         const mappedErrors = mapApiErrorsToState(response.errors, stepNumber);
@@ -909,6 +912,7 @@ const MarketPlaceListing = () => {
               {adInfo.priceType === "amount" && (
                 <div className="w-full" ref={priceRef}>
                   <InputWithTitle
+                    type="number"
                     title="Amount"
                     value={adInfo.amount}
                     required={true}

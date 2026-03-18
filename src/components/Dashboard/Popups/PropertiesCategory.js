@@ -1,4 +1,5 @@
 import { get_sub_category } from "@/api/Categories";
+import { getCategorybyType } from "@/api/uaeAdminCategories";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -8,8 +9,8 @@ const PropertiesCategory = () => {
 
   const [category, setCategory] = useState(null);
   const getCategoryMarketplace = async () => {
-    const res = await get_sub_category("properties");
-    if (res) setCategory(res?.result);
+    const res = await getCategorybyType("property");
+    if (res) setCategory(res?.data);
   };
 
   useEffect(() => {
@@ -45,7 +46,7 @@ const PropertiesCategory = () => {
       <section className="w-full h-auto flex flex-wrap gap-10 my-10 ">
         {category?.map((item, index) => (
           <Link
-            href={`/dashboard/properties-listing?id=${item?.id}&type=${type}&category=${item?.slug}`}
+            href={`/dashboard/properties-listing?id=${item?._id}&type=${type}&category=${item?.slug}`}
             key={index}
             className="bg-white w-66 text-sm font-semibold text-center py-2 px-3 h-10 rounded-md"
           >

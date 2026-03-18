@@ -17,6 +17,9 @@ export default function BlogCategories() {
   const [deleteId, setDeleteId] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [toast, setToast] = useState(null);
+  const [errors, setErrors] = useState({
+    name: "",
+  });
 
   const [form, setForm] = useState({
     name: "",
@@ -59,14 +62,21 @@ export default function BlogCategories() {
   const resetForm = () => {
     setEditTarget(null);
     setForm({ name: "", description: "" });
+    setErrors({ name: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    let newErrors = { name: "" };
+
     if (!form.name.trim()) {
-      return showToast("error", "Name is required");
+      newErrors.name = "Category name is required";
     }
+
+    setErrors(newErrors);
+
+    if (newErrors.name) return;
 
     setSubmitting(true);
 
@@ -74,7 +84,7 @@ export default function BlogCategories() {
       if (editTarget) {
         const res = await updateCategory(editTarget._id, form);
 
-        if (res?.success) {
+        if (res?.status == true) {
           showToast("success", "Category updated");
           await fetchCategories();
           resetForm();
@@ -82,7 +92,7 @@ export default function BlogCategories() {
       } else {
         const res = await createCategory(form);
 
-        if (res?.success) {
+        if (res?.status == true) {
           showToast("success", "Category created");
           await fetchCategories();
           resetForm();
@@ -172,12 +182,24 @@ export default function BlogCategories() {
                       type="text"
                       value={form.name}
                       placeholder="Technology"
-                      onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
-                      }
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm
-                      focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                      onChange={(e) => {
+                        setForm({ ...form, name: e.target.value });
+
+                        if (errors.name) {
+                          setErrors({ ...errors, name: "" });
+                        }
+                      }}
+                      className={`w-full px-3 py-2.5 border rounded-lg text-sm outline-none transition
+    ${
+      errors.name
+        ? "border-red-400 focus:ring-2 focus:ring-red-300"
+        : "border-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+    }`}
                     />
+
+                    {errors.name && (
+                      <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                    )}
                   </div>
 
                   <div>

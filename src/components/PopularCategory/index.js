@@ -91,7 +91,7 @@ const PopularCategory = ({ data }) => {
           >
             <div className="flex flex-col items-center">
               <div
-                className="flex flex-col items-center  border border-orange-200 h-23 w-25 max-md:h-20 max-md:w-20 justify-center rounded-xl max-md:scale-75 max-[340px]:!scale-65 shadow hover:shadow-md transition"
+                className="flex flex-col items-center  border border-gray-300 h-23 w-25 max-md:h-20 max-md:w-20 justify-center rounded-xl max-md:scale-75 max-[340px]:!scale-65 shadow hover:shadow-md transition"
                 style={{ backgroundColor: category?.colors }}
               >
                 <div
@@ -118,7 +118,7 @@ const PopularCategory = ({ data }) => {
           >
             <div className="flex flex-col items-center">
               <div
-                className="flex flex-col items-center h-23 w-25 max-md:h-20 max-md:w-20 border border-orange-200  justify-center rounded-xl max-md:scale-75 max-[340px]:!scale-65 shadow hover:shadow-md transition"
+                className="flex flex-col items-center h-23 w-25 max-md:h-20 max-md:w-20 border border-gray-300  justify-center rounded-xl max-md:scale-75 max-[340px]:!scale-65 shadow hover:shadow-md transition"
                 style={{ backgroundColor: viewMore?.bg }}
               >
                 <div dangerouslySetInnerHTML={{ __html: viewMore?.svg }} />

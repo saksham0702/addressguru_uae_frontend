@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [city, setCity] = useState("Singapore");
+  const [city, setCity] = useState("All Cities(UAE)");
 
   // fetch user using token
   const fetchUser = async (authToken) => {

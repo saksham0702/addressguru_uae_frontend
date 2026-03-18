@@ -6,7 +6,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
   const placeholders = [
     "What are you looking for?",
     "Restaurants Near Me",
-    "Hotels in Singapore",
+    "Hotels in UAE",
   ];
 
   const [isFocused, setIsFocused] = useState(false);

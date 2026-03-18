@@ -1,6 +1,5 @@
 "use client";
 
-
 import axios from "axios";
 import {
   Users,
@@ -20,8 +19,7 @@ import {
 import { useEffect } from "react";
 
 export default function AdminDashboard() {
-
-  const API_URL = "http://192.168.31.107:5001";
+  const API_URL = "https://addressguru.ae/api";
 
   useEffect(() => {
     testCookie();
@@ -73,7 +71,7 @@ export default function AdminDashboard() {
   const testCookie = async () => {
     try {
       const res = await axios.get(`${API_URL}/test-cookie`, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       console.log("cookie response:", res.data);
@@ -179,12 +177,13 @@ export default function AdminDashboard() {
                 </div>
 
                 <div
-                  className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${item.trend === "up"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : item.trend === "down"
-                      ? "bg-rose-50 text-rose-700"
-                      : "bg-slate-100 text-slate-600"
-                    }`}
+                  className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                    item.trend === "up"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : item.trend === "down"
+                        ? "bg-rose-50 text-rose-700"
+                        : "bg-slate-100 text-slate-600"
+                  }`}
                 >
                   <TrendIcon className="w-3 h-3" />
                   {item.change}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import InputWithTitle from "../InputWithTitle";
 import axios from "axios";
 import { API_URL, COUNTRY_CODES } from "@/services/constants";
+import { getCities } from "@/api/uaeadminCities";
 
 const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
   const [cities, setCities] = useState([]);
@@ -21,7 +22,7 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get(`${API_URL}/cities`);
+        const res = await getCities();
         setCities(res?.data || []);
       } catch (err) {
         console.error("City fetch error:", err);
@@ -58,7 +59,7 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
   /* ---------------- CITY SELECT ---------------- */
 
   const handleCitySelect = (city) => {
-    handleChange("cityId", city.id, "contactCity");
+    handleChange("cityId", city._id, "contactCity");
     setCityOpen(false);
   };
 
@@ -78,10 +79,10 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
 
   /* ---------------- UI ---------------- */
 
-  const selectedCity = cities.find((c) => c.id === contact?.cityId);
+  const selectedCity = cities.find((c) => c._id === contact?.cityId);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+    <div className="bg-white  rounded-xl p-8 ">
       <h2 className="text-xl font-semibold text-gray-800 mb-8">
         Business Contact Details
       </h2>
@@ -254,10 +255,10 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
             <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-md max-h-60 overflow-y-auto">
               {cities.map((city) => (
                 <div
-                  key={city.id}
+                  key={city._id}
                   onClick={() => handleCitySelect(city)}
                   className={`px-4 py-2 cursor-pointer hover:bg-orange-50 ${
-                    contact?.cityId === city.id
+                    contact?.cityId === city._id
                       ? "bg-orange-50 text-orange-600 font-medium"
                       : ""
                   }`}
