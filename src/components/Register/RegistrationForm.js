@@ -1,11 +1,12 @@
 import React, { useRef, useState } from "react";
 import InputWithSvg from "../InputWithSvg";
 import Image from "next/image";
-import { user_register, social_login } from "@/api/userAuth";
+import { social_login } from "@/api/userAuth";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { user_register } from "@/api/uaeadminlogin";
 
 const RegistrationForm = ({ setPop, setUserId, type }) => {
   const router = useRouter();
@@ -95,27 +96,31 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
 
     try {
       const payload = {
-        name,
-        phone,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         password,
-        password_confirmation: passwordConfirmation,
-        ...(type && { type }),
+        phone,
+        whatsapp_same: true, // since you're using same number
+        login_type: "email", // static for now
+        ...(type && { type }), // keep if needed
       };
 
-      const res = await user_register(payload);
-      console.log(payload);
+      console.log("Final Payload:", payload);
 
-      if (res?.user) {
-        setPop(true);
-        setUserId(res?.user?.id);
-        setUser(res?.user);
+      const res = await user_register(payload);
+      console.log("user response :", res);
+
+      setPop(true);
+      if (res?.data) {
+        if (res?.data?.email) {
+          setUserId({
+            email: res?.data?.email,
+          });
+        }
       } else if (res) {
-        // Map backend errors to field errors
         const backendErrors = {};
         Object.entries(res).forEach(([key, value]) => {
-          const errorMessage = Array.isArray(value) ? value.join(", ") : value;
-          backendErrors[key] = errorMessage;
+          backendErrors[key] = Array.isArray(value) ? value.join(", ") : value;
         });
         setErrors(backendErrors);
       }
@@ -124,6 +129,7 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
       setErrors({ general: "Registration failed. Please try again." });
     }
   };
+
   return (
     <GoogleOAuthProvider clientId="477872652143-tciloohp49r48l80d7j6tqituovm9nu0.apps.googleusercontent.com">
       <div className=" bg-white rounded-lg px-4 py-3 w-full min-h-[480px] space-y-3 ">

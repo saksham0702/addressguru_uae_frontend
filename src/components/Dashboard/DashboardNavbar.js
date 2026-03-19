@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 const DashboardNavbar = ({ setPostAdd }) => {
   const [logPop, setLogPop] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
   const { setToken } = useAuth();
 
   const navItems = [
@@ -132,10 +132,11 @@ const DashboardNavbar = ({ setPostAdd }) => {
     router.push("/");
     setToken(null);
     localStorage.removeItem("authToken");
+    
   };
 
   const { user } = useAuth();
-  // console.log("user from navbar", user?.user?.name);
+  console.log("user from navbar", user);
   return (
     <nav className="bg-white h-[78px] pr-10 pl-5 py-3 z-[1] fixed w-[82.5%] max-md:hidden rounded-bl-xl shadow-sm  top-0 right-0">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -175,11 +176,11 @@ const DashboardNavbar = ({ setPostAdd }) => {
               className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mb-1"
             >
               <span className="text-white font-medium text-sm">
-                {user?.user?.name?.slice(0, 1)}
+                {user?.data?.name?.slice(0, 1)}
               </span>
             </div>
             <span className="text-xs text-gray-700 font-medium">
-              {user?.user?.name}
+              {user?.data?.name}
             </span>
             {logPop && (
               <div className=" w-40 py-3 bg-white shadow-xl absolute top-17 rounded-lg flex flex-col items-center justify-center gap-3">

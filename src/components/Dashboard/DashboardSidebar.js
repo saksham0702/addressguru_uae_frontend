@@ -14,7 +14,6 @@ const useMockRouter = () => {
   return { currentPath, navigate };
 };
 const DashboardSidebar = ({ activeTab, setActiveTab }) => {
-
   const { currentPath, navigate } = useRouter();
   const [showLogoutPop, setShowLogoutPop] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -149,7 +148,7 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
       active: false,
       link: "my-marketplace",
     },
-      {
+    {
       icon: (
         <svg
           id="fi_15586958"
@@ -164,7 +163,6 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
             fill="currentColor"
           ></path>{" "}
         </svg>
-        
       ),
       label: "Properties",
       active: false,
@@ -310,13 +308,13 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
         >
           <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-lg">
-              {user?.user?.name?.slice(0, 1)}
+              {user?.data?.name?.slice(0, 1)}
             </span>
           </div>
           {!isCollapsed && (
             <div>
               <p className="text-sm font-semibold mt-3 text-black">
-                Welcome, {user?.user?.name}
+                Welcome, {user?.data?.name}
               </p>
             </div>
           )}
@@ -407,9 +405,7 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
             />
           </svg>
 
-          <p>
-            Live Support
-          </p>
+          <p>Live Support</p>
         </span>
         {/* <div
           className={`flex items-center ${
@@ -417,7 +413,7 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
           } py-2 text-sm text-gray-600`}
         >
           {!isCollapsed && <span>Live Support</span>} */}
-          {/* <button
+        {/* <button
             onClick={() => setShowLogoutPop(true)}
             className="mx-auto bg-red-600 text-white justify-center items-center flex gap-2 font-semibold px-3 w-full py-2 text-base rounded-md"
           >

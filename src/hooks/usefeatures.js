@@ -13,9 +13,18 @@ export const useFeatures = () => {
     facilities: [],
     services: [],
     courses: [],
+    paymentModes: [],
   });
 
   const [loading, setLoading] = useState(false);
+
+  // ✅ Central mapping (BEST PRACTICE)
+  const typeMap = {
+    facilities: "facility",
+    services: "service",
+    courses: "course",
+    paymentModes: "payment_mode",
+  };
 
   const fetchFeatures = async () => {
     try {
@@ -26,12 +35,14 @@ export const useFeatures = () => {
         facilities: [],
         services: [],
         courses: [],
+        paymentModes: [],
       };
 
       result.data.forEach((item) => {
         if (item.type === "facility") grouped.facilities.push(item);
         if (item.type === "service") grouped.services.push(item);
         if (item.type === "course") grouped.courses.push(item);
+        if (item.type === "payment_mode") grouped.paymentModes.push(item);
       });
 
       setData(grouped);
@@ -46,12 +57,7 @@ export const useFeatures = () => {
     try {
       const payload = {
         name: item.name,
-        type:
-          activeTab === "facilities"
-            ? "facility"
-            : activeTab === "services"
-              ? "service"
-              : "course",
+        type: typeMap[activeTab], // ✅ CLEAN
         iconSvg: item.svg || "",
       };
 

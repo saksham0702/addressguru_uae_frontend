@@ -5,7 +5,7 @@ import axios from "axios";
 
 const API_URL = "https://addressguru.ae/api";
 
-// const API_URL = "http://192.168.31.108:5001";
+// const API_URL = "http://192.168.31.107:5001";
 
 export const createOrUpdateCategory = async (payload) => {
   try {
@@ -610,12 +610,11 @@ export const removeFeatureFromSubCategoryApi = async (
 export const getBusinessListing = async (id) => {
   try {
     const response = await axios.get(
-      `${API_URL}/business-listing/get-features-and-additional-fields/${id}`,
+      `${API_URL}/business-listing/get-features/${id}`,
     );
     console.log("get business response", response);
-    return response.data;
+    return response.data.data;
   } catch (error) {
-    console.error("Error fetching business listing:", error);
-    throw error;
+    console.log("Error fetching business listing:", error);
   }
 };

@@ -2,9 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { resend_otp, verify_otp } from "@/api/userAuth";
+import { resend_otp } from "@/api/userAuth";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
+import { verify_otp } from "@/api/uaeadminlogin";
 
 const OTPPopup = ({ setPop, userId }) => {
   const otpLength = 6;
@@ -50,16 +51,34 @@ const OTPPopup = ({ setPop, userId }) => {
     setResendAvailable(false);
   };
 
-  const handleSubmit = async (userId) => {
+  const handleSubmit = async () => {
     const code = otp.join("");
+
     if (code.length === otpLength) {
-      const res = await verify_otp(userId, code);
-      console.log("response of user after otp", res);
-      if (res?.status === 200) {
-        setPop(false); // ✅ correct action
-        router.push("/dashboard");
-      } else {
-        // show some error message here
+      try {
+        const payload = {
+          email: userId?.email, // ✅ from registration
+          otp: code,
+        };
+
+        console.log("OTP Verify Payload:", payload);
+
+        const res = await verify_otp(payload);
+
+        if (res?.status == true) {
+          setPop(false);
+
+          // ✅ NOW login user
+          // Example (depends on your API response)
+          // setToken(res?.access_token);
+          // setUser(res?.user);
+
+          router.push("/dashboard");
+        } else {
+          // handle error
+        }
+      } catch (error) {
+        console.error("OTP verification failed:", error);
       }
     }
   };

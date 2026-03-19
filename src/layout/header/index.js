@@ -80,7 +80,7 @@ const Header = () => {
         const res = await axios.get(`${API_URL}/cities`);
         setCities(res.data);
       } catch (err) {
-        console.error("Client-side error:", err);
+        console.log("Client-side error:", err);
         setError(err);
       }
     };

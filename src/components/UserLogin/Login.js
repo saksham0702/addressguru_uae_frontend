@@ -13,6 +13,7 @@ import {
   GoogleLogin,
   GoogleOAuthProvider,
 } from "@react-oauth/google";
+import { loginUser } from "@/api/uaeadminlogin";
 
 const Login = ({ setShowLogin }) => {
   const [forgot, setforgot] = useState(false);
@@ -52,12 +53,13 @@ const Login = ({ setShowLogin }) => {
     const payload = { email, password };
     setLoading(true);
     try {
-      const res = await user_login(payload);
-      console.log(res);
+      const res = await loginUser(payload);
+      console.log("res data :", res);
       // console.log("res status", res?.stauts);
-      if (res?.status === 200) {
-        login(res?.access_token);
-        setToken(res?.access_token);
+      if (res?.status == 200) {
+        localStorage.setItem("authToken", res?.data?.data?.authToken);
+        login(res?.data?.data?.authToken);
+        setToken(res?.data?.data?.authToken);
         router.push("/dashboard");
       } else if (res?.status === 401) {
         setResError(res?.error || "Invalid email or password");

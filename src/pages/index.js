@@ -205,7 +205,7 @@ export default function Home() {
             {/* ads section for mobile */}
             <div className="w-full max-h-55 md:hidden p-2">
               <div className="border border-gray-100 w-full h-full flex items-center justify-center">
-                <Image
+                <l
                   src="/assets/ads-img-small.png"
                   alt="adds"
                   height={500}

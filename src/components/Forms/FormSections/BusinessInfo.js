@@ -264,8 +264,7 @@ const BusinessInfo = ({
           />
         </div>
       )}
-      {/* <div ref={refs?.payment}>
-       
+      <div ref={refs?.payment}>
         <CheckBox
           error={errors?.payments}
           heading="Payment Mode"
@@ -279,7 +278,7 @@ const BusinessInfo = ({
           }}
           errorRef={refs?.paymentRef}
         />
-      </div> */}
+      </div>
 
       {/* Ad Description - Wrapped with ref */}
       <div ref={refs?.businessDescriptionRef}>

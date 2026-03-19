@@ -10,6 +10,7 @@ const TABS = [
   { key: "facilities", label: "Facilities", singular: "Facility" },
   { key: "services", label: "Services", singular: "Service" },
   { key: "courses", label: "Courses", singular: "Course" },
+  { key: "paymentModes", label: "Payment Modes", singular: "Payment Mode" },
 ];
 
 export default function AddFeaturesTabs() {

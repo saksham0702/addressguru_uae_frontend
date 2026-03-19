@@ -43,25 +43,25 @@ const Dashboard = () => {
     }
   };
 
-  const getUserListings = async (type) => {
-    const res = await get_user_listings(type);
-    console.log(`response from user ${type}`, res?.data);
-    if (res?.data?.success && type === "listing")
-      setMyListings(res?.data?.data);
-    if (res?.data?.success && type === "jobs") setMyJobs(res?.data?.data);
-    if (res?.data?.success && type === "marketplace")
-      setMyMarketplace(res?.data?.data);
-    if (res?.data?.success && type === "property")
-      setMyProperties(res?.data?.data);
-  };
+  // const getUserListings = async (type) => {
+  //   const res = await get_user_listings(type);
+  //   console.log(`response from user ${type}`, res?.data);
+  //   if (res?.data?.success && type === "listing")
+  //     setMyListings(res?.data?.data);
+  //   if (res?.data?.success && type === "jobs") setMyJobs(res?.data?.data);
+  //   if (res?.data?.success && type === "marketplace")
+  //     setMyMarketplace(res?.data?.data);
+  //   if (res?.data?.success && type === "property")
+  //     setMyProperties(res?.data?.data);
+  // };
 
   useEffect(() => {
     if (!user) return;
     getDashboardData();
-    getUserListings("listing");
-    getUserListings("jobs");
-    getUserListings("property");
-    getUserListings("marketplace");
+    // getUserListings("listing");
+    // getUserListings("jobs");
+    // getUserListings("property");
+    // getUserListings("marketplace");
   }, [user]);
 
   if (loading || !user) return null;
@@ -122,7 +122,7 @@ const Dashboard = () => {
             </div>
 
             <section className="my-5 space-y-5">
-              <MyListings data={myListings} />
+              {/* <MyListings data={myListings} /> */}
               {/* <MyPropertyListings data={myProperties} />
               <MyMarketplaceListings data={myMarketplace} />
               <MyJobListings data={myJobs} /> */}
@@ -134,7 +134,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%]">
             <section className="my-5 space-y-5">
-              <MyListings data={myListings} />
+              {/* <MyListings data={myListings} /> */}
             </section>
           </div>
         );
@@ -143,7 +143,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              <MyJobListings data={myJobs} />
+              {/* <MyJobListings data={myJobs} /> */}
             </section>
           </div>
         );
@@ -152,7 +152,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              <MyMarketplaceListings data={myMarketplace} />
+              {/* <MyMarketplaceListings data={myMarketplace} /> */}
             </section>
           </div>
         );
@@ -161,7 +161,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              <MyPropertyListings data={myProperties} />
+              {/* <MyPropertyListings data={myProperties} /> */}
             </section>
           </div>
         );

@@ -26,7 +26,7 @@ export const verify_otp = async (ID, postdata) => {
     otp: postdata,
   };
   try {
-    const response = await axios.post(`${API_URL}/verify-otp/${ID}`, payLoad);
+    const response = await axios.post(`${API_URL}/verify-otp`, payLoad);
     return response?.data;
   } catch (error) {
     // console.log("error", error);

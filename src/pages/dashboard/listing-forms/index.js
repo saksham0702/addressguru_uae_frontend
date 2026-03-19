@@ -61,7 +61,7 @@ const ListingForms = () => {
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [service, setService] = useState([]);
   const [facility, setFacility] = useState([]);
-  const [payment, setPayment] = useState([{}]);
+  const [payment, setPayment] = useState([]);
   const [existingData, setExistingData] = useState(null);
   const [additional_fields, setadditional_fields] = useState([]);
   const [errors, setErrors] = useState({});
@@ -473,31 +473,36 @@ const ListingForms = () => {
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
       const res = await getBusinessListing(categoryId);
-      if (res?.success === true) {
-        const facilities = res?.features?.facilities || [];
-        const services = res?.features?.services || [];
-        const additional_fields = res?.additionalFields || [];
+      console.log("res :", res);
 
-        setFacility(facilities.length > 0 ? facilities : []);
-        setService(services.length > 0 ? services : []);
-        setadditional_fields(
-          additional_fields.length > 0 ? additional_fields : [],
-        );
-      }
+      const facilities = res?.features?.facilities || [];
+      const services = res?.features?.services || [];
+      const payment = res?.payment_modes || [];
+      // console.log("payment data: ", payment);
+
+      const additional_fields = res?.additionalFields || [];
+
+      setFacility(facilities.length > 0 ? facilities : []);
+      setService(services.length > 0 ? services : []);
+      setPayment(payment.length > 0 ? payment : []);
+      setadditional_fields(
+        additional_fields.length > 0 ? additional_fields : [],
+      );
     };
+
     if (categoryId) {
       getServiceAndFacility(categoryId);
     }
   }, [categoryId]);
 
   //get payment methods
-  useEffect(() => {
-    const getPaymentMode = async () => {
-      const res = await get_payment_mode();
-      setPayment(res);
-    };
-    getPaymentMode();
-  }, []);
+  // useEffect(() => {
+  //   const getPaymentMode = async () => {
+  //     const res = await get_payment_mode();
+  //     setPayment(res);
+  //   };
+  //   getPaymentMode();
+  // }, []);
 
   // Scroll to first error field
   const scrollToError = (errorKey) => {
@@ -713,7 +718,7 @@ const ListingForms = () => {
 
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
         selectedServices.forEach((id) => formData.append("services[]", id));
-        // selectedPayment.forEach((id) => formData.append("payments[]", id));
+        selectedPayment.forEach((id) => formData.append("payments[]", id));
 
         formData.append("hours", JSON.stringify(schedule));
 

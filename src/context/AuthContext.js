@@ -1,5 +1,6 @@
 "use client";
-import { get_user_details } from "@/api/dashboard";
+
+import { get_user_details } from "@/api/uaeadminlogin";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
@@ -14,6 +15,8 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async (authToken) => {
     if (!authToken) return;
     const userData = await get_user_details(authToken);
+    console.log(userData);
+
     if (userData) setUser(userData);
     else setUser(null);
   };
