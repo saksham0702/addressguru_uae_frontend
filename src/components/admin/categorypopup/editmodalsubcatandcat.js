@@ -106,9 +106,9 @@ export default function EditCategoryPage() {
           id,
         );
 
-        setFacilities(featureRes?.data?.facilities || []);
-        setServices(featureRes?.data?.services || []);
-        setCourses(featureRes?.data?.courses || []);
+        setFacilities(featureRes?.data?.facilities ?? []);
+        setServices(featureRes?.data?.services ?? []);
+        setCourses(featureRes?.data?.courses ?? []);
       } else {
         res = await getallfeaturesdatabyCategory(id);
 
@@ -133,10 +133,10 @@ export default function EditCategoryPage() {
   };
 
   useEffect(() => {
-    if (id) {
+    if (id && !isSubCategory) {
       fetchFullCategoryData();
     }
-  }, [id]);
+  }, [id, isSubCategory]);
 
   useEffect(() => {
     const fetchFeatures = async () => {

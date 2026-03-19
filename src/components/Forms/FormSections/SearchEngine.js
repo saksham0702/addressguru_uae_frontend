@@ -24,13 +24,13 @@ const SearchEngine = ({ seo, setSeo, business, error, clearError, refs }) => {
         console.log("🔍 Fetching available models from API...");
 
         const response = await axios.get(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_KEY}`
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_KEY}`,
         );
 
         if (response.data && response.data.models) {
           const generateModels = response.data.models
             .filter((model) =>
-              model.supportedGenerationMethods?.includes("generateContent")
+              model.supportedGenerationMethods?.includes("generateContent"),
             )
             .map((model) => model.name.replace("models/", ""));
 
@@ -38,7 +38,7 @@ const SearchEngine = ({ seo, setSeo, business, error, clearError, refs }) => {
           setAvailableModels(generateModels);
         }
       } catch (error) {
-        console.error("❌ Error fetching models:", error);
+        console.log("❌ Error fetching models:", error);
       } finally {
         setCheckingModels(false);
       }
@@ -83,7 +83,7 @@ const SearchEngine = ({ seo, setSeo, business, error, clearError, refs }) => {
 
     if (availableModels.length === 0) {
       alert(
-        "No compatible Gemini models found. Please check your API key at https://aistudio.google.com/app/apikey"
+        "No compatible Gemini models found. Please check your API key at https://aistudio.google.com/app/apikey",
       );
       return;
     }
@@ -129,7 +129,7 @@ Provide ONLY the meta description text, nothing else.`;
               temperature: 0.7,
               maxOutputTokens: 200,
             },
-          }
+          },
         );
 
         const generatedText =
@@ -151,7 +151,7 @@ Provide ONLY the meta description text, nothing else.`;
           handleChange("description", finalText, "seoDescription"); // ADD errorKey
           console.log(
             "✨ Meta description generated successfully with",
-            modelName
+            modelName,
           );
           setLoading(false);
           return; // Success!
@@ -281,8 +281,8 @@ Provide ONLY the meta description text, nothing else.`;
               availableModels.length === 0
                 ? "AI model not available"
                 : !canGenerate
-                ? "Complete business information in Step 1 first"
-                : "Generate SEO meta description"
+                  ? "Complete business information in Step 1 first"
+                  : "Generate SEO meta description"
             }
           >
             {loading ? "Generating..." : "Generate AI"}

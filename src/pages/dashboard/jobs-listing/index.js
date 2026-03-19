@@ -25,6 +25,7 @@ import {
   get_job_categories,
   save_job_company,
 } from "@/api/uae-job-listing";
+import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 
 // Import your API functions here
 // import { get_categories, get_job_types, get_education_levels } from "@/api/listings";
@@ -33,14 +34,7 @@ const JobListing = () => {
   const router = useRouter();
   const { jobId } = router.query;
   const { edit } = router.query;
-
-  const subCategoryOptions = [
-    { value: "frontend", label: "Frontend Development" },
-    { value: "backend", label: "Backend Development" },
-    { value: "fullstack", label: "Full Stack Development" },
-    { value: "mobile", label: "Mobile Development" },
-    { value: "devops", label: "DevOps" },
-  ];
+  const [subCategories, setSubCategories] = useState([]);
 
   const workModeOptions = [
     { value: "on-site", label: "On Site" },
@@ -262,16 +256,49 @@ const JobListing = () => {
     }
   }, [jobId]);
 
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      if (!postJobData.category_id) return;
+
+      try {
+        const res = await getSubCategoriesByCategory(postJobData.category_id);
+
+        // adjust depending on API response structure
+        const formatted = (res?.data || []).map((sub) => ({
+          value: sub._id,
+          label: sub.name,
+        }));
+
+        setSubCategories(formatted);
+      } catch (err) {
+        console.error("Error fetching subcategories:", err);
+      }
+    };
+
+    fetchSubCategories();
+  }, [postJobData.category_id]);
+
   const getJobDetails = async (jobId) => {
     const res = await get_job_details(jobId);
     console.log("response of edit job", res);
+    if (res.category_id) {
+      const subRes = await getSubCategoriesByCategory(res.category_id);
+
+      const formatted = (subRes?.data || []).map((sub) => ({
+        value: sub._id,
+        label: sub.name,
+      }));
+
+      setSubCategories(formatted);
+    }
 
     if (!res) return;
 
     setPostJobData((prev) => ({
       ...prev,
       jobType: res.job_type_id || "",
-      category: res.category_id || "",
+      category_id: res.category_id || "",
+      sub_category_id: res.sub_category_id || "",
       qualification: res.qualifications || [],
       title: res.title || "",
       description: res.description || "",
@@ -666,8 +693,9 @@ const JobListing = () => {
         setLoading(false);
         return false;
       }
-
-      console.log("res of step 1", res);
+      if (!res?.success && res?.message) {
+        setResponse(res.message);
+      }
 
       if (stepNumber == 1) {
         setJobListingId(res?.data?.id);
@@ -677,6 +705,7 @@ const JobListing = () => {
 
       if (stepNumber === 2) {
         clearSession();
+        setResponse("");
         setResponse(res?.message || "Job listing posted successfully!");
 
         // Redirect after successful submission
@@ -703,7 +732,10 @@ const JobListing = () => {
         const firstErrorKey = Object.keys(mappedErrors)[0];
         setTimeout(() => scrollToError(firstErrorKey), 100);
       } else {
-        setResponse(`Error submitting step ${stepNumber}. Please try again.`);
+        setResponse(
+          error?.response?.data?.message ||
+            "Something went wrong. Please try again.",
+        );
       }
       setLoading(false);
       return false;
@@ -743,6 +775,7 @@ const JobListing = () => {
       key: "category_id",
       type: "dropdown",
       placeholder: "Select category",
+      required: true,
       ref: categoryRef,
       options: categoryOptions,
     },
@@ -753,7 +786,7 @@ const JobListing = () => {
       type: "dropdown",
       placeholder: "Select sub category",
       ref: subCategoryRef,
-      options: subCategoryOptions,
+      options: subCategories,
     },
     {
       id: 3,
@@ -762,6 +795,7 @@ const JobListing = () => {
       type: "text",
       placeholder: "Enter job title",
       ref: titleRef,
+      required: true,
     },
     {
       id: 4,
@@ -770,6 +804,7 @@ const JobListing = () => {
       type: "textarea",
       placeholder: "Enter description",
       ref: descriptionRef,
+      required: true,
     },
     {
       id: 5,
@@ -799,6 +834,7 @@ const JobListing = () => {
       type: "search",
       placeholder: "Enter skill",
       ref: skillsRef,
+      required: true,
     },
     {
       id: 9,
@@ -808,6 +844,7 @@ const JobListing = () => {
       type: "dropdown",
       placeholder: "Select sector",
       options: sectorOptions,
+      required: true,
     },
     {
       id: 10,
@@ -818,6 +855,7 @@ const JobListing = () => {
       placeholder: "Select job type",
       ref: jobTypeRef,
       options: jobTypeOptions,
+      required: true,
     },
     {
       id: 11,
@@ -836,6 +874,7 @@ const JobListing = () => {
       type: "dropdown",
       placeholder: "Select experience level",
       options: experienceLevelOptions,
+      requried: true,
     },
     {
       id: 13,
@@ -844,6 +883,7 @@ const JobListing = () => {
       key: "salaryFrom",
       type: "text",
       ref: salaryFromRef,
+      required: true,
     },
     {
       id: 14,
@@ -852,6 +892,7 @@ const JobListing = () => {
       key: "salaryTo",
       type: "text",
       ref: salaryToRef,
+      required: true,
     },
     {
       id: 15,
@@ -900,6 +941,7 @@ const JobListing = () => {
       type: "text",
       placeholder: "Enter number of positions",
       ref: openingsRef,
+      required: true,
     },
     {
       id: 21,
@@ -908,6 +950,7 @@ const JobListing = () => {
       key: "gender",
       type: "dropdown",
       options: genderOptions,
+      required: true,
     },
   ];
 
@@ -1071,10 +1114,19 @@ const JobListing = () => {
                             onChange={(option) => {
                               if (!option) return;
 
-                              setPostJobData({
-                                ...postJobData,
-                                [item.key]: option.value,
-                              });
+                              // Special handling for category
+                              if (item.key === "category_id") {
+                                setPostJobData({
+                                  ...postJobData,
+                                  category_id: option.value,
+                                  sub_category_id: "", // reset subcategory
+                                });
+                              } else {
+                                setPostJobData({
+                                  ...postJobData,
+                                  [item.key]: option.value,
+                                });
+                              }
 
                               clearError(item.key);
                             }}
@@ -1090,7 +1142,11 @@ const JobListing = () => {
 
                       {item.type === "text" && (
                         <>
-                          <InputWithTitle isTextarea={false} {...commonProps} />
+                          <InputWithTitle
+                            isTextarea={false}
+                            required={item.required}
+                            {...commonProps}
+                          />
                           {errors[item.key] && (
                             <p className="text-red-500 text-sm mt-1">
                               {errors[item.key]}
@@ -1103,6 +1159,7 @@ const JobListing = () => {
                         <>
                           <InputWithTitle
                             isTextarea={true}
+                            required={item.required}
                             rows={3}
                             {...commonProps}
                           />

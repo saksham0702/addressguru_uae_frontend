@@ -166,7 +166,6 @@ export const getSubCategoriesByCategory = async (categoryId) => {
     return response.data;
   } catch (err) {
     console.log("get subcategories error", err);
-    throw err;
   }
 };
 

@@ -67,6 +67,8 @@ const ListingForms = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [slug, setSlug] = useState();
+  const [globalError, setGlobalError] = useState("");
 
   const [business, setBusiness] = useState({
     name: "",
@@ -106,6 +108,7 @@ const ListingForms = () => {
     altCountryCode: "+65",
     altNumber: "",
     city: "",
+    cityId: "",
     landmark: "",
   });
 
@@ -575,7 +578,7 @@ const ListingForms = () => {
       // if (contact.altNumber.trim() && !/^[6-9]\d{9}$/.test(contact.altNumber)) {
       //   newErrors.contactAltNumber = "Enter a valid alternate number";
       // }
-      if (!contact.city.trim()) {
+      if (!contact.cityId) {
         newErrors.contactCity = "City is required";
       }
       // if (!contact.landmark.trim()) {
@@ -697,12 +700,8 @@ const ListingForms = () => {
     const formData = new FormData();
     formData.append("category_id", categoryId);
     // formData.append("step", stepNumber);
-    if (name && existingData?.id) {
-      formData.append("listing_id", existingData?.id);
-      // formData.append("is_edit", "true");
-    } else if (listingId) {
-      formData.append("listing_id", listingId);
-    }
+
+    const currentListingId = existingData?.id || listingId;
 
     switch (stepNumber) {
       case 1:
@@ -714,7 +713,7 @@ const ListingForms = () => {
 
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
         selectedServices.forEach((id) => formData.append("services[]", id));
-        selectedPayment.forEach((id) => formData.append("payments[]", id));
+        // selectedPayment.forEach((id) => formData.append("payments[]", id));
 
         formData.append("hours", JSON.stringify(schedule));
 
@@ -755,7 +754,7 @@ const ListingForms = () => {
         // formData.append("listing_id", listingId);
         if (contact.altNumber)
           formData.append("second_mobile_number", contact.altNumber);
-        formData.append("city", contact.city);
+        formData.append("city_id", contact.cityId);
         formData.append("locality", contact.landmark);
         break;
 
@@ -798,10 +797,10 @@ const ListingForms = () => {
     try {
       console.table("FORMDATAT ::", formData);
 
-      const response = await add_listings(formData, stepNumber);
+      const response = await add_listings(formData, stepNumber, slug);
       console.log(`Step ${stepNumber} submitted:`, response);
       if (!response?.success && response?.message) {
-        alert(response?.message || "Error Occured");
+        setGlobalError(response?.message || "Something went wrong.");
       }
 
       if (response?.errors && Object.keys(response.errors).length > 0) {
@@ -821,10 +820,12 @@ const ListingForms = () => {
       // set listing id
       if (stepNumber === 1 && response?.data?.data?.id) {
         setListingId(response.data.data.id);
+        setSlug(response.data.data.slug);
       }
 
       // move to next step
       if (response?.data?.status === true) {
+        setGlobalError(""); // ✅ CLEAR
         setActiveStep(stepNumber + 1);
       }
 
@@ -854,7 +855,7 @@ const ListingForms = () => {
         const firstErrorKey = Object.keys(mappedErrors)[0];
         setTimeout(() => scrollToError(firstErrorKey), 100);
       } else {
-        alert(`Error submitting step ${stepNumber}. Please try again.`);
+        setGlobalError("Something went wrong. Please try again.");
       }
       setIsSubmitting(false);
       return false;
@@ -1127,6 +1128,39 @@ const ListingForms = () => {
               )}
             </button>
           </div>
+          {globalError && (
+            <div className="w-[95%] 2xl:w-[95%] mb-4">
+              <div className="flex items-start gap-3 p-4 rounded-lg border border-red-200 bg-red-50 shadow-sm">
+                {/* Icon */}
+                <svg
+                  className="w-5 h-5 text-red-500 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
+                  />
+                </svg>
+
+                {/* Message */}
+                <div className="flex-1 text-sm text-red-700 font-medium">
+                  {globalError}
+                </div>
+
+                {/* Close button */}
+                <button
+                  onClick={() => setGlobalError("")}
+                  className="text-red-400 hover:text-red-600"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <Footer />
         {/* <section>

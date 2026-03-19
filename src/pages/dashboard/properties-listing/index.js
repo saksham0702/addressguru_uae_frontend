@@ -44,6 +44,7 @@ const PropertiesListing = () => {
   const [editCategoryId, setEditCategoryId] = useState(null);
   const [editType, setEditType] = useState(null);
   const [editCategory, setEditCategory] = useState(null);
+  const [slug, setSlug] = useState("");
 
   // Derived: use API values in edit mode, query params in create mode
   const resolvedCategoryId = isEditMode ? editCategoryId : categoryId;
@@ -94,6 +95,7 @@ const PropertiesListing = () => {
     description: "",
     priceType: "amount",
     amount: "",
+    areaUnit: "sqft", // ✅ NEW
   });
 
   // Section 2: Media
@@ -107,8 +109,9 @@ const PropertiesListing = () => {
     countryCode: "+65",
     altCountryCode: "+65",
     altNumber: "",
-    city: "",
+    cityId: "",
     landmark: "",
+    address: "",
   });
 
   // Section 4: SEO
@@ -254,7 +257,7 @@ const PropertiesListing = () => {
           countryCode: d.country_code || "+65",
           altCountryCode: d.alt_country_code || "+65",
           altNumber: d.second_mobile_number || "",
-          city: d.city || "",
+          cityId: d.city_id || "",
           landmark: d.locality || "",
         });
 
@@ -269,7 +272,7 @@ const PropertiesListing = () => {
           getServiceAndFacility(d.category_id);
         }
       } catch (err) {
-        console.error("Error fetching property edit data:", err);
+        console.log("Error fetching property edit data:", err);
       } finally {
         setEditLoading(false);
       }
@@ -277,6 +280,12 @@ const PropertiesListing = () => {
 
     prefillEditData();
   }, [router.isReady, isEditMode, editSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (isEditMode && editSlug) {
+      setSlug(editSlug);
+    }
+  }, [isEditMode, editSlug]);
 
   // Load from session (non-edit only)
   useEffect(() => {
@@ -543,7 +552,7 @@ const PropertiesListing = () => {
       3: {
         name: "contactName",
         email: "contactEmail",
-        city: "contactCity",
+        cityId: "contactCity",
         mobile_number: "contactNumber",
         second_mobile_number: "contactAltNumber",
         locality: "contactLandmark",
@@ -605,9 +614,11 @@ const PropertiesListing = () => {
       if (!contact.email.trim()) newErrors.contactEmail = "Email is required";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email))
         newErrors.contactEmail = "Enter a valid email";
-      if (!contact.city.trim()) newErrors.contactCity = "City is required";
+      if (!contact.cityId) newErrors.contactCity = "City is required";
       if (!contact.number.trim())
         newErrors.contactNumber = "Mobile number is required";
+      if (!contact.address?.trim())
+        newErrors.contactAddress = "Address is required";
     }
 
     if (step === 4) {
@@ -650,53 +661,40 @@ const PropertiesListing = () => {
 
     switch (stepNumber) {
       case 1:
-        // Required
         formData.append("category_id", resolvedCategoryId);
 
-        // OPTIONAL: only if you actually have subcategory state
-        if (contact.subCategoryId) {
-          formData.append("sub_category_id", contact.subCategoryId);
+        if (propertyInfo.subCategoryId) {
+          formData.append("sub_category_id", propertyInfo.subCategoryId);
         }
 
-        // MUST BE ID (not name)
-        formData.append("city_id", contact.city);
-
-        // Basic Info
         formData.append("title", propertyInfo.title);
         formData.append("description", propertyInfo.description);
 
-        // Purpose (sale | rent | lease)
-        formData.append("purpose", resolvedType);
+        formData.append("purpose", resolvedType); // sale | rent | lease
 
         // PRICE
         if (propertyInfo.priceType === "amount") {
           formData.append("price_amount", propertyInfo.amount);
         }
 
-        formData.append("price_currency", "AED"); // can make dynamic later
-        formData.append("price_negotiable", "false"); // string required
-        formData.append("price_period", "one-time"); // or monthly/yearly
+        formData.append("price_currency", "AED");
+        formData.append("price_negotiable", "true"); // or dynamic later
+        formData.append("price_period", "one-time");
 
         // AREA
         formData.append("area_size", propertyInfo.size);
-        formData.append("area_unit", "sqft"); // TODO: make dynamic if needed
+        formData.append("area_unit", propertyInfo.areaUnit || "sqft");
 
-        // formData.append("area_unit", propertyInfo.areaUnit || "sqft");
-
-        // PAYMENTS (plan)
-        if (selectedPlanId) {
-          formData.append("payments", selectedPlanId);
-        }
-
-        // FACILITIES & SERVICES (if backend supports)
+        // FACILITIES
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
 
+        // SERVICES
         selectedServices.forEach((id) => formData.append("services[]", id));
 
-        // ADDITIONAL FIELDS (IMPORTANT FORMAT)
-        if (additionalFields && Object.keys(additionalFields).length > 0) {
+        // ADDITIONAL FIELDS
+        if (Object.keys(additionalFields).length > 0) {
           const formattedFields = Object.entries(additionalFields)
-            .filter(([_, value]) => value !== "" && value !== null)
+            .filter(([_, v]) => v !== "" && v !== null)
             .map(([field_id, value]) => ({
               field_id,
               value: String(value),
@@ -713,7 +711,7 @@ const PropertiesListing = () => {
           .filter((img) => !img.isExisting)
           .forEach((img) => {
             const file = imageFilesRef.current[img.id];
-            if (file) formData.append("images[]", file);
+            if (file) formData.append("images", file);
           });
         break;
 
@@ -721,10 +719,12 @@ const PropertiesListing = () => {
         formData.append("listing_id", listingId);
         formData.append("name", contact.name);
         formData.append("email", contact.email);
-        formData.append("city", contact.city);
+        formData.append("city_id", contact.cityId);
         formData.append("country_code", contact.countryCode);
         formData.append("alt_country_code", contact.altCountryCode);
         formData.append("mobile_number", contact.number);
+        formData.append("address", contact.address);
+
         if (contact.altNumber)
           formData.append("second_mobile_number", contact.altNumber);
         formData.append("locality", contact.landmark);
@@ -750,13 +750,14 @@ const PropertiesListing = () => {
         payload: formData,
         step: stepNumber,
         listingId,
+        slug,
       });
       console.log(`Step ${stepNumber} submitted:`, response);
       console.log("response of step 1", response);
 
-      if (!response?.status) {
-        alert(response?.message || "Error Occurred");
-      }
+      // if (!response?.status) {
+      //   alert(response?.message || "Error Occurred");
+      // }
 
       if (response?.errors && Object.keys(response.errors).length > 0) {
         const mappedErrors = mapApiErrorsToState(response.errors, stepNumber);
@@ -767,8 +768,9 @@ const PropertiesListing = () => {
         return false;
       }
 
-      if (stepNumber === 1 && response?.data?._id) {
-        setListingId(response.data._id);
+      if (stepNumber === 1 && response?.data?.slug) {
+        setListingId(response.data.id);
+        setSlug(response.data.slug);
       }
 
       if (stepNumber === 5) {
@@ -780,13 +782,13 @@ const PropertiesListing = () => {
           });
         }
       } else {
-        if (response?.success) setActiveStep(stepNumber + 1);
+        if (response?.status == true) setActiveStep(stepNumber + 1);
       }
 
       setIsSubmitting(false);
       return true;
     } catch (error) {
-      console.error(`Error submitting step ${stepNumber}:`, error);
+      console.log(`Error submitting step ${stepNumber}:`, error);
       if (error?.response?.data?.errors) {
         const mappedErrors = mapApiErrorsToState(
           error.response.data.errors,
@@ -887,14 +889,35 @@ const PropertiesListing = () => {
             </div>
 
             <div ref={sizeRef}>
-              <InputWithTitle
-                title={"Size (sqft)"}
-                required={true}
-                value={propertyInfo.size}
-                onChange={(e) =>
-                  handlePropertyInfoChange("size", e.target.value)
-                }
-              />
+              <label className="block text-sm font-semibold text-gray-600 mb-1">
+                Area *
+              </label>
+
+              <div className="flex gap-2">
+                {/* Size Input */}
+                <input
+                  type="number"
+                  placeholder="Enter size"
+                  value={propertyInfo.size}
+                  onChange={(e) =>
+                    handlePropertyInfoChange("size", e.target.value)
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+
+                {/* Unit Dropdown */}
+                <select
+                  value={propertyInfo.areaUnit}
+                  onChange={(e) =>
+                    handlePropertyInfoChange("areaUnit", e.target.value)
+                  }
+                  className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-orange-400 outline-none"
+                >
+                  <option value="sqft">sqft</option>
+                  <option value="sqm">sqm</option>
+                </select>
+              </div>
+
               {errors.size && (
                 <p className="text-red-500 text-sm mt-1">{errors.size}</p>
               )}
