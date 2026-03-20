@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const API_URL = "http://192.168.31.104:5001";
-// const API_URL1 = "http://192.168.31.108:5001";
+// const API_URL = "http://192.168.31.107:5001";
 const API_URL = "https://addressguru.ae/api";
 
 export const get_job_categories = async () => {

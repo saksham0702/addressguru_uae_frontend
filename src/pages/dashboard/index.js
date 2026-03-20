@@ -9,18 +9,24 @@ import Image from "next/image";
 import Header from "@/components/HeadersMobile/Dashboard";
 import MyListings from "@/components/Dashboard/MyListings";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
-import { get_user_listings } from "@/api/showlistings";
+
 import { get_dashboard_data } from "@/api/dashboard";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MyJobListings from "@/components/Dashboard/MyJobListings";
 import MyMarketplaceListings from "@/components/Dashboard/MyMarketplace";
 import MyPropertyListings from "@/components/Dashboard/MyProperties";
+import {
+  get_job_listings,
+  get_marketplace_listings,
+  get_property_listings,
+  get_user_listings,
+} from "@/api/uae-dashboard";
 
 const Dashboard = () => {
   const router = useRouter();
   const { user, loading } = useAuth();
-
+  const API_URL = "https://addressguru.ae/api";
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [myListings, setMyListings] = useState(null);
@@ -43,22 +49,29 @@ const Dashboard = () => {
     }
   };
 
-  // const getUserListings = async (type) => {
-  //   const res = await get_user_listings(type);
-  //   console.log(`response from user ${type}`, res?.data);
-  //   if (res?.data?.success && type === "listing")
-  //     setMyListings(res?.data?.data);
-  //   if (res?.data?.success && type === "jobs") setMyJobs(res?.data?.data);
-  //   if (res?.data?.success && type === "marketplace")
-  //     setMyMarketplace(res?.data?.data);
-  //   if (res?.data?.success && type === "property")
-  //     setMyProperties(res?.data?.data);
-  // };
+  const getUserListings = async (type) => {
+    const listres = await get_user_listings();
+    const jobres = await get_job_listings();
+    const marketplaceres = await get_marketplace_listings();
+    const propertyres = await get_property_listings();
+
+    if (listres) setMyListings(listres?.listings);
+
+    if (jobres) setMyJobs(jobres);
+
+    if (marketplaceres) setMyMarketplace(marketplaceres);
+
+    if (propertyres) setMyProperties(propertyres);
+    // if (res?.data?.success && type === "marketplace")
+    //   setMyMarketplace(res?.data?.data);
+    // if (res?.data?.success && type === "property")
+    //   setMyProperties(res?.data?.data);
+  };
 
   useEffect(() => {
     if (!user) return;
     getDashboardData();
-    // getUserListings("listing");
+    getUserListings("listing");
     // getUserListings("jobs");
     // getUserListings("property");
     // getUserListings("marketplace");
@@ -122,10 +135,11 @@ const Dashboard = () => {
             </div>
 
             <section className="my-5 space-y-5">
-              {/* <MyListings data={myListings} /> */}
-              {/* <MyPropertyListings data={myProperties} />
+              <MyListings data={myListings} APP_URL={API_URL} />
               <MyMarketplaceListings data={myMarketplace} />
-              <MyJobListings data={myJobs} /> */}
+              <MyPropertyListings data={myProperties} />
+
+              {/* <MyJobListings data={myJobs} /> */}
             </section>
           </div>
         );
@@ -139,14 +153,14 @@ const Dashboard = () => {
           </div>
         );
 
-      case "my-jobs":
-        return (
-          <div className="md-max-w-[80%] w-full max-w-[80%]">
-            <section className="my-5 space-y-5">
-              {/* <MyJobListings data={myJobs} /> */}
-            </section>
-          </div>
-        );
+      // case "my-jobs":
+      //   return (
+      //     <div className="md-max-w-[80%] w-full max-w-[80%]">
+      //       <section className="my-5 space-y-5">
+      //         <MyJobListings data={myJobs} />
+      //       </section>
+      //     </div>
+      //   );
 
       case "my-marketplace":
         return (

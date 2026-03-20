@@ -17,11 +17,12 @@ import {
   getFromSession,
   clearSession,
 } from "@/utils/sessionStorage";
-import { get_listing_data } from "@/api/showlistings";
+
 import { BUSINESS_POSTING_TIPS } from "@/services/constants";
 import AdditionalInfo from "@/components/Forms/FormSections/AdditionalInfo";
 import { getBusinessListing } from "@/api/uaeAdminCategories";
-import { add_listings } from "@/api/listing-form";
+import { add_listings, get_listing_data } from "@/api/listing-form";
+import SuccessModal from "@/components/Forms/sucesspopup";
 
 const ListingForms = () => {
   const router = useRouter();
@@ -77,6 +78,7 @@ const ListingForms = () => {
     establishmentYear: "",
     uenNumber: "",
   });
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const [additionalFields, setAdditionalFields] = useState({});
 
@@ -300,7 +302,9 @@ const ListingForms = () => {
   const getPlans = async () => {
     try {
       const res = await get_plans();
-      setPlans(res?.data);
+      console.log("plan response", res);
+
+      setPlans(res?.data?.plans);
     } catch (error) {
       console.log("error in frontend", error);
     }
@@ -310,7 +314,8 @@ const ListingForms = () => {
     async (name) => {
       try {
         const res = await get_listing_data(name);
-        setExistingData(res);
+        console.log("res of listing data", res?.data?.data);
+        setExistingData(res?.data?.data);
         // console.log("response of single listing i am", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
@@ -358,102 +363,75 @@ const ListingForms = () => {
     return scheduleMap;
   };
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
-    if (existingData && name) {
-      // Populate business info
+    if (existingData && name && !isInitialized) {
+      console.log("Mapping existingData:", existingData);
+
+      // ✅ Business Info
       setBusiness({
-        name: existingData?.business_name || "",
-        address: existingData?.business_address || "",
-        description: existingData?.ad_description || "",
-        establishmentYear: existingData?.establishment_year || "",
-        uenNumber: existingData?.uen_number || "",
+        name: existingData?.businessName || "",
+        address: existingData?.businessAddress || "",
+        description: existingData?.description || "",
+        establishmentYear: existingData?.establishedYear || "",
+        uenNumber: existingData?.taxNumber || "",
       });
 
-      // Populate additional fields
-      setAdditionalFields({
-        vehicle_types: existingData?.vehicle_types || [],
-        driver_options: existingData?.driver_options || [],
-        fare_type: existingData?.fare_type || "",
-        fare_amount: existingData?.fare_amount || "",
-      });
-      // Populate schedule from opening_hours - USE THE NEW HELPER FUNCTION
-      if (
-        existingData?.opening_hours &&
-        Array.isArray(existingData.opening_hours)
-      ) {
-        const formattedSchedule = formatOpeningHoursForState(
-          existingData.opening_hours,
-        );
-        setSchedule(formattedSchedule);
-      }
-
-      // Populate social links
-      setSocial({
-        websiteLink: existingData?.website_link || "",
-        videoLink: existingData?.video_link || "",
-      });
-
-      // Populate contact details
+      // ✅ Contact
       setContact({
-        name: existingData?.name || "",
+        altNumber: existingData?.alternateMobileNumber || "",
+        name: existingData?.contactPersonName || "",
         email: existingData?.email || "",
-        countryCode: existingData?.country_code || "",
-        altCountryCode: existingData?.alt_country_code || "",
-        number: existingData?.mobile_number || "",
-        altNumber: existingData?.second_mobile_number || "",
-        city: existingData?.city || "",
+        number: existingData?.mobileNumber || "", // ✅ FIXED
+        altNumber: existingData?.alternateMobileNumber || "",
+        countryCode: existingData?.countryCode || "+91",
+        altCountryCode: existingData?.altCountryCode || "+91",
+        city: existingData?.city?.name || "",
+        cityId: existingData?.city?._id || "",
         landmark: existingData?.locality || "",
       });
 
-      // Populate SEO
-      setSeo({
-        title: existingData?.seo_title || "",
-        description: existingData?.seo_description || "",
+      // ✅ Social Links
+      setSocial({
+        websiteLink: existingData?.socialLinks?.website || "",
+        videoLink: existingData?.socialLinks?.video || "",
+        facebook: existingData?.socialLinks?.facebook || "",
+        instagram: existingData?.socialLinks?.instagram || "",
+        twitter: existingData?.socialLinks?.twitter || "",
+        linkedin: existingData?.socialLinks?.linkedin || "",
+        youtube: existingData?.socialLinks?.youtube || "",
       });
 
-      // Set listing ID for edit mode
-      setListingId(existingData?.id);
+      // ✅ SEO (if exists)
+      setSeo({
+        title: existingData?.seo?.title || "",
+        description: existingData?.seo?.description || "",
+      });
+      // ✅ Facilities / Services / Payments
+      setSelectedFacilities(existingData?.facilities || []);
+      setSelectedServices(existingData?.services || []);
+      setSelectedPayment(existingData?.paymentModes || []);
 
-      // Populate selected facilities - Use facilities_id for actual IDs
-      if (
-        existingData?.facilities_id &&
-        Array.isArray(existingData.facilities_id)
-      ) {
-        setSelectedFacilities(existingData.facilities_id);
-      }
-
-      // Populate selected services - Use services_id for actual IDs
-      if (
-        existingData?.services_id &&
-        Array.isArray(existingData.services_id)
-      ) {
-        setSelectedServices(existingData.services_id);
-      }
-
-      // Populate selected payment methods - Use payments_id for actual IDs
-      if (
-        existingData?.payments_id &&
-        Array.isArray(existingData.payments_id)
-      ) {
-        setSelectedPayment(existingData.payments_id);
-      }
-
-      // Set existing media
+      // ✅ Media
       setMedia({
         logo: existingData?.logo
           ? { preview: existingData.logo, isExisting: true }
           : null,
-        images: existingData?.images
-          ? existingData.images.map((imgPath, idx) => ({
-              preview: imgPath,
-              isExisting: true,
-              id: idx,
-            }))
-          : [],
+        images: (existingData?.images || []).map((img, idx) => ({
+          preview: img,
+          isExisting: true,
+          id: idx,
+        })),
       });
-    }
-  }, [existingData, name, payment]); // Added 'payment' to dependencies
 
+      // ✅ Listing ID + slug
+      setListingId(existingData?._id);
+      setSlug(existingData?.slug);
+
+      setIsInitialized(true);
+    }
+  }, [existingData, name]);
   useEffect(() => {
     getPlans();
   }, []);
@@ -713,7 +691,9 @@ const ListingForms = () => {
         formData.append("business_name", business.name);
         formData.append("business_address", business.address);
         formData.append("ad_description", business.description);
-        formData.append("establishment_year", business.establishmentYear);
+        if (business?.establishmentYear) {
+          formData.append("establishment_year", business.establishmentYear);
+        }
         formData.append("uen_number", business.uenNumber);
 
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
@@ -802,7 +782,12 @@ const ListingForms = () => {
     try {
       console.table("FORMDATAT ::", formData);
 
-      const response = await add_listings(formData, stepNumber, slug);
+      const response = await add_listings(
+        formData,
+        stepNumber,
+        slug,
+        existingData?._id || listingId,
+      );
       console.log(`Step ${stepNumber} submitted:`, response);
       if (!response?.success && response?.message) {
         setGlobalError(response?.message || "Something went wrong.");
@@ -837,12 +822,13 @@ const ListingForms = () => {
       if (stepNumber === 6) {
         clearSession();
         console.log("response from 6 ", response);
-        if (response?.success) {
-          router.push({
-            pathname: `/${response?.data?.slug}`,
-            query: { preview: true },
-          });
-        }
+        setShowSuccessPopup(true);
+        // if (response?.status) {
+        //   router.push({
+        //     pathname: `/${response?.data?.slug}`,
+        //     query: { preview: true },
+        //   });
+        // }
         // alert("Listing completed successfully!");
       }
 
@@ -943,6 +929,8 @@ const ListingForms = () => {
             setContact={setContact}
             error={errors}
             clearError={clearError}
+            business={business}
+            setBusiness={setBusiness}
             refs={{
               contactNameRef,
               contactEmailRef,
@@ -979,9 +967,8 @@ const ListingForms = () => {
         );
       case 6:
         return (
-          <section className="mx-auto w-full" ref={planRef}>
-            <div className="p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4">Payment Section</h2>
+          <section className="w-full" ref={planRef}>
+            <div className=" text-center">
               <PricingTable
                 plans={plans}
                 selectedPlanId={selectedPlanId}
@@ -1035,21 +1022,26 @@ const ListingForms = () => {
             <section className="2xl:w-[95%] w-full   h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
+            {currentStep == 6 ? (
+              <div></div>
+            ) : (
+              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
+                <div className="w-full">
+                  <h6 className="font-extrabold text-base my-2">
+                    Posting Tips
+                  </h6>
 
-            <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
-              <div className="w-full">
-                <h6 className="font-extrabold text-base my-2">Posting Tips</h6>
-
-                {currentPostingStep?.fields?.map((field, index) => (
-                  <div key={index} className="mb-0.5">
-                    <p className="font-semibold text-xs">{field.title}</p>
-                    <p className="text-gray-700 text-[10px] font-medium leading-snug">
-                      {field.tip}
-                    </p>
-                  </div>
-                ))}
+                  {currentPostingStep?.fields?.map((field, index) => (
+                    <div key={index} className="mb-0.5">
+                      <p className="font-semibold text-xs">{field.title}</p>
+                      <p className="text-gray-700 text-[10px] font-medium leading-snug">
+                        {field.tip}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex justify-between w-[95%] 2xl:w-[95%] mb-8">
@@ -1167,6 +1159,24 @@ const ListingForms = () => {
             </div>
           )}
         </div>
+        <SuccessModal
+          open={showSuccessPopup}
+          onClose={() => setShowSuccessPopup(false)}
+          title="Thank You!"
+          message={
+            <>
+              Your listing has been successfully submitted on{" "}
+              <span className="font-semibold text-gray-800">
+                AddressGuru.ae
+              </span>
+              .
+              <br />
+              Our team will review it shortly.
+            </>
+          }
+          redirectTo="/dashboard"
+          // autoRedirect={true}
+        />
         <Footer />
         {/* <section>
           <Footer />

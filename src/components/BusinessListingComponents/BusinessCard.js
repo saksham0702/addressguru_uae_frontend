@@ -9,6 +9,7 @@ import { get_view } from "@/api/queries";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data }) => {
+  const API_URL = "https://addressguru.ae/api";
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +46,7 @@ const BusinessCard = ({ data }) => {
             className="md:w-[160px] md:max-h-[195px] max-md:max-w-[32%] max-md:h-[120px] border border-gray-200 rounded-sm max-[340]:w-[140px]  2xl:w-[190px] 2xl:h-[220px]  overflow-hidden "
           >
             <Image
-              src={`${APP_URL}/${data?.logo}`}
+              src={`${API_URL}/${data?.logo}`}
               alt="course poster"
               width={500}
               height={500}
@@ -60,7 +61,7 @@ const BusinessCard = ({ data }) => {
                 href={`/${data?.slug}`}
                 className=" md:whitespace-nowrap 2xl:text-lg max-md:text-sm capitalize leading-5 max-md:mt-2 max-[320px]:!text-xs max-md:font-bold font-bold "
               >
-                {data?.business_name}
+                {data?.businessName}
               </Link>
               <div className="text-xs text-gray-500  whitespace-nowrap max-md:hidden absolute right-7 ">
                 <div className="flex items-center gap-1">
@@ -71,7 +72,7 @@ const BusinessCard = ({ data }) => {
             {/* Address */}
             <div className="text-xs 2xl:text-[13.5px] text-gray-700 font-medium flex items-center gap-1">
               <span className="truncate max-md:w-50 max-[340px]:!text-xs max-[340px]:!w-20  max-md:text-[11px]">
-                {data?.business_address}
+                {data?.businessAddress}
               </span>
             </div>
 
@@ -134,17 +135,17 @@ const BusinessCard = ({ data }) => {
             </div>
 
             {/* Tags bring tag randomly from anywhere */}
-            <div className="max-md:flex max-md:flex-col md:flex md:gap-3 gap-1 text-[12px] 2xl:text-[13px] font-medium">
+            {/* <div className="max-md:flex max-md:flex-col md:flex md:gap-3 gap-1 text-[12px] 2xl:text-[13px] font-medium">
               {selectedService && (
                 <span className="w-fit max-w-46 truncate p-0.5 px-1 rounded-sm border border-gray-300 text-[10px] md:text-[12px]">
                   {selectedService}
                 </span>
               )}
-            </div>
+            </div> */}
 
             {/* Description */}
             <p className="text-[11px] font-[500] truncate  w-md max-md:hidden 2xl:text-[13px] 2xl:w-lg ">
-              {data?.ad_description}
+              {data?.description}
             </p>
 
             {/* Action Buttons */}
@@ -152,7 +153,7 @@ const BusinessCard = ({ data }) => {
               <CustomButton
                 showToggle={true}
                 defaultText="SHOW NUMBER"
-                toggledText={data?.mobile_number}
+                toggledText={data?.mobileNumber}
                 icon={
                   <svg
                     width="17"
@@ -241,7 +242,7 @@ const BusinessCard = ({ data }) => {
               {/* whatsap button */}
               <a
                 onClick={() => handleShowNumber("whatsapp")}
-                href={`https://wa.me/${data?.mobile_number}`}
+                href={`https://wa.me/${data?.mobileNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

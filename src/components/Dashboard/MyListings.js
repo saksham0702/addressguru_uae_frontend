@@ -1,10 +1,10 @@
 import React from "react";
 import { Edit, Trash2, Eye, Edit3, ArrowUp } from "lucide-react";
 import Image from "next/image";
-import { APP_URL } from "@/services/constants";
+
 import Link from "next/link";
 
-const MyListings = ({ data }) => {
+const MyListings = ({ data, APP_URL }) => {
   // Data structure for listings
   const listings = [
     {
@@ -117,7 +117,7 @@ const MyListings = ({ data }) => {
                     width={500}
                     height={500}
                     src={`${APP_URL}/${listing?.logo}`}
-                    alt={listing?.business_name.slice(0, 12)}
+                    alt={listing?.businessName.slice(0, 12)}
                     className="w-full h-full rounded-lg object-cover border border-gray-100"
                   />
                 </Link>
@@ -126,11 +126,11 @@ const MyListings = ({ data }) => {
                 <div className=" max-md:max-w-[60%]">
                   <span className="font-semibold text-base max-w-xs  max-md:text-sm  text-gray-900  md:mb-1">
                     <p className="line-clamp-2 leading-5">
-                      {listing?.business_name}
+                      {listing?.businessName}
                     </p>
                   </span>
                   <p className="text-xs text-gray-800 md:mb-3">
-                    {listing?.business_address}
+                    {listing?.businessAddress}
                   </p>
 
                   {/* for mobile only */}
@@ -169,9 +169,9 @@ const MyListings = ({ data }) => {
                   <div className="flex gap-2 whitespace-nowrap max-md:mt-1 ">
                     <Link
                       href={`/dashboard/listing-forms?category=${
-                        listing?._id
+                        listing?.category?._id
                       }&categoryName=${encodeURIComponent(
-                        listing?.category_name
+                        listing?.businessName,
                       )}&name=${encodeURIComponent(listing?.slug)}`}
                       className="inline-flex items-center gap-2 px-4 max-md:px-2 py-1.5 max-md:text-[10px] max-md:border-1 max-md:border-blue-500 max-md:text-blue-400  md:bg-blue-600 md:hover:bg-blue-700 text-white text-xs font-semibold rounded-sm transition-colors"
                     >

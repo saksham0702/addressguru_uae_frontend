@@ -22,14 +22,14 @@ const BusinessListingCategories = ({ categories }) => {
       } else {
         // No subcategories, redirect directly to listing forms with category name
         window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(
-          categoryName
+          categoryName,
         )}`;
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       // On error, redirect to listing forms with just category and name
       window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(
-        categoryName
+        categoryName,
       )}`;
     } finally {
       setLoading(false);
@@ -50,12 +50,12 @@ const BusinessListingCategories = ({ categories }) => {
 
   // Filter categories based on search query
   const filteredCategories = categories?.filter((category) =>
-    category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    category?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Filter subcategories based on search query
   const filteredSubCategories = subCategories?.filter((subCategory) =>
-    subCategory?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    subCategory?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const renderCategories = () => (
@@ -120,7 +120,7 @@ const BusinessListingCategories = ({ categories }) => {
                 <div
                   className="flex-shrink-0 w-8 h-8 xl:scale-130 flex items-center justify-center"
                   dangerouslySetInnerHTML={{
-                    __html: category?.svg_code
+                    __html: category?.iconSvg
                       ?.replace(/width="[^"]*"/g, 'width="25"')
                       .replace(/height="[^"]*"/g, 'height="25"'),
                   }}

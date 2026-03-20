@@ -51,6 +51,7 @@ const MyJobListings = ({ data }) => {
       };
     }
   };
+
   return (
     <div className="bg-white shadow-sm border w-full max-md:w-[98%] max-md:mx-auto rounded-md border-gray-200">
       {/* Header */}

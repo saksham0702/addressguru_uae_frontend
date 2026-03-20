@@ -1289,7 +1289,21 @@ const JobListing = () => {
                   );
                 })}
               </div>
+              {Object.keys(errors).length > 0 && (
+                <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded-lg">
+                  <h3 className="text-red-600 font-semibold mb-2">
+                    Please fix the following errors:
+                  </h3>
 
+                  <ul className="list-disc list-inside space-y-1">
+                    {Object.entries(errors).map(([key, message]) => (
+                      <li key={key} className="text-red-500 text-sm">
+                        {message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {/* Navigation buttons */}
               <div className="flex justify-between items-center mt-8">
                 {activeStep > 1 && (

@@ -106,10 +106,10 @@ const MyMarketplaceListings = ({ data }) => {
 
                     {/* Product Details */}
                     <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-gray-600 md:mb-3 mb-2">
-                      <span className="flex items-center gap-1">
+                      {/* <span className="flex items-center gap-1">
                         <Tag className="w-3 h-3" />
                         {formatPrice(product?.price)}
-                      </span>
+                      </span> */}
                       <span className="flex items-center gap-1">
                         <Package className="w-3 h-3" />
                         {product?.quantity ?? 1} in stock

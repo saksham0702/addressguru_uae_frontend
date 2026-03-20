@@ -15,6 +15,7 @@ import { get_listing_filters } from "@/api/listingfilters";
 import Header from "@/layout/header";
 import Footer from "@/layout/footer";
 import MobileFooter from "@/components/MobileFooter";
+import { get_all_listings } from "@/api/listing-form";
 
 const SearchResults = () => {
   const router = useRouter();
@@ -108,14 +109,16 @@ const SearchResults = () => {
         setListings([]); // 🔥 reset
         setPageData(null); // 🔥 reset pagination
 
-        const res = await get_listing_by_slug(slug, globalCity, 1, filters);
+        // const res = await get_listing_by_slug(slug, globalCity, 1, filters);
+        const res = await get_all_listings();
+        console.log("get all listings response", res);
 
         // if (!res || res.status != true) {
         //   router.push("/404");
         //   return;
         // }
 
-        setListings(res.result || []);
+        setListings(res.data.listings || []);
         setPageData(res);
       } catch (err) {
         console.error("Error fetching listings:", err);

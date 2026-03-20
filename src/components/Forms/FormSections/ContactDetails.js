@@ -4,7 +4,15 @@ import axios from "axios";
 import { API_URL, COUNTRY_CODES } from "@/services/constants";
 import { getCities } from "@/api/uaeadminCities";
 
-const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
+const ContactDetails = ({
+  contact,
+  setContact,
+  error,
+  clearError,
+  refs,
+  business,
+  setBusiness,
+}) => {
   const [cities, setCities] = useState([]);
   const [cityOpen, setCityOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
@@ -16,6 +24,15 @@ const ContactDetails = ({ contact, setContact, error, clearError, refs }) => {
 
   const [rawNumber, setRawNumber] = useState("");
   const [rawAltNumber, setRawAltNumber] = useState("");
+
+  useEffect(() => {
+    if (contact?.number) {
+      setRawNumber(contact.number);
+    }
+    if (contact?.altNumber) {
+      setRawAltNumber(contact.altNumber);
+    }
+  }, [contact]);
 
   /* ---------------- FETCH CITIES ---------------- */
 

@@ -1,7 +1,7 @@
 import { get_marketplace_subcategories } from "@/api/Categories";
 
 import { get_plans } from "@/api/plans";
-import { get_marketplace_by_id } from "@/api/showlistings";
+
 import DropDown from "@/components/Forms/DropDown";
 import InputWithTitle from "@/components/Forms/InputWithTitle";
 import Navbar from "@/components/Forms/Navbar";
@@ -21,7 +21,11 @@ import {
 } from "@/utils/sessionStorage";
 import ContactDetails from "@/components/Forms/FormSections/ContactDetails";
 import { APP_URL } from "@/services/constants";
-import { add_marketplace_listing } from "@/api/uae-marketplace";
+import {
+  add_marketplace_listing,
+  get_marketplace_by_slug,
+} from "@/api/uae-marketplace";
+import SuccessModal from "@/components/Forms/sucesspopup";
 
 const MarketPlaceListing = () => {
   const router = useRouter();
@@ -42,6 +46,8 @@ const MarketPlaceListing = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
   const [slug, setSlug] = useState(null);
+  const [editcategory, seteditcategory] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   // Refs for error scrolling
   const conditionRef = useRef(null);
   const titleRef = useRef(null);
@@ -66,7 +72,7 @@ const MarketPlaceListing = () => {
   const getPlansData = async () => {
     try {
       const res = await get_plans();
-      setPlans(res?.data);
+      setPlans(res?.data?.plans);
     } catch (error) {
       console.log("error in fetching plans", error);
     }
@@ -160,21 +166,34 @@ const MarketPlaceListing = () => {
     const prefillEditData = async () => {
       setEditLoading(true);
       try {
-        const res = await get_marketplace_by_id(editSlug);
+        const res = await get_marketplace_by_slug(editSlug);
         const d = res?.data;
+        console.log("response of market place existing data will be: ", d);
+        setListingId(res?.data?._id);
+        setSlug(res?.data?.slug);
+        seteditcategory(res?.data?.category?._id);
+
         if (!d) return;
 
         // Set listing ID so all step submits include listing_id
-        setListingId(d.id);
 
         // Pre-fill step 1 — Ad Info
         setAdInfo({
           condition: d.condition || "",
-          subcategoryId: d.sub_category_id || "",
+          subcategoryId: d.subCategory?._id || "", // FIXED
           title: d.title || "",
           description: d.description || "",
-          priceType: d.price_type || "amount",
-          amount: d.amount ? String(d.amount) : "",
+
+          // 🔥 PRICE MAPPING (IMPORTANT)
+          priceType: d.price?.isFree
+            ? "free"
+            : d.price?.isNegotiable
+              ? "contact_for_sale"
+              : d.price?.isFixed
+                ? "amount"
+                : "amount",
+
+          amount: d.price?.amount ? String(d.price.amount) : "",
         });
 
         // Pre-fill step 2 — Images
@@ -194,7 +213,9 @@ const MarketPlaceListing = () => {
           images: existingImages.map((url, idx) => ({
             id: `existing-${idx}-${Date.now()}`,
             file: null, // no File object for existing images
-            preview: url.startsWith("http") ? url : `${APP_URL}/${url}`,
+            preview: url.startsWith("http")
+              ? url
+              : `https://addressguru.ae/${url}`,
             name: url.split("/").pop(),
             isExisting: true, // flag to distinguish from newly uploaded
           })),
@@ -202,21 +223,20 @@ const MarketPlaceListing = () => {
 
         // Pre-fill step 3 — Contact
         setContact({
-          name: d.name || "",
+          name: d.contactPersonName || "", // ✅ FIXED
           email: d.email || "",
-          number: d.mobile_number || "",
-          countryCode: d.country_code || "+971",
-          altCountryCode: d.alt_country_code || "+971",
-          altNumber: d.second_mobile_number || "",
-          cityId: d.city_id || "",
+          number: d.mobileNumber || "", // ✅ FIXED
+          countryCode: d.countryCode || "+971",
+          altCountryCode: d.altCountryCode || "+971",
+          altNumber: d.alternateMobileNumber || "", // ✅ FIXED
+          cityId: d.city?._id || "", // ✅ FIXED
           locality: d.locality || "",
           address: d.address || "",
         });
-
         // Pre-fill step 4 — SEO
         setSeo({
-          title: d.seo_title || "",
-          description: d.seo_description || "",
+          title: d.seo?.title || "",
+          description: d.seo?.description || "",
         });
 
         // If the listing has a category, fetch its subcategories
@@ -618,7 +638,7 @@ const MarketPlaceListing = () => {
     switch (stepNumber) {
       case 1:
         formData.append("condition", adInfo.condition);
-        formData.append("category_id", categoryId);
+        formData.append("category_id", isEditMode ? editcategory : categoryId);
         formData.append("title", adInfo.title);
         formData.append("description", adInfo.description);
 
@@ -707,6 +727,7 @@ const MarketPlaceListing = () => {
         payload: formData,
         step: stepNumber,
         slug: slug,
+        listingId: listingId,
       });
 
       console.log(`Step ${stepNumber} submitted:`, response);
@@ -734,9 +755,9 @@ const MarketPlaceListing = () => {
         setSlug(response.data.slug);
       }
 
-      if (stepNumber === 5) {
+      if (stepNumber == 5) {
         clearSession();
-        router.push("/dashboard");
+        setShowSuccessPopup(true);
       } else {
         if (response?.data) {
           setActiveStep(stepNumber + 1);
@@ -984,7 +1005,7 @@ const MarketPlaceListing = () => {
                   {media.images.map((img) => (
                     <div key={img.id} className="relative group">
                       <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <Image
+                        <img
                           height={500}
                           width={500}
                           src={img.preview}
@@ -1056,9 +1077,8 @@ const MarketPlaceListing = () => {
 
       case 5:
         return (
-          <section className="mx-auto w-full" ref={planRef}>
-            <div className="p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4">Payment Section</h2>
+          <section className="w-full" ref={planRef}>
+            <div className=" text-center">
               <PricingTable
                 plans={plans}
                 selectedPlanId={selectedPlanId}
@@ -1129,34 +1149,39 @@ const MarketPlaceListing = () => {
             <section className="2xl:w-[95%] w-full h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
-
-            <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
-              <div className="w-full">
-                <h6 className="font-extrabold text-base my-2">Posting Tips</h6>
-                <p>
-                  <strong>Condition: </strong>Select whether your item is new or
-                  used.
-                  <br />
-                  <strong>Title: </strong>Create a clear, descriptive title for
-                  your ad.
-                  <br />
-                  <strong>Description: </strong>Provide detailed information
-                  about your item.
-                  <br />
-                  <strong>Price: </strong>Set a fair price or choose alternative
-                  options.
-                  <br />
-                  <strong>Images: </strong>Upload clear photos showing your item
-                  from multiple angles.
-                  <br />
-                  <strong>Contact: </strong>Provide accurate contact information
-                  for buyers to reach you.
-                  <br />
-                  <strong>SEO: </strong>Optimize your listing with relevant
-                  keywords for better visibility.
-                </p>
+            {currentStep == 5 ? (
+              <div> </div>
+            ) : (
+              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
+                <div className="w-full">
+                  <h6 className="font-extrabold text-base my-2">
+                    Posting Tips
+                  </h6>
+                  <p>
+                    <strong>Condition: </strong>Select whether your item is new
+                    or used.
+                    <br />
+                    <strong>Title: </strong>Create a clear, descriptive title
+                    for your ad.
+                    <br />
+                    <strong>Description: </strong>Provide detailed information
+                    about your item.
+                    <br />
+                    <strong>Price: </strong>Set a fair price or choose
+                    alternative options.
+                    <br />
+                    <strong>Images: </strong>Upload clear photos showing your
+                    item from multiple angles.
+                    <br />
+                    <strong>Contact: </strong>Provide accurate contact
+                    information for buyers to reach you.
+                    <br />
+                    <strong>SEO: </strong>Optimize your listing with relevant
+                    keywords for better visibility.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex justify-between w-[95%] 2xl:w-[95%] mb-8">
@@ -1242,6 +1267,24 @@ const MarketPlaceListing = () => {
           </div>
         </div>
         <section>
+          <SuccessModal
+            open={showSuccessPopup}
+            onClose={() => setShowSuccessPopup(false)}
+            title="Thank You!"
+            message={
+              <>
+                Your listing has been successfully submitted on{" "}
+                <span className="font-semibold text-gray-800">
+                  AddressGuru.ae
+                </span>
+                .
+                <br />
+                Our team will review it shortly.
+              </>
+            }
+            redirectTo="/dashboard"
+            // autoRedirect={true}
+          />
           <Footer />
         </section>
       </div>

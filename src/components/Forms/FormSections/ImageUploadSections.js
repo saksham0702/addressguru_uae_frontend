@@ -148,7 +148,7 @@ const IconRotate = () => (
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PREVIEW_W = 800;
 const PREVIEW_H = 500;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
+const APP_URL = "https://addressguru.ae";
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 function uid() {
   return Math.random().toString(36).slice(2);
@@ -1301,7 +1301,7 @@ const ImageUploadSections = ({
 
             {/* ── Divider: Image Library ── */}
             <div style={{ marginTop: 6 }}>
-              <SectionDivider label="Image Library" color="#3b82f6" />
+              {/* <SectionDivider label="Image Library" color="#3b82f6" /> */}
             </div>
 
             {/* Thumbnail strip */}
