@@ -58,20 +58,6 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    const fetchRecentListings = async () => {
-      const data = await get_recent_listings("listing");
-      console.log("i am recent listing data", data);
-      setRecentListing(data);
-    };
-    const fetchRecentJobs = async () => {
-      const jobData = await get_recent_listings("jobs");
-      setRecentJobs(jobData);
-      console.log("jobs data recent", jobData);
-    };
-    fetchRecentListings();
-    fetchRecentJobs();
-  }, []);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -222,32 +208,6 @@ export default function Home() {
             <div className="">
               <PopularServices />
             </div>
-
-            {/* recent Business section */}
-            {recentListing && (
-              <>
-                <HomeHeadingView title={"Recent Business"} view={"view more"} />
-                <div className="flex gap-3 pr-5 max-md:overflow-x-scroll hide-scroll max-md:pb-5  px-4">
-                  {recentListing?.map((item, index) => (
-                    <RecentBusinessCard key={index} data={item} />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* recent Listing section */}
-            {recentJobs && (
-              <>
-                <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
-                <div className="flex gap-3 pr-5 max-md:overflow-x-scroll hide-scroll max-md:pb-5  px-4">
-                  {recentJobs?.map((item, index) => (
-                    <RecentJobCard key={index} img={1} data={item} />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* recent job section */}
 
             {/* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
 
