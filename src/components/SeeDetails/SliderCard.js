@@ -4,7 +4,7 @@ import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { APP_URL } from "@/services/constants";
+// import { APP_URL } from "@/services/constants";
 
 const SliderCard = ({ images }) => {
   const settings = {
@@ -20,6 +20,8 @@ const SliderCard = ({ images }) => {
     },
     dotsClass: "slick-dots custom-dots",
   };
+
+  const APP_URL = "https://addressguru.ae/api";
 
   return (
     <div className="relative md:w-full md:max-h-[450px] max-md:h-[240px] border-2  border-gray-200 p-[2px] flex justify-center rounded-lg overflow-hidden">

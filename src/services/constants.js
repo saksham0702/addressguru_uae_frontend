@@ -1,6 +1,8 @@
 import {
   Layers2,
   LayoutDashboard,
+  List,
+  ShoppingBag,
   ShoppingCartIcon,
   User,
   UserIcon,
@@ -15,6 +17,7 @@ export const GEMINI_KEY = "AIzaSyDYRKcWbV8oj1nfR_Z_PpJnCwKPnkg4rMc";
 // export const GEMINI_KEY = "AIzaSyDWHmk3K0KpZ0-qA7Z8Ea2FmTDorJnGJes"
 // export const API_URL = "http://127.0.0.1:8000/api/"
 export const APP_URL = "https://api.addressguru.sg";
+export const IMG_URL = "https://addressguru.ae/api";
 
 export const COUNTRY_CODES = [
   { code: "+65", country: "Singapore", flag: "🇸🇬" },
@@ -973,6 +976,12 @@ export const NAV_ROUTES = [
     name: "Users",
     icon: User,
     href: "/admin/users",
+  },
+
+  {
+    name: "Business Listings",
+    icon: ShoppingBag,
+    href: "/admin/business-listings",
   },
 
   // {

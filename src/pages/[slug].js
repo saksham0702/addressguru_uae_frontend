@@ -8,7 +8,7 @@ import GetMoreInfo from "@/components/SeeDetails/GetMoreInfo";
 import UserInformation from "@/components/SeeDetails/UserInformation";
 import RecentCustomerReviewCard from "@/components/BusinessListingComponents/RecentCustomerReviewCard";
 import TitleAndLogoMobile from "@/components/SeeDetails/TitleAndLogoMobile";
-import { get_listing_data } from "@/api/showlistings";
+
 import { Share } from "@/components/SeeDetails/Popups/Share";
 import { Claim } from "@/components/SeeDetails/Popups/Claim";
 import RateUs from "@/components/SeeDetails/Popups/RateUs";
@@ -23,6 +23,11 @@ import { APP_URL } from "@/services/constants";
 import { get_view } from "@/api/queries";
 import Header from "@/layout/header";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
+import {
+  get_listing_by_businessslug,
+  get_listing_data,
+} from "@/api/listing-form";
+import Link from "next/link";
 
 const SeeDetails = () => {
   const [data, setData] = useState(null);
@@ -46,7 +51,7 @@ const SeeDetails = () => {
         const ip = await res.json();
         setUserIP(ip.ip);
       } catch (err) {
-        console.error("IP fetch error:", err);
+        console.log("IP fetch error:", err);
       }
     };
     getIP();
@@ -60,8 +65,10 @@ const SeeDetails = () => {
       setLoading(true);
       try {
         const result = await get_listing_data(slug);
+        console.log("listing data: ", result);
+
         if (result) {
-          setData(result);
+          setData(result?.data?.data);
         } else {
           router.push("/404");
         }
@@ -91,6 +98,35 @@ const SeeDetails = () => {
     sendView();
   }, [data?.id, userIP]);
 
+  // 🔁 EDIT LISTING
+  const handleEditListing = () => {
+    router.push(``);
+  };
+
+  // ✅ APPROVE LISTING
+  const handleApprove = async () => {
+    try {
+      const res = await approve_listing(data?.id); // 👈 your API
+      console.log("Approved:", res);
+      alert("Listing Approved ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to approve ❌");
+    }
+  };
+
+  // ❌ REJECT LISTING
+  const handleReject = async () => {
+    try {
+      const res = await reject_listing(data?.id); // 👈 your API
+      console.log("Rejected:", res);
+      alert("Listing Rejected ❌");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to reject ❌");
+    }
+  };
+
   /* ----------------------- CLICK HANDLER ----------------------- */
   const handleClick = async (id, clickType) => {
     try {
@@ -102,16 +138,6 @@ const SeeDetails = () => {
   };
 
   /* ----------------------- PREVIEW MODE ----------------------- */
-  useEffect(() => {
-    if (preview === "true") {
-      document.body.style.pointerEvents = "none";
-    } else {
-      document.body.style.pointerEvents = "auto";
-    }
-    return () => {
-      document.body.style.pointerEvents = "auto";
-    };
-  }, [preview]);
 
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
@@ -173,7 +199,7 @@ const SeeDetails = () => {
                   data?.ratings?.length > 0 ? data?.ratings[0]?.rating : 4,
                 reviewCount: data?.ratings?.length || 1,
               },
-              openingHours: data?.opening_hours,
+              openingHours: data?.workingHours,
               telephone: data?.phone,
               priceRange: "$$",
             }),
@@ -231,11 +257,15 @@ const SeeDetails = () => {
       )}
 
       {/* MAIN CONTENT */}
-      <div className="h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2">
+      <div
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
+          preview === "true" ? "pointer-events-none opacity-90" : ""
+        }`}
+      >
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
             <BreadCrumbs
-              slug={data?.category?.slug}
+              slug={data?.slug}
               city={serverCity}
               name={data?.slug}
               type={true}
@@ -245,13 +275,13 @@ const SeeDetails = () => {
           <div className="max-md:hidden">
             <TitleAndLogo
               handlePop={handlePop}
-              name={data?.business_name}
-              address={data?.business_address}
+              name={data?.businessName}
+              address={data?.businessAddress}
               data={data}
               logo={data?.logo}
               ratings={data?.ratings}
               handleClick={handleClick}
-              openingHours={data?.opening_hours}
+              openingHours={data?.workingHours}
             />
           </div>
 
@@ -264,7 +294,7 @@ const SeeDetails = () => {
               <div className="md:hidden mx-auto  w-full">
                 <TitleAndLogoMobile
                   data={data}
-                  openingHours={data?.opening_hours}
+                  openingHours={data?.workingHours}
                   handlePop={handlePop}
                   onClose={closePopup}
                   enquirePop={enquirePop}
@@ -283,7 +313,7 @@ const SeeDetails = () => {
                 </span>
 
                 <p className="md:text-[13.5px] text-[15px] mt-2 md:font-[500]">
-                  {data?.ad_description}
+                  {data?.description}
                 </p>
               </div>
 
@@ -298,7 +328,7 @@ const SeeDetails = () => {
                   </span>
 
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.business_name} provides the following facilities:
+                    {data?.businessAddress} provides the following facilities:
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -317,7 +347,7 @@ const SeeDetails = () => {
                           />
                         </svg>
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
-                          {facility}
+                          {facility.name}
                         </span>
                       </div>
                     ))}
@@ -336,7 +366,7 @@ const SeeDetails = () => {
                   </span>
 
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.business_name} provides the following services:
+                    {data?.businessAddress} provides the following services:
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,7 +385,7 @@ const SeeDetails = () => {
                           />
                         </svg>
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
-                          {service}
+                          {service.name}
                         </span>
                       </div>
                     ))}
@@ -374,7 +404,7 @@ const SeeDetails = () => {
                   </span>
 
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.business_name} accepts the following payment methods:
+                    {data?.businessName} accepts the following payment methods:
                   </p>
 
                   <div className="flex flex-col gap-4">
@@ -412,11 +442,13 @@ const SeeDetails = () => {
 
                 <div className="md:text-[13.5px] text-[15px] md:font-[500] flex flex-col gap-5 mt-2 max-w-4xl">
                   <p>
-                    {`${data?.business_name} is located at ${data?.business_address}, ${serverCity}.`}
+                    {`${
+                      data?.businessName
+                    } is located at ${data?.businessAddress}, ${serverCity}.`}
                     {data?.facilities && data.facilities.length > 0 && (
                       <span>
                         {" Their facilities include: "}
-                        {data.facilities.join(", ")}.
+                        {data?.facilities?.name?.join(", ")}.
                       </span>
                     )}
                   </p>
@@ -439,7 +471,7 @@ const SeeDetails = () => {
             <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
               <QuickInformation
                 id={data?.id}
-                businessHours={data?.opening_hours}
+                businessHours={data?.workingHours}
                 category={data?.category}
                 link={data?.website_link}
                 handlePop={handlePop}
@@ -503,15 +535,53 @@ const SeeDetails = () => {
 
       {/* PREVIEW BANNER */}
       {preview === "true" && (
-        <div className="fixed top-0 left-0 w-full z-[10000] bg-black/40 text-white flex items-center justify-between p-3">
-          <h2 className="text-lg font-semibold">Preview Mode</h2>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="bg-orange-600 text-white px-4 py-1 rounded font-medium"
-            style={{ pointerEvents: "auto" }}
-          >
-            Go Back
-          </button>
+        <div className="fixed top-0 left-0 w-full z-[10000] backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+            {/* LEFT SIDE */}
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-gray-700 tracking-wide">
+                Preview Mode
+              </h2>
+            </div>
+
+            {/* RIGHT SIDE ACTIONS */}
+            <div className="flex items-center gap-2">
+              {/* ✏️ EDIT */}
+              <Link
+                href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(
+                  data?.businessName,
+                )}&name=${encodeURIComponent(data?.slug)}`}
+                className="flex items-center gap-1.5 px-4 py-1.5 cursor-pointer text-sm font-medium rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+              >
+                ✏️ Edit
+              </Link>
+
+              {/* ✅ APPROVE */}
+              <button
+                onClick={handleApprove}
+                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition shadow-sm"
+              >
+                ✔ Approve
+              </button>
+
+              {/* ❌ REJECT */}
+              <button
+                onClick={handleReject}
+                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
+              >
+                ✖ Reject
+              </button>
+
+              {/* 🔙 BACK */}
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                style={{ pointerEvents: "auto" }}
+              >
+                ← Back
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

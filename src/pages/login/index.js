@@ -58,15 +58,12 @@ export default function LoginPage() {
         password,
       });
 
-      console.log('response of login user :', response);
-
+      console.log("response of login user :", response);
 
       if (response.status) {
-        console.log('status');
+        console.log("status");
 
-
-        localStorage.setItem("token", response.data.data.token);
-
+        localStorage.setItem("token", response.data.data.authToken);
 
         router.push("/admin");
       } else {
@@ -82,30 +79,19 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-200 p-8">
-
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Admin Login
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Access your dashboard
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
+          <p className="text-gray-500 text-sm mt-1">Access your dashboard</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5">
-
           {/* Email */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="text-sm font-medium text-gray-700">Email</label>
 
             <div className="relative mt-1">
-              <Mail
-                size={18}
-                className="absolute left-3 top-3 text-gray-400"
-              />
+              <Mail size={18} className="absolute left-3 top-3 text-gray-400" />
 
               <input
                 type="email"
@@ -113,17 +99,16 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full pl-10 pr-3 py-2.5 border rounded-lg outline-none transition
-                ${errors.email
+                ${
+                  errors.email
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  }`}
+                }`}
               />
             </div>
 
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
@@ -134,10 +119,7 @@ export default function LoginPage() {
             </label>
 
             <div className="relative mt-1">
-              <Lock
-                size={18}
-                className="absolute left-3 top-3 text-gray-400"
-              />
+              <Lock size={18} className="absolute left-3 top-3 text-gray-400" />
 
               <input
                 type={showPassword ? "text" : "password"}
@@ -145,10 +127,11 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full pl-10 pr-10 py-2.5 border rounded-lg outline-none transition
-                ${errors.password
+                ${
+                  errors.password
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  }`}
+                }`}
               />
 
               <button
@@ -161,9 +144,7 @@ export default function LoginPage() {
             </div>
 
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
 
@@ -179,10 +160,7 @@ export default function LoginPage() {
               Remember me
             </label>
 
-            <button
-              type="button"
-              className="text-blue-600 hover:underline"
-            >
+            <button type="button" className="text-blue-600 hover:underline">
               Forgot password?
             </button>
           </div>
@@ -201,7 +179,6 @@ export default function LoginPage() {
         <div className="text-center mt-6 text-xs text-gray-400">
           © {new Date().getFullYear()} Admin Dashboard
         </div>
-
       </div>
     </div>
   );

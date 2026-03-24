@@ -2,6 +2,7 @@ import axios from "axios";
 import { API_URL } from "@/services/constants";
 
 // get multiple listings based on category and city with pagination
+
 export const get_listing_by_slug = async (SLUG, city, page = 1, filter) => {
   try {
     const response = await axios.get(`${API_URL}/listing/${SLUG}/${city}`, {
@@ -22,6 +23,7 @@ export const get_listing_by_slug = async (SLUG, city, page = 1, filter) => {
 };
 
 // market place single listing by id
+
 export const get_marketplace_by_id = async (ID) => {
   try {
     const response = await axios.get(`${API_URL}/marketplace/listings/${ID}`);
@@ -31,6 +33,7 @@ export const get_marketplace_by_id = async (ID) => {
   }
 };
 //get listings by userID
+
 export const get_user_listings = async (type) => {
   const token = localStorage.getItem("authToken");
   try {
@@ -47,6 +50,7 @@ export const get_user_listings = async (type) => {
   }
 };
 // get single listing  for landing page
+
 export const get_listing_data = async (SLUG) => {
   try {
     const response = await axios.get(`${API_URL}/listing/${SLUG}`);
@@ -86,7 +90,7 @@ export const get_marketplace_listing = async (filters, page = 2) => {
           : null,
         // cities (array → comma separated)
         location: filters?.cities?.length ? filters.cities.join(",") : null,
-        limit: 15
+        limit: 15,
         // optional extra filters (if you add later)
         // sort_by: filters?.sort_by || null,
       },
@@ -110,7 +114,7 @@ export const get_property_listing = async (filters, page = 2) => {
           : null,
         // cities (array → comma separated)
         location: filters?.cities?.length ? filters.cities.join(",") : null,
-        limit: 15
+        limit: 15,
         // optional extra filters (if you add later)
         // sort_by: filters?.sort_by || null,
       },
@@ -123,7 +127,6 @@ export const get_property_listing = async (filters, page = 2) => {
   }
 };
 
-
 export const get_property_listing_by_category = async (ID) => {
   try {
     const response = await axios.get(`${API_URL}/property/${ID}`);
@@ -132,9 +135,11 @@ export const get_property_listing_by_category = async (ID) => {
     console.log("this is get property category error", error);
   }
 };
+
 //recent listings for main page
+
 export const get_recent_listings = async (type) => {
-  console.log("type",type)
+  console.log("type", type);
   try {
     const res = await axios.get(`${API_URL}/recent/${type}`);
     // console.log("recent listing ", res?.data);
@@ -144,8 +149,8 @@ export const get_recent_listings = async (type) => {
   }
 };
 
-
 // properties
+
 export const get_property_by_slug = async (SLUG) => {
   try {
     const response = await axios.get(`${API_URL}/property/listings/${SLUG}`);
@@ -154,3 +159,4 @@ export const get_property_by_slug = async (SLUG) => {
     return null;
   }
 };
+

@@ -15,16 +15,22 @@ import { get_listing_filters } from "@/api/listingfilters";
 import Header from "@/layout/header";
 import Footer from "@/layout/footer";
 import MobileFooter from "@/components/MobileFooter";
-import { get_all_listings } from "@/api/listing-form";
+import {
+  get_all_listings,
+  get_approved_listings,
+  get_listings_by_category_and_city,
+} from "@/api/listing-form";
 
 const SearchResults = () => {
   const router = useRouter();
+
   const { city: globalCity } = useAuth(); // USE ONLY GLOBAL CITY
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pageData, setPageData] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const [filters, setFilters] = useState({
     sort_by: null, // newest | oldest | popular
     ag_verified: false, // true | false
@@ -110,7 +116,16 @@ const SearchResults = () => {
         setPageData(null); // 🔥 reset pagination
 
         // const res = await get_listing_by_slug(slug, globalCity, 1, filters);
-        const res = await get_all_listings();
+        const res = await get_approved_listings();
+
+        // const citySlugRaw = router.asPath.split("/")[2];
+
+        // const city_slug = citySlugRaw
+        //   ?.toLowerCase()
+        //   .replace(/\(.*\)/, "")
+        //   .replace(/\s+/g, "-");
+
+        // const res = await get_listings_by_category_and_city(slug, city_slug);
         console.log("get all listings response", res);
 
         // if (!res || res.status != true) {
@@ -118,10 +133,10 @@ const SearchResults = () => {
         //   return;
         // }
 
-        setListings(res.data.listings || []);
+        setListings(res.data.data || []);
         setPageData(res);
       } catch (err) {
-        console.error("Error fetching listings:", err);
+        console.log("Error fetching listings:", err);
         setError(true);
       } finally {
         setIsLoading(false);

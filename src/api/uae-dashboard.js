@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// const API_URL = "https://addressguru.ae/api";
+const API_URL = "https://addressguru.ae/api";
 
-const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "http://192.168.31.107:5001";
 
 export const get_user_listings = async (type) => {
   const token = localStorage.getItem("authToken");

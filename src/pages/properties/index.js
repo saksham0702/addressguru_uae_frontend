@@ -5,10 +5,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import HelpFull from "@/components/Helpfull";
 import Link from "next/link";
-import { get_property_listing } from "@/api/showlistings";
+
 import { get_property_filter } from "@/api/filter";
 import { useAuth } from "@/context/AuthContext";
 import MobileMarketplaceFilter from "@/components/MarketplaceAndToLet/MobileMarketplaceFilter";
+import { get_property_listing } from "@/api/showlistings";
+import { get_all_property_listing } from "@/api/uae-property";
 
 // ─── Skeleton Card (matches RecentListingCard dimensions) ───────────────────
 const PropertiesCardSkeleton = () => (
@@ -67,9 +69,9 @@ const Properties = () => {
         setListings([]); // 🔥 reset list
         setPageData(null); // 🔥 reset pagination
 
-        const res = await get_property_listing(selectedFilters, 1);
+        const res = await get_all_property_listing(selectedFilters, 1);
 
-        setListings(res?.result || []);
+        setListings(res?.data?.listings || []);
         setPageData(res); // store full response for pagination meta
       } catch (err) {
         console.error("fetchListings error", err);
@@ -137,18 +139,17 @@ const Properties = () => {
           <h1 className="capitalize font-semibold max-md:text-lg p-2  text-2xl">
             top products in {city}
           </h1>
-        {/* mobile filter */}
-        <div className="md:hidden">
-          <MobileMarketplaceFilter
-            filters={propertyFilter}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-            hasActiveFilters={hasActiveFilters}
-            handleReset={handleReset}
-          />
-        </div>
+          {/* mobile filter */}
+          <div className="md:hidden">
+            <MobileMarketplaceFilter
+              filters={propertyFilter}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              hasActiveFilters={hasActiveFilters}
+              handleReset={handleReset}
+            />
+          </div>
         </section>
-
 
         <div className="flex md:gap-1 mt-2 relative min-h-screen">
           {/* ── Sticky Filter Sidebar ─────────────────────────────────────────── */}
@@ -219,7 +220,7 @@ const Properties = () => {
                 <>
                   {listings.map((item, index) => (
                     <RecentListingCard
-                      slugData={'properties'}
+                      slugData={"properties"}
                       key={item?.id || index}
                       data={item}
                       img={slug === "properties" ? 1 : 1}

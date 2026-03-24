@@ -215,7 +215,7 @@ const MarketPlaceListing = () => {
             file: null, // no File object for existing images
             preview: url.startsWith("http")
               ? url
-              : `https://addressguru.ae/${url}`,
+              : `https://addressguru.ae/api/${url}`,
             name: url.split("/").pop(),
             isExisting: true, // flag to distinguish from newly uploaded
           })),

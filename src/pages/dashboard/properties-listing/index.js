@@ -1,5 +1,5 @@
 import { add_properties_listing, get_service_facility } from "@/api/forms";
-import { get_plans } from "@/api/plans";
+
 import { get_property_by_slug } from "@/api/showlistings";
 import CheckBox from "@/components/Forms/CheckBox";
 import DropDown from "@/components/Forms/DropDown";
@@ -29,6 +29,7 @@ import { APP_URL } from "@/services/constants";
 
 import axios from "axios";
 import { add_property_listing } from "@/api/uae-property";
+import { get_plans } from "@/api/plans";
 
 const PropertiesListing = () => {
   const router = useRouter();
@@ -426,7 +427,7 @@ const PropertiesListing = () => {
   const getPlansData = async () => {
     try {
       const res = await get_plans();
-      setPlans(res?.data);
+      setPlans(res?.data?.plans);
     } catch (error) {
       console.log("error in fetching plans", error);
     }
@@ -1243,43 +1244,48 @@ const PropertiesListing = () => {
             <section className="2xl:w-[95%] w-full h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
-
-            <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
-              <div className="w-full">
-                <h6 className="font-extrabold text-base my-2">Posting Tips</h6>
-                <p>
-                  <strong>Property Type: </strong>Specify whether you&apos;re
-                  the owner, broker, or agency.
-                  <br />
-                  <strong>Availability: </strong>Mention when the property will
-                  be available.
-                  <br />
-                  <strong>Size: </strong>Provide accurate property size in
-                  square feet.
-                  <br />
-                  <strong>Title: </strong>Create a clear, descriptive title for
-                  your property.
-                  <br />
-                  <strong>Description: </strong>Describe key features,
-                  amenities, and location benefits.
-                  <br />
-                  <strong>Price: </strong>Set a competitive price or choose
-                  alternative pricing options.
-                  <br />
-                  <strong>Images: </strong>Upload high-quality images showing
-                  property interior and exterior.
-                  <br />
-                  <strong>Facilities: </strong>Select available facilities to
-                  attract potential buyers/renters.
-                  <br />
-                  <strong>Contact: </strong>Provide accurate contact information
-                  for buyers to reach you.
-                  <br />
-                  <strong>SEO: </strong>Optimize your listing with relevant
-                  keywords for better visibility.
-                </p>
+            {currentStep == 5 ? (
+              <div></div>
+            ) : (
+              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
+                <div className="w-full">
+                  <h6 className="font-extrabold text-base my-2">
+                    Posting Tips
+                  </h6>
+                  <p>
+                    <strong>Property Type: </strong>Specify whether you&apos;re
+                    the owner, broker, or agency.
+                    <br />
+                    <strong>Availability: </strong>Mention when the property
+                    will be available.
+                    <br />
+                    <strong>Size: </strong>Provide accurate property size in
+                    square feet.
+                    <br />
+                    <strong>Title: </strong>Create a clear, descriptive title
+                    for your property.
+                    <br />
+                    <strong>Description: </strong>Describe key features,
+                    amenities, and location benefits.
+                    <br />
+                    <strong>Price: </strong>Set a competitive price or choose
+                    alternative pricing options.
+                    <br />
+                    <strong>Images: </strong>Upload high-quality images showing
+                    property interior and exterior.
+                    <br />
+                    <strong>Facilities: </strong>Select available facilities to
+                    attract potential buyers/renters.
+                    <br />
+                    <strong>Contact: </strong>Provide accurate contact
+                    information for buyers to reach you.
+                    <br />
+                    <strong>SEO: </strong>Optimize your listing with relevant
+                    keywords for better visibility.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex justify-between w-[95%] 2xl:w-[95%] mb-8">

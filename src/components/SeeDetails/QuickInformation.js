@@ -2,8 +2,16 @@ import React from "react";
 import BusinessHours from "./BusinessHours";
 import { Target } from "lucide-react";
 
-const QuickInformation = ({ handlePop, category, businessHours, job,link,handleWebsiteClick,id }) => {
-  const date = category?.updated_at
+const QuickInformation = ({
+  handlePop,
+  category,
+  workingHours,
+  job,
+  link,
+  handleWebsiteClick,
+  id,
+}) => {
+  const date = category?.updated_at;
   return (
     <div className=" w-full max-md:hidden  rounded-t-lg ">
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
@@ -16,31 +24,36 @@ const QuickInformation = ({ handlePop, category, businessHours, job,link,handleW
             {job ? category?.category_name : category?.name}
           </span>
         </p>
-        {/* <p>
+        <p>
           <span className="font-medium text-[#5B5B5B] ">Starting Price :</span>
           <span className="font-bold">
             {" "}
             <span>&#x20B9;</span> 1200
           </span>
-        </p> */}
+        </p>
         <p>
-          <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "}
-          <span className="font-bold">
+          {/* <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "} */}
+          {/* <span className="font-bold">
             {new Date(date).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "short",
               year: "numeric",
             })}
-          </span>
+          </span> */}
         </p>
-        {!job && businessHours && <BusinessHours openingHours={businessHours} />}
+        {/* {!job && workingHours && <BusinessHours openingHours={workingHours} />} */}
 
         <p className="text-right text-xs  mt-2 text-[#5B5B5B]">
           Ad Id : <span className="text-black">R1074662</span>
         </p>
       </div>
       <div className="flex justify-between items-center bg-white  max-md:p-3 p-1 border border-t-0 border-gray-200 rounded-b-lg">
-        <a onClick={()=>handleWebsiteClick(id,"website")} href={link} target="_blank" className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded">
+        <a
+          onClick={() => handleWebsiteClick(id, "website")}
+          href={link}
+          target="_blank"
+          className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded"
+        >
           Visit Website
         </a>
         <button

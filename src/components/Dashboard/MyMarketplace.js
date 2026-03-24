@@ -1,11 +1,12 @@
 import React from "react";
 import { Eye, ShoppingBag, Tag, Package } from "lucide-react";
 import Image from "next/image";
-import { APP_URL } from "@/services/constants";
+// import { APP_URL } from "@/services/constants";
 import Link from "next/link";
 
 const MyMarketplaceListings = ({ data }) => {
   console.log("Marketplace listings data:", data);
+  const APP_URL = "https://addressguru.ae/api";
   // Helper to format price
   const formatPrice = (price) => {
     if (!price) return "Not Specified";
@@ -82,7 +83,7 @@ const MyMarketplaceListings = ({ data }) => {
                   {/* Product Image */}
                   <div className="w-20 h-20 max-md:w-13 max-md:h-13 flex-shrink-0">
                     {product?.images?.length > 0 ? (
-                      <Image
+                      <img
                         width={500}
                         height={500}
                         src={`${APP_URL}/${product?.images[0]}`}
@@ -199,9 +200,9 @@ const MyMarketplaceListings = ({ data }) => {
                       {statusInfo.label}
                     </span>
                   </div>
-                  {product?.price && (
+                  {product?.price?.amount && (
                     <span className="text-xs text-gray-500 mt-1 font-semibold">
-                      {formatPrice(product?.price)}
+                      {formatPrice(product?.price?.amount)}
                     </span>
                   )}
                 </div>

@@ -88,3 +88,16 @@ export const add_property_listing = async ({ payload, step, slug }) => {
     };
   }
 };
+
+export const get_all_property_listing = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/property-listings/get-all-listings?page=1&limit=10`,
+    );
+
+    return response?.data;
+  } catch (error) {
+    console.log("this is get property error", error);
+    return error?.response?.data;
+  }
+};

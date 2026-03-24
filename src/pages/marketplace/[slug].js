@@ -14,6 +14,7 @@ import Head from "next/head";
 import { APP_URL } from "@/services/constants";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
+import { get_marketplace_by_slug } from "@/api/uae-marketplace";
 
 /* ─── Checkmark SVG (reused across sections) ─── */
 const CheckIcon = () => (
@@ -97,7 +98,7 @@ const MarketplaceSeeDetails = () => {
       setLoading(true);
       setError(false);
       try {
-        const res = await get_marketplace_by_id(slug);
+        const res = await get_marketplace_by_slug(slug);
         console.log(res?.data);
         if (res?.data) {
           setData(res.data);
@@ -227,7 +228,7 @@ const MarketplaceSeeDetails = () => {
             <h1 className="font-semibold text-2xl line-clamp-2 capitalize mb-1">
               {data?.title}
             </h1>
-            {(data?.locality || data?.city) && (
+            {(data?.address || data?.city) && (
               <span className="flex gap-1.5 items-center text-gray-400 font-medium text-[15px]">
                 <svg
                   width="13"
@@ -242,9 +243,9 @@ const MarketplaceSeeDetails = () => {
                     fill="#8C8C8C"
                   />
                 </svg>
-                {data?.locality && <p>{data.locality}</p>}
-                {data?.locality && data?.city && <span>/</span>}
-                {data?.city && <p>{data.city}</p>}
+                {data?.address && <p>{data.address}</p>}
+                {data?.address && data?.city && <span>/</span>}
+                {data?.city && <p>{data.city.name}</p>}
               </span>
             )}
           </div>
@@ -264,7 +265,7 @@ const MarketplaceSeeDetails = () => {
                 />
               </div>
 
-              {/* Description */}
+            {/* Description */}
               <div className="mt-5 md:pl-2 px-1">
                 <SectionHeader title="Description" />
                 <p className="md:text-[13.5px] text-[15px] mt-2 md:font-[500] capitalize">

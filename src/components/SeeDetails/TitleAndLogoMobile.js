@@ -36,13 +36,13 @@ const TitleAndLogoMobile = ({
           />
         </svg>
         <span className="truncate text-[13px] mr-2  sm:w-44">
-          {data?.business_address}
+          {data?.businessAddress || data?.address}
         </span>
 
         {/* <span className="text-xs whitespace-nowrap ">{"9 km"}</span> */}
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-            data?.business_address
+            data?.businessAddress || data?.address,
           )}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -60,7 +60,7 @@ const TitleAndLogoMobile = ({
           <span className="flex items-center max-w-fit relative ">
             <div
               className="scale-[58%] relative  left-[-12px] "
-              dangerouslySetInnerHTML={{ __html: data?.category?.svg_code }}
+              dangerouslySetInnerHTML={{ __html: data?.category?.iconSvg }}
             />
           </span>
           <h6 className="font-semibold relative left-[-22px]  ">
@@ -179,13 +179,18 @@ const TitleAndLogoMobile = ({
               fill="#323232"
             />
           </svg>
-          <p>{data?.city}</p>
+          <p>{data?.city?.name}</p>
         </span>
-        <span className="flex items-center text-sm gap-1">
-          <FaRegEye />
-          <p>Views - {data?.views}</p>
-        </span>
-        <BusinessHours openingHours={openingHours} mobile={true} />{" "}
+        {data?.views !== "" ? (
+          <span></span>
+        ) : (
+          <span className="flex items-center text-sm gap-1">
+            <FaRegEye />
+            <p>Views - {data?.views}</p>
+          </span>
+        )}
+
+        {/* <BusinessHours openingHours={openingHours} mobile={true} />{" "} */}
       </div>
 
       {/* prices and features section */}
@@ -196,7 +201,7 @@ const TitleAndLogoMobile = ({
               key={index}
               className="rounded-full border max-w-28 truncate border-gray-300 px-1 py-[1px]"
             >
-              <p className="max-w-26 px-1.5 truncate">{item}</p>
+              <p className="max-w-26 px-1.5 truncate">{item.name}</p>
             </span>
           );
         })}

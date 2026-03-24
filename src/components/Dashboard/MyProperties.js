@@ -1,7 +1,7 @@
 import React from "react";
 import { Eye, Home, BedDouble, Bath, Maximize2 } from "lucide-react";
 import Image from "next/image";
-import { APP_URL } from "@/services/constants";
+// import { APP_URL } from "@/services/constants";
 import Link from "next/link";
 
 const MyPropertyListings = ({ data }) => {
@@ -11,7 +11,7 @@ const MyPropertyListings = ({ data }) => {
     if (listingType === "rent" || listingType === 2) return `${formatted}/mo`;
     return formatted;
   };
-
+  const APP_URL = "https://addressguru.ae/api";
   const getPropertyTypeLabel = (typeId) => {
     const types = {
       1: "Apartment",
@@ -151,11 +151,11 @@ const MyPropertyListings = ({ data }) => {
                       >
                         {getListingTypeLabel(property?.listing_type)}
                       </span>
-                      {property?.city && (
+                      {/* {property?.city && (
                         <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-xs rounded">
                           {property?.city}
                         </span>
-                      )}
+                      )} */}
                       {property?.category_name && (
                         <span className="px-2 py-0.5 bg-orange-50 text-orange-700 text-xs rounded">
                           {property?.category_name}

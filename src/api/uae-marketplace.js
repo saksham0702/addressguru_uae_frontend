@@ -144,10 +144,22 @@ export const add_marketplace_listing = async ({
     return error?.response?.data;
   }
 };
+
 export const get_marketplace_by_slug = async (ID) => {
   try {
     const response = await axios.get(
       `${API_URL}/marketplace/get-listing-by-slug/${ID}`,
+    );
+    return response?.data;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const get_all_marketplace = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/marketplace/get-all-listings?page=1&limit=10`,
     );
     return response?.data;
   } catch (error) {

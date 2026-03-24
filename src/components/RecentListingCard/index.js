@@ -1,9 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { APP_URL } from "@/services/constants";
+import { IMG_URL } from "@/services/constants";
 
-const RecentListingCard = ({ data,slugData }) => {
+const RecentListingCard = ({ data, slugData }) => {
   const formatDate = (date) => {
     const d = new Date(date);
     return d.toLocaleDateString("en-US", {
@@ -14,14 +14,14 @@ const RecentListingCard = ({ data,slugData }) => {
   };
   return (
     <Link
-      href={`/${slugData}/${data?.slug}?id=${data?.id}`}
+      href={`/${slugData}/${data?.slug}?id=${data?._id}`}
       className="block w-[180px] h-[350px] md:w-[200px] 2xl:min-w-[240px] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex-shrink-0"
     >
       {/* House Image - Fixed Height */}
       <div className="w-full h-[200px] bg-gray-200 relative overflow-hidden">
-        {data?.image ? (
-          <Image
-            src={`${APP_URL}/${data?.image[0]}`}
+        {data?.images.length > 0 ? (
+          <img
+            src={`${IMG_URL}/${data?.images[0]}`}
             alt={data?.title || "Business"}
             fill
             className="object-cover"
@@ -51,11 +51,11 @@ const RecentListingCard = ({ data,slugData }) => {
         <div className="space-y-2">
           {data?.price_type === "amount" ? (
             <h3 className="text-lg font-semibold text-gray-950 line-clamp-2 leading-tight">
-              $ {data?.price}
+              $ {data?.price?.amount}
             </h3>
           ) : (
             <h3 className="text-lg font-semibold text-gray-950  leading-tight">
-              {data?.price_type}
+              {data?.price?.currency}
             </h3>
           )}
           {/* Business Name */}
@@ -78,7 +78,7 @@ const RecentListingCard = ({ data,slugData }) => {
               />
             </svg>
             <p className="text-xs font-medium truncate">
-              {data?.city || "Location"}
+              {data?.city?.name || "Location"}
             </p>
           </div>
         </div>
@@ -86,7 +86,7 @@ const RecentListingCard = ({ data,slugData }) => {
         {/* Date Badge */}
         <div className="flex justify-end">
           <span className="text-[10px] font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded">
-            {formatDate(data?.created_at)}
+            {formatDate(data?.createdAt)}
           </span>
         </div>
       </div>

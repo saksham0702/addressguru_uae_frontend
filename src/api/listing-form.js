@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "http://192.168.31.108:5001";
 const API_URL = "https://addressguru.ae/api";
 
 export const add_listings = async (payload, step, slug, listingId) => {
@@ -68,6 +68,76 @@ export const get_all_listings = async (SLUG) => {
     console.log("response of single listing", response?.data);
     return response.data;
   } catch (error) {
+    return null;
+  }
+};
+
+// get single listing  for landing page
+
+export const get_listing_by_businessslug = async (SLUG) => {
+  try {
+    const response = await axios.get(`${API_URL}/listing/${SLUG}`);
+    console.log("response of single listing", response?.data);
+    return response?.data?.data;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const reject_listing = (id, data) => {
+  const token = localStorage.getItem("token"); // 👈 get token
+
+  return axios.put(`${API_URL}/business-listing/${id}/status`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`, // 👈 attach token
+    },
+  });
+};
+
+export const approve_listing = (id) => {
+  const token = localStorage.getItem("token");
+
+  return axios.put(
+    `${API_URL}/business-listing/${id}/status`,
+    {
+      status: "approved", // ✅ IMPORTANT
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
+export const get_listings_by_category_and_city = async (
+  category_slug,
+  city_slug,
+) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/business-listing/get-listing-by-category-and-city/${category_slug}/${city_slug}`,
+    );
+
+    console.log("response of category + city listings", response?.data);
+
+    return response;
+  } catch (error) {
+    console.log("Error fetching listings:", error);
+  }
+};
+
+export const get_approved_listings = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/business-listing/get-approved-listings`,
+    );
+
+    console.log("approved listings response", response?.data);
+
+    return response;
+  } catch (error) {
+    console.error("Error fetching approved listings:", error);
     return null;
   }
 };

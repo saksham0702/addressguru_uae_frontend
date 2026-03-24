@@ -10,7 +10,7 @@ import Header from "@/components/HeadersMobile/Dashboard";
 import MyListings from "@/components/Dashboard/MyListings";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 
-import { get_dashboard_data } from "@/api/dashboard";
+// import { get_dashboard_data } from "@/api/dashboard";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MyJobListings from "@/components/Dashboard/MyJobListings";
@@ -42,12 +42,12 @@ const Dashboard = () => {
     }
   }, [user, loading, router]);
 
-  const getDashboardData = async () => {
-    const res = await get_dashboard_data();
-    if (res?.success) {
-      setData(res?.data);
-    }
-  };
+  // const getDashboardData = async () => {
+  //   const res = await get_dashboard_data();
+  //   if (res?.success) {
+  //     setData(res?.data);
+  //   }
+  // };
 
   const getUserListings = async (type) => {
     const listres = await get_user_listings();
@@ -70,7 +70,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    getDashboardData();
+    // getDashboardData();
     getUserListings("listing");
     // getUserListings("jobs");
     // getUserListings("property");
