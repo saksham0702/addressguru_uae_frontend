@@ -13,9 +13,12 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
 
   // Filter cities
   useEffect(() => {
-    if (!cities?.length) return;
+    if (!Array.isArray(cities)) {
+      setFilteredCities([]);
+      return;
+    }
     const filtered = cities.filter((city) =>
-      city.toLowerCase().includes(searchTerm.toLowerCase())
+      city?.toLowerCase()?.includes(searchTerm?.toLowerCase() || "")
     );
     setFilteredCities(filtered);
   }, [cities, searchTerm]);
@@ -53,9 +56,8 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-white h-full max-md:w-full md:w-[85%] transform transition-transform duration-300 ease-in-out ${
-          showCities ? "translate-x-0" : "translate-x-full"
-        } overflow-y-auto`}
+        className={`bg-white h-full max-md:w-full md:w-[85%] transform transition-transform duration-300 ease-in-out ${showCities ? "translate-x-0" : "translate-x-full"
+          } overflow-y-auto`}
       >
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-4 py-4 border-b md:px-10 border-gray-100 shadow-sm">
@@ -121,7 +123,7 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
           )}
 
           {/* Empty State */}
-          {!cities?.length && (
+          {(!Array.isArray(cities) || cities.length === 0) && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No cities available</p>
             </div>
