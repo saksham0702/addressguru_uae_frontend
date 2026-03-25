@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// const API_URL = "http://192.168.31.108:5001";
+// const API_URL = "http://192.168.31.107:5001";
 const API_URL = "https://addressguru.ae/api";
 
 export const add_listings = async (payload, step, slug, listingId) => {
@@ -138,6 +138,30 @@ export const get_approved_listings = async () => {
     return response;
   } catch (error) {
     console.error("Error fetching approved listings:", error);
+    return null;
+  }
+};
+
+export const get_all_admin_listings = async ({
+  page = 1,
+  limit = 10,
+  status = "pending",
+} = {}) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/business-listing/get-all-listings`,
+      {
+        params: {
+          page,
+          limit,
+          status,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching listings:", error);
     return null;
   }
 };

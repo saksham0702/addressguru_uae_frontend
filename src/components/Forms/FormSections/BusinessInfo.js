@@ -213,18 +213,6 @@ const BusinessInfo = ({
             }
           />
         </div>
-
-        <div className="w-sm">
-          <InputWithTitle
-            error={errors?.uenNumber}
-            title="UEN/Tax Number"
-            placeholder="Enter UEN"
-            value={business.uenNumber}
-            onChange={(e) =>
-              handleInputChange("uenNumber", e.target.value, "uenNumber")
-            }
-          />
-        </div>
       </section>
 
       {/* Facilities - with ref and selectedIds */}
@@ -374,6 +362,10 @@ const BusinessInfo = ({
           >
             {loading ? "Generating..." : "Generate AI"}
           </button>
+        </div>
+        <div className="text-xs text-gray-500 mt-1 text-right">
+          {business.description ? business.description.length : 0} / 700
+          characters
         </div>
       </div>
 

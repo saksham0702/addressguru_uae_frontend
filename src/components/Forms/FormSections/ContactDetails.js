@@ -12,12 +12,19 @@ const ContactDetails = ({
   refs,
   business,
   setBusiness,
+  islistingForm,
 }) => {
   const [cities, setCities] = useState([]);
   const [cityOpen, setCityOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
   const [altCountryOpen, setAltCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
 
+  const filteredCountries = COUNTRY_CODES.filter((item) =>
+    `${item.country} ${item.code}`
+      .toLowerCase()
+      .includes(countrySearch.toLowerCase()),
+  );
   const cityRef = useRef(null);
   const countryRef = useRef(null);
   const altCountryRef = useRef(null);
@@ -115,6 +122,7 @@ const ContactDetails = ({
         />
 
         {/* EMAIL */}
+
         <InputWithTitle
           title="Email Address"
           placeholder="Enter email address"
@@ -144,21 +152,42 @@ const ContactDetails = ({
               </button>
 
               {countryOpen && (
-                <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-md w-64 max-h-60 overflow-y-auto">
-                  {COUNTRY_CODES.map((item, index) => (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        handleChange("countryCode", item.code);
-                        setCountryOpen(false);
-                      }}
-                      className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
-                    >
-                      <span>{item.flag}</span>
-                      <span>{item.country}</span>
-                      <span className="ml-auto">{item.code}</span>
-                    </div>
-                  ))}
+                <div className="absolute z-50 bg-white border outline-none  border-gray-200 rounded-lg shadow-md w-64">
+                  {/* 🔍 Search Input */}
+                  <div className="p-2 border-b outline-none border-gray-200">
+                    <input
+                      type="text"
+                      placeholder="Search country..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  {/* 🌍 Country List */}
+                  <div className="max-h-52 overflow-y-auto">
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map((item, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            handleChange("countryCode", item.code);
+                            setCountryOpen(false);
+                            setCountrySearch(""); // reset search
+                          }}
+                          className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
+                        >
+                          <span>{item.flag}</span>
+                          <span>{item.country}</span>
+                          <span className="ml-auto">{item.code}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                        No country found
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -241,15 +270,17 @@ const ContactDetails = ({
         />
 
         {/* ADDRESS */}
-        <InputWithTitle
-          title="Address"
-          placeholder="Enter full address"
-          value={contact?.address || ""}
-          error={error?.contactAddress}
-          onChange={(e) =>
-            handleChange("address", e.target.value, "contactAddress")
-          }
-        />
+        {!islistingForm && (
+          <InputWithTitle
+            title="Address"
+            placeholder="Enter full address"
+            value={contact?.address || ""}
+            error={error?.contactAddress}
+            onChange={(e) =>
+              handleChange("address", e.target.value, "contactAddress")
+            }
+          />
+        )}
 
         {/* CITY */}
         <div className="relative md:col-span-2" ref={cityRef}>
