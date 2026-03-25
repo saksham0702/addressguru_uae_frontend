@@ -931,6 +931,7 @@ const ListingForms = () => {
             clearError={clearError}
             business={business}
             setBusiness={setBusiness}
+            islistingForm={true}
             refs={{
               contactNameRef,
               contactEmailRef,
@@ -1022,7 +1023,7 @@ const ListingForms = () => {
             <section className="2xl:w-[95%] w-full   h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
-            {currentStep == 6 ? (
+            {currentStep ? (
               <div></div>
             ) : (
               <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">

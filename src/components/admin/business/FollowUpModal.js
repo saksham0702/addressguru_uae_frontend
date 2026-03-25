@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+"use client";
+import { createFollowupLog, getFollowupLogs } from "@/api/followup";
+import { getFollowupConfig } from "@/api/followupconfig";
+import React, { useEffect, useState } from "react";
 
 const ACTIVITY_OPTIONS = [
   "Call Back Later",
@@ -44,26 +47,105 @@ const PhoneIcon = () => (
 );
 
 // ── FOLLOW UP MODAL ───────────────────────────────────────────────────────────
-const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
+const FollowUpModal = ({
+  listing,
+  history,
+
+  onClose,
+  onSubmit,
+}) => {
   const [selected, setSelected] = useState("");
   const [remark, setRemark] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [followupConfig, setFollowupConfig] = useState(null);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [logs, setLogs] = useState([]);
 
-  function handleSubmit() {
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await getFollowupLogs(listing._id, token);
+
+        setLogs(res.data || []);
+        console.log("res of logs", res.data);
+        // if you want to store locally instead of props:
+        // setHistory(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (listing?._id) {
+      fetchLogs();
+    }
+  }, [listing?._id]);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const token = localStorage.getItem("token"); // or your auth method
+
+        const res = await getFollowupConfig("listing", token);
+
+        // your response is { data: {...} }
+        setFollowupConfig(res.data);
+      } catch (err) {
+        console.error("Failed to load followup config", err);
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  async function handleSubmit() {
     if (!selected) return;
-    onSubmit(listing._id, {
-      reason: selected,
-      remark,
-      nextDate: date,
-      nextTime: time,
-      createdAt: nowStr(),
-    });
-    setSelected("");
-    setRemark("");
-    setDate("");
-    setTime("");
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const selectedOption = followupConfig?.options?.find(
+        (o) => o._id === selected,
+      );
+
+      const payload = {
+        listingId: listing._id,
+        activityOptionId: selectedOption?._id,
+        remark: remark || "",
+        nextFollowUpDate:
+          date && time ? new Date(`${date}T${time}`).toISOString() : null,
+      };
+
+      const res = await createFollowupLog(payload, token);
+
+      await getFollowupLogs(listing._id, token);
+
+      // Optional: update UI
+      onSubmit(listing._id, {
+        reason: selectedOption?.label,
+        remark,
+        nextDate: date,
+        nextTime: time,
+        createdAt: new Date().toLocaleString(),
+      });
+
+      // Reset
+      setSelected("");
+      setRemark("");
+      setDate("");
+      setTime("");
+    } catch (err) {
+      console.error(err);
+    }
   }
+
+  const selectedOption = followupConfig?.options?.find(
+    (o) => o._id === selected,
+  );
 
   return (
     <div
@@ -104,7 +186,7 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
 
         {/* ── Body ── */}
         <div
-          className="flex flex-1 overflow-hidden divide-x divide-slate-100"
+          className="flex flex-1 overflow-hidden divide-x divide-slate-100 min-h-0"
           style={{ gridTemplateColumns: "none" }}
         >
           {/* LEFT – Log Activity */}
@@ -118,42 +200,48 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
 
             {/* Radio Options */}
             <div className="flex flex-col gap-0.5 mb-5">
-              {ACTIVITY_OPTIONS.map((opt) => (
-                <label
-                  key={opt}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all text-sm
-                    ${
-                      selected === opt
-                        ? "bg-orange-50 border border-orange-200 text-orange-600 font-medium"
-                        : "border border-transparent text-slate-600 hover:bg-slate-50"
-                    }`}
-                >
-                  <input
-                    type="radio"
-                    name="fu-activity"
-                    value={opt}
-                    checked={selected === opt}
-                    onChange={() => setSelected(opt)}
-                    className="accent-orange-500 w-3.5 h-3.5 flex-shrink-0"
-                  />
-                  {opt}
-                </label>
-              ))}
+              {followupConfig?.options
+                ?.filter((opt) => opt.isActive)
+                ?.map((opt) => (
+                  <label
+                    key={opt._id}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all text-sm
+      ${
+        selected === opt._id
+          ? "bg-orange-50 border border-orange-200 text-orange-600 font-medium"
+          : "border border-transparent text-slate-600 hover:bg-slate-50"
+      }`}
+                  >
+                    <input
+                      type="radio"
+                      name="fu-activity"
+                      value={opt._id}
+                      checked={selected === opt._id}
+                      onChange={() => setSelected(opt._id)}
+                      className="accent-orange-500 w-3.5 h-3.5 flex-shrink-0"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
             </div>
 
             {/* Remark */}
-            <div className="mb-4">
-              <label className="text-[10px] font-bold tracking-widest uppercase text-slate-400 block mb-1.5">
-                Remark
-              </label>
-              <textarea
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                placeholder="Add a remark…"
-                rows={3}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 resize-none outline-none focus:border-orange-400 transition-colors placeholder-slate-300"
-              />
-            </div>
+            {selectedOption?.hasRemark && (
+              <div className="mb-4">
+                <label className="text-[10px] font-bold tracking-widest uppercase text-slate-400 block mb-1.5">
+                  Remark
+                </label>
+                <textarea
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                  placeholder={
+                    selectedOption?.remarkPlaceholder || "Add a remark…"
+                  }
+                  rows={3}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 resize-none outline-none focus:border-orange-400 transition-colors placeholder-slate-300"
+                />
+              </div>
+            )}
 
             {/* Date + Time */}
             <div className="grid grid-cols-2 gap-3 mb-5">
@@ -196,7 +284,7 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
           </div>
 
           {/* RIGHT – Interaction History */}
-          <div className="overflow-y-auto p-5 flex-1">
+          <div className="overflow-y-auto p-5 flex-1 max-h-[65vh]">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
                 Interaction History
@@ -208,21 +296,21 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
               )}
             </div>
 
-            {history.length === 0 ? (
+            {logs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-slate-300">
                 <div className="text-4xl mb-3">📋</div>
                 <p className="text-sm">No follow-ups found.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2.5">
-                {history.map((h, i) => (
+                {logs.map((h, i) => (
                   <div
                     key={i}
                     className="border border-slate-100 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-500 border border-orange-100">
-                        {h.reason}
+                        {h?.reason}
                       </span>
                       <span className="text-[10px] text-slate-400 whitespace-nowrap flex-shrink-0">
                         {h.createdAt}
@@ -233,13 +321,13 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit }) => {
                         {h.remark}
                       </p>
                     )}
-                    {(h.nextDate || h.nextTime) && (
+                    {(h.nextFollowUpDate || h.nextTime) && (
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white border border-slate-100 rounded-lg px-2.5 py-1.5 w-fit">
                         <span>📅</span>
                         <span>
                           Next:{" "}
                           <span className="font-medium text-slate-700">
-                            {h.nextDate}
+                            {h.nextFollowUpDate}
                             {h.nextTime ? " · " + h.nextTime : ""}
                           </span>
                         </span>

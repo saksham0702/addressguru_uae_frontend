@@ -1,5 +1,4 @@
 "use client";
-
 import { get_user_details } from "@/api/uaeadminlogin";
 import { createContext, useContext, useState, useEffect } from "react";
 
@@ -14,11 +13,20 @@ export const AuthProvider = ({ children }) => {
   // fetch user using token
   const fetchUser = async (authToken) => {
     if (!authToken) return;
+
     const userData = await get_user_details(authToken);
     console.log(userData);
 
-    if (userData) setUser(userData);
-    else setUser(null);
+    if (userData) {
+      setUser(userData);
+    } else {
+      // ✅ Bad/error response → wipe everything out
+      setUser(null);
+      setToken(null);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("authToken");
+      }
+    }
   };
 
   // load token and city on first mount
@@ -27,17 +35,10 @@ export const AuthProvider = ({ children }) => {
       setIsLoaded(true);
       return;
     }
-
     const savedToken = localStorage.getItem("authToken");
     const savedCity = localStorage.getItem("city");
-
-    if (savedToken) {
-      setToken(savedToken);
-    }
-    if (savedCity) {
-      setCity(savedCity);
-    }
-
+    if (savedToken) setToken(savedToken);
+    if (savedCity) setCity(savedCity);
     setIsLoaded(true);
   }, []);
 
@@ -62,7 +63,6 @@ export const AuthProvider = ({ children }) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("authToken", newToken);
     }
-    // immediately fetch user for a snappy UX
     await fetchUser(newToken);
   };
 
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  if (!isLoaded) return null; // optional loader
+  if (!isLoaded) return null;
 
   return (
     <AuthContext.Provider
@@ -97,8 +97,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };

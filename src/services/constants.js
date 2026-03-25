@@ -4,6 +4,7 @@ import {
   List,
   ShoppingBag,
   ShoppingCartIcon,
+  TableConfigIcon,
   User,
   UserIcon,
   Users,
@@ -983,7 +984,11 @@ export const NAV_ROUTES = [
     icon: ShoppingBag,
     href: "/admin/business-listings",
   },
-
+  {
+    name: "Business Configs",
+    icon: TableConfigIcon,
+    href: "/admin/business-configs",
+  },
   // {
   //   name: "Users",
   //   href: "/admin/#",

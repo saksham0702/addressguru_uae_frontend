@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   approve_listing,
+  get_all_admin_listings,
   get_all_listings,
   reject_listing,
 } from "@/api/listing-form";
@@ -231,39 +232,46 @@ const BusinessListings = () => {
   const [showEntries, setShowEntries] = useState(10);
   const [page, setPage] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [rejectModalData, setRejectModalData] = useState(null);
-
+  const [loadingId, setLoadingId] = useState(null);
+  const [totallistings, settotallistings] = useState(0);
+  const [approvedlisting, setapprovedlisting] = useState(0);
+  const [rejectedlisting, setrejectedlisting] = useState(0);
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   }
 
   async function handleApproveReject(listing, action) {
-    if (action === "approved") {
-      try {
-        // ✅ call API first
+    try {
+      setLoadingId(listing._id);
+
+      if (action === "approved") {
         await approve_listing(listing._id);
-
-        // ✅ update UI AFTER success
-        setListings((prev) =>
-          prev.map((l) =>
-            l._id === listing._id ? { ...l, status: "approved" } : l,
-          ),
-        );
-
-        showToast("Listing approved successfully", "success");
-      } catch (error) {
-        console.error(error);
-        showToast("Failed to approve listing", "error");
       }
-    }
 
-    if (action === "rejected") {
-      // same as before
-      setRejectModalData(listing);
+      if (action === "unapproved") {
+        await reject_listing(listing._id, { status: "unapproved" });
+      }
+
+      if (action === "rejected") {
+        setRejectModalData(listing);
+        return;
+      }
+
+      showToast(`Listing ${action} successfully`, "success");
+
+      // ✅ RELOAD DATA FROM BACKEND
+      await fetchListings();
+    } catch (error) {
+      console.error(error);
+      showToast("Something went wrong", "error");
+    } finally {
+      setLoadingId(null);
     }
   }
+
   async function handleRejectSubmit({ listingId, reason }) {
     try {
       const payload = {
@@ -287,18 +295,34 @@ const BusinessListings = () => {
       showToast("Failed to reject listing", "error");
     }
   }
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchListings = async () => {
+    try {
+      const res = await get_all_admin_listings({
+        page,
+        limit: showEntries,
+        ...(statusFilter !== "all" && { status: statusFilter }),
+      });
+
+      console.log("API RESPONSE:", res);
+
+      // ✅ correct keys
+      setListings(res?.data?.listings || []);
+      setTotalPages(res?.data?.pagination?.totalPages || 1);
+      setTotalCount(res?.data?.pagination?.total || 0);
+      settotallistings(res?.data?.totalAll || 0);
+      setapprovedlisting(res?.data?.statusCounts?.approved || 0);
+      setrejectedlisting(res?.data?.statusCounts?.rejected || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        const res = await get_all_listings();
-        setListings(res?.data?.listings || []);
-      } catch (err) {
-        console.error("Error fetching listings:", err);
-      }
-    };
     fetchListings();
-  }, []);
+  }, [page, showEntries, statusFilter]);
 
   function handleFollowUpSubmit(listingId, entry) {
     setFollowUps((prev) => ({
@@ -309,14 +333,14 @@ const BusinessListings = () => {
   }
 
   const stats = [
-    {
-      label: "Total",
-      key: "all",
-      color: "text-orange-500",
-      bg: "bg-orange-50",
-      activeBg: "bg-orange-500",
-      ring: "ring-orange-200",
-    },
+    // {
+    //   label: "Total",
+    //   key: "all",
+    //   color: "text-orange-500",
+    //   bg: "bg-orange-50",
+    //   activeBg: "bg-orange-500",
+    //   ring: "ring-orange-200",
+    // },
     {
       label: "Pending",
       key: "pending",
@@ -344,34 +368,14 @@ const BusinessListings = () => {
   ];
 
   const statCounts = {
-    all: listings.length,
-    pending: listings.filter((l) => l.status === "pending").length,
-    approved: listings.filter((l) => l.status === "approved").length,
-    rejected: listings.filter((l) => l.status === "rejected").length,
+    all: totalCount,
+    pending: statusFilter === "pending" ? totalCount : 0,
+    approved: statusFilter === "approved" ? totalCount : approvedlisting,
+    rejected: statusFilter === "rejected" ? totalCount : rejectedlisting,
   };
-
-  const filtered = listings.filter((l) => {
-    const matchSearch = [
-      l.businessName,
-      l.category?.name,
-      l.city?.name,
-      l.contactPersonName,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || l.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / showEntries));
-
-  const paginated = filtered.slice(
-    (page - 1) * showEntries,
-    page * showEntries,
-  );
-  const startEntry = filtered.length === 0 ? 0 : (page - 1) * showEntries + 1;
-  const endEntry = Math.min(page * showEntries, filtered.length);
+  const paginated = listings;
+  const startEntry = (page - 1) * showEntries + 1;
+  const endEntry = Math.min(page * showEntries, totalCount);
 
   function toggleSelect(id) {
     setSelected((prev) => {
@@ -393,22 +397,28 @@ const BusinessListings = () => {
     >
       {/* ── PAGE HEADER ── */}
       <div className="flex items-start justify-between mb-6">
-        <div>
+        <div className="">
           <h1 className="text-xl font-bold text-slate-800 leading-tight">
             Business Listings
           </h1>
-          <p className="text-slate-400 text-xs mt-1 font-medium">
-            Manage and review all business listings on the platform
-          </p>
+
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-slate-500 font-medium">
+              Total Listings:
+            </span>
+            <span className="px-2.5 py-0.5 text-sm font-bold bg-orange-100 text-orange-600 rounded-lg">
+              {totallistings}
+            </span>
+          </div>
         </div>
         <div className="relative">
-          <button
+          {/* <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition-colors"
           >
             Assign Lead
             <ChevronIcon dir={dropdownOpen ? "up" : "down"} />
-          </button>
+          </button> */}
           {dropdownOpen && (
             <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1 overflow-hidden">
               {["Ayushe Gupta", "Vikas Suyal", "Shivani Gupta"].map((u) => (
@@ -426,10 +436,11 @@ const BusinessListings = () => {
       </div>
 
       {/* ── STAT / FILTER CARDS ── */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="flex gap-3 mb-5">
         {stats.map((s) => {
           const active = statusFilter === s.key;
           const count = statCounts[s.key];
+
           return (
             <button
               key={s.key}
@@ -437,31 +448,38 @@ const BusinessListings = () => {
                 setStatusFilter(s.key);
                 setPage(1);
               }}
-              className={`flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150
-                ${
-                  active
-                    ? `${s.activeBg} border-transparent shadow-lg`
-                    : `bg-white border-slate-200 hover:border-slate-200 hover:shadow-md`
-                }`}
+              className={`flex items-center justify-between min-w-[140px] px-4 py-2.5 rounded-lg border text-left transition-all
+        ${
+          active
+            ? `${s.activeBg} text-white border-transparent shadow`
+            : `bg-white border-slate-200 hover:shadow-sm`
+        }`}
             >
-              <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 font-extrabold text-base
-                ${active ? "bg-white/20 text-white" : `${s.bg} ${s.color}`}`}
-              >
-                {count}
-              </div>
-              <div>
-                <div
-                  className={`text-[11px] font-bold uppercase tracking-widest ${active ? "text-white/80" : "text-slate-400"}`}
+              {/* LEFT TEXT */}
+              <div className="flex flex-col">
+                <span
+                  className={`text-[11px] font-semibold uppercase tracking-wide ${
+                    active ? "text-white/80" : "text-slate-400"
+                  }`}
                 >
                   {s.label}
-                </div>
-                <div
-                  className={`text-[11px] mt-0.5 font-medium ${active ? "text-white/60" : "text-slate-300"}`}
+                </span>
+
+                <span
+                  className={`text-sm font-bold ${
+                    active ? "text-white" : "text-slate-800"
+                  }`}
                 >
-                  listings
-                </div>
+                  {count}
+                </span>
               </div>
+
+              {/* RIGHT DOT INDICATOR */}
+              <div
+                className={`w-2.5 h-2.5 rounded-full ${
+                  active ? "bg-white" : "bg-slate-300"
+                }`}
+              />
             </button>
           );
         })}
@@ -795,30 +813,102 @@ const BusinessListings = () => {
                     {/* Action */}
                     <TD vAlign="top" className="w-32">
                       <div className="flex flex-col gap-1.5">
-                        <button
-                          onClick={() =>
-                            handleApproveReject(listing, "approved")
-                          }
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:bg-emerald-200 transition-colors whitespace-nowrap shadow-sm"
-                        >
-                          <CheckIcon /> Approve
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleApproveReject(listing, "rejected")
-                          }
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 transition-colors whitespace-nowrap shadow-sm"
-                        >
-                          <XIcon /> Reject
-                        </button>
-                        <a
-                          href={`/${listing.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors whitespace-nowrap no-underline shadow-sm"
-                        >
-                          <ExternalIcon /> Visit
-                        </a>
+                        {/* ✅ PENDING */}
+                        {listing.status === "pending" && (
+                          <>
+                            {/* APPROVE */}
+                            <button
+                              onClick={() =>
+                                handleApproveReject(listing, "approved")
+                              }
+                              disabled={loadingId === listing._id}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
+                            >
+                              {loadingId === listing._id ? (
+                                <>
+                                  <svg
+                                    className="w-3 h-3 animate-spin"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-25"
+                                    />
+                                    <path
+                                      d="M22 12a10 10 0 00-10-10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-75"
+                                    />
+                                  </svg>
+                                  Approving...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckIcon /> Approve
+                                </>
+                              )}
+                            </button>
+
+                            {/* REJECT */}
+                            <button
+                              onClick={() =>
+                                handleApproveReject(listing, "rejected")
+                              }
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-sm"
+                            >
+                              <XIcon /> Reject
+                            </button>
+                          </>
+                        )}
+
+                        {/* ✅ APPROVED → SHOW UNAPPROVE */}
+                        {listing.status === "approved" && (
+                          <button
+                            onClick={() =>
+                              handleApproveReject(listing, "unapproved")
+                            }
+                            disabled={loadingId === listing._id}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors shadow-sm"
+                          >
+                            {loadingId === listing._id ? (
+                              <>
+                                <svg
+                                  className="w-3 h-3 animate-spin"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    className="opacity-25"
+                                  />
+                                  <path
+                                    d="M22 12a10 10 0 00-10-10"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    className="opacity-75"
+                                  />
+                                </svg>
+                                Updating...
+                              </>
+                            ) : (
+                              "Unapprove"
+                            )}
+                          </button>
+                        )}
+                        {listing.status === "rejected" && (
+                          <span className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-sm">
+                            <XIcon /> Rejected
+                          </span>
+                        )}
+                        {/* ❌ REJECTED → NO ACTION */}
                       </div>
                     </TD>
                   </tr>
@@ -834,7 +924,7 @@ const BusinessListings = () => {
         <span className="text-xs text-slate-500 font-medium">
           Showing <span className="font-bold text-slate-700">{startEntry}</span>{" "}
           to <span className="font-bold text-slate-700">{endEntry}</span> of{" "}
-          <span className="font-bold text-slate-700">{filtered.length}</span>{" "}
+          <span className="font-bold text-slate-700">{totalCount}</span>
           entries
         </span>
 
