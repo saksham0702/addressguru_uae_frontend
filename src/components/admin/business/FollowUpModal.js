@@ -122,7 +122,8 @@ const FollowUpModal = ({
 
       const res = await createFollowupLog(payload, token);
 
-      await getFollowupLogs(listing._id, token);
+      const resLogs = await getFollowupLogs(listing._id, token);
+      setLogs(resLogs.data || []);
 
       // Optional: update UI
       onSubmit(listing._id, {
