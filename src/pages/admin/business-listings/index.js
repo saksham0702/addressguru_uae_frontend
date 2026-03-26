@@ -238,6 +238,7 @@ const BusinessListings = () => {
   const [totallistings, settotallistings] = useState(0);
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
+  const [pendinglistsing, setpendinglistsing] = useState(0);
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -281,6 +282,8 @@ const BusinessListings = () => {
 
       await reject_listing(listingId, payload);
 
+      await fetchListings();
+
       // ✅ update AFTER API success
       setListings((prev) =>
         prev.map((l) =>
@@ -315,6 +318,7 @@ const BusinessListings = () => {
       settotallistings(res?.data?.totalAll || 0);
       setapprovedlisting(res?.data?.statusCounts?.approved || 0);
       setrejectedlisting(res?.data?.statusCounts?.rejected || 0);
+      setpendinglistsing(res?.data?.statusCounts?.pending || 0);
     } catch (err) {
       console.error(err);
     }
@@ -369,7 +373,7 @@ const BusinessListings = () => {
 
   const statCounts = {
     all: totalCount,
-    pending: statusFilter === "pending" ? totalCount : 0,
+    pending: statusFilter === "pending" ? totalCount : pendinglistsing,
     approved: statusFilter === "approved" ? totalCount : approvedlisting,
     rejected: statusFilter === "rejected" ? totalCount : rejectedlisting,
   };
@@ -727,14 +731,14 @@ const BusinessListings = () => {
 
                     {/* Country & City */}
                     <TD vAlign="top" className="min-w-[130px]">
-                      <div className="flex items-start gap-1.5 mt-0.5">
+                      <div className="flex items-center gap-1 ">
                         <PinIcon />
                         <div>
-                          <div className="text-sm font-semibold text-black">
-                            {listing.country || "India"}
-                          </div>
-                          <div className="text-[11px] text-gray-900  font-medium mt-0.5">
-                            ({listing.city?.name || "N/A"})
+                          {/* <div className="text-sm font-semibold text-black">
+                            {listing.country?.name || "India"}
+                          </div> */}
+                          <div className="text-[14px] text-gray-900  font-medium ">
+                            {listing.city?.name || "N/A"}
                           </div>
                         </div>
                       </div>
@@ -771,6 +775,7 @@ const BusinessListings = () => {
                           {
                             label: "Status",
                             value: listing.status,
+                            isStatus: true, // 👈 flag to apply color
                           },
 
                           // ✅ Show ONLY when approved or rejected
@@ -793,20 +798,37 @@ const BusinessListings = () => {
                               listing.contactPersonName ||
                               "Admin",
                           },
-                        ].map(({ label, value }) => (
-                          <div
-                            key={label}
-                            className="flex items-center gap-1.5"
-                          >
-                            <UserIcon />
-                            <span className="text-[11px] text-slate-400 font-medium">
-                              {label}:
-                            </span>
-                            <span className="text-[11px] font-bold text-slate-700 truncate max-w-[110px]">
-                              {value}
-                            </span>
-                          </div>
-                        ))}
+                        ].map(({ label, value, isStatus }) => {
+                          // 🎯 Status color logic
+                          const statusColor =
+                            value === "approved"
+                              ? "text-green-600"
+                              : value === "rejected"
+                                ? "text-red-600"
+                                : value === "pending"
+                                  ? "text-yellow-500"
+                                  : "text-slate-700";
+
+                          return (
+                            <div
+                              key={label}
+                              className="flex items-center gap-1.5"
+                            >
+                              <UserIcon />
+                              <span className="text-[11px] text-slate-400 font-medium">
+                                {label}:
+                              </span>
+
+                              <span
+                                className={`text-[11px] font-bold truncate max-w-[110px] ${
+                                  isStatus ? statusColor : "text-slate-700"
+                                }`}
+                              >
+                                {value}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </TD>
 
@@ -904,9 +926,42 @@ const BusinessListings = () => {
                           </button>
                         )}
                         {listing.status === "rejected" && (
-                          <span className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-sm">
-                            <XIcon /> Rejected
-                          </span>
+                          <button
+                            onClick={() =>
+                              handleApproveReject(listing, "approved")
+                            }
+                            disabled={loadingId === listing._id}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
+                          >
+                            {loadingId === listing._id ? (
+                              <>
+                                <svg
+                                  className="w-3 h-3 animate-spin"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    className="opacity-25"
+                                  />
+                                  <path
+                                    d="M22 12a10 10 0 00-10-10"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    className="opacity-75"
+                                  />
+                                </svg>
+                                Approving...
+                              </>
+                            ) : (
+                              <>
+                                <CheckIcon /> Approve
+                              </>
+                            )}
+                          </button>
                         )}
                         {/* ❌ REJECTED → NO ACTION */}
                       </div>

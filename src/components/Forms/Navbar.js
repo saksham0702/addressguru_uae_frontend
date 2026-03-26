@@ -1,13 +1,17 @@
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 const Navbar = ({ categoryName, subCategoryName }) => {
   const listingName = subCategoryName ? subCategoryName : categoryName;
+  const router = useRouter();
+
   return (
     <>
       <section className=" rounded-b-xl h-20 md:w-[90%] max-w-[1400px] max-md:min-w-full  md:mx-auto shadow-md flex items-center justify-between md:px-7 max-md:px-3 ">
         <div className="flex items-center md:gap-10 gap-3">
-          <Link href="/dashboard">
+          <button onClick={() => router.back()}>
             <svg
               className="max-md:scale-70"
               width="13"
@@ -17,13 +21,13 @@ const Navbar = ({ categoryName, subCategoryName }) => {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M0.53421 11.2847C-0.169739 10.6277 -0.169739 9.56234 0.53421 8.90532L9.54762 0.492788C10.2516 -0.164263 11.393 -0.164263 12.097 0.492788C12.801 1.14986 12.801 2.21515 12.097 2.87222L4.35824 10.095L12.097 17.3178C12.801 17.9749 12.801 19.0402 12.097 19.6972C11.393 20.3543 10.2516 20.3543 9.54762 19.6972L0.53421 11.2847Z"
                 fill="black"
               />
             </svg>
-          </Link>
+          </button>
           <span className="font-semibold flex items-center gap-1 max-md:text-sm max-md:mr-5">
             ADD/EDIT YOUR
             <p className="text-orange-600 font-bold uppercase">{listingName}</p>

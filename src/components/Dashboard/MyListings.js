@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 const MyListings = ({ data, APP_URL }) => {
+  console.log(data);
+
   // Data structure for listings
   const listings = [
     {
@@ -171,7 +173,7 @@ const MyListings = ({ data, APP_URL }) => {
                       href={`/dashboard/listing-forms?category=${
                         listing?.category?._id
                       }&categoryName=${encodeURIComponent(
-                        listing?.businessName,
+                        listing?.category?.name,
                       )}&name=${encodeURIComponent(listing?.slug)}`}
                       className="inline-flex items-center gap-2 px-4 max-md:px-2 py-1.5 max-md:text-[10px] max-md:border-1 max-md:border-blue-500 max-md:text-blue-400  md:bg-blue-600 md:hover:bg-blue-700 text-white text-xs font-semibold rounded-sm transition-colors"
                     >
