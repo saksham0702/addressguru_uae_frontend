@@ -1,6 +1,7 @@
 "use client";
 import { createFollowupLog, getFollowupLogs } from "@/api/followup";
 import { getFollowupConfig } from "@/api/followupconfig";
+import { formatDateTime } from "@/helpers/helper";
 import React, { useEffect, useState } from "react";
 
 const ACTIVITY_OPTIONS = [
@@ -61,6 +62,7 @@ const FollowUpModal = ({
   const [followupConfig, setFollowupConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [logs, setLogs] = useState([]);
+  console.log(listing);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -155,7 +157,7 @@ const FollowUpModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white rounded-xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
         style={{ animation: "modalIn 0.2s ease" }}
       >
         {/* ── Header ── */}
@@ -164,17 +166,38 @@ const FollowUpModal = ({
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
               <PhoneIcon />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-800">
-                Listing Follow Up
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+            <div className="flex flex-col gap-1">
+              {/* Title */}
+              <h2 className="text-base font-semibold text-slate-800 leading-tight">
                 {listing.businessName}
-                <span className="mx-1.5 text-slate-200">·</span>
-                <span className="text-orange-500 font-medium">
+                <span className="ml-2 text-xs font-medium text-slate-400">
+                  Follow Up
+                </span>
+              </h2>
+
+              {/* Info Row */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                {/* Contact Person */}
+                <span className="font-medium text-slate-600">
+                  {listing?.contactPersonName || "—"}
+                </span>
+
+                {/* Divider */}
+                <span className="text-slate-300">•</span>
+
+                {/* Email */}
+                <span className="text-orange-500 font-medium break-all">
+                  {listing.email || "—"}
+                </span>
+
+                {/* Divider */}
+                <span className="text-slate-300">•</span>
+
+                {/* Phone */}
+                <span className="text-orange-500 font-medium whitespace-nowrap">
                   {listing.countryCode} {listing.mobileNumber}
                 </span>
-              </p>
+              </div>
             </div>
           </div>
           <button
@@ -303,39 +326,86 @@ const FollowUpModal = ({
                 <p className="text-sm">No follow-ups found.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5">
-                {logs.map((h, i) => (
-                  <div
-                    key={i}
-                    className="border border-slate-100 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-500 border border-orange-100">
-                        {h?.reason}
-                      </span>
-                      <span className="text-[10px] text-slate-400 whitespace-nowrap flex-shrink-0">
-                        {h.createdAt}
-                      </span>
-                    </div>
-                    {h.remark && (
-                      <p className="text-xs text-slate-600 mb-2 leading-relaxed">
-                        {h.remark}
-                      </p>
-                    )}
-                    {(h.nextFollowUpDate || h.nextTime) && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white border border-slate-100 rounded-lg px-2.5 py-1.5 w-fit">
-                        <span>📅</span>
-                        <span>
-                          Next:{" "}
-                          <span className="font-medium text-slate-700">
-                            {h.nextFollowUpDate}
-                            {h.nextTime ? " · " + h.nextTime : ""}
+              <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-6">
+                        #
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Reason
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Remark
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Next Date
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Created At
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {logs.map((h, i) => (
+                      <tr
+                        key={i}
+                        className="bg-white hover:bg-slate-50/70 transition-colors"
+                      >
+                        {/* # */}
+                        <td className="px-4 py-3 text-xs text-slate-400 font-medium">
+                          {i + 1}
+                        </td>
+
+                        {/* Reason */}
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-500 border border-orange-100 whitespace-nowrap">
+                            {h?.reason}
                           </span>
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        </td>
+
+                        {/* Remark */}
+                        <td className="px-4 py-3 text-xs text-slate-500 max-w-[220px]">
+                          {h.remark ? (
+                            <div className="group relative cursor-pointer">
+                              {/* Truncated Text */}
+                              <p className="truncate">{h.remark}</p>
+
+                              {/* Hover Tooltip */}
+                              <div className="absolute z-50 hidden group-hover:block left-0 top-full mt-1 w-72 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-lg">
+                                {h.remark}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-slate-300 italic">N/A</span>
+                          )}
+                        </td>
+
+                        {/* Next Date */}
+                        <td className="px-4 py-3">
+                          {h.nextFollowUpDate || h.nextTime ? (
+                            <div className="flex items-center gap-1.5 text-[11px] text-slate-600 whitespace-nowrap">
+                              <span>📅</span>
+                              <span className="font-medium">
+                                {formatDateTime(h.nextFollowUpDate, h.nextTime)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-300 text-xs italic">
+                              —
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Created At */}
+                        <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">
+                          {h.createdAt ? formatDateTime(h.createdAt) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

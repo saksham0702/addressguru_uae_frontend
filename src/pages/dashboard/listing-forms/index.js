@@ -30,6 +30,7 @@ const ListingForms = () => {
   const { categoryName, subCategoryName, name } = router.query;
   const category = router.query.categoryName;
   const subCategory = router.query.subCategoryName;
+  const [showTips, setShowTips] = useState(false);
 
   // Refs for error scrolling
   const businessNameRef = useRef(null);
@@ -314,8 +315,9 @@ const ListingForms = () => {
     async (name) => {
       try {
         const res = await get_listing_data(name);
-        console.log("res of listing data", res?.data?.data);
+        console.log("res of existing  listing data", res?.data?.data);
         setExistingData(res?.data?.data);
+
         // console.log("response of single listing i am", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
@@ -409,9 +411,11 @@ const ListingForms = () => {
         description: existingData?.seo?.description || "",
       });
       // ✅ Facilities / Services / Payments
-      setSelectedFacilities(existingData?.facilities || []);
-      setSelectedServices(existingData?.services || []);
-      setSelectedPayment(existingData?.paymentModes || []);
+      setSelectedFacilities(existingData?.facilities?.map((f) => f._id) || []);
+
+      setSelectedServices(existingData?.services?.map((s) => s._id) || []);
+
+      setSelectedPayment(existingData?.paymentModes?.map((p) => p._id) || []);
 
       // ✅ Media
       setMedia({
@@ -863,7 +867,7 @@ const ListingForms = () => {
     switch (currentStep) {
       case 1:
         return (
-          <>
+          <div className="w-[80%]">
             <BusinessInfo
               category={category}
               subCategory={subCategory}
@@ -910,7 +914,7 @@ const ListingForms = () => {
             ) : (
               ""
             )}
-          </>
+          </div>
         );
       case 2:
         return (
@@ -992,6 +996,21 @@ const ListingForms = () => {
       <div className="h-screen w-full">
         <div className="bg-white md:w-[80%] max-md:w-full h-auto mx-auto flex flex-col items-center relative max-w-[2000px]">
           <div className="fixed top-0 md:w-[80%] max-w-[1400px] w-full bg-white z-40">
+            <button
+              onClick={() => setShowTips((prev) => !prev)}
+              className="fixed right-67 top-[22%] -translate-y-[20%] z-50 
+             bg-white border border-gray-200 
+             hover:bg-gray-50 
+             text-gray-600 
+             w-10 h-10 flex items-center justify-center 
+             rounded-full shadow-md 
+             text-md  font-semibold 
+             transition-all duration-200"
+              title="Posting Tips"
+            >
+              i
+            </button>
+
             <Navbar
               categoryName={categoryName}
               subCategoryName={subCategoryName}
@@ -1023,19 +1042,25 @@ const ListingForms = () => {
             <section className="2xl:w-[95%] w-full   h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
-            {currentStep ? (
-              <div></div>
-            ) : (
-              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-3 rounded-xl text-sm">
+            {showTips && (
+              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-4 rounded-xl text-sm border border-orange-100">
                 <div className="w-full">
-                  <h6 className="font-extrabold text-base my-2">
+                  <h6 className="font-extrabold text-base mb-3 flex items-center justify-between">
                     Posting Tips
+                    <button
+                      onClick={() => setShowTips(false)}
+                      className="text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      ✕
+                    </button>
                   </h6>
 
                   {currentPostingStep?.fields?.map((field, index) => (
-                    <div key={index} className="mb-0.5">
-                      <p className="font-semibold text-xs">{field.title}</p>
-                      <p className="text-gray-700 text-[10px] font-medium leading-snug">
+                    <div key={index} className="mb-2">
+                      <p className="font-semibold text-xs text-gray-800">
+                        {field.title}
+                      </p>
+                      <p className="text-gray-600 text-[11px] leading-snug">
                         {field.tip}
                       </p>
                     </div>

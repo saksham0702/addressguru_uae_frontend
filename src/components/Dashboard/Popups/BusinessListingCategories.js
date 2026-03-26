@@ -37,6 +37,7 @@ const BusinessListingCategories = ({ categories }) => {
   };
 
   const handleCategoryClick = (category) => {
+    console.log("category data ", category);
     setSelectedCategory(category);
     fetchSubCategories(category._id, category.slug);
   };
