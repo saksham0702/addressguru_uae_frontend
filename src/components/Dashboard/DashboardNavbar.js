@@ -132,7 +132,6 @@ const DashboardNavbar = ({ setPostAdd }) => {
     router.push("/");
     setToken(null);
     localStorage.removeItem("authToken");
-    
   };
 
   const { user } = useAuth();

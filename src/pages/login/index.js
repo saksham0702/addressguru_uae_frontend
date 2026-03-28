@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+ 
   const [errors, setErrors] = useState({
     email: "",
     password: "",
@@ -61,9 +61,10 @@ export default function LoginPage() {
       console.log("response of login user :", response);
 
       if (response.status) {
-        console.log("status");
+        console.log("resonse", response.data);
 
-        localStorage.setItem("token", response.data.data.authToken);
+        localStorage.setItem("authToken", response?.data?.data?.authToken);
+        localStorage.setItem("token", response?.data?.data?.authToken);
 
         router.push("/admin");
       } else {

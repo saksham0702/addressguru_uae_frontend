@@ -670,7 +670,7 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
   return (
     <div
       style={{
-        maxWidth: 680,
+        maxWidth: 820,
         margin: "10px 60px",
         padding: "32px 20px",
         fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",

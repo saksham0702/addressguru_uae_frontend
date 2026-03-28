@@ -24,8 +24,10 @@ import { get_view } from "@/api/queries";
 import Header from "@/layout/header";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import {
+  approve_listing,
   get_listing_by_businessslug,
   get_listing_data,
+  reject_listing,
 } from "@/api/listing-form";
 import Link from "next/link";
 
@@ -40,7 +42,9 @@ const SeeDetails = () => {
 
   const router = useRouter();
   const { slug, preview } = router.query;
-  const { city } = useAuth();
+  const { city, user } = useAuth();
+  console.log("user response", user);
+
   const serverCity = city;
 
   /* ----------------------- FETCH USER IP ----------------------- */
@@ -106,7 +110,7 @@ const SeeDetails = () => {
   // ✅ APPROVE LISTING
   const handleApprove = async () => {
     try {
-      const res = await approve_listing(data?.id); // 👈 your API
+      const res = await approve_listing(data?._id); // 👈 your API
       console.log("Approved:", res);
       alert("Listing Approved ✅");
     } catch (err) {
@@ -118,7 +122,7 @@ const SeeDetails = () => {
   // ❌ REJECT LISTING
   const handleReject = async () => {
     try {
-      const res = await reject_listing(data?.id); // 👈 your API
+      const res = await reject_listing(data?._id); // 👈 your API
       console.log("Rejected:", res);
       alert("Listing Rejected ❌");
     } catch (err) {
@@ -557,28 +561,33 @@ const SeeDetails = () => {
               </Link>
 
               {/* ✅ APPROVE */}
-              <button
-                onClick={handleApprove}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition shadow-sm"
-              >
-                ✔ Approve
-              </button>
+              {user?.data?.roles[0] == 1 && (
+                <button
+                  onClick={handleApprove}
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition shadow-sm"
+                >
+                  ✔ Approve
+                </button>
+              )}
+
+              {user?.data?.roles[0] == 1 && (
+                <button
+                  onClick={handleReject}
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
+                >
+                  ✖ Reject
+                </button>
+              )}
 
               {/* ❌ REJECT */}
-              <button
-                onClick={handleReject}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
-              >
-                ✖ Reject
-              </button>
 
               {/* 🔙 BACK */}
               <button
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.back()}
                 className="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
                 style={{ pointerEvents: "auto" }}
               >
-                ← Back
+                Back
               </button>
             </div>
           </div>

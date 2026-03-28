@@ -559,7 +559,7 @@ const BusinessListings = () => {
                     />
                   </button>
                 </th>
-                <TH_Cell className="w-14">Sr No.</TH_Cell>
+                {/* <TH_Cell className="w-14">Sr No.</TH_Cell> */}
                 <TH_Cell highlight className="min-w-[228px]">
                   Client Info
                 </TH_Cell>
@@ -620,53 +620,49 @@ const BusinessListings = () => {
                     </td>
 
                     {/* Sr No */}
-                    <TD vAlign="top" className="w-14">
-                      <span className="text-sm font-bold text-gray-900">
-                        {String((page - 1) * showEntries + idx + 1).padStart(
-                          2,
-                          "0",
-                        )}
-                      </span>
-                    </TD>
+                    {/* <TD vAlign="top" className="w-14">
+                     
+                    </TD> */}
 
-                    {/* Client Info */}
-                    <TD vAlign="top" className="min-w-[260px]">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
+                    <TD vAlign="top" className="min-w-[300px]">
+                      {/* TOP ROW */}
+                      <div className="flex gap-3">
+                        {/* IMAGE */}
+                        <div className="w-14 h-10 flex-shrink-0">
                           <img
                             className="w-14 h-14 rounded-xl object-contain border border-slate-200 bg-white shadow-sm"
                             src={`https://addressguru.ae/api/${listing.logo}`}
                             alt={listing.businessName}
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "flex";
-                            }}
                           />
-                          <div
-                            className="w-14 h-14 rounded-xl flex-shrink-0 items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-lg shadow-sm"
-                            style={{ display: "none" }}
-                          >
-                            {listing.businessName?.charAt(0)}
-                          </div>
                         </div>
 
-                        <div className="min-w-0 flex-1 pt-0.5">
-                          <a
-                            className="font-semibold text-blue-600 text-md leading-snug truncate max-w-[210px]"
-                            href={`/${listing?.slug}?preview=true`}
-                            target="_blank"
-                          >
-                            {listing.businessName}
-                          </a>
+                        {/* TITLE ONLY */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="text-sm font-bold text-gray-900">
+                              {String(
+                                (page - 1) * showEntries + idx + 1,
+                              ).padStart(2, "0")}
+                              )
+                            </span>
 
-                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[11px] text-slate-500">
+                            <a
+                              className="font-semibold text-blue-600 text-md truncate"
+                              href={`/${listing?.slug}?preview=true`}
+                            >
+                              {listing.businessName}
+                            </a>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-[11px] mt-1">
+                            <span className="text-slate-800">
                               ({listing.category?.name})
                             </span>
 
-                            <span className="text-slate-200 text-xs">|</span>
+                            <span className="text-slate-600">|</span>
+
                             <Link
-                              className="text-[11px] text-blue-500 font-semibold hover:text-blue-700 hover:underline transition-colors"
+                              className="text-blue-500 font-semibold hover:underline"
                               href={`/dashboard/listing-forms?category=${
                                 listing?.category?._id
                               }&categoryName=${encodeURIComponent(
@@ -675,43 +671,44 @@ const BusinessListings = () => {
                             >
                               Edit
                             </Link>
-
-                            {/* <button className="text-[11px] text-blue-500 font-semibold hover:text-blue-700 hover:underline transition-colors">
-                              Bulk Lead
-                            </button>
-                            <LeadBadge status={leadStatus} /> */}
-                          </div>
-
-                          {listing.mobileNumber && (
-                            <div className="flex items-center font-medium gap-1.5 mt-2">
-                              <PhoneIcon />
-                              <span className="text-[11px] text-black font-medium">
-                                {listing.countryCode} {listing.mobileNumber}
-                              </span>
-                            </div>
-                          )}
-                          {listing.email && (
-                            <div className="flex items-center font-medium gap-1.5 mt-1">
-                              <MailIcon />
-                              <span className="text-[11px] text-black truncate max-w-[200px]">
-                                {listing.email}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center font-medium text-black gap-1.5 mt-1">
-                            <CalIcon className="text-black" />
-                            <span className="text-[11px] text-black">
-                              Create Date: {fmtDate(listing.createdAt)}{" "}
-                              {fmtTime(listing.createdAt)}
-                            </span>
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-700 text-white leading-none ml-0.5">
-                              {daysAgo(listing.createdAt)}
-                            </span>
                           </div>
                         </div>
                       </div>
-                    </TD>
 
+                      {/* 🔥 FULL WIDTH BLOCK */}
+                      <div className="mt-5 space-y-1 ml-[3px]">
+                        {listing.mobileNumber && (
+                          <div className="flex items-center gap-2 text-[12.5px] font-medium text-gray-800">
+                            <PhoneIcon className="w-4 h-4 text-gray-500" />
+                            <span className="tracking-[0.2px]">
+                              {listing.countryCode} {listing.mobileNumber}
+                            </span>
+                          </div>
+                        )}
+
+                        {listing.email && (
+                          <div className="flex items-center gap-2 text-[12.5px] font-medium text-gray-800">
+                            <MailIcon className="w-4 h-4 text-gray-500" />
+                            <span className="truncate tracking-[0.2px]">
+                              {listing.email}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-[12.5px] font-medium text-gray-800">
+                          <CalIcon className="w-4 h-4 text-gray-500" />
+
+                          <span className="tracking-[0.2px]">
+                            {fmtDate(listing.createdAt)}{" "}
+                            {fmtTime(listing.createdAt)}
+                          </span>
+
+                          <span className="ml-.5 px-2 py-[2px] rounded-md text-[10.5px] font-semibold bg-slate-700 text-white">
+                            {daysAgo(listing.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    </TD>
                     {/* Plan */}
                     <TD vAlign="top" className="w-32">
                       <div className="mt-0.5">
@@ -815,7 +812,7 @@ const BusinessListings = () => {
                               className="flex items-center gap-1.5"
                             >
                               <UserIcon />
-                              <span className="text-[11px] text-slate-400 font-medium">
+                              <span className="text-[11px] text-slate-600 font-medium">
                                 {label}:
                               </span>
 
