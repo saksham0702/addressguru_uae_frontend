@@ -157,7 +157,7 @@ const FollowUpModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-white rounded-xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white rounded-xl w-full max-w-6xl h-[84vh] flex flex-col shadow-2xl overflow-hidden"
         style={{ animation: "modalIn 0.2s ease" }}
       >
         {/* ── Header ── */}

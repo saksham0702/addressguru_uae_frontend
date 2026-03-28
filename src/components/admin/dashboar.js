@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import {
   Users,
@@ -16,6 +17,7 @@ import {
   Shield,
   Clock,
 } from "lucide-react";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 export default function AdminDashboard() {
@@ -24,6 +26,18 @@ export default function AdminDashboard() {
   useEffect(() => {
     testCookie();
   }, []);
+
+  const { user, loading } = useAuth();
+  console.log("user details", user);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem("token");
+    if (!adminToken) {
+      router.replace("/login");
+    }
+  }, [user]);
 
   const stats = [
     {

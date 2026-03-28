@@ -31,7 +31,6 @@ const ListingForms = () => {
   const category = router.query.categoryName;
   const subCategory = router.query.subCategoryName;
   const [showTips, setShowTips] = useState(false);
-
   // Refs for error scrolling
   const businessNameRef = useRef(null);
   const businessAddressRef = useRef(null);
@@ -391,7 +390,7 @@ const ListingForms = () => {
         altCountryCode: existingData?.altCountryCode || "+91",
         city: existingData?.city?.name || "",
         cityId: existingData?.city?._id || "",
-        landmark: existingData?.locality || "",
+        locality: existingData?.locality || "",
       });
 
       // ✅ Social Links
@@ -417,6 +416,8 @@ const ListingForms = () => {
 
       setSelectedPayment(existingData?.paymentModes?.map((p) => p._id) || []);
 
+      setSchedule(existingData?.workingHours);
+
       // ✅ Media
       setMedia({
         logo: existingData?.logo
@@ -441,6 +442,7 @@ const ListingForms = () => {
   }, []);
 
   // Clear specific error
+
   const clearError = (errorKey) => {
     if (errors[errorKey]) {
       setErrors((prev) => {
@@ -744,7 +746,7 @@ const ListingForms = () => {
         if (contact.altNumber)
           formData.append("second_mobile_number", contact.altNumber);
         formData.append("city_id", contact.cityId);
-        formData.append("locality", contact.landmark);
+        formData.append("locality", contact.locality);
         break;
 
       case 4:
@@ -774,6 +776,7 @@ const ListingForms = () => {
         });
 
         break;
+
       case 6:
         // formData.append("listing_id", listingId);
         formData.append("plan_id", selectedPlanId);
@@ -867,7 +870,7 @@ const ListingForms = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="w-[80%]">
+          <div className="w-[72%]">
             <BusinessInfo
               category={category}
               subCategory={subCategory}
@@ -996,21 +999,106 @@ const ListingForms = () => {
       <div className="h-screen w-full">
         <div className="bg-white md:w-[80%] max-md:w-full h-auto mx-auto flex flex-col items-center relative max-w-[2000px]">
           <div className="fixed top-0 md:w-[80%] max-w-[1400px] w-full bg-white z-40">
-            <button
-              onClick={() => setShowTips((prev) => !prev)}
-              className="fixed right-67 top-[22%] -translate-y-[20%] z-50 
-             bg-white border border-gray-200 
-             hover:bg-gray-50 
-             text-gray-600 
-             w-10 h-10 flex items-center justify-center 
-             rounded-full shadow-md 
-             text-md  font-semibold 
-             transition-all duration-200"
-              title="Posting Tips"
-            >
-              i
-            </button>
+            ``{" "}
+            <div className="relative group">
+              {/* Button */}
+              <button
+                className="
+      absolute 
+      right-4 
+      top-52 
+      z-50 
+      bg-white border border-gray-200 
+      hover:bg-gray-50 
+      text-gray-600 
+      w-10 h-10 flex items-center justify-center 
+      rounded-full shadow-md 
+      font-semibold 
+      transition-all duration-200
+    "
+                title="Posting Tips"
+              >
+                i
+              </button>
 
+              {/* Tips Panel */}
+              <div
+                className="
+      absolute 
+      right-0 
+      top-64
+      w-[380px] 
+      z-50
+      shadow-xl 
+      bg-[#FFF8F3] 
+      p-4 
+      rounded-xl 
+      text-sm 
+      border border-orange-100
+
+      opacity-0 
+      invisible 
+      group-hover:opacity-100 
+      group-hover:visible 
+      transition-all duration-200
+    "
+              >
+                <h6 className="font-extrabold text-base mb-3">Posting Tips</h6>
+
+                {currentPostingStep?.fields?.map((field, index) => (
+                  <div key={index} className="mb-2">
+                    <p className="font-semibold text-xs text-gray-800">
+                      {field.title}
+                    </p>
+                    <p className="text-gray-600 text-[11px] leading-snug">
+                      {field.tip}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {showTips && (
+              <div
+                className="
+      absolute 
+      right-6 
+      top-64
+      z-50 
+      ml-auto
+      w-[340px] 
+      
+      shadow-xl 
+      bg-[#FFF8F3] 
+      p-4 
+      rounded-xl 
+      text-sm 
+      border border-orange-100
+    "
+              >
+                <div className="w-full">
+                  <h6 className="font-extrabold text-base mb-3 flex items-center justify-between">
+                    Posting Tips
+                    <button
+                      onClick={() => setShowTips(false)}
+                      className="text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      ✕
+                    </button>
+                  </h6>
+
+                  {currentPostingStep?.fields?.map((field, index) => (
+                    <div key={index} className="mb-2">
+                      <p className="font-semibold text-xs text-gray-800">
+                        {field.title}
+                      </p>
+                      <p className="text-gray-600 text-[11px] leading-snug">
+                        {field.tip}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <Navbar
               categoryName={categoryName}
               subCategoryName={subCategoryName}
@@ -1038,36 +1126,10 @@ const ListingForms = () => {
             <Steps steps={steps} setActiveStep={setActiveStep} />
           </section>
 
-          <div className="flex max-md:flex-col gap-2 2xl:w-[95%] md:mt-14 mb-24">
+          <div className="flex max-md:flex-col gap-2 items-start relative 2xl:w-[95%] md:mt-14 mb-24 ">
             <section className="2xl:w-[95%] w-full   h-full max-md:px-5 md:pl-10 rounded-xl">
               {renderStepContent()}
             </section>
-            {showTips && (
-              <div className="md:w-[420px] mx-2 h-fit shadow-md mt-7 bg-[#FFF8F3] p-4 rounded-xl text-sm border border-orange-100">
-                <div className="w-full">
-                  <h6 className="font-extrabold text-base mb-3 flex items-center justify-between">
-                    Posting Tips
-                    <button
-                      onClick={() => setShowTips(false)}
-                      className="text-gray-400 hover:text-gray-600 text-sm"
-                    >
-                      ✕
-                    </button>
-                  </h6>
-
-                  {currentPostingStep?.fields?.map((field, index) => (
-                    <div key={index} className="mb-2">
-                      <p className="font-semibold text-xs text-gray-800">
-                        {field.title}
-                      </p>
-                      <p className="text-gray-600 text-[11px] leading-snug">
-                        {field.tip}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="flex justify-between w-[95%] 2xl:w-[95%] mb-8">

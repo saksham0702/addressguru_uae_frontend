@@ -20,6 +20,7 @@ import {
   get_approved_listings,
   get_listings_by_category_and_city,
 } from "@/api/listing-form";
+import { getListingsByCategoryAndCity } from "@/api/uaeAdminCategories";
 
 const SearchResults = () => {
   const router = useRouter();
@@ -115,17 +116,14 @@ const SearchResults = () => {
         setListings([]); // 🔥 reset
         setPageData(null); // 🔥 reset pagination
 
-        // const res = await get_listing_by_slug(slug, globalCity, 1, filters);
-        const res = await get_approved_listings();
+        const citySlugRaw = router.asPath.split("/")[2];
 
-        // const citySlugRaw = router.asPath.split("/")[2];
+        const city_slug = citySlugRaw
+          ?.toLowerCase()
+          .replace(/\(.*\)/, "")
+          .replace(/\s+/g, "-");
 
-        // const city_slug = citySlugRaw
-        //   ?.toLowerCase()
-        //   .replace(/\(.*\)/, "")
-        //   .replace(/\s+/g, "-");
-
-        // const res = await get_listings_by_category_and_city(slug, city_slug);
+        const res = await getListingsByCategoryAndCity(slug, city_slug);
         console.log("get all listings response", res);
 
         // if (!res || res.status != true) {
@@ -133,7 +131,7 @@ const SearchResults = () => {
         //   return;
         // }
 
-        setListings(res.data.data || []);
+        setListings(res || []);
         setPageData(res);
       } catch (err) {
         console.log("Error fetching listings:", err);

@@ -618,3 +618,21 @@ export const getBusinessListing = async (id) => {
     console.log("Error fetching business listing:", error);
   }
 };
+
+export const getListingsByCategoryAndCity = async (
+  category_slug,
+  city_slug,
+) => {
+  try {
+    console.log("category api hit");
+    const response = await axios.get(
+      `${API_URL}/business-listing/get-listing-by-category-and-city/${category_slug}/${city_slug}`,
+    );
+
+    console.log("get listings response", response);
+
+    return response.data;
+  } catch (error) {
+    console.log("Error fetching listings:", error);
+  }
+};

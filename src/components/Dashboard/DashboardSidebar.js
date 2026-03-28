@@ -13,6 +13,7 @@ const useMockRouter = () => {
   };
   return { currentPath, navigate };
 };
+
 const DashboardSidebar = ({ activeTab, setActiveTab }) => {
   const { currentPath, navigate } = useRouter();
   const [showLogoutPop, setShowLogoutPop] = useState(false);
