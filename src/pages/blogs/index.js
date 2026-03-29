@@ -127,19 +127,19 @@ const Blogs = () => {
       <Head>
         {/* Primary Meta Tags */}
         <title>
-          Singapore Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru
+          UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru
         </title>
         <meta
           name="title"
-          content="Singapore Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
+          content="UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
         />
         <meta
           name="description"
-          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in Singapore. Your go-to resource for living in Singapore."
+          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in UAE. Your go-to resource for living in UAE."
         />
         <meta
           name="keywords"
-          content="Singapore blog, Singapore restaurants, Singapore shopping, Singapore real estate, Singapore lifestyle, hawker centers Singapore, best cafes Singapore, fitness Singapore, education Singapore, entertainment Singapore"
+          content="UAE blog, UAE restaurants, UAE shopping, UAE real estate, UAE lifestyle, hawker centers UAE, best cafes UAE, fitness UAE, education UAE, entertainment UAE"
         />
         <meta name="author" content="AddressGuru" />
         <link rel="canonical" href="https://addressguru.sg/blogs" />
@@ -149,11 +149,11 @@ const Blogs = () => {
         <meta property="og:url" content="https://addressguru.sg/blogs" />
         <meta
           property="og:title"
-          content="Singapore Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
+          content="UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
         />
         <meta
           property="og:description"
-          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in Singapore."
+          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in UAE."
         />
         <meta property="og:image" content={`${APP_URL}/og-image-blogs.jpg`} />
         <meta property="og:site_name" content="AddressGuru" />
@@ -164,11 +164,11 @@ const Blogs = () => {
         <meta name="twitter:url" content="https://addressguru.sg/blogs" />
         <meta
           name="twitter:title"
-          content="Singapore Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
+          content="UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
         />
         <meta
           name="twitter:description"
-          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in Singapore."
+          content="Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in UAE."
         />
         <meta name="twitter:image" content={`${APP_URL}/og-image-blogs.jpg`} />
 
@@ -181,9 +181,9 @@ const Blogs = () => {
         <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        {/* Geo Tags for Singapore */}
+        {/* Geo Tags for UAE */}
         <meta name="geo.region" content="SG" />
-        <meta name="geo.placename" content="Singapore" />
+        <meta name="geo.placename" content="UAE" />
         <meta name="geo.position" content="1.290270;103.851959" />
         <meta name="ICBM" content="1.290270, 103.851959" />
 

@@ -128,7 +128,7 @@ const TitleAndLogo = ({
           <CustomButton
             showToggle={true}
             defaultText="SHOW NUMBER"
-            toggledText={data?.mobile_number}
+            toggledText={data?.mobileNumber}
             icon={
               <svg
                 width="17"
@@ -163,7 +163,7 @@ const TitleAndLogo = ({
             textColor="#FF6E04"
             toggledTextColor="#fff"
             width="150px"
-            onClick={() => handleClick(data?.id, "phone")}
+            onClick={() => handleClick(data?._id, "phone")}
           />
 
           {/* enquire now */}

@@ -1,4 +1,5 @@
 import {
+  HomeIcon,
   Layers2,
   LayoutDashboard,
   List,
@@ -985,10 +986,22 @@ export const NAV_ROUTES = [
     href: "/admin/business-listings",
   },
   {
-    name: "Business Configs",
+    name: "Followup Configs",
     icon: TableConfigIcon,
     href: "/admin/business-configs",
   },
+
+  {
+    name: "Marketplace Listings",
+    href: "/admin/marketplace-listings",
+    icon: ShoppingBag,
+  },
+  {
+    name: "Property Listings",
+    href: "/admin/property-listings",
+    icon: HomeIcon,
+  },
+
   // {
   //   name: "Users",
   //   href: "/admin/#",

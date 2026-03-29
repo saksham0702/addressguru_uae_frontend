@@ -151,6 +151,8 @@ const SeeDetails = () => {
     return <LandingPageSkeleton />;
   }
 
+  console.log("working hours data:", data.workingHours);
+
   return (
     <>
       <Head>
@@ -475,7 +477,7 @@ const SeeDetails = () => {
             <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
               <QuickInformation
                 id={data?.id}
-                businessHours={data?.workingHours}
+                businesshours={data?.workingHours}
                 category={data?.category}
                 link={data?.website_link}
                 handlePop={handlePop}

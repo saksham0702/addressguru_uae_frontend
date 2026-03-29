@@ -631,7 +631,7 @@ export const getListingsByCategoryAndCity = async (
 
     console.log("get listings response", response);
 
-    return response.data;
+    return response.data.data.listings;
   } catch (error) {
     console.log("Error fetching listings:", error);
   }

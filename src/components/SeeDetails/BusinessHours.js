@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Clock, X } from "lucide-react";
 
-const BusinessHours = ({ openingHours, mobile }) => {
+const BusinessHours = ({ openingHours , mobile }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -9,7 +9,14 @@ const BusinessHours = ({ openingHours, mobile }) => {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   // Find today's hours
-  const todayHours = openingHours?.find((hour) => hour.day === today);
+  const formattedHours = openingHours
+    ? Object.keys(openingHours).map((day) => ({
+        day,
+        ...openingHours[day],
+      }))
+    : [];
+
+  const todayHours = formattedHours.find((hour) => hour.day === today);
 
   // Format time from 24hr to 12hr
   const formatTime = (time) => {
@@ -26,10 +33,11 @@ const BusinessHours = ({ openingHours, mobile }) => {
     if (!todayHours) return "Closed Today";
     if (!todayHours.is_open) return "Closed Today";
     return `${formatTime(todayHours.open_time)} - ${formatTime(
-      todayHours.close_time
+      todayHours.close_time,
     )}`;
   };
-
+  console.log("openingHours:", openingHours);
+  console.log("formattedHours:", formattedHours);
   // Mobile view
   if (mobile) {
     return (
@@ -39,8 +47,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
           className="flex items-center gap-1 text-sm text-gray-900 hover:text-gray-800"
         >
           <Clock className="w-4 h-4" />
-          Business Hours : 
-          <span>{getDisplayText()}</span>
+          Business Hours :<span>{getDisplayText()}</span>
         </button>
 
         {showModal && (
@@ -56,7 +63,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
                 </button>
               </div>
               <div className="p-4">
-                {openingHours.map((hour) => {
+                {formattedHours?.map((hour) => {
                   const isToday = hour.day === today;
                   return (
                     <div
@@ -69,7 +76,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
                       <span>
                         {hour.is_open
                           ? `${formatTime(hour.open_time)} - ${formatTime(
-                              hour.close_time
+                              hour.close_time,
                             )}`
                           : "Closed"}
                       </span>
@@ -104,7 +111,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
           onMouseLeave={() => setIsHovered(false)}
         >
           <div className="space-y-2">
-            {openingHours.map((hour) => {
+            {formattedHours?.map((hour) => {
               const isToday = hour.day === today;
               return (
                 <div
@@ -117,7 +124,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
                   <span className="">
                     {hour.is_open
                       ? `${formatTime(hour.open_time)} - ${formatTime(
-                          hour.close_time
+                          hour.close_time,
                         )}`
                       : "Closed"}
                   </span>
@@ -132,5 +139,3 @@ const BusinessHours = ({ openingHours, mobile }) => {
 };
 
 export default BusinessHours;
-
-

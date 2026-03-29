@@ -56,7 +56,7 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
           </div>
 
           {/* City List */}
-          {data.map((item) => (
+          {data?.map((item) => (
             <div
               key={item._id}
               onClick={() => {

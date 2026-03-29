@@ -25,7 +25,7 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
 
       const citySlug = city.toLowerCase().replace(/\s+/g, "-");
 
-      // ✅ THIS creates /hotel/singapore
+      // ✅ THIS creates /hotel/UAE
       router.push(`/${categorySlug}/${citySlug}`);
     } catch (error) {
       console.error("Search API failed:", error);

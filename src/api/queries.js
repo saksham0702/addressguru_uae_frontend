@@ -12,7 +12,7 @@ export const query = async (type, id, payload) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     console.log(response);
     return response?.data?.message;
@@ -33,7 +33,7 @@ export const report = async (type, id, payload) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     console.log(response);
     return response?.data;
@@ -53,7 +53,7 @@ export const rate_us = async (type, id, payload) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     console.log("rating response", response?.data);
     return response;
@@ -74,7 +74,7 @@ export const claim_business = async (payload, type, id) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     console.log(response);
     return response.data;
@@ -106,23 +106,21 @@ export const get_view = async (type, id, viewType, userIP) => {
     console.log("res", response.data);
     return response.data;
   } catch (error) {
-    console.error("error", error?.response?.data || error.message);
-    throw error;
+    console.log("error", error?.response?.data || error.message);
   }
 };
-
 
 // send listings in mail api
 
 export const send_listings_in_mail = async (payload) => {
   console.log("payload", payload);
   try {
-      const response = await axios.post(`${API_URL}/lead/send`, payload, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      return response;
+    const response = await axios.post(`${API_URL}/lead/send`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
   } catch (error) {
     console.error("send listings in mail error:", error);
     return error;
