@@ -13,6 +13,7 @@ import MobileCities from "@/components/MobileCities";
 import Login from "@/components/UserLogin/Login";
 import { searchData } from "@/api/search";
 import { useRouter } from "next/router";
+import { getCities } from "@/api/uaeadminCities";
 
 const Header = () => {
   const [cities, setCities] = useState([]);
@@ -48,7 +49,7 @@ const Header = () => {
 
       const citySlug = city.toLowerCase().replace(/\s+/g, "-");
 
-      // ✅ THIS creates /hotel/singapore
+      // ✅ THIS creates /hotel/UAE
       router.push(`/${categorySlug}/${citySlug}`);
     } catch (error) {
       console.error("Search API failed:", error);
@@ -77,8 +78,11 @@ const Header = () => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get(`${API_URL}/cities`);
-        setCities(res.data);
+        // const res = await axios.get(`${API_URL}/cities`);
+        const res = await getCities();
+        console.log("city response from top header", res);
+
+        setCities(res?.data);
       } catch (err) {
         console.log("Client-side error:", err);
         setError(err);
@@ -141,6 +145,7 @@ const Header = () => {
   }, [pathname]);
 
   // Close sidebar on outside click
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -182,6 +187,7 @@ const Header = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [pathname]);
+
 
   return (
     <>

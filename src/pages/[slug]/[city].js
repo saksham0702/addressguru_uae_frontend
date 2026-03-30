@@ -124,7 +124,8 @@ const SearchResults = () => {
           .replace(/\s+/g, "-");
 
         const res = await getListingsByCategoryAndCity(slug, city_slug);
-        console.log("get all listings response", res);
+
+        console.log("get single listing response", res);
 
         // if (!res || res.status != true) {
         //   router.push("/404");

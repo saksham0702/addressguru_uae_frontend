@@ -18,7 +18,7 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
       return;
     }
     const filtered = cities.filter((city) =>
-      city?.toLowerCase()?.includes(searchTerm?.toLowerCase() || "")
+      city?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase() || ""),
     );
     setFilteredCities(filtered);
   }, [cities, searchTerm]);
@@ -56,8 +56,9 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-white h-full max-md:w-full md:w-[85%] transform transition-transform duration-300 ease-in-out ${showCities ? "translate-x-0" : "translate-x-full"
-          } overflow-y-auto`}
+        className={`bg-white h-full max-md:w-full md:w-[85%] transform transition-transform duration-300 ease-in-out ${
+          showCities ? "translate-x-0" : "translate-x-full"
+        } overflow-y-auto`}
       >
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-4 py-4 border-b md:px-10 border-gray-100 shadow-sm">

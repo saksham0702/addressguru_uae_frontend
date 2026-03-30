@@ -5,13 +5,15 @@ import { Target } from "lucide-react";
 const QuickInformation = ({
   handlePop,
   category,
-  workingHours,
+  businesshours,
   job,
   link,
   handleWebsiteClick,
   id,
 }) => {
   const date = category?.updated_at;
+  console.log("business hours", businesshours);
+
   return (
     <div className=" w-full max-md:hidden  rounded-t-lg ">
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
@@ -33,15 +35,17 @@ const QuickInformation = ({
         </p>
         <p>
           {/* <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "} */}
-          {/* <span className="font-bold">
-            {new Date(date).toLocaleDateString("en-GB", {
+          <span className="font-bold">
+            {/* {new Date(date).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "short",
               year: "numeric",
-            })}
-          </span> */}
+            })} */}
+          </span>
         </p>
-        {/* {!job && workingHours && <BusinessHours openingHours={workingHours} />} */}
+        {!job && BusinessHours && (
+          <BusinessHours openingHours={businesshours} mobile={""} />
+        )}
 
         <p className="text-right text-xs  mt-2 text-[#5B5B5B]">
           Ad Id : <span className="text-black">R1074662</span>
