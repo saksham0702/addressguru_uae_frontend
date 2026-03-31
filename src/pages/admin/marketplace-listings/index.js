@@ -7,6 +7,7 @@ import {
   reject_marketplace_listing,
 } from "@/api/uae-marketplace";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
+import FollowUpModal from "@/components/admin/business/FollowUpModal";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 export function fmtDate(iso) {
@@ -891,7 +892,14 @@ const MarketplaceListings = () => {
       </div>
 
       {/* ── MODALS (wire up your FollowUpModal & RejectReasonModal here) ── */}
-      {/* {followUpModal && <FollowUpModal listing={followUpModal} history={followUps[followUpModal._id] || []} onClose={() => setFollowUpModal(null)} onSubmit={handleFollowUpSubmit} />} */}
+      {followUpModal && (
+        <FollowUpModal
+          listing={followUpModal}
+          history={followUps[followUpModal._id] || []}
+          onClose={() => setFollowUpModal(null)}
+          onSubmit={handleFollowUpSubmit}
+        />
+      )}
       {rejectModalData && (
         <RejectReasonModal
           listing={rejectModalData}

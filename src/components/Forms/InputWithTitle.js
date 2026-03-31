@@ -1,7 +1,7 @@
 import React from "react";
 
 const InputWithTitle = ({
-  type="text",
+  type = "text",
   title,
   value,
   onChange,
@@ -58,8 +58,17 @@ const InputWithTitle = ({
           onChange={onChange}
         />
       )}
+      {/* CHARACTER COUNTER */}
+      {(maxLength || minLength) && (
+        <p className="text-xs text-gray-500 text-right">
+          {value?.length || 0}
+          {maxLength && ` / ${maxLength}`}
+        </p>
+      )}
+
+      {/* ERROR */}
       {error && (
-        <p className="text-red-500  z-50 text-sm font-normal">{error}</p>
+        <p className="text-red-500 z-50 text-sm font-normal">{error}</p>
       )}
     </div>
   );

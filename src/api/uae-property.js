@@ -1,16 +1,31 @@
 import axios from "axios";
 
 const API_URL = "https://addressguru.ae/api";
-// const API_URL = "http://192.168.31.108:5001";
+// const API_URL = "http://192.168.29.191:5001";
 
-export const add_property_listing = async ({ payload, step, slug }) => {
+export const add_property_listing = async ({
+  payload,
+  step,
+  slug,
+  isEditMode, // ✅ ADD THIS
+}) => {
   try {
     let url = "";
     let method = "post";
     const token = localStorage.getItem(`authToken`);
+
     if (step === 1) {
-      url = `${API_URL}/property-listings/create-listing/step/${step}`;
-      method = "post";
+      if (isEditMode) {
+        // ✅ EDIT MODE → UPDATE API
+        if (!slug) throw new Error("Slug required for edit");
+
+        url = `${API_URL}/property-listings/update-listing/${slug}/step/1`;
+        method = "put";
+      } else {
+        // ✅ CREATE MODE
+        url = `${API_URL}/property-listings/create-listing/step/1`;
+        method = "post";
+      }
     } else {
       if (!slug) {
         throw new Error("Slug is required for update steps");
@@ -27,7 +42,7 @@ export const add_property_listing = async ({ payload, step, slug }) => {
       headers: {
         "Content-Type": "multipart/form-data",
         Accept: "application/json",
-        Authorization: `Bearer ${token}`, // ✅ bearer token added
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -83,4 +98,15 @@ export const approve_property_listing = (id) => {
       },
     },
   );
+};
+
+export const get_property_by_slug = async (SLUG) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/property-listings/get-listing-by-slug/${SLUG}`,
+    );
+    return response?.data;
+  } catch (error) {
+    return null;
+  }
 };

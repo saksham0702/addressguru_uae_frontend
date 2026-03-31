@@ -7,12 +7,18 @@ import UserInformation from "@/components/SeeDetails/UserInformation";
 import RecentCustomerReviewCard from "@/components/BusinessListingComponents/RecentCustomerReviewCard";
 import TitleAndLogoMobile from "@/components/SeeDetails/TitleAndLogoMobile";
 import LandingPageSkeleton from "@/components/BusinessListingComponents/LandingPageSkeleton";
-import { get_property_by_slug } from "@/api/showlistings";
+
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { APP_URL } from "@/services/constants";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
+import {
+  approve_property_listing,
+  get_property_by_slug,
+  reject_property_listing,
+} from "@/api/uae-property";
+import { useAuth } from "@/context/AuthContext";
 
 /* ─── Checkmark SVG ─── */
 const CheckIcon = () => (
@@ -597,7 +603,7 @@ const DETAIL_FIELDS = [
 const PropertySeeDetails = () => {
   const router = useRouter();
   const { isReady, query } = router;
-  const { slug } = query;
+  const { slug, preview } = query;
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -605,6 +611,18 @@ const PropertySeeDetails = () => {
   const [enquirePop, setEnquirePop] = useState(false);
   const [thanksPop, setThanksPop] = useState(false);
   const [type, setType] = useState(null);
+  const { user } = useAuth();
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const isAdmin = user?.data?.roles?.includes(1);
+
+  const status = data?.status; // adjust if needed
+
+  const isApproved = status === "approved";
+
+  const isRejected = status === "rejected";
+  
+  const isPending = !status || status === "pending";
 
   const parseImages = (raw) => {
     if (!raw) return [];
@@ -626,6 +644,47 @@ const PropertySeeDetails = () => {
     }
   };
 
+  const handleApprove = async () => {
+    try {
+      setActionLoading("approve");
+
+      const res = await approve_property_listing(data?._id);
+      console.log("Approved:", res);
+
+      alert("Property Approved ✅");
+
+      // ✅ REFRESH DATA
+      await fetchData(0); // no retry needed
+    } catch (err) {
+      console.error(err);
+      alert("Failed to approve ❌");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setActionLoading("reject");
+
+      const res = await reject_property_listing(data?._id, {
+        status: "rejected",
+        rejectionReason: "rejected by admin",
+      });
+
+      console.log("Rejected:", res);
+      alert("Property Rejected ❌");
+
+      // ✅ REFRESH DATA
+      await fetchData(0);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to reject ❌");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const fetchData = useCallback(
     async (retries = 2) => {
       if (!slug) return;
@@ -633,7 +692,7 @@ const PropertySeeDetails = () => {
       setError(false);
       try {
         const res = await get_property_by_slug(slug);
-        console.log("response of property", res?.data);
+        console.log("response of property", res);
         if (res?.data) {
           setData(res.data);
         } else {
@@ -658,9 +717,12 @@ const PropertySeeDetails = () => {
   ); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!isReady || !slug) return;
-    fetchData();
-  }, [isReady, slug, fetchData]);
+    if (!router.isReady) return;
+
+    if (slug) {
+      fetchData();
+    }
+  }, [router.isReady, slug]);
 
   if (loading || !data) return <LandingPageSkeleton />;
 
@@ -748,11 +810,11 @@ const PropertySeeDetails = () => {
                   availability: "https://schema.org/InStock",
                 },
               }),
-              ...(data?.locality || data?.city || data?.state
+              ...(data?.locality || data?.city?.name || data?.state
                 ? {
                     address: {
                       "@type": "PostalAddress",
-                      addressLocality: data?.locality || data?.city,
+                      addressLocality: data?.locality || data?.city?.name,
                       addressRegion: data?.state,
                     },
                   }
@@ -773,7 +835,11 @@ const PropertySeeDetails = () => {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2">
+      <div
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
+          preview === "true" ? "pointer-events-none opacity-90" : ""
+        }`}
+      >
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           {/* Desktop breadcrumb */}
           <div className="max-md:hidden my-3">
@@ -785,7 +851,7 @@ const PropertySeeDetails = () => {
             <h1 className="font-semibold text-2xl line-clamp-2 capitalize mb-1">
               {data?.title}
             </h1>
-            {(data?.locality || data?.city || data?.state) && (
+            {(data?.locality || data?.city?.name || data?.state) && (
               <span className="flex gap-1.5 items-center text-gray-400 font-medium text-[15px]">
                 <svg
                   width="13"
@@ -801,11 +867,11 @@ const PropertySeeDetails = () => {
                   />
                 </svg>
                 {data?.locality && <p>{data.locality}</p>}
-                {data?.locality && (data?.city || data?.state) && (
+                {data?.locality && (data?.city?.name || data?.state) && (
                   <span>/</span>
                 )}
-                {data?.city && <p>{data.city}</p>}
-                {data?.city && data?.state && <span>/</span>}
+                {data?.city?.name && <p>{data.city?.name}</p>}
+                {data?.city?.name && data?.state && <span>/</span>}
                 {data?.state && <p>{data.state}</p>}
               </span>
             )}
@@ -893,7 +959,7 @@ const PropertySeeDetails = () => {
                   <p>
                     {`${data?.title} is listed on AddressGuru`}
                     {data?.locality ? ` in ${data.locality}` : ""}
-                    {data?.city ? `, ${data.city}` : ""}
+                    {data?.city?.name ? `, ${data.city?.name}` : ""}
                     {data?.state ? `, ${data.state}` : ""}.
                     {facilities.length > 0 && (
                       <span> Facilities include: {facilities.join(", ")}.</span>
@@ -967,6 +1033,144 @@ const PropertySeeDetails = () => {
               setType={setType}
               setThanksPop={setThanksPop}
             />
+          </div>
+        </div>
+      )}
+
+      {/* PREVIEW BANNER */}
+      {preview === "true" && (
+        <div className="fixed top-0 left-0 w-full z-[10000] backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+            {/* LEFT */}
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-gray-700 tracking-wide">
+                Preview Mode
+              </h2>
+            </div>
+
+            {/* RIGHT ACTIONS */}
+            <div className="flex items-center gap-2">
+              {/* EDIT */}
+              <button
+                onClick={() =>
+                  router.push(
+                    `/dashboard/properties-listing?propertyId=${data?.slug}&type=${data?.purpose}&category=${data?.category?._id}&edit=true`,
+                  )
+                }
+                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+                style={{ pointerEvents: "auto" }}
+              >
+                ✏️ Edit
+              </button>
+
+              {/* ACTION BUTTONS */}
+              {isAdmin && (
+                <>
+                  {/* ✅ APPROVED → show ONLY REJECT */}
+                  {isApproved && (
+                    <button
+                      onClick={handleReject}
+                      disabled={actionLoading !== null}
+                      className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg transition shadow-sm
+          ${
+            actionLoading === "reject"
+              ? "bg-red-400 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 text-white"
+          }`}
+                      style={{ pointerEvents: "auto" }}
+                    >
+                      {actionLoading === "reject" ? (
+                        <>
+                          <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                          Rejecting...
+                        </>
+                      ) : (
+                        "✖ Reject"
+                      )}
+                    </button>
+                  )}
+
+                  {/* ❌ REJECTED → show ONLY APPROVE */}
+                  {isRejected && (
+                    <button
+                      onClick={handleApprove}
+                      disabled={actionLoading !== null}
+                      className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg transition shadow-sm
+          ${
+            actionLoading === "approve"
+              ? "bg-green-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700 text-white"
+          }`}
+                      style={{ pointerEvents: "auto" }}
+                    >
+                      {actionLoading === "approve" ? (
+                        <>
+                          <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                          Approving...
+                        </>
+                      ) : (
+                        "✔ Approve"
+                      )}
+                    </button>
+                  )}
+
+                  {/* ⏳ PENDING → show BOTH */}
+                  {isPending && (
+                    <>
+                      <button
+                        onClick={handleApprove}
+                        disabled={actionLoading !== null}
+                        className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg transition shadow-sm
+            ${
+              actionLoading === "approve"
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700 text-white"
+            }`}
+                        style={{ pointerEvents: "auto" }}
+                      >
+                        {actionLoading === "approve" ? (
+                          <>
+                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                            Approving...
+                          </>
+                        ) : (
+                          "✔ Approve"
+                        )}
+                      </button>
+
+                      <button
+                        onClick={handleReject}
+                        disabled={actionLoading !== null}
+                        className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg transition shadow-sm
+            ${
+              actionLoading === "reject"
+                ? "bg-red-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700 text-white"
+            }`}
+                        style={{ pointerEvents: "auto" }}
+                      >
+                        {actionLoading === "reject" ? (
+                          <>
+                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                            Rejecting...
+                          </>
+                        ) : (
+                          "✖ Reject"
+                        )}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+              {/* BACK */}
+              <button
+                onClick={() => router.back()}
+                className="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                style={{ pointerEvents: "auto" }}
+              >
+                Back
+              </button>
+            </div>
           </div>
         </div>
       )}

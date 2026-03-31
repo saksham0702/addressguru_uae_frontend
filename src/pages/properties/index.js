@@ -66,8 +66,8 @@ const Properties = () => {
       try {
         setIsLoading(true);
         setError(false);
-        setListings([]); // 🔥 reset list
-        setPageData(null); // 🔥 reset pagination
+        setListings([]);
+        setPageData(null);
 
         const res = await get_all_property_listing(selectedFilters, 1);
 
