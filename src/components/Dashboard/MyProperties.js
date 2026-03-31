@@ -178,7 +178,7 @@ const MyPropertyListings = ({ data }) => {
                     {/* Buttons */}
                     <div className="flex gap-2 whitespace-nowrap max-md:mt-1">
                       <Link
-                        href={`/dashboard/properties-listing?propertyId=${property?.slug}&edit=true`}
+                        href={`/dashboard/properties-listing?propertyId=${property?.slug}&type=${property?.purpose}&category=${property?.category?._id}&edit=true`}
                         className="inline-flex items-center gap-2 px-4 max-md:px-2 py-1.5 max-md:text-[10px] max-md:border-1 max-md:border-blue-500 max-md:text-blue-400 md:bg-blue-600 md:hover:bg-blue-700 text-white text-xs font-semibold rounded-sm transition-colors"
                       >
                         <svg
@@ -206,7 +206,7 @@ const MyPropertyListings = ({ data }) => {
                       </Link>
 
                       <Link
-                        href={`/property/${property?.slug}`}
+                        href={`/properties/${property?.slug}?preview=true`}
                         className="inline-flex items-center gap-2 max-md:px-2 px-4 py-1.5 max-md:text-[10px] uppercase text-orange-600 border border-orange-600 text-xs font-semibold rounded-sm transition-colors hover:bg-orange-50"
                       >
                         <Eye className="w-3 h-3" />

@@ -66,12 +66,12 @@ const Properties = () => {
       try {
         setIsLoading(true);
         setError(false);
-        setListings([]); // 🔥 reset list
-        setPageData(null); // 🔥 reset pagination
+        setListings([]);
+        setPageData(null);
 
         const res = await get_all_property_listing(selectedFilters, 1);
 
-        setListings(res?.data?.properties || []);
+        setListings(res?.data?.listings || []);
         setPageData(res); // store full response for pagination meta
       } catch (err) {
         console.error("fetchListings error", err);

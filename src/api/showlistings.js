@@ -153,10 +153,9 @@ export const get_recent_listings = async (type) => {
 
 export const get_property_by_slug = async (SLUG) => {
   try {
-    const response = await axios.get(`${API_URL}/property/listings/${SLUG}`);
+    const response = await axios.get(`${API_URL}/property-listings/${SLUG}`);
     return response?.data;
   } catch (error) {
     return null;
   }
 };
-

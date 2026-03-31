@@ -674,8 +674,7 @@ const PropertyListings = () => {
                         <div className="min-w-0 flex-1 pt-0.5">
                           <a
                             className="font-semibold text-blue-600 text-md leading-snug truncate max-w-[210px] block"
-                            href={`/${listing?.slug}?preview=true`}
-                            target="_blank"
+                            href={`/properties/${listing?.slug}?preview=true`}
                           >
                             {listing.title}
                           </a>
@@ -748,12 +747,12 @@ const PropertyListings = () => {
                         </div>
                       </div>
                       {listing.location?.locality && (
-                        <div className="text-[11px] text-slate-400 mt-0.5 ml-5">
+                        <div className="text-[11px] text-gray-800 mt-0.5 ml-5">
                           {listing.location.locality}
                         </div>
                       )}
                       {listing.location?.address && (
-                        <div className="text-[10px] text-slate-300 mt-0.5 ml-5 truncate max-w-[120px]">
+                        <div className="text-[10px] text-gray-800 mt-0.5 ml-5 truncate max-w-[120px]">
                           {listing.location.address}
                         </div>
                       )}

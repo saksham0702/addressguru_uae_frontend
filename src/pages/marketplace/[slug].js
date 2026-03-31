@@ -185,7 +185,6 @@ const MarketplaceSeeDetails = () => {
   const payments = parseList(data.payments);
   const facilities = parseList(data.facilities);
   const services = parseList(data.services);
-
   return (
     <>
       <Head>
@@ -432,7 +431,7 @@ const MarketplaceSeeDetails = () => {
       )}
 
       {/* PREVIEW BANNER */}
-      {/* PREVIEW BANNER */}
+
       {preview === "true" && (
         <div className="fixed top-0 left-0 w-full z-[10000] backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
@@ -448,7 +447,9 @@ const MarketplaceSeeDetails = () => {
               {/* ✏️ EDIT */}
               <button
                 onClick={() =>
-                  router.push(`/dashboard/marketplace-form?slug=${data?.slug}`)
+                  router.push(
+                    `/dashboard/marketplace-listing?productId=${data?.slug}&edit=true`,
+                  )
                 }
                 className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
               >

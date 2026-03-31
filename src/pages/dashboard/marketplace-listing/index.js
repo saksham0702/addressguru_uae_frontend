@@ -559,7 +559,9 @@ const MarketPlaceListing = () => {
     }
 
     if (step === 2) {
-      if (media.images.length === 0) {
+      const hasExistingImages = media.images.some((img) => img.isExisting);
+
+      if (!hasExistingImages && media.images.length === 0) {
         newErrors.images = "Please upload at least one image";
       }
     }
@@ -681,15 +683,42 @@ const MarketPlaceListing = () => {
         formData.append("additional_fields", JSON.stringify([]));
 
         break;
-      case 2:
-        // formData.append("listing_id", listingId);
-        // Only send new (non-existing) images as files
+      case 2: {
         formData.append("step", stepNumber);
+
         const newImages = media.images.filter((img) => !img.isExisting);
-        newImages.forEach((img) => {
-          formData.append("images", img.file);
+        const existingImages = media.images.filter((img) => img.isExisting);
+
+        console.log("STEP 2 DEBUG:", {
+          newImages,
+          existingImages,
         });
+
+        // 🚨 EDIT MODE FIX (MOST IMPORTANT)
+        if (isEditMode && newImages.length === 0 && existingImages.length > 0) {
+          console.log("Skipping Step 2 API (only existing images)");
+
+          setActiveStep(3);
+          setIsSubmitting(false);
+          return true;
+        }
+
+        // ❌ No images at all
+        if (newImages.length === 0 && existingImages.length === 0) {
+          setErrors({ images: "Please upload at least one image" });
+          setIsSubmitting(false);
+          return false;
+        }
+
+        // ✅ Upload only NEW images
+        newImages.forEach((img) => {
+          if (img.file) {
+            formData.append("images", img.file);
+          }
+        });
+
         break;
+      }
 
       case 3:
         formData.append("name", contact.name);
@@ -903,6 +932,7 @@ const MarketPlaceListing = () => {
                 required={true}
                 isTextarea={true}
                 rows={5}
+                maxLength={500}
                 value={adInfo.description}
                 onChange={(e) =>
                   handleAdInfoChange("description", e.target.value)

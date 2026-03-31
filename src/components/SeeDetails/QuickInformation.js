@@ -19,20 +19,20 @@ const QuickInformation = ({
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
         Quick Information
       </div>
-      <div className="bg-[#EEEEEE] p-4 text-sm border-b">
+      <div className="bg-[#EEEEEE] px-4 py-6 text-sm border-b">
         <p>
           <span className="font-medium text-[#5B5B5B]">Category :</span>{" "}
           <span className="font-bold">
             {job ? category?.category_name : category?.name}
           </span>
         </p>
-        <p>
+        {/* <p>
           <span className="font-medium text-[#5B5B5B] ">Starting Price :</span>
           <span className="font-bold">
             {" "}
             <span>&#x20B9;</span> 1200
           </span>
-        </p>
+        </p> */}
         <p>
           {/* <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "} */}
           <span className="font-bold">

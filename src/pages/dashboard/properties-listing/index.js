@@ -1,6 +1,6 @@
 import { add_properties_listing, get_service_facility } from "@/api/forms";
 
-import { get_property_by_slug } from "@/api/showlistings";
+// import { get_property_by_slug } from "@/api/showlistings";
 import CheckBox from "@/components/Forms/CheckBox";
 import DropDown from "@/components/Forms/DropDown";
 import InputWithTitle from "@/components/Forms/InputWithTitle";
@@ -25,13 +25,15 @@ import {
 import AdditionalPropertyFields, {
   FIELD_CONFIG as FIELD_CONFIG_REF,
 } from "@/components/Forms/FormSections/AdditionalPropertyFields";
-import { APP_URL } from "@/services/constants";
+// import { APP_URL } from "@/services/constants";
 
 import axios from "axios";
-import { add_property_listing } from "@/api/uae-property";
+import { add_property_listing, get_property_by_slug } from "@/api/uae-property";
 import { get_plans } from "@/api/plans";
+import SuccessModal from "@/components/Forms/sucesspopup";
 
 const PropertiesListing = () => {
+  const APP_URL = "https://addressguru.ae/api";
   const router = useRouter();
   const categoryId = router?.query?.id;
   const type = router?.query?.type;
@@ -66,7 +68,8 @@ const PropertiesListing = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [additionalFields, setAdditionalFields] = useState({});
   const [editLoading, setEditLoading] = useState(false);
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [redirectSlug, setRedirectSlug] = useState("");
   // Refs
   const rentByRef = useRef(null);
   const availableRef = useRef(null);
@@ -111,7 +114,7 @@ const PropertiesListing = () => {
     altCountryCode: "+65",
     altNumber: "",
     cityId: "",
-    landmark: "",
+    locality: "",
     address: "",
   });
 
@@ -175,21 +178,21 @@ const PropertiesListing = () => {
         setListingId(d.id);
 
         // ── Resolve category/type from API so we don't need query params ──
-        setEditCategoryId(d.category_id || "");
-        setEditType(d.type || d.sale_by || "sale");
-        setEditCategory(d.category_slug || d.category?.slug || "");
+        setEditCategoryId(d.category._id || "");
+        setEditType(d.purpose || d.sale_by || "sale");
+        setEditCategory(d.category?.name || "other");
 
         // Pre-fill step 1 — Property Info
         setPropertyInfo({
-          rentBy: d.sale_by || "",
-          size: d.size ? String(d.size) : "",
+          rentBy: d.purpose || "", // ✅ FIXED
+          size: d.area?.size ? String(d.area.size) : "", // ✅ FIXED
           caeNumber: d.cae_number || "",
           title: d.title || "",
           description: d.description || "",
-          priceType: d.price_type || "amount",
-          amount: d.amount ? String(d.amount) : "",
+          priceType: d.price?.amount ? "amount" : "contact_for_sale",
+          amount: d.price?.amount ? String(d.price.amount) : "", // ✅ FIXED
+          areaUnit: d.area?.unit || "sqft",
         });
-
         // Pre-fill available date
         if (d.available) {
           const parsedDate = new Date(d.available);
@@ -197,12 +200,8 @@ const PropertiesListing = () => {
         }
 
         // Pre-fill facilities & services
-        if (d.facilities_id && Array.isArray(d.facilities_id)) {
-          setSelectedFacilities(d.facilities_id);
-        }
-        if (d.services_id && Array.isArray(d.services_id)) {
-          setSelectedServices(d.services_id);
-        }
+        setSelectedFacilities(d.facilities || []);
+        setSelectedServices(d.services || []);
 
         // Pre-fill additional property fields
         setAdditionalFields({
@@ -232,17 +231,19 @@ const PropertiesListing = () => {
         // Pre-fill step 2 — Images
         const existingImages = Array.isArray(d.images)
           ? d.images
-          : (() => {
-              try {
-                return JSON.parse(d.images);
-              } catch {
-                return [];
-              }
-            })();
+          : typeof d.images === "string"
+            ? (() => {
+                try {
+                  return JSON.parse(d.images);
+                } catch {
+                  return [];
+                }
+              })()
+            : [];
 
         setMedia({
-          images: existingImages?.map((url, idx) => ({
-            id: `existing-${idx}-${Date.now()}`,
+          images: existingImages.map((url, idx) => ({
+            id: `existing-${idx}`,
             file: null,
             preview: url.startsWith("http") ? url : `${APP_URL}/${url}`,
             name: url.split("/").pop(),
@@ -252,20 +253,24 @@ const PropertiesListing = () => {
 
         // Pre-fill step 3 — Contact
         setContact({
-          name: d.name || "",
+          name: d.contactPersonName || "",
           email: d.email || "",
-          number: d.mobile_number || "",
-          countryCode: d.country_code || "+65",
-          altCountryCode: d.alt_country_code || "+65",
-          altNumber: d.second_mobile_number || "",
-          cityId: d.city_id || "",
-          landmark: d.locality || "",
+          number: d.mobileNumber || "",
+          countryCode: d.countryCode || "+65",
+
+          altCountryCode: d.altCountryCode || "+65",
+          altNumber: d.alternateMobileNumber || "",
+
+          cityId: d.city?._id || "",
+
+          locality: d.location?.locality || "",
+          address: d.location?.address || "",
         });
 
         // Pre-fill step 4 — SEO
         setSeo({
-          title: d.seo_title || "",
-          description: d.seo_description || "",
+          title: d.seo?.title || "",
+          description: d.seo?.description || "",
         });
 
         // Fetch facilities/services using category_id from API
@@ -389,6 +394,19 @@ const PropertiesListing = () => {
     if (!isEditMode) return; // create mode fetches plans in above effect
     getPlansData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (media.images.length > 0) {
+      saveToSession("media", media);
+    }
+  }, [media]);
+
+  useEffect(() => {
+    if (isEditMode) return;
+
+    const savedData = getFromSession();
+    if (savedData.media) setMedia(savedData.media);
+  }, []);
 
   const currentStep = steps.find((step) => step.active)?.step || 1;
 
@@ -605,8 +623,11 @@ const PropertiesListing = () => {
     }
 
     if (step === 2) {
-      if (media.images.length === 0)
+      const hasExistingImages = media.images.some((img) => img.isExisting);
+
+      if (!hasExistingImages && media.images.length === 0) {
         newErrors.images = "Please upload at least one image";
+      }
     }
 
     if (step === 3) {
@@ -706,16 +727,45 @@ const PropertiesListing = () => {
 
         break;
 
-      case 2:
+      case 2: {
         formData.append("listing_id", listingId);
-        media.images
-          .filter((img) => !img.isExisting)
-          .forEach((img) => {
-            const file = imageFilesRef.current[img.id];
-            if (file) formData.append("images", file);
-          });
-        break;
 
+        // 🔍 Separate images
+        const newImages = media.images.filter((img) => !img.isExisting);
+        const existingImages = media.images.filter((img) => img.isExisting);
+
+        console.log("STEP 2 DEBUG:", {
+          newImages,
+          existingImages,
+        });
+
+        // 🚨 EDIT MODE FIX (MOST IMPORTANT)
+        if (isEditMode && newImages.length === 0 && existingImages.length > 0) {
+          // ✅ Skip API call completely
+          console.log("Skipping Step 2 API (only existing images)");
+
+          setActiveStep(3);
+          setIsSubmitting(false);
+          return true;
+        }
+
+        // ❌ If no images at all (edge case)
+        if (newImages.length === 0 && existingImages.length === 0) {
+          setErrors({ images: "Please upload at least one image" });
+          setIsSubmitting(false);
+          return false;
+        }
+
+        // ✅ Upload only NEW images
+        newImages.forEach((img) => {
+          const file = imageFilesRef.current[img.id];
+          if (file) {
+            formData.append("images", file);
+          }
+        });
+
+        break;
+      }
       case 3:
         formData.append("listing_id", listingId);
         formData.append("name", contact.name);
@@ -725,10 +775,11 @@ const PropertiesListing = () => {
         formData.append("alt_country_code", contact.altCountryCode);
         formData.append("mobile_number", contact.number);
         formData.append("address", contact.address);
+        formData.append("locality", contact.locality);
 
         if (contact.altNumber)
           formData.append("second_mobile_number", contact.altNumber);
-        formData.append("locality", contact.landmark);
+
         break;
 
       case 4:
@@ -752,6 +803,7 @@ const PropertiesListing = () => {
         step: stepNumber,
         listingId,
         slug,
+        isEditMode,
       });
       console.log(`Step ${stepNumber} submitted:`, response);
       console.log("response of step 1", response);
@@ -776,12 +828,10 @@ const PropertiesListing = () => {
 
       if (stepNumber === 5) {
         clearSession();
-        if (response?.success) {
-          router.push({
-            pathname: `/property/${response?.data?.slug}`,
-            query: { preview: true },
-          });
-        }
+        if (response?.status == true) {
+          setRedirectSlug(response?.data?.slug);
+          setShowSuccessModal(true);
+        } // ✅ OPEN MODAL
       } else {
         if (response?.status == true) setActiveStep(stepNumber + 1);
       }
@@ -961,6 +1011,7 @@ const PropertiesListing = () => {
                 required={true}
                 isTextarea={true}
                 rows={5}
+                maxLength={500}
                 value={propertyInfo.description}
                 onChange={(e) =>
                   handlePropertyInfoChange("description", e.target.value)
@@ -1372,6 +1423,16 @@ const PropertiesListing = () => {
         <section>
           <Footer />
         </section>
+
+        <SuccessModal
+          open={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          title="Listing Submitted Successfully 🎉"
+          message="Your property listing has been submitted successfully. You can preview or manage it from your dashboard."
+          redirectTo={`/dashboard`}
+          autoRedirect={true}
+          autoRedirectTime={3000}
+        />
       </div>
     </>
   );
