@@ -339,8 +339,14 @@ const SeeDetails = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.facilities?.map((facility, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <svg
+                      <div key={index} className="flex items-end space-x-2">
+                        {facility?.iconSvg ? (
+                          <div
+                           className="icon-wrapper"
+                            dangerouslySetInnerHTML={{ __html: facility?.iconSvg }}
+                          />
+                        ) : (
+                          <svg
                           width="20"
                           height="20"
                           viewBox="0 0 20 20"
@@ -352,6 +358,7 @@ const SeeDetails = () => {
                             fill="#FF6E04"
                           />
                         </svg>
+                        )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {facility.name}
                         </span>
@@ -400,7 +407,7 @@ const SeeDetails = () => {
               )}
 
               {/* PAYMENT METHODS */}
-              {data?.payments && data.payments.length > 0 && (
+              {data?.paymentModes && data.paymentModes.length > 0 && (
                 <div className="max-w-5xl mt-5 md:pl-2 px-1">
                   <span className="flex gap-3 items-center">
                     <h2 className="font-semibold uppercase whitespace-nowrap md:text-xl">
@@ -414,8 +421,14 @@ const SeeDetails = () => {
                   </p>
 
                   <div className="flex flex-col gap-4">
-                    {data?.payments?.map((payment, index) => (
+                    {data?.paymentModes?.map((payment, index) => (
                       <div key={index} className="flex items-center space-x-2">
+                        {payment?.iconSvg ? (
+                          <div
+                           className="icon-wrapper"
+                            dangerouslySetInnerHTML={{ __html: payment?.iconSvg }}
+                          />
+                        ) : (
                         <svg
                           width="20"
                           height="20"
@@ -427,9 +440,10 @@ const SeeDetails = () => {
                             d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
                             fill="#FF6E04"
                           />
-                        </svg>
+                          </svg>
+                        )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
-                          {payment}
+                          {payment?.name}
                         </span>
                       </div>
                     ))}

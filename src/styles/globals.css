@@ -29,6 +29,12 @@ body {
    font-family: 'Montserrat', sans-serif;
    background-color: #F8F7F7;
 }
+.icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
 
  /* .custom-dots .swiper-pagination-bullet {
   width: 6px;
