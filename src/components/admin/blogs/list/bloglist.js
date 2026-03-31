@@ -9,7 +9,8 @@ export default function BlogList() {
   const router = useRouter();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  //   const API_URL = "http://192.168.29.191:5001";
+  //   const API_URL = "
+  // .168.29.191:5001";
   const API_URL = "https://addressguru.ae/api";
   useEffect(() => {
     fetchBlogs();
