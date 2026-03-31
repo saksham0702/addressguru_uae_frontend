@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { get_marketplace_listings } from "@/api/uae-dashboard";
-import { get_all_marketplace_listings } from "@/api/uae-marketplace";
+import {
+  approve_marketplace_listing,
+  get_all_marketplace_listings,
+  reject_marketplace_listing,
+} from "@/api/uae-marketplace";
+import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 export function fmtDate(iso) {
@@ -210,10 +215,10 @@ const MarketplaceListings = () => {
     try {
       setLoadingId(listing._id);
       if (action === "approved") {
-        // await approve_marketplace_listing(listing._id);
+        await approve_marketplace_listing(listing._id);
       }
       if (action === "unapproved") {
-        // await reject_marketplace_listing(listing._id, { status: "unapproved" });
+        await reject_marketplace_listing(listing._id, { status: "unapproved" });
       }
       if (action === "rejected") {
         setRejectModalData(listing);
@@ -230,7 +235,20 @@ const MarketplaceListings = () => {
 
   async function handleRejectSubmit({ listingId, reason }) {
     try {
-      // await reject_marketplace_listing(listingId, { status: "rejected", rejectionReason: reason });
+      await reject_marketplace_listing(listingId, {
+        status: "rejected",
+        rejectionReason: reason,
+      });
+
+      // ✅ instant UI update (better UX)
+      setListings((prev) =>
+        prev.map((l) =>
+          l._id === listingId
+            ? { ...l, status: "rejected", rejectionReason: reason }
+            : l,
+        ),
+      );
+
       await fetchListings();
 
       setRejectModalData(null);
@@ -242,16 +260,16 @@ const MarketplaceListings = () => {
 
   const fetchListings = async () => {
     try {
-      // Replace with your actual API call:
       const res = await get_all_marketplace_listings({
         page,
         limit: showEntries,
-        ...(statusFilter !== "all" && { status: statusFilter }),
+        status: statusFilter, // ✅ ALWAYS send
       });
-      console.log("res", res);
+
       setListings(res?.data?.listings || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
       setTotalCount(res?.data?.pagination?.total || 0);
+
       settotallistings(res?.data?.totalAll || 0);
       setapprovedlisting(res?.data?.statusCounts?.approved || 0);
       setrejectedlisting(res?.data?.statusCounts?.rejected || 0);
@@ -260,7 +278,6 @@ const MarketplaceListings = () => {
       console.error(err);
     }
   };
-
   useEffect(() => {
     fetchListings();
   }, [page, showEntries, statusFilter]);
@@ -353,6 +370,7 @@ const MarketplaceListings = () => {
               onClick={() => {
                 setStatusFilter(s.key);
                 setPage(1);
+                setListings([]);
               }}
               className={`flex items-center justify-between min-w-[140px] px-4 py-2.5 rounded-lg border text-left transition-all
                 ${
@@ -530,8 +548,7 @@ const MarketplaceListings = () => {
                         <div className="min-w-0 flex-1 pt-0.5">
                           <a
                             className="font-semibold text-blue-600 text-md leading-snug truncate max-w-[210px] block"
-                            href={`/${listing?.slug}?preview=true`}
-                            target="_blank"
+                            href={`/marketplace/${listing?.slug}?preview=true`}
                           >
                             {listing.title}
                           </a>
@@ -553,7 +570,7 @@ const MarketplaceListings = () => {
                             <span className="text-slate-200 text-xs">|</span>
                             <Link
                               className="text-[11px] text-blue-500 font-semibold hover:text-blue-700 hover:underline transition-colors"
-                              href={`/dashboard/marketplace-forms?category=${listing?.category?._id}&name=${encodeURIComponent(listing?.slug)}`}
+                              href={`/dashboard/marketplace-listing?productId=${listing?.slug}&edit=true`}
                             >
                               Edit
                             </Link>
@@ -875,8 +892,13 @@ const MarketplaceListings = () => {
 
       {/* ── MODALS (wire up your FollowUpModal & RejectReasonModal here) ── */}
       {/* {followUpModal && <FollowUpModal listing={followUpModal} history={followUps[followUpModal._id] || []} onClose={() => setFollowUpModal(null)} onSubmit={handleFollowUpSubmit} />} */}
-      {/* {rejectModalData && <RejectReasonModal listing={rejectModalData} onClose={() => setRejectModalData(null)} onSubmit={handleRejectSubmit} />} */}
-
+      {rejectModalData && (
+        <RejectReasonModal
+          listing={rejectModalData}
+          onClose={() => setRejectModalData(null)}
+          onSubmit={handleRejectSubmit}
+        />
+      )}
       <Toast toast={toast} />
 
       <style>{`

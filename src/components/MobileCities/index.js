@@ -7,7 +7,7 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
   const { setCity } = useAuth();
 
   const handleCitySelect = (city) => {
-    setCity(city); // ✅ Update globally
+    setCity(city?.name); // ✅ Update globally
     setShowCities(false);
   };
 
@@ -107,7 +107,7 @@ const MobileCities = ({ cities = [], showCities, setShowCities }) => {
                 className="cursor-pointer max-w-60 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all"
               >
                 <span className="text-gray-800 font-medium text-sm md:text-base">
-                  {city}
+                  {city?.name}
                 </span>
               </div>
             ))}

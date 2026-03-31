@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL = "https://addressguru.ae/api";
+// const API_URL = "http://192.168.31.108:5001";
 
 export const add_property_listing = async ({ payload, step, slug }) => {
   try {
@@ -42,10 +43,13 @@ export const add_property_listing = async ({ payload, step, slug }) => {
   }
 };
 
-export const get_all_property_listing = async () => {
+export const get_all_property_listing = async (params) => {
   try {
     const response = await axios.get(
-      `${API_URL}/property-listings/get-all-listings?page=1&limit=10`,
+      `${API_URL}/property-listings/get-all-listings`,
+      {
+        params, // 👈 THIS IS KEY
+      },
     );
 
     return response?.data;

@@ -20,13 +20,11 @@ const RecentListingCard = ({ data, slugData }) => {
       {/* House Image - Fixed Height */}
       <div className="w-full h-[200px] bg-gray-200 relative overflow-hidden">
         {data?.images.length > 0 ? (
-          <img
-            src={`${IMG_URL}/${data?.images[0]}`}
-            alt={data?.title || "Business"}
-            fill
-            className="object-cover"
-            sizes="200px"
-          />
+         <img
+  src={`${IMG_URL}/${data?.images[0]}`}
+  alt={data?.title || "Business"}
+  className="w-full h-full object-cover"
+/>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             <svg

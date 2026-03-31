@@ -25,12 +25,16 @@ import { getListingsByCategoryAndCity } from "@/api/uaeAdminCategories";
 const SearchResults = () => {
   const router = useRouter();
 
-  const { city: globalCity } = useAuth(); // USE ONLY GLOBAL CITY
+  const { city: globalcity } = useAuth(); // USE ONLY GLOBAL CITY
+
+  const cityName =
+    typeof globalcity === "string" ? globalcity : globalcity?.name || "";
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pageData, setPageData] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  // console.log("global city", cityName);
 
   const [filters, setFilters] = useState({
     sort_by: null, // newest | oldest | popular
@@ -89,9 +93,9 @@ const SearchResults = () => {
   //   REDIRECT WHEN CITY CHANGES
   // -------------------------
   useEffect(() => {
-    if (!router.isReady || !slug || !globalCity) return;
+    if (!router.isReady || !slug || !cityName) return;
 
-    const newCitySlug = globalCity.toLowerCase().replace(/\s+/g, "-");
+    const newCitySlug = cityName?.toLowerCase().replace(/\s+/g, "-");
     const categorySlug = slug.toLowerCase().replace(/\s+/g, "-");
 
     const expectedPath = `/${categorySlug}/${newCitySlug}`;
@@ -101,13 +105,13 @@ const SearchResults = () => {
         pathname: expectedPath,
       });
     }
-  }, [globalCity, router.isReady, slug]);
+  }, [cityName, router.isReady, slug]);
 
   // -------------------------
   //  API CALL (ONLY GLOBAL CITY)
   // -------------------------
   useEffect(() => {
-    if (!router.isReady || !globalCity) return;
+    if (!router.isReady || !cityName) return;
 
     const fetchListings = async () => {
       try {
@@ -116,9 +120,7 @@ const SearchResults = () => {
         setListings([]); // 🔥 reset
         setPageData(null); // 🔥 reset pagination
 
-        const citySlugRaw = router.asPath.split("/")[2];
-
-        const city_slug = citySlugRaw
+        const city_slug = cityName
           ?.toLowerCase()
           .replace(/\(.*\)/, "")
           .replace(/\s+/g, "-");
@@ -132,7 +134,7 @@ const SearchResults = () => {
         //   return;
         // }
 
-        setListings(res || []);
+        setListings(Array.isArray(res) ? res : res?.data || []);
         setPageData(res);
       } catch (err) {
         console.log("Error fetching listings:", err);
@@ -143,7 +145,7 @@ const SearchResults = () => {
     };
 
     fetchListings();
-  }, [router.isReady, slug, globalCity, filters]);
+  }, [router.isReady, slug, cityName, filters]);
 
   const handleLoadMore = async () => {
     if (!pageData?.has_more || isLoadingMore) return;
@@ -152,7 +154,7 @@ const SearchResults = () => {
       setIsLoadingMore(true);
       const res = await get_listing_by_slug(
         slug,
-        globalCity,
+        cityName,
         pageData.next_page,
         filters, // 🔥 PASS FILTERS
       );
@@ -193,41 +195,41 @@ const SearchResults = () => {
       </section>
       <Head>
         {/* ===== META BASIC ===== */}
-        <title>{`Top ${slug} in ${globalCity} | Best ${slug} Listings`}</title>
+        <title>{`Top ${slug} in ${cityName} | Best ${slug} Listings`}</title>
         <meta
           name="description"
-          content={`Find the best ${slug} in ${globalCity}. Browse verified business listings, reviews, contact information, and more.`}
+          content={`Find the best ${slug} in ${cityName}. Browse verified business listings, reviews, contact information, and more.`}
         />
         <meta
           name="keywords"
-          content={`${slug}, best ${slug} in ${globalCity}, top ${slug}, ${globalCity} business listings`}
+          content={`${slug}, best ${slug} in ${cityName}, top ${slug}, ${cityName} business listings`}
         />
 
         {/* ===== CANONICAL ===== */}
-        <link
+        {/* <link
           rel="canonical"
           href={`${APP_URL}/${slug
             ?.toLowerCase()
-            .replace(/\s+/g, "-")}/${globalCity
+            .replace(/\s+/g, "-")}/${cityName
             ?.toLowerCase()
             .replace(/\s+/g, "-")}`}
-        />
+        /> */}
 
         {/* ===== OPEN GRAPH (FACEBOOK / WHATSAPP) ===== */}
         <meta property="og:type" content="website" />
         <meta
           property="og:title"
-          content={`Top ${slug} in ${globalCity} | Business Listings`}
+          content={`Top ${slug} in ${cityName} | Business Listings`}
         />
         <meta
           property="og:description"
-          content={`Looking for the best ${slug} in ${globalCity}? Visit our platform to explore verified listings and choose the right one.`}
+          content={`Looking for the best ${slug} in ${cityName}? Visit our platform to explore verified listings and choose the right one.`}
         />
         <meta
           property="og:url"
           content={`${APP_URL}/${slug
             ?.toLowerCase()
-            .replace(/\s+/g, "-")}/${globalCity
+            .replace(/\s+/g, "-")}/${cityName
             ?.toLowerCase()
             .replace(/\s+/g, "-")}`}
         />
@@ -241,11 +243,11 @@ const SearchResults = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content={`Top ${slug} in ${globalCity} | Business Listings`}
+          content={`Top ${slug} in ${cityName} | Business Listings`}
         />
         <meta
           name="twitter:description"
-          content={`Checkout the top ${slug} available in ${globalCity}. Explore business listings, ratings, and contact details.`}
+          content={`Checkout the top ${slug} available in ${cityName}. Explore business listings, ratings, and contact details.`}
         />
         <meta
           name="twitter:image"
@@ -259,8 +261,8 @@ const SearchResults = () => {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ItemList",
-              name: `Top ${slug} in ${globalCity}`,
-              url: `${APP_URL}/${slug}/${globalCity}`,
+              name: `Top ${slug} in ${cityName}`,
+              url: `${APP_URL}/${slug}/${cityName}`,
               numberOfItems: listings?.length || 0,
               itemListElement: listings?.map((item, i) => ({
                 "@type": "ListItem",
@@ -280,14 +282,14 @@ const SearchResults = () => {
           <div className="mt-6 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
               slug={slug}
-              city={globalCity}
+              city={cityName}
               length={pageData?.total}
               name={"business listings"}
             />
           </div>
 
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {slug} in {globalCity}
+            Top {slug} in {cityName}
           </h1>
 
           <FilterBar

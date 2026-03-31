@@ -5,6 +5,7 @@ import {
   get_all_property_listing,
   reject_property_listing,
 } from "@/api/uae-property";
+import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 // import { get_all_property_listings } from "@/api/uae-property"; // wire up your API
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -329,17 +330,27 @@ const PropertyListings = () => {
   async function handleApproveReject(listing, action) {
     try {
       setLoadingId(listing._id);
+
+      if (action === "approved") {
+        await approve_property_listing(listing._id);
+      }
+
+      if (action === "unapproved") {
+        await reject_property_listing(listing._id, {
+          status: "unapproved",
+        });
+      }
+
       if (action === "rejected") {
+        // 👇 open modal only (like business listing)
         setRejectModalData(listing);
         return;
       }
-      const res = await approve_property_listing(listing._id);
-      console.log("res of approve listing", res);
 
-      // await unapprove_property_listing(listing._id);
       showToast(`Listing ${action} successfully`, "success");
       await fetchListings();
-    } catch {
+    } catch (err) {
+      console.error(err);
       showToast("Something went wrong", "error");
     } finally {
       setLoadingId(null);
@@ -348,27 +359,60 @@ const PropertyListings = () => {
 
   async function handleRejectSubmit({ listingId, reason }) {
     try {
-      // await reject_property_listing(listingId, {
-      //   status: "rejected",
-      //   rejectionReason: reason,
-      // });
+      const payload = {
+        status: "rejected",
+        rejectionReason: reason,
+      };
+
+      await reject_property_listing(listingId, payload);
+
+      // ✅ instant UI update FIRST (smooth UX)
+      setListings((prev) =>
+        prev.map((l) =>
+          l._id === listingId
+            ? {
+                ...l,
+                status: "rejected",
+                rejectionReason: reason,
+              }
+            : l,
+        ),
+      );
+
+      // ✅ then sync with backend
       await fetchListings();
+
       setRejectModalData(null);
       showToast("Listing rejected successfully", "success");
-    } catch {
+    } catch (err) {
+      console.error(err);
       showToast("Failed to reject listing", "error");
     }
   }
 
   const fetchListings = async () => {
     try {
-      // Replace with your actual API call:
+      const payload = {
+        page: Number(page),
+        limit: Number(showEntries),
+      };
+
+      // ✅ ALWAYS send status
+      if (statusFilter) {
+        payload.status = statusFilter;
+      }
+
+      console.log("API PAYLOAD:", payload); // 👈 DEBUG
+
       const res = await get_all_property_listing({
         page,
         limit: showEntries,
-        ...(statusFilter !== "all" && { status: statusFilter }),
+        status: statusFilter,
       });
-      setListings(res?.data?.listings || []);
+
+      console.log("API RESPONSE:", res); // 👈 DEBUG
+
+      setListings(res?.data?.properties || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
       setTotalCount(res?.data?.pagination?.total || 0);
       setTotalAll(res?.data?.totalAll || 0);
@@ -653,7 +697,7 @@ const PropertyListings = () => {
                             <span className="text-slate-200 text-xs">|</span>
                             <Link
                               className="text-[11px] text-blue-500 font-semibold hover:text-blue-700 hover:underline transition-colors"
-                              href={`/dashboard/property-forms?category=${listing?.category?._id}&name=${encodeURIComponent(listing?.slug)}`}
+                              href={`/dashboard/properties-listing?propertyId=${listing?.slug}&purpose=${listing?.purpose}&categoryId=${listing?.category?._id}&edit=true`}
                             >
                               Edit
                             </Link>
@@ -805,6 +849,7 @@ const PropertyListings = () => {
                       <div className="flex flex-col gap-1.5">
                         {listing.status === "pending" && (
                           <>
+                            {/* APPROVE */}
                             <button
                               onClick={() =>
                                 handleApproveReject(listing, "approved")
@@ -822,6 +867,8 @@ const PropertyListings = () => {
                                 </>
                               )}
                             </button>
+
+                            {/* ✅ REJECT BUTTON (MISSING BEFORE) */}
                             <button
                               onClick={() =>
                                 handleApproveReject(listing, "rejected")
@@ -885,7 +932,9 @@ const PropertyListings = () => {
           to <span className="font-bold text-slate-700">{endEntry}</span> of{" "}
           <span className="font-bold text-slate-700">{totalCount}</span> entries
         </span>
+
         <div className="flex items-center gap-1">
+          {/* PREVIOUS */}
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
@@ -893,18 +942,89 @@ const PropertyListings = () => {
           >
             Previous
           </button>
-          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map(
-            (p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-8 h-8 text-xs font-bold border rounded-lg transition-colors shadow-sm
-                ${page === p ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"}`}
-              >
-                {p}
-              </button>
-            ),
-          )}
+
+          {/* DYNAMIC PAGE NUMBERS */}
+          {(() => {
+            const pages = [];
+            const maxVisible = 5;
+
+            let start = Math.max(1, page - 2);
+            let end = Math.min(totalPages, page + 2);
+
+            if (page <= 3) {
+              start = 1;
+              end = Math.min(totalPages, maxVisible);
+            }
+
+            if (page >= totalPages - 2) {
+              start = Math.max(1, totalPages - maxVisible + 1);
+              end = totalPages;
+            }
+
+            // FIRST PAGE + DOTS
+            if (start > 1) {
+              pages.push(
+                <button
+                  key={1}
+                  onClick={() => setPage(1)}
+                  className="w-8 h-8 text-xs font-bold border rounded-lg bg-white text-slate-600 hover:bg-slate-50"
+                >
+                  1
+                </button>,
+              );
+
+              if (start > 2) {
+                pages.push(
+                  <span key="start-ellipsis" className="px-1 text-slate-400">
+                    ...
+                  </span>,
+                );
+              }
+            }
+
+            // MAIN RANGE
+            for (let i = start; i <= end; i++) {
+              pages.push(
+                <button
+                  key={i}
+                  onClick={() => setPage(i)}
+                  className={`w-8 h-8 text-xs font-bold border rounded-lg transition-colors shadow-sm
+              ${
+                page === i
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+                >
+                  {i}
+                </button>,
+              );
+            }
+
+            // LAST PAGE + DOTS
+            if (end < totalPages) {
+              if (end < totalPages - 1) {
+                pages.push(
+                  <span key="end-ellipsis" className="px-1 text-slate-400">
+                    ...
+                  </span>,
+                );
+              }
+
+              pages.push(
+                <button
+                  key={totalPages}
+                  onClick={() => setPage(totalPages)}
+                  className="w-8 h-8 text-xs font-bold border rounded-lg bg-white text-slate-600 hover:bg-slate-50"
+                >
+                  {totalPages}
+                </button>,
+              );
+            }
+
+            return pages;
+          })()}
+
+          {/* NEXT */}
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
@@ -920,6 +1040,14 @@ const PropertyListings = () => {
       {/* {rejectModalData && <RejectReasonModal listing={rejectModalData} onClose={() => setRejectModalData(null)} onSubmit={handleRejectSubmit} />} */}
 
       <Toast toast={toast} />
+
+      {rejectModalData && (
+        <RejectReasonModal
+          listing={rejectModalData}
+          onClose={() => setRejectModalData(null)}
+          onSubmit={handleRejectSubmit}
+        />
+      )}
 
       <style>{`
         @keyframes slideUp {

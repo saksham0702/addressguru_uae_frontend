@@ -13,23 +13,24 @@ const TitleAndLogo = ({
   rating,
   handleClick,
 }) => {
+  console.log(name);
+
   return (
-    <div className="flex gap-5  items-center">
-      {/* image */}
-      <div className=" w-45 h-35 object-contain  rounded-md relative p-1 bg-gray-100 ">
+    <div className="flex gap-3 items-start md:items-center">
+      {/* IMAGE */}
+      <div className="w-[90px] h-[90px] md:w-[120px] md:h-[120px] flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
         <Image
           src={`${APP_URL}/${logo}`}
           alt="header-image"
-          height={1000}
-          width={1000}
-          className="  h-[99%] w-[99%] "
+          height={500}
+          width={500}
+          className="w-full h-full object-cover"
         />
       </div>
 
-      {/* title and button */}
-
-      <div className=" w-[75%] h-[20%] ">
-        <h1 className="text-xl  font-bold">{name}</h1>
+      {/* CONTENT */}
+      <div className="flex-1 min-w-0">
+        <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
 
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
@@ -107,24 +108,30 @@ const TitleAndLogo = ({
               fill="#8C8C8C"
             />
           </svg>
-          <span className="truncate max-w-44" title={address}>
-            {address}
-          </span>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              data?.businessAddress,
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="uppercase font-semibold text-xs relative top-0.5 whitespace-nowrap text-[#0876FE]"
-          >
-            (view map)
-          </a>
+          <div className="text-sm text-gray-500 font-medium flex items-center gap-1 flex-wrap">
+            <span
+              className="truncate max-w-[180px] md:max-w-[300px]"
+              title={address}
+            >
+              {address}
+            </span>
+
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                data?.businessAddress,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#0876FE] text-xs whitespace-nowrap"
+            >
+              (View Map)
+            </a>
+          </div>
         </div>
 
         {/* buttons section */}
         {/* Action Buttons */}
-        <div className="flex gap-3 items-center mt-1">
+        <div className="flex flex-wrap gap-2 items-center mt-2">
           <CustomButton
             showToggle={true}
             defaultText="SHOW NUMBER"

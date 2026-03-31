@@ -14,7 +14,12 @@ import Head from "next/head";
 import { APP_URL } from "@/services/constants";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
-import { get_marketplace_by_slug } from "@/api/uae-marketplace";
+import {
+  approve_marketplace_listing,
+  get_marketplace_by_slug,
+  reject_marketplace_listing,
+} from "@/api/uae-marketplace";
+import { useAuth } from "@/context/AuthContext";
 
 /* ─── Checkmark SVG (reused across sections) ─── */
 const CheckIcon = () => (
@@ -60,7 +65,8 @@ const MarketplaceSeeDetails = () => {
   const router = useRouter();
   // router.query is empty on first render in Next.js — use isReady guard
   const { isReady, query } = router;
-  const { slug } = query;
+  const { slug, preview } = query;
+  const { user } = useAuth();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -123,6 +129,31 @@ const MarketplaceSeeDetails = () => {
     },
     [slug],
   ); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleApprove = async () => {
+    try {
+      const res = await approve_marketplace_listing(data?._id);
+      console.log("Approved:", res);
+      alert("Marketplace Approved ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to approve ❌");
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      const res = await reject_marketplace_listing(data?._id, {
+        status: "rejected",
+        rejectionReason: "rejected by admin",
+      });
+      console.log("Rejected:", res);
+      alert("Marketplace Rejected ❌");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to reject ❌");
+    }
+  };
 
   /* ── Only run once router is hydrated ── */
   useEffect(() => {
@@ -216,7 +247,11 @@ const MarketplaceSeeDetails = () => {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2">
+      <div
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
+          preview === "true" ? "pointer-events-none opacity-90" : ""
+        }`}
+      >
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           {/* Desktop breadcrumb */}
           <div className="max-md:hidden my-3">
@@ -265,7 +300,7 @@ const MarketplaceSeeDetails = () => {
                 />
               </div>
 
-            {/* Description */}
+              {/* Description */}
               <div className="mt-5 md:pl-2 px-1">
                 <SectionHeader title="Description" />
                 <p className="md:text-[13.5px] text-[15px] mt-2 md:font-[500] capitalize">
@@ -394,6 +429,65 @@ const MarketplaceSeeDetails = () => {
       {/* Thank You Popup */}
       {thanksPop && (
         <ThanksPop onClose={() => setThanksPop(false)} type={type} />
+      )}
+
+      {/* PREVIEW BANNER */}
+      {/* PREVIEW BANNER */}
+      {preview === "true" && (
+        <div className="fixed top-0 left-0 w-full z-[10000] backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+            {/* LEFT */}
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-gray-700 tracking-wide">
+                Preview Mode
+              </h2>
+            </div>
+
+            {/* RIGHT */}
+            <div className="flex items-center gap-2">
+              {/* ✏️ EDIT */}
+              <button
+                onClick={() =>
+                  router.push(`/dashboard/marketplace-form?slug=${data?.slug}`)
+                }
+                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+              >
+                ✏️ Edit
+              </button>
+
+              {/* ✅ APPROVE (Admin only) */}
+              {user?.data?.roles?.[0] == 1 && (
+                <button
+                  onClick={handleApprove}
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition shadow-sm"
+                  style={{ pointerEvents: "auto" }}
+                >
+                  ✔ Approve
+                </button>
+              )}
+
+              {/* ❌ REJECT (Admin only) */}
+              {user?.data?.roles?.[0] == 1 && (
+                <button
+                  onClick={handleReject}
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
+                  style={{ pointerEvents: "auto" }}
+                >
+                  ✖ Reject
+                </button>
+              )}
+
+              {/* 🔙 BACK */}
+              <button
+                onClick={() => router.back()}
+                className="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                style={{ pointerEvents: "auto" }}
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
