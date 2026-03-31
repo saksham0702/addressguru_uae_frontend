@@ -57,6 +57,7 @@ export const add_property_listing = async ({
     };
   }
 };
+
 export const get_all_property_listing = async (params) => {
   try {
     const response = await axios.get(
