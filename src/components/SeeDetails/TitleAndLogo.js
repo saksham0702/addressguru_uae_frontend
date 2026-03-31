@@ -18,13 +18,13 @@ const TitleAndLogo = ({
   return (
     <div className="flex gap-3 items-start md:items-center">
       {/* IMAGE */}
-      <div className="w-[90px] h-[90px] md:w-[120px] md:h-[120px] flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+      <div className="w-[90px] h-[90px] md:w-[160px] md:h-[145px] border-2 border-gray-200 flex-shrink-0 rounded-md overflow-hidden ">
         <Image
           src={`${APP_URL}/${logo}`}
           alt="header-image"
           height={500}
           width={500}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       </div>
 

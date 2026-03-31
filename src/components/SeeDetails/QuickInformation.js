@@ -19,10 +19,58 @@ const QuickInformation = ({
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
         Quick Information
       </div>
-      <div className="bg-[#EEEEEE] px-4 py-6 text-sm border-b">
-        <p>
-          <span className="font-medium text-[#5B5B5B]">Category :</span>{" "}
-          <span className="font-bold">
+      <div className="bg-[#EEEEEE] p-4 text-sm space-y-1 border-b">
+        <p className="flex items-center gap-1">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="3"
+              y="3"
+              width="8"
+              height="8"
+              rx="1.5"
+              stroke="#333"
+              stroke-width="1.5"
+              fill="#323232"
+            />
+            <rect
+              x="13"
+              y="3"
+              width="8"
+              height="8"
+              rx="1.5"
+              stroke="#333"
+              stroke-width="1.5"
+              fill="#323232"
+            />
+            <rect
+              x="3"
+              y="13"
+              width="8"
+              height="8"
+              rx="1.5"
+              stroke="#333"
+              stroke-width="1.5"
+              fill="#323232"
+            />
+            <rect
+              x="13"
+              y="13"
+              width="8"
+              height="8"
+              rx="1.5"
+              stroke="#333"
+              stroke-width="1.5"
+              fill="#323232"
+            />
+          </svg>
+          <span className="font-medium text-black">Category :</span>{" "}
+          <span className="font-bold text-orange-600">
             {job ? category?.category_name : category?.name}
           </span>
         </p>
@@ -47,9 +95,9 @@ const QuickInformation = ({
           <BusinessHours openingHours={businesshours} mobile={""} />
         )}
 
-        <p className="text-right text-xs  mt-2 text-[#5B5B5B]">
+        {/* <p className="text-right text-xs  mt-2 text-[#5B5B5B]">
           Ad Id : <span className="text-black">R1074662</span>
-        </p>
+        </p> */}
       </div>
       <div className="flex justify-between items-center bg-white  max-md:p-3 p-1 border border-t-0 border-gray-200 rounded-b-lg">
         <a

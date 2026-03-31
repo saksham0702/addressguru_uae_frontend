@@ -388,8 +388,8 @@ export const BUSINESS_POSTING_TIPS = [
   },
 ];
 
-// export const SITE_URL = "https://addressguru.sg"
-export const SITE_URL = "http://localhost:3000";
+export const SITE_URL = "https://addressguru.ae"
+// export const SITE_URL = "http://localhost:3000";
 
 // const filterItems = [
 //   // {
