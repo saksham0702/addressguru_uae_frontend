@@ -178,7 +178,7 @@ const MyMarketplaceListings = ({ data }) => {
                       </Link>
 
                       <Link
-                        href={`/marketplace/${product?.slug}`}
+                        href={`/marketplace/${product?.slug}?preview=true`}
                         className="inline-flex items-center gap-2 max-md:px-2 px-4 py-1.5 max-md:text-[10px] uppercase text-orange-600 border border-orange-600 text-xs font-semibold rounded-sm transition-colors hover:bg-orange-50"
                       >
                         <Eye className="w-3 h-3" />

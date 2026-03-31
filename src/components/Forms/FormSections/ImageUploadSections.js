@@ -103,6 +103,11 @@ const IconPlus = () => (
   </svg>
 );
 
+// ✅ ADD THIS HERE
+const isInvalidFormat = (file) => {
+  return file.type === "image/avif";
+};
+
 // ─── Image Preview ────────────────────────────────────────────────────────────
 function ImagePreview({ image, zoom, onNavigate, totalCount, currentIdx }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -570,18 +575,23 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
+    if (!file.type.startsWith("image/") || isInvalidFormat(file)) {
       setUploadError((p) => ({
         ...p,
-        logo: "Please upload a valid image file",
+        logo: "AVIF format is not supported. Please upload PNG, JPG or WebP.",
       }));
       return;
     }
+
     if (!validate(file)) {
-      setUploadError((p) => ({ ...p, logo: "File size must be 2MB or less." }));
+      setUploadError((p) => ({
+        ...p,
+        logo: "File size must be 2MB or less.",
+      }));
       if (logoInputRef.current) logoInputRef.current.value = "";
       return;
     }
+
     setUploadError((p) => ({ ...p, logo: "" }));
     if (clearError) clearError("logo");
     const reader = new FileReader();
@@ -597,6 +607,7 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
       }));
     reader.readAsDataURL(file);
   };
+
   const removeLogo = () => {
     setMedia((p) => ({ ...p, logo: null }));
     if (logoInputRef.current) logoInputRef.current.value = "";
@@ -606,8 +617,8 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
 
   // Image handlers
   const handleMultipleUpload = (files) => {
-    const imageFiles = Array.from(files).filter((f) =>
-      f.type.startsWith("image/"),
+    const imageFiles = Array.from(files).filter(
+      (f) => f.type.startsWith("image/") && !isInvalidFormat(f),
     );
     if (!imageFiles.length) {
       setUploadError((p) => ({
@@ -616,6 +627,17 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
       }));
       return;
     }
+
+    const invalidFiles = Array.from(files).filter((f) => isInvalidFormat(f));
+
+    if (invalidFiles.length) {
+      setUploadError((p) => ({
+        ...p,
+        images: "AVIF images are not supported.",
+      }));
+      return;
+    }
+
     if ((media.images?.length || 0) + imageFiles.length > 10) {
       setUploadError((p) => ({ ...p, images: "Maximum 10 images allowed" }));
       return;
@@ -719,12 +741,12 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
                 Upload your logo
               </p>
               <p style={{ margin: "0 0 16px", fontSize: 12, color: "#94a3b8" }}>
-                PNG, SVG, WebP · Max 2MB
+                PNG, JPG, JPEG, WebP · Max 2MB (AVIF not supported)
               </p>
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
                 onChange={handleLogoUpload}
                 id="logo-upload"
                 style={{ display: "none" }}
@@ -747,12 +769,13 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
                   }
                   alt="Logo"
                   style={{
-                    width: 72,
-                    height: 72,
+                    width: 120,
+                    height: 120,
                     objectFit: "contain",
-                    borderRadius: 12,
+                    borderRadius: 16,
                     border: "1px solid #e8edf3",
                     background: "#f8fafc",
+                    padding: 8,
                   }}
                 />
                 <button
@@ -824,7 +847,7 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
                 onChange={handleLogoUpload}
                 style={{ display: "none" }}
               />
@@ -909,7 +932,7 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
             <input
               ref={multipleInputRef}
               type="file"
-              accept="image/*"
+              accept="image/png, image/jpeg, image/jpg, image/webp"
               multiple
               onChange={(e) => handleMultipleUpload(e.target.files)}
               id="multi-upload"

@@ -16,11 +16,15 @@ const TitleAndLogoMobile = ({
   handleClick,
   openingHours,
 }) => {
+  console.log(data);
+
   const [reviewPop, setReviewPop] = useState(false);
   return (
     <section className=" mt-2 h-full space-y-1 ">
       {/* title */}
-      <h3 className="font-semibold text-lg uppercase ">{data?.name}</h3>
+      <h3 className="font-semibold text-md uppercase truncate ">
+        {data?.businessName}
+      </h3>
       {/* address  */}
       <div className=" text-black font-[500] flex items-center  w-full gap-1">
         <svg
@@ -56,16 +60,16 @@ const TitleAndLogoMobile = ({
 
       {/* category and ag verified */}
       <div className="flex justify-between border-b pb-1 border-gray-200 items-center mt-2">
-        <div className="flex items-center h-8  relative">
-          <span className="flex items-center max-w-fit relative ">
+        <div className="flex items-center justify-between  pb-1 mt-2">
+          {/* LEFT */}
+          <div className="flex items-center gap-1 flex-1 min-w-0">
             <div
-              className="scale-[58%] relative  left-[-12px] "
+              className="scale-[0.6]"
               dangerouslySetInnerHTML={{ __html: data?.category?.iconSvg }}
             />
-          </span>
-          <h6 className="font-semibold relative left-[-22px]  ">
-            {data?.category?.name}
-          </h6>
+
+            <h6 className="font-semibold truncate">{data?.category?.name}</h6>
+          </div>
         </div>
         <span className="flex items-center w-26 justify-center bg-[#EEF7FF] text-[#FF6E04] gap-0.5 py-1.5 px-2 rounded-full text-xs font-bold">
           <svg
@@ -211,7 +215,7 @@ const TitleAndLogoMobile = ({
 
       <hr className="text-gray-200 my-2" />
       {/* buttons section */}
-      <div className="flex justify-between items-center md:hidden ">
+      <div className="flex justify-between gap-2 items-center md:hidden">
         <CustomButton
           showToggle={true}
           defaultText="CALL NOW"

@@ -71,7 +71,7 @@ const Properties = () => {
 
         const res = await get_all_property_listing(selectedFilters, 1);
 
-        setListings(res?.data?.listings || []);
+        setListings(res?.data?.properties || []);
         setPageData(res); // store full response for pagination meta
       } catch (err) {
         console.error("fetchListings error", err);

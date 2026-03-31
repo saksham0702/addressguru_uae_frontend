@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL = "https://addressguru.ae/api";
+// const API_URL = "http://192.168.31.108:5001";
 
 export const get_marketplace_category = async () => {
   try {
@@ -15,16 +16,20 @@ export const get_marketplace_category = async () => {
   }
 };
 
-export const get_all_marketplace_listings = async () => {
+export const get_all_marketplace_listings = async (params) => {
   try {
     const response = await axios.get(
-      `${API_URL}/marketplace/get-all-listings?page=1&limit=10`,
+      `${API_URL}/marketplace/get-all-listings`,
+      {
+        params, // ✅ dynamic query params
+      },
     );
+
     console.log("response of marketplace listings", response);
     return response?.data;
   } catch (error) {
     console.log("error getting marketplace listings", error);
-    return error;
+    return error?.response?.data;
   }
 };
 
@@ -147,7 +152,7 @@ export const approve_marketplace_listing = (id) => {
 
   return axios.put(
     `${API_URL}/marketplace/${id}/status`,
-    {
+    { 
       status: "approved",
     },
     {
