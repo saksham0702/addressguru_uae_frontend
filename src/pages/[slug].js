@@ -39,6 +39,7 @@ const SeeDetails = () => {
   const [type, setType] = useState(null);
   const [enquirePop, setEnquirePop] = useState(false);
   const [userIP, setUserIP] = useState(null);
+  const API_URL = "https://addressguru.ae";
 
   const router = useRouter();
   const { slug, preview } = router.query;
@@ -157,12 +158,12 @@ const SeeDetails = () => {
     <>
       <Head>
         <title>
-          {data?.business_name} | {serverCity} | AddressGuru
+          {data?.seo?.title} | {serverCity} | AddressGuru
         </title>
 
         <meta
           name="description"
-          content={data?.ad_description?.substring(0, 160)}
+          content={data?.seo?.description?.substring(0, 160)}
         />
 
         {/* OG Tags */}
@@ -172,7 +173,7 @@ const SeeDetails = () => {
           content={data?.ad_description?.substring(0, 160)}
         />
         <meta property="og:image" content={data?.images?.[0]} />
-        <meta property="og:url" content={`https://${APP_URL}/${data?.slug}`} />
+        <meta property="og:url" content={`${API_URL}/${data?.slug}`} />
         <meta property="og:type" content="business.business" />
 
         {/* Twitter Tags */}
@@ -185,7 +186,7 @@ const SeeDetails = () => {
         <meta name="twitter:card" content="summary_large_image" />
 
         {/* Canonical */}
-        <link rel="canonical" href={`https://${APP_URL}/${data?.slug}`} />
+        <link rel="canonical" href={`/${data?.slug}`} />
 
         {/* Schema JSON-LD */}
         <script
@@ -198,7 +199,7 @@ const SeeDetails = () => {
               description: data?.ad_description,
               image: data?.images,
               address: data?.business_address,
-              url: `https://${APP_URL}/${data?.slug}`,
+              url: `https://addressguru.ae/${data?.slug}`,
               aggregateRating: {
                 "@type": "AggregateRating",
                 ratingValue:
@@ -271,7 +272,7 @@ const SeeDetails = () => {
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
             <BreadCrumbs
-              slug={data?.slug}
+              slug={data?.category?.slug}
               city={serverCity}
               name={data?.slug}
               type={true}
@@ -342,22 +343,24 @@ const SeeDetails = () => {
                       <div key={index} className="flex items-end space-x-2">
                         {facility?.iconSvg ? (
                           <div
-                           className="icon-wrapper"
-                            dangerouslySetInnerHTML={{ __html: facility?.iconSvg }}
+                            className="icon-wrapper"
+                            dangerouslySetInnerHTML={{
+                              __html: facility?.iconSvg,
+                            }}
                           />
                         ) : (
                           <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                          <path
-                            d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                            fill="#FF6E04"
-                          />
-                        </svg>
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
+                            <path
+                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
+                              fill="#FF6E04"
+                            />
+                          </svg>
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {facility.name}
@@ -425,21 +428,23 @@ const SeeDetails = () => {
                       <div key={index} className="flex items-center space-x-2">
                         {payment?.iconSvg ? (
                           <div
-                           className="icon-wrapper"
-                            dangerouslySetInnerHTML={{ __html: payment?.iconSvg }}
+                            className="icon-wrapper"
+                            dangerouslySetInnerHTML={{
+                              __html: payment?.iconSvg,
+                            }}
                           />
                         ) : (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                          <path
-                            d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                            fill="#FF6E04"
-                          />
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
+                            <path
+                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
+                              fill="#FF6E04"
+                            />
                           </svg>
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">

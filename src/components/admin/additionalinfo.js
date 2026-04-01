@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, X } from "lucide-react";
 
 import {
   createAdditionalField,
   getAdditionalFieldsByCategory,
+  updateAdditionalField,
+  deleteAdditionalField,
 } from "@/api/uaeAdminCategories";
 
 export default function AdditionalInfoBuilder() {
@@ -15,6 +17,7 @@ export default function AdditionalInfoBuilder() {
 
   const [fieldsList, setFieldsList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null); // tracks which field is being edited
 
   const fieldTypes = [
     "text",
@@ -29,7 +32,7 @@ export default function AdditionalInfoBuilder() {
     "dropdown",
   ];
 
-  const [field, setField] = useState({
+  const emptyField = {
     field_label: "",
     field_type: "",
     placeholder: "",
@@ -45,7 +48,9 @@ export default function AdditionalInfoBuilder() {
     error_message: "",
     default_value: "",
     options: [],
-  });
+  };
+
+  const [field, setField] = useState(emptyField);
 
   useEffect(() => {
     if (!id) return;
@@ -58,15 +63,11 @@ export default function AdditionalInfoBuilder() {
   };
 
   const updateField = (key, value) => {
-    setField((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setField((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleTypeChange = (type) => {
     updateField("field_type", type);
-
     if (["checkbox", "radio", "dropdown"].includes(type)) {
       updateField("options", [""]);
     } else {
@@ -84,12 +85,59 @@ export default function AdditionalInfoBuilder() {
     updateField("options", updated);
   };
 
-  const handleSubmit = async () => {
-    // if (!field.field_label || !field.field_type) {
-    //   alert("Field Label & Type are required");
-    //   return;
-    // }
+  // ─── Click on a field card → fill form for editing ───────────────────────
+  const handleEditClick = (item) => {
+    setEditingId(item._id);
 
+    // Merge options from whichever list exists
+    const options = item.checkbox_items?.length
+      ? item.checkbox_items
+      : item.radio_items?.length
+        ? item.radio_items
+        : item.dropdown_items?.length
+          ? item.dropdown_items
+          : [];
+
+    setField({
+      field_label: item.field_label || "",
+      field_type: item.field_type || "",
+      placeholder: item.placeholder || "",
+      help_text: item.help_text || "",
+      is_required: item.is_required || false,
+      show_in_filter: item.show_in_filter || false,
+      display_order: item.display_order || 0,
+      min_length: item.min_length || "",
+      max_length: item.max_length || "",
+      min_value: item.min_value || "",
+      max_value: item.max_value || "",
+      pattern: item.pattern || "",
+      error_message: item.error_message || "",
+      default_value: item.default_value || "",
+      options,
+    });
+  };
+
+  // ─── Cancel edit → reset form ─────────────────────────────────────────────
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setField(emptyField);
+  };
+
+  // ─── Soft delete ──────────────────────────────────────────────────────────
+  const handleDelete = async (e, itemId) => {
+    e.stopPropagation(); // prevent triggering edit click
+    if (!confirm("Are you sure you want to delete this field?")) return;
+
+    const res = await deleteAdditionalField(itemId);
+    if (res?.status) {
+      setFieldsList((prev) => prev.filter((f) => f._id !== itemId));
+      // If the deleted field was being edited, reset form
+      if (editingId === itemId) handleCancelEdit();
+    }
+  };
+
+  // ─── Submit: create or update ─────────────────────────────────────────────
+  const handleSubmit = async () => {
     setLoading(true);
 
     const payload = {
@@ -117,27 +165,19 @@ export default function AdditionalInfoBuilder() {
       display_order: field.display_order,
     };
 
-    const res = await createAdditionalField(payload);
+    let res;
+
+    if (editingId) {
+      // UPDATE
+      res = await updateAdditionalField(editingId, payload);
+    } else {
+      // CREATE
+      res = await createAdditionalField(payload);
+    }
 
     if (res?.status) {
       fetchFields();
-      setField({
-        field_label: "",
-        field_type: "",
-        placeholder: "",
-        help_text: "",
-        is_required: false,
-        show_in_filter: false,
-        display_order: 0,
-        min_length: "",
-        max_length: "",
-        min_value: "",
-        max_value: "",
-        pattern: "",
-        error_message: "",
-        default_value: "",
-        options: [],
-      });
+      handleCancelEdit();
     }
 
     setLoading(false);
@@ -169,6 +209,21 @@ export default function AdditionalInfoBuilder() {
         <div className="grid grid-cols-3 gap-8">
           {/* LEFT SIDE BUILDER */}
           <div className="col-span-2 bg-white rounded-2xl border border-gray-300 p-8 space-y-8">
+            {/* Edit mode indicator */}
+            {editingId && (
+              <div className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg px-4 py-2.5">
+                <span className="text-sm text-orange-700 font-medium">
+                  Editing existing field
+                </span>
+                <button
+                  onClick={handleCancelEdit}
+                  className="text-xs text-orange-500 hover:text-orange-700 underline"
+                >
+                  Cancel & Create New
+                </button>
+              </div>
+            )}
+
             {/* FIELD TYPE */}
             <div>
               <label className="text-sm font-medium text-gray-600 mb-2 block">
@@ -254,15 +309,6 @@ export default function AdditionalInfoBuilder() {
                 </div>
               )}
 
-              {/* <input
-                placeholder="Pattern (Regex)"
-                value={field.pattern}
-                onChange={(e) =>
-                  updateField("pattern", e.target.value)
-                }
-                className="border border-gray-200 rounded-lg px-4 py-2 w-full"
-              /> */}
-
               <input
                 placeholder="Error Message"
                 value={field.error_message}
@@ -327,20 +373,33 @@ export default function AdditionalInfoBuilder() {
               />
             </div>
 
-            {/* SAVE BUTTON */}
-            <div className="flex justify-end">
+            {/* SAVE / UPDATE BUTTON */}
+            <div className="flex justify-end gap-3">
+              {editingId && (
+                <button
+                  onClick={handleCancelEdit}
+                  className="border border-gray-300 text-gray-600 px-6 py-2.5 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              )}
               <button
                 onClick={handleSubmit}
                 disabled={loading}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg"
               >
-                {loading ? "Saving..." : "Save Field"}
+                {loading
+                  ? editingId
+                    ? "Updating..."
+                    : "Saving..."
+                  : editingId
+                    ? "Update Field"
+                    : "Save Field"}
               </button>
             </div>
           </div>
 
           {/* RIGHT SIDE CREATED FIELDS */}
-
           <div className="bg-white border border-gray-300 rounded-2xl p-6 h-fit">
             <h3 className="font-semibold text-gray-700 mb-4">Created Fields</h3>
 
@@ -352,9 +411,23 @@ export default function AdditionalInfoBuilder() {
               {fieldsList.map((item) => (
                 <div
                   key={item._id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm"
+                  onClick={() => handleEditClick(item)}
+                  className={`relative border rounded-lg p-4 cursor-pointer transition-all hover:shadow-sm ${
+                    editingId === item._id
+                      ? "border-orange-400 bg-orange-50"
+                      : "border-gray-200"
+                  }`}
                 >
-                  <div className="flex justify-between items-center">
+                  {/* Cross / Delete button — top right */}
+                  <button
+                    onClick={(e) => handleDelete(e, item._id)}
+                    className="absolute top-2 right-2 p-0.5 rounded-full text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Delete field"
+                  >
+                    <X size={14} />
+                  </button>
+
+                  <div className="flex justify-between items-center pr-5">
                     <span className="font-medium text-gray-800">
                       {item.field_label}
                     </span>

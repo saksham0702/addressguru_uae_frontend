@@ -6,6 +6,7 @@ import {
   reject_property_listing,
 } from "@/api/uae-property";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
+import FollowUpModal from "@/components/admin/business/FollowUpModal";
 // import { get_all_property_listings } from "@/api/uae-property"; // wire up your API
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ function daysAgo(iso) {
   if (diff === 1) return "1 Day Ago";
   return `${diff} Days Ago`;
 }
+
 function fmtPrice(price) {
   if (!price?.amount) return "N/A";
   const formatted = Number(price.amount).toLocaleString();
@@ -38,6 +40,7 @@ function fmtPrice(price) {
       : "";
   return `${currency} ${formatted}${period}`;
 }
+
 function fmtArea(area) {
   if (!area?.size) return null;
   return `${area.size.toLocaleString()} ${area.unit || "sqft"}`;
@@ -325,6 +328,36 @@ const PropertyListings = () => {
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  }
+
+  async function handleFollowUpSubmit({ listingId, entry }) {
+    try {
+      // ✅ Optional: show loader if you want per listing
+      setLoadingId(listingId);
+
+      // 🔹 If you have API → call it here
+      // await create_property_followup(listingId, entry);
+
+      // ✅ Instant UI update (BEST UX)
+      setFollowUps((prev) => ({
+        ...prev,
+        [listingId]: [entry, ...(prev[listingId] || [])],
+      }));
+
+      // ✅ Close modal smoothly
+      setFollowUpModal(null);
+
+      // ✅ Success feedback
+      showToast("Follow up added successfully", "success");
+
+      // 🔹 Optional: refresh from backend if needed
+      // await fetchListings();
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to add follow up", "error");
+    } finally {
+      setLoadingId(null);
+    }
   }
 
   async function handleApproveReject(listing, action) {
@@ -1038,6 +1071,16 @@ const PropertyListings = () => {
       {/* {followUpModal && <FollowUpModal listing={followUpModal} history={followUps[followUpModal._id] || []} onClose={() => setFollowUpModal(null)} onSubmit={handleFollowUpSubmit} />} */}
       {/* {rejectModalData && <RejectReasonModal listing={rejectModalData} onClose={() => setRejectModalData(null)} onSubmit={handleRejectSubmit} />} */}
 
+      {/* ── MODALS ── */}
+      {followUpModal && (
+        <FollowUpModal
+          listing={followUpModal}
+          history={followUps[followUpModal._id] || []}
+          onClose={() => setFollowUpModal(null)}
+          onSubmit={handleFollowUpSubmit}
+          source={"PropertyListing"}
+        />
+      )}
       <Toast toast={toast} />
 
       {rejectModalData && (

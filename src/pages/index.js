@@ -11,7 +11,7 @@ import HomeHeadingView from "@/components/HomeHeadingView";
 import { get_categories } from "@/api/Categories";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { API_URL, APP_URL } from "@/services/constants";
+import { APP_URL } from "@/services/constants";
 import Loader from "@/components/Loader";
 import { get_recent_listings } from "@/api/showlistings";
 import Head from "next/head";
@@ -26,6 +26,7 @@ export default function Home() {
   const [recentJobs, setRecentJobs] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
+  const API_URL = "https://addressguru.ae";
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -57,7 +58,6 @@ export default function Home() {
     };
     fetchCategories();
   }, []);
-
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -92,7 +92,7 @@ export default function Home() {
         />
 
         {/* ======= CANONICAL URL ======= */}
-        <link rel="canonical" href={APP_URL} />
+        <link rel="canonical" href={API_URL} />
 
         {/* ======= OPEN GRAPH (Facebook/WhatsApp) ======= */}
         <meta property="og:type" content="website" />

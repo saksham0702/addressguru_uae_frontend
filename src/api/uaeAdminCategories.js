@@ -5,7 +5,7 @@ import axios from "axios";
 
 const API_URL = "https://addressguru.ae/api";
 
-// const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "http://192.168.29.191:5001";
 
 export const createOrUpdateCategory = async (payload) => {
   try {
@@ -373,22 +373,28 @@ const generateFieldName = (label) => {
 };
 
 /* ========= CREATE FIELD ========= */
-
 export const createAdditionalField = async (data) => {
   console.log("i amm hit");
   console.log("data of payload", data);
+
+  const token = localStorage.getItem("token");
+
   try {
     console.log("try");
 
     const res = await axios.post(
       `${API_URL}/additional-fields/create-field`,
       data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ send token here
+        },
+      },
     );
 
     return { status: true, data: res.data };
   } catch (error) {
     console.log("catch");
-
     console.log("Additional Field Error:", error?.response || error.message);
 
     return {
@@ -399,9 +405,14 @@ export const createAdditionalField = async (data) => {
 };
 
 export const getAdditionalFieldsByCategory = async (category_id) => {
+  const token = localStorage.getItem("token");
+
   try {
     const res = await axios.get(`${API_URL}/additional-fields/get-fields`, {
       params: { category_id },
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ now it will be sent
+      },
     });
 
     return {
@@ -414,6 +425,66 @@ export const getAdditionalFieldsByCategory = async (category_id) => {
     return {
       status: false,
       data: [],
+    };
+  }
+};
+
+export const updateAdditionalField = async (id, data) => {
+  console.log("update api hit");
+  console.log("update payload", data);
+
+  const token = localStorage.getItem("token");
+
+  try {
+    console.log("update try");
+
+    const res = await axios.put(
+      `${API_URL}/additional-fields/update-field/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ send token here
+        },
+      },
+    );
+
+    return { status: true, data: res.data };
+  } catch (error) {
+    console.log("update catch");
+    console.log("Update Field Error:", error?.response || error.message);
+
+    return {
+      status: false,
+      message: error?.response?.data?.message || "Something went wrong",
+    };
+  }
+};
+export const deleteAdditionalField = async (id) => {
+  console.log("delete api hit");
+  console.log("delete id", id);
+
+  const token = localStorage.getItem("token");
+
+  try {
+    console.log("delete try");
+
+    const res = await axios.delete(
+      `${API_URL}/additional-fields/delete-field/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ send token here
+        },
+      },
+    );
+
+    return { status: true, data: res.data };
+  } catch (error) {
+    console.log("delete catch");
+    console.log("Delete Field Error:", error?.response || error.message);
+
+    return {
+      status: false,
+      message: error?.response?.data?.message || "Something went wrong",
     };
   }
 };

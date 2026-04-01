@@ -13,15 +13,6 @@ const BusinessCard = ({ data }) => {
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [selectedService, setSelectedService] = React.useState(null);
-
-  React.useEffect(() => {
-    if (data?.services?.length) {
-      const index = Math.floor(Math.random() * data.services.length);
-      setSelectedService(data.services[index]);
-    }
-  }, [data?.services]);
-
   const handleShowNumber = async (type) => {
     // If already loaded → don’t call API again
     if (number) return;
@@ -118,7 +109,7 @@ const BusinessCard = ({ data }) => {
               <p className="text-xs 2xl:text-[13px] whitespace-nowrap text-gray-500">
                 {data?.rating}
               </p>
-              <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-bold">
+              {/* <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-bold">
                 <svg
                   width="14"
                   height="14"
@@ -134,17 +125,37 @@ const BusinessCard = ({ data }) => {
                 </svg>
                 <p>AG</p>
                 <p className="text-black">Verified</p>
-              </span>
+              </span> */}
             </div>
 
             {/* Tags bring tag randomly from anywhere */}
-            {/* <div className="max-md:flex max-md:flex-col md:flex md:gap-3 gap-1 text-[12px] 2xl:text-[13px] font-medium">
-              {selectedService && (
-                <span className="w-fit max-w-46 truncate p-0.5 px-1 rounded-sm border border-gray-300 text-[10px] md:text-[12px]">
-                  {selectedService}
-                </span>
-              )}
-            </div> */}
+            <div className="max-md:flex max-md:flex-col md:flex md:gap-3 gap-1 text-[12px] 2xl:text-[13px] font-medium">
+              <div className="flex flex-wrap gap-2">
+                {data?.facilities?.slice(0, 3).map((facility, index) => (
+                  <div
+                    key={index}
+                    className={`
+        flex items-center gap-2 px-2 py-1 border border-gray-200 rounded-md bg-gray-50
+        text-[11px] md:text-[12px]
+        ${index > 0 ? "hidden md:flex" : ""}
+      `}
+                  >
+                    {/* ICON */}
+                    {facility?.iconSvg && (
+                      <span
+                        className="w-4 h-4 flex items-center justify-center"
+                        dangerouslySetInnerHTML={{ __html: facility.iconSvg }}
+                      />
+                    )}
+
+                    {/* NAME */}
+                    <span className="truncate max-w-[120px] text-gray-700 font-medium">
+                      {facility?.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Description */}
             <p className="text-[11px] font-[500] truncate  w-md max-md:hidden 2xl:text-[13px] 2xl:w-lg ">
