@@ -142,11 +142,11 @@ const Blogs = () => {
           content="UAE blog, UAE restaurants, UAE shopping, UAE real estate, UAE lifestyle, hawker centers UAE, best cafes UAE, fitness UAE, education UAE, entertainment UAE"
         />
         <meta name="author" content="AddressGuru" />
-        <link rel="canonical" href="https://addressguru.sg/blogs" />
+        <link rel="canonical" href="https://addressguru.ae/blogs" />
 
         {/* Open Graph / Facebook Meta Tags */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://addressguru.sg/blogs" />
+        <meta property="og:url" content="https://addressguru.ae/blogs" />
         <meta
           property="og:title"
           content="UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
@@ -157,11 +157,11 @@ const Blogs = () => {
         />
         <meta property="og:image" content={`${APP_URL}/og-image-blogs.jpg`} />
         <meta property="og:site_name" content="AddressGuru" />
-        <meta property="og:locale" content="en_SG" />
+        <meta property="og:locale" content="en_AE" />
 
         {/* Twitter Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://addressguru.sg/blogs" />
+        <meta name="twitter:url" content="https://addressguru.ae/blogs" />
         <meta
           name="twitter:title"
           content="UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru"
@@ -182,10 +182,10 @@ const Blogs = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         {/* Geo Tags for UAE */}
-        <meta name="geo.region" content="SG" />
+        <meta name="geo.region" content="AE" />
         <meta name="geo.placename" content="UAE" />
-        <meta name="geo.position" content="1.290270;103.851959" />
-        <meta name="ICBM" content="1.290270, 103.851959" />
+        <meta name="geo.position" content="25.2048;55.2708" />
+        <meta name="ICBM" content="25.2048, 55.2708" />
 
         {/* Structured Data (JSON-LD) */}
         <script

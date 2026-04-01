@@ -4,9 +4,9 @@ import axios from "axios";
 const API_URL = "https://addressguru.ae/api";
 
 
-export const getFollowupConfig = async (module, token) => {
+export const getFollowupConfig = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/followup-config/${module}`, {
+    const response = await axios.get(`${API_URL}/followup-config`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -20,9 +20,9 @@ export const getFollowupConfig = async (module, token) => {
 };
 
 // ✅ Create Option
-export const createFollowupOption = async (module, payload, token) => {
+export const createFollowupOption = async (payload, token) => {
   const res = await axios.post(
-    `${API_URL}/followup-config/${module}/option`,
+    `${API_URL}/followup-config/option`,
     payload,
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -33,13 +33,12 @@ export const createFollowupOption = async (module, payload, token) => {
 
 // ✅ Update Option
 export const updateFollowupOption = async (
-  module,
   optionId,
   payload,
   token,
 ) => {
   const res = await axios.put(
-    `${API_URL}/followup-config/${module}/option/${optionId}`,
+    `${API_URL}/followup-config/option/${optionId}`,
     payload,
     {
       headers: { Authorization: `Bearer ${token}` },

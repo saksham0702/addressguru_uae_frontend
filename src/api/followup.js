@@ -4,9 +4,9 @@ import axios from "axios";
 const API_URL = "https://addressguru.ae/api";
 
 
-export const createFollowupLog = async (payload, token) => {
+export const createFollowupLog = async (payload, token,module) => {
   try {
-    const response = await axios.post(`${API_URL}/follow-ups`, payload, {
+    const response = await axios.post(`${API_URL}/follow-ups?module=${module}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -20,10 +20,11 @@ export const createFollowupLog = async (payload, token) => {
   }
 };
 
-export const getFollowupLogs = async (listingId, token) => {
+export const getFollowupLogs = async (listingId, token,module) => {
+  console.log("module",module)
   try {
     const response = await axios.get(
-      `${API_URL}/follow-ups/listing/${listingId}`,
+      `${API_URL}/follow-ups/listing/${listingId}?module=${module}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

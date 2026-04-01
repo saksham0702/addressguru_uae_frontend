@@ -70,7 +70,7 @@ export default function FollowupConfigPage() {
 
   const fetchConfigs = async () => {
     try {
-      const res = await getFollowupConfig(MODULE, token);
+      const res = await getFollowupConfig(token);
       setConfigs(res.data.options || []);
     } catch (err) {
       console.error(err);
@@ -86,9 +86,10 @@ export default function FollowupConfigPage() {
   const handleSave = async (form) => {
     try {
       if (editItem) {
-        await updateFollowupOption(MODULE, editItem._id, form, token);
+        console.log(editItem._id, form, token);
+        await updateFollowupOption(editItem._id, form, token);
       } else {
-        await createFollowupOption(MODULE, form, token);
+        await createFollowupOption(form, token);
       }
       setModalOpen(false);
       setEditItem(null);

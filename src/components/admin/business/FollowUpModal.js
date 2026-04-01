@@ -69,7 +69,7 @@ const FollowUpModal = ({
       try {
         const token = localStorage.getItem("token");
 
-        const res = await getFollowupLogs(listing._id, token);
+        const res = await getFollowupLogs(listing._id, token,"BusinessListing");
 
         setLogs(res.data || []);
         console.log("res of logs", res.data);
@@ -90,7 +90,7 @@ const FollowUpModal = ({
       try {
         const token = localStorage.getItem("token"); // or your auth method
 
-        const res = await getFollowupConfig("listing", token);
+        const res = await getFollowupConfig(token);
 
         // your response is { data: {...} }
         setFollowupConfig(res.data);
@@ -122,9 +122,9 @@ const FollowUpModal = ({
           date && time ? new Date(`${date}T${time}`).toISOString() : null,
       };
 
-      const res = await createFollowupLog(payload, token);
+      const res = await createFollowupLog(payload, token,"BusinessListing");
 
-      const resLogs = await getFollowupLogs(listing._id, token);
+      const resLogs = await getFollowupLogs(listing._id, token,"BusinessListing");
       setLogs(resLogs.data || []);
 
       // Optional: update UI
@@ -161,29 +161,29 @@ const FollowUpModal = ({
         style={{ animation: "modalIn 0.2s ease" }}
       >
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-400">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
               <PhoneIcon />
             </div>
             <div className="flex flex-col gap-1">
               {/* Title */}
-              <h2 className="text-base font-semibold text-slate-800 leading-tight">
+              <h2 className="text-base font-semibold text-gray-800 leading-tight">
                 {listing.businessName}
-                <span className="ml-2 text-xs font-medium text-slate-400">
+                <span className="ml-2 text-xs font-medium text-gray-800">
                   Follow Up
                 </span>
               </h2>
 
               {/* Info Row */}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-800">
                 {/* Contact Person */}
-                <span className="font-medium text-slate-600">
+                <span className="font-medium text-gray-800">
                   {listing?.contactPersonName || "—"}
                 </span>
 
                 {/* Divider */}
-                <span className="text-slate-300">•</span>
+                <span className="text-gray-800">•</span>
 
                 {/* Email */}
                 <span className="text-orange-500 font-medium break-all">
@@ -191,7 +191,7 @@ const FollowUpModal = ({
                 </span>
 
                 {/* Divider */}
-                <span className="text-slate-300">•</span>
+                <span className="text-gray-800">•</span>
 
                 {/* Phone */}
                 <span className="text-orange-500 font-medium whitespace-nowrap">
@@ -202,7 +202,7 @@ const FollowUpModal = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
+            className="w-8 h-8 rounded-lg border border-gray-200 bg-slate-50 text-gray-800 hover:text-gray-800 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
           >
             ✕
           </button>
@@ -218,7 +218,7 @@ const FollowUpModal = ({
             className="overflow-y-auto p-5 flex-shrink-0"
             style={{ width: "35%" }}
           >
-            <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-3">
+            <p className="text-[10px] font-bold tracking-widest uppercase text-gray-800 mb-3">
               Log Activity
             </p>
 
@@ -233,7 +233,7 @@ const FollowUpModal = ({
       ${
         selected === opt._id
           ? "bg-orange-50 border border-orange-200 text-orange-600 font-medium"
-          : "border border-transparent text-slate-600 hover:bg-slate-50"
+          : "border border-transparent text-gray-800 hover:bg-slate-50"
       }`}
                   >
                     <input
@@ -252,7 +252,7 @@ const FollowUpModal = ({
             {/* Remark */}
             {selectedOption?.hasRemark && (
               <div className="mb-4">
-                <label className="text-[10px] font-bold tracking-widest uppercase text-slate-400 block mb-1.5">
+                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-800 block mb-1.5">
                   Remark
                 </label>
                 <textarea
@@ -262,7 +262,7 @@ const FollowUpModal = ({
                     selectedOption?.remarkPlaceholder || "Add a remark…"
                   }
                   rows={3}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 resize-none outline-none focus:border-orange-400 transition-colors placeholder-slate-300"
+                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-800 resize-none outline-none focus:border-orange-400 transition-colors placeholder-slate-300"
                 />
               </div>
             )}
@@ -270,25 +270,25 @@ const FollowUpModal = ({
             {/* Date + Time */}
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div>
-                <label className="text-[10px] font-bold tracking-widest uppercase text-slate-400 block mb-1.5">
+                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-800 block mb-1.5">
                   Next Date
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 outline-none focus:border-orange-400 transition-colors"
+                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold tracking-widest uppercase text-slate-400 block mb-1.5">
+                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-800 block mb-1.5">
                   Next Time
                 </label>
                 <input
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 outline-none focus:border-orange-400 transition-colors"
+                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
                 />
               </div>
             </div>
@@ -300,7 +300,7 @@ const FollowUpModal = ({
                 ${
                   selected
                     ? "bg-orange-500 text-white hover:bg-orange-600 shadow-sm"
-                    : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                    : "bg-slate-100 text-gray-800 cursor-not-allowed"
                 }`}
             >
               Submit Follow Up
@@ -310,7 +310,7 @@ const FollowUpModal = ({
           {/* RIGHT – Interaction History */}
           <div className="overflow-y-auto p-5 flex-1 max-h-[65vh]">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
+              <p className="text-[10px] font-bold tracking-widest uppercase text-gray-800">
                 Interaction History
               </p>
               {history.length > 0 && (
@@ -321,28 +321,28 @@ const FollowUpModal = ({
             </div>
 
             {logs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-300">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-800">
                 <div className="text-4xl mb-3">📋</div>
                 <p className="text-sm">No follow-ups found.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-gray-300 shadow-sm">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-6">
+                    <tr className="bg-slate-50 border-b border-gray-500">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider w-6">
                         #
                       </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider">
                         Reason
                       </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider">
                         Remark
                       </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider">
                         Next Date
                       </th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider">
                         Created At
                       </th>
                     </tr>
@@ -354,7 +354,7 @@ const FollowUpModal = ({
                         className="bg-white hover:bg-slate-50/70 transition-colors"
                       >
                         {/* # */}
-                        <td className="px-4 py-3 text-xs text-slate-400 font-medium">
+                        <td className="px-4 py-3 text-xs text-gray-800 font-medium">
                           {i + 1}
                         </td>
 
@@ -366,40 +366,40 @@ const FollowUpModal = ({
                         </td>
 
                         {/* Remark */}
-                        <td className="px-4 py-3 text-xs text-slate-500 max-w-[220px]">
+                        <td className="px-4 py-3 text-xs text-gray-800 max-w-[220px]">
                           {h.remark ? (
                             <div className="group relative cursor-pointer">
                               {/* Truncated Text */}
                               <p className="truncate">{h.remark}</p>
 
                               {/* Hover Tooltip */}
-                              <div className="absolute z-50 hidden group-hover:block left-0 top-full mt-1 w-72 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-lg">
+                              <div className="absolute z-50 hidden group-hover:block left-0 top-full mt-1 w-72 rounded-lg border border-gray-500 bg-white p-3 text-xs text-gray-800 shadow-lg">
                                 {h.remark}
                               </div>
                             </div>
                           ) : (
-                            <span className="text-slate-300 italic">N/A</span>
+                            <span className="text-gray-800 italic">N/A</span>
                           )}
                         </td>
 
                         {/* Next Date */}
                         <td className="px-4 py-3">
                           {h.nextFollowUpDate || h.nextTime ? (
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-600 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-[11px] text-gray-800 whitespace-nowrap">
                               <span>📅</span>
                               <span className="font-medium">
                                 {formatDateTime(h.nextFollowUpDate, h.nextTime)}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-slate-300 text-xs italic">
+                            <span className="text-gray-800 text-xs italic">
                               —
                             </span>
                           )}
                         </td>
 
                         {/* Created At */}
-                        <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">
+                        <td className="px-4 py-3 text-[11px] text-gray-800 whitespace-nowrap">
                           {h.createdAt ? formatDateTime(h.createdAt) : "—"}
                         </td>
                       </tr>

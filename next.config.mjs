@@ -10,7 +10,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.addressguru.sg",
+        hostname: "api.addressguru.ae",
       },
       {
         protocol: "https",

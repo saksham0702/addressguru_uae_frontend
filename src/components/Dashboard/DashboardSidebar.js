@@ -254,7 +254,7 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
   const handleNavigation = (link) => {
     if (link === "/") {
       // Only redirect to AddressGuru site
-      window.open("https://addressguru.sg", "_blank"); // open in new tab
+      window.open("https://addressguru.ae", "_blank"); // open in new tab
       return;
     }
     setActiveTab(link);
