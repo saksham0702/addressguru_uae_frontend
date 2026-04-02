@@ -31,9 +31,37 @@ import {
 } from "@/api/listing-form";
 import Link from "next/link";
 
-const SeeDetails = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+// ─────────────────────────────────────────────────────────────────────────────
+// SSR: fetch listing on the server so crawlers receive full HTML
+// ─────────────────────────────────────────────────────────────────────────────
+export async function getServerSideProps(context) {
+  const { slug } = context.params;
+
+  try {
+    const result = await get_listing_data(slug);
+
+    if (!result?.data?.data) {
+      return { notFound: true }; // renders Next.js 404 page
+    }
+
+    return {
+      props: {
+        initialData: result.data.data,
+      },
+    };
+  } catch (err) {
+    console.error("SSR listing fetch error:", err);
+    return { notFound: true };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page component — initialData comes from SSR, everything else unchanged
+// ─────────────────────────────────────────────────────────────────────────────
+const SeeDetails = ({ initialData }) => {
+  // Seed state with SSR data so the page renders immediately (no skeleton flash)
+  const [data, setData] = useState(initialData ?? null);
+  const [loading, setLoading] = useState(!initialData); // skip loading if SSR gave us data
   const [activePop, setActivePop] = useState(null);
   const [thanksPop, setThanksPop] = useState(false);
   const [type, setType] = useState(null);
@@ -61,8 +89,10 @@ const SeeDetails = () => {
     getIP();
   }, []);
 
-  /* ----------------------- FETCH LISTING DATA ----------------------- */
+  /* ----------------------- FETCH LISTING DATA (client fallback) ----------------------- */
+  // Only re-fetches if SSR didn't provide data (e.g. client-side navigation)
   useEffect(() => {
+    if (data) return; // SSR already populated — skip
     if (!slug || !userIP) return;
 
     const fetchListing = async () => {
@@ -110,7 +140,7 @@ const SeeDetails = () => {
   // ✅ APPROVE LISTING
   const handleApprove = async () => {
     try {
-      const res = await approve_listing(data?._id); // 👈 your API
+      const res = await approve_listing(data?._id);
       console.log("Approved:", res);
       alert("Listing Approved ✅");
     } catch (err) {
@@ -122,7 +152,7 @@ const SeeDetails = () => {
   // ❌ REJECT LISTING
   const handleReject = async () => {
     try {
-      const res = await reject_listing(data?._id); // 👈 your API
+      const res = await reject_listing(data?._id);
       console.log("Rejected:", res);
       alert("Listing Rejected ❌");
     } catch (err) {
@@ -594,8 +624,6 @@ const SeeDetails = () => {
                   ✖ Reject
                 </button>
               )}
-
-              {/* ❌ REJECT */}
 
               {/* 🔙 BACK */}
               <button
