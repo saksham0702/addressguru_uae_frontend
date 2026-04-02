@@ -8,11 +8,12 @@ const QuickInformation = ({
   businesshours,
   job,
   link,
+  price,
   handleWebsiteClick,
   id,
 }) => {
   const date = category?.updated_at;
-  console.log("business hours", businesshours);
+  console.log("price", price);
 
   return (
     <div className=" w-full max-md:hidden  rounded-t-lg ">
@@ -74,13 +75,15 @@ const QuickInformation = ({
             {job ? category?.category_name : category?.name}
           </span>
         </p>
-        {/* <p>
-          <span className="font-medium text-[#5B5B5B] ">Starting Price :</span>
-          <span className="font-bold">
-            {" "}
-            <span>&#x20B9;</span> 1200
-          </span>
-        </p> */}
+        {price && (
+          <p>
+            <span className="font-medium text-[#5B5B5B] ">Starting Price :</span>
+            <span className="font-bold">
+              {" "}
+              <span>{price?.value?.currency}</span> {price?.value?.amount}
+            </span>
+          </p>
+        )}
         <p>
           {/* <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "} */}
           <span className="font-bold">

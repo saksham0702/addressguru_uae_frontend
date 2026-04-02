@@ -999,7 +999,7 @@ const ListingForms = () => {
       <div className="h-screen w-full">
         <div className="bg-white md:w-[80%] max-md:w-full h-auto mx-auto flex flex-col items-center relative max-w-[2000px]">
           <div className="fixed top-0 md:w-[80%] max-w-[1400px] w-full bg-white z-40">
-            ``{" "}
+            {" "}
             <div className="relative group">
               {/* Button */}
               <button

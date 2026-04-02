@@ -1,8 +1,8 @@
 import React from "react";
 import InputWithTitle from "../InputWithTitle";
 import CheckBox from "../CheckBox";
-import Select from "../Select";
 import DropDown from "../DropDown";
+import PriceInput from "../PriceInput";
 
 const AdditionalFieldRenderer = ({ field, value, onChange }) => {
   const handleChange = (e) => {
@@ -11,11 +11,6 @@ const AdditionalFieldRenderer = ({ field, value, onChange }) => {
 
   switch (field.field_type) {
     case "text":
-    case "email":
-    case "number":
-    case "date":
-    case "time":
-    case "url":
       return (
         <InputWithTitle
           title={field.field_label}
@@ -41,11 +36,33 @@ const AdditionalFieldRenderer = ({ field, value, onChange }) => {
         />
       );
 
+    case "number":
+      return (
+        <InputWithTitle
+          title={field.field_label}
+          type="number"
+          value={value || ""}
+          onChange={handleChange}
+          placeholder={field.placeholder || ""}
+          min={field.min_value}
+          max={field.max_value}
+          required={field.is_required}
+        />
+      );
+
+    case "price":
+      return (
+        <PriceInput
+          field={field}
+          value={value || { amount: "", currency: "AED" }}
+          onChange={(val) => onChange(field._id, val)}
+        />
+      );
+
     case "dropdown":
       return (
         <div>
           <label className="font-medium">{field.field_label}</label>
-
           <DropDown
             options={field.dropdown_items || []}
             placeholder={field.placeholder || "Select"}
@@ -64,15 +81,6 @@ const AdditionalFieldRenderer = ({ field, value, onChange }) => {
             name: opt,
           }))}
           selectedIds={value || []}
-          onChange={(val) => onChange(field._id, val)}
-        />
-      );
-
-    case "radio":
-      return (
-        <Select
-          heading={field.field_label}
-          options={field.radio_items || []}
           onChange={(val) => onChange(field._id, val)}
         />
       );

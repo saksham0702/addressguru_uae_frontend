@@ -2,6 +2,10 @@ import React from "react";
 import Image from "next/image";
 import CustomButton from "@/components/Buttons/CustomButton";
 import { FaUser } from "react-icons/fa";
+import StarRatingBadge, {
+  getStarRating,
+} from "../BusinessListingComponents/additional-field/hotel";
+
 // import { APP_URL } from "@/services/constants";
 const APP_URL = "https://addressguru.ae/api";
 const TitleAndLogo = ({
@@ -30,8 +34,10 @@ const TitleAndLogo = ({
 
       {/* CONTENT */}
       <div className="flex-1 min-w-0">
-        <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
-
+        <div className="flex gap-2 items-center">
+          <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
+          <StarRatingBadge value={getStarRating(data?.additionalFields)} />
+        </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
           {data?.star && (

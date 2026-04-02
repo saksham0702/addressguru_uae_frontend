@@ -18,7 +18,7 @@ export const GEMINI_KEY = "AIzaSyDYRKcWbV8oj1nfR_Z_PpJnCwKPnkg4rMc";
 // sir api
 // export const GEMINI_KEY = "AIzaSyDWHmk3K0KpZ0-qA7Z8Ea2FmTDorJnGJes"
 // export const API_URL = "http://127.0.0.1:8000/api/"
-export const APP_URL = "https://api.addressguru.sg";
+export const APP_URL = "https:/addressguru.sg/api.";
 export const IMG_URL = "https://addressguru.ae/api";
 
 export const COUNTRY_CODES = [
@@ -388,7 +388,7 @@ export const BUSINESS_POSTING_TIPS = [
   },
 ];
 
-export const SITE_URL = "https://addressguru.ae"
+export const SITE_URL = "https://addressguru.ae";
 // export const SITE_URL = "http://localhost:3000";
 
 // const filterItems = [

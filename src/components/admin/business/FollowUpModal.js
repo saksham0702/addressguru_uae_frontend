@@ -48,13 +48,7 @@ const PhoneIcon = () => (
 );
 
 // ── FOLLOW UP MODAL ───────────────────────────────────────────────────────────
-const FollowUpModal = ({
-  listing,
-  history,
-
-  onClose,
-  onSubmit,
-}) => {
+const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
   const [selected, setSelected] = useState("");
   const [remark, setRemark] = useState("");
   const [date, setDate] = useState("");
@@ -62,14 +56,13 @@ const FollowUpModal = ({
   const [followupConfig, setFollowupConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [logs, setLogs] = useState([]);
-  console.log(listing);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await getFollowupLogs(listing._id, token,"BusinessListing");
+        const res = await getFollowupLogs(listing._id, token, source);
 
         setLogs(res.data || []);
         console.log("res of logs", res.data);
@@ -122,9 +115,9 @@ const FollowUpModal = ({
           date && time ? new Date(`${date}T${time}`).toISOString() : null,
       };
 
-      const res = await createFollowupLog(payload, token,"BusinessListing");
+      const res = await createFollowupLog(payload, token, source);
 
-      const resLogs = await getFollowupLogs(listing._id, token,"BusinessListing");
+      const resLogs = await getFollowupLogs(listing._id, token, source);
       setLogs(resLogs.data || []);
 
       // Optional: update UI
@@ -157,11 +150,11 @@ const FollowUpModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-white rounded-xl w-full max-w-6xl h-[84vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white rounded-xl border border-gray-400 w-full max-w-6xl h-[84vh] flex flex-col shadow-2xl overflow-hidden"
         style={{ animation: "modalIn 0.2s ease" }}
       >
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-400">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-300">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
               <PhoneIcon />
@@ -169,7 +162,7 @@ const FollowUpModal = ({
             <div className="flex flex-col gap-1">
               {/* Title */}
               <h2 className="text-base font-semibold text-gray-800 leading-tight">
-                {listing.businessName}
+                {listing.businessName || listing.title}
                 <span className="ml-2 text-xs font-medium text-gray-800">
                   Follow Up
                 </span>
@@ -202,7 +195,7 @@ const FollowUpModal = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg border border-gray-200 bg-slate-50 text-gray-800 hover:text-gray-800 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
+            className="w-8 h-8 rounded-lg border border-gray-300 bg-slate-50 text-gray-800 hover:text-gray-800 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
           >
             ✕
           </button>
@@ -210,7 +203,7 @@ const FollowUpModal = ({
 
         {/* ── Body ── */}
         <div
-          className="flex flex-1 overflow-hidden divide-x divide-slate-100 min-h-0"
+          className="flex flex-1 overflow-hidden divide-x divide-gray-300 min-h-0"
           style={{ gridTemplateColumns: "none" }}
         >
           {/* LEFT – Log Activity */}
@@ -223,7 +216,7 @@ const FollowUpModal = ({
             </p>
 
             {/* Radio Options */}
-            <div className="flex flex-col gap-0.5 mb-5">
+            <div className="flex flex-col gap-0.5 mb-5 border-b pb-4 border-gray-300">
               {followupConfig?.options
                 ?.filter((opt) => opt.isActive)
                 ?.map((opt) => (
@@ -250,6 +243,7 @@ const FollowUpModal = ({
             </div>
 
             {/* Remark */}
+
             {selectedOption?.hasRemark && (
               <div className="mb-4">
                 <label className="text-[10px] font-bold tracking-widest uppercase text-gray-800 block mb-1.5">
@@ -268,6 +262,7 @@ const FollowUpModal = ({
             )}
 
             {/* Date + Time */}
+
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase text-gray-800 block mb-1.5">
@@ -277,7 +272,7 @@ const FollowUpModal = ({
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
+                  className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
                 />
               </div>
               <div>
@@ -288,7 +283,7 @@ const FollowUpModal = ({
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
+                  className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
                 />
               </div>
             </div>
@@ -296,7 +291,7 @@ const FollowUpModal = ({
             <button
               onClick={handleSubmit}
               disabled={!selected}
-              className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all
+              className={`w-full py-2.5 rounded-xl border border-gray-300 text-sm font-bold transition-all
                 ${
                   selected
                     ? "bg-orange-500 text-white hover:bg-orange-600 shadow-sm"
@@ -308,6 +303,7 @@ const FollowUpModal = ({
           </div>
 
           {/* RIGHT – Interaction History */}
+          
           <div className="overflow-y-auto p-5 flex-1 max-h-[65vh]">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] font-bold tracking-widest uppercase text-gray-800">
@@ -326,10 +322,10 @@ const FollowUpModal = ({
                 <p className="text-sm">No follow-ups found.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-gray-300 shadow-sm">
+              <div className="overflow-hidden rounded-xl border border-gray-400 shadow-sm">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-gray-500">
+                    <tr className="bg-slate-50 border-b border-gray-400">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-800 uppercase tracking-wider w-6">
                         #
                       </th>
