@@ -5,6 +5,8 @@ import DropDown from "../DropDown";
 import PriceInput from "../PriceInput";
 
 const AdditionalFieldRenderer = ({ field, value, onChange }) => {
+  console.log('additional ',field);
+
   const handleChange = (e) => {
     onChange(field._id, e.target.value);
   };
