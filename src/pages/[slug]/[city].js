@@ -9,47 +9,105 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { APP_URL } from "@/services/constants";
-import Listings from "@/components/HeadersMobile/Listings";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
 import { get_listing_filters } from "@/api/listingfilters";
 import Header from "@/layout/header";
 import Footer from "@/layout/footer";
 import MobileFooter from "@/components/MobileFooter";
-import {
-  get_all_listings,
-  get_approved_listings,
-  get_listings_by_category_and_city,
-} from "@/api/listing-form";
 import { getListingsByCategoryAndCity } from "@/api/uaeAdminCategories";
 
-const SearchResults = () => {
-  const router = useRouter();
+// ─────────────────────────────────────────────
+//  SSR — runs on every request, gives Google
+//  fully-rendered HTML with real listings data
+// ─────────────────────────────────────────────
+export async function getServerSideProps(context) {
+  const { params, res } = context;
+  const slug = params?.slug || null;
+  const city = params?.city || null;
 
-  const { city: globalcity } = useAuth(); // USE ONLY GLOBAL CITY
+  // Cache at CDN/edge for 60 s, stale-while-revalidate 300 s
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=300"
+  );
+
+  let initialListings = [];
+  let initialPageData = null;
+  let initialFilters = {
+    facilitis: null,
+    service: null,
+    paymentMode: null,
+  };
+
+  try {
+    // Fetch listings and filters in parallel
+    const [listingsRes, filtersRes] = await Promise.allSettled([
+      getListingsByCategoryAndCity(slug, city),
+      get_listing_filters(slug),
+    ]);
+
+    if (listingsRes.status === "fulfilled" && listingsRes.value) {
+      const data = listingsRes.value;
+      initialListings = Array.isArray(data) ? data : data?.data || [];
+      initialPageData = Array.isArray(data) ? null : data;
+    }
+
+    if (filtersRes.status === "fulfilled" && filtersRes.value) {
+      initialFilters = { ...initialFilters, ...filtersRes.value };
+    }
+  } catch (err) {
+    console.error("SSR fetch error:", err);
+    // Don't 404 — let the page render with empty state
+  }
+
+  return {
+    props: {
+      initialListings,
+      initialPageData,
+      initialFilters,
+      ssrSlug: slug,
+      ssrCity: city,
+    },
+  };
+}
+
+// ─────────────────────────────────────────────
+//  PAGE COMPONENT
+// ─────────────────────────────────────────────
+const SearchResults = ({
+  initialListings,
+  initialPageData,
+  initialFilters,
+  ssrSlug,
+  ssrCity,
+}) => {
+  const router = useRouter();
+  const { city: globalcity } = useAuth();
 
   const cityName =
-    typeof globalcity === "string" ? globalcity : globalcity?.name || "";
-  const [listings, setListings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+    typeof globalcity === "string"
+      ? globalcity
+      : globalcity?.name || ssrCity || "";
+
+  // Seed state with SSR data so first paint is instant
+  const [listings, setListings] = useState(initialListings || []);
+  const [isLoading, setIsLoading] = useState(false); // SSR already loaded
   const [error, setError] = useState(false);
-  const [pageData, setPageData] = useState(null);
+  const [pageData, setPageData] = useState(initialPageData || null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  // console.log("global city", cityName);
+  const [dynamicFilters, setDynamicFilters] = useState(
+    initialFilters || { facilitis: null, service: null, paymentMode: null }
+  );
 
   const [filters, setFilters] = useState({
-    sort_by: null, // newest | oldest | popular
-    ag_verified: false, // true | false
+    sort_by: null,
+    ag_verified: false,
     facilities_id: [],
     services_id: [],
     payment_mode_id: [],
   });
-  const [dynamicFilters, setDynamicFilters] = useState({
-    facilitis: null,
-    service: null,
-    paymentMode: null,
-  });
 
-  const { slug } = router.query; // KEEP slug and id from URL but NOT city
+  const { slug } = router.query;
 
   const hasActiveFilters =
     filters.sort_by !== null ||
@@ -68,71 +126,62 @@ const SearchResults = () => {
     });
   };
 
-  // -------------------------
-  //   GET FILTERS
-  // -------------------------
-
+  // ── GET FILTERS (client-side refresh only when slug changes) ──
   const getFilters = async (slug) => {
     try {
       const response = await get_listing_filters(slug);
-      setDynamicFilters({ ...dynamicFilters, ...response });
-      return response;
+      setDynamicFilters((prev) => ({ ...prev, ...response }));
     } catch (error) {
       console.log("getFilters", error);
-      return error;
     }
   };
 
   useEffect(() => {
     if (!router.isReady || !slug) return;
-
-    getFilters(slug);
+    // Only refetch filters if slug differs from what SSR already fetched
+    if (slug !== ssrSlug) {
+      getFilters(slug);
+    }
   }, [slug]);
 
-  // -------------------------
-  //   REDIRECT WHEN CITY CHANGES
-  // -------------------------
+  // ── REDIRECT WHEN GLOBAL CITY CHANGES ──
   useEffect(() => {
     if (!router.isReady || !slug || !cityName) return;
 
     const newCitySlug = cityName?.toLowerCase().replace(/\s+/g, "-");
     const categorySlug = slug.toLowerCase().replace(/\s+/g, "-");
-
     const expectedPath = `/${categorySlug}/${newCitySlug}`;
 
-    if (router.pathname !== expectedPath) {
-      router.replace({
-        pathname: expectedPath,
-      });
+    if (router.asPath.split("?")[0] !== expectedPath) {
+      router.replace({ pathname: expectedPath });
     }
   }, [cityName, router.isReady, slug]);
 
-  // -------------------------
-  //  API CALL (ONLY GLOBAL CITY)
-  // -------------------------
+  // ── CLIENT-SIDE FETCH (only when filters change OR city/slug differs from SSR) ──
   useEffect(() => {
     if (!router.isReady || !cityName) return;
+
+    // Skip the very first render if SSR already provided matching data
+    const city_slug = cityName
+      ?.toLowerCase()
+      .replace(/\(.*\)/, "")
+      .replace(/\s+/g, "-");
+
+    const ssrCitySlug = ssrCity?.toLowerCase().replace(/\s+/g, "-");
+    const isSameAsSSR =
+      slug === ssrSlug && city_slug === ssrCitySlug && !hasActiveFilters;
+
+    if (isSameAsSSR && listings.length > 0) return; // already have SSR data
 
     const fetchListings = async () => {
       try {
         setIsLoading(true);
         setError(false);
-        setListings([]); // 🔥 reset
-        setPageData(null); // 🔥 reset pagination
-
-        const city_slug = cityName
-          ?.toLowerCase()
-          .replace(/\(.*\)/, "")
-          .replace(/\s+/g, "-");
+        setListings([]);
+        setPageData(null);
 
         const res = await getListingsByCategoryAndCity(slug, city_slug);
-
-        console.log("get single listing response", res);
-
-        // if (!res || res.status != true) {
-        //   router.push("/404");
-        //   return;
-        // }
+        console.log("client fetch response", res);
 
         setListings(Array.isArray(res) ? res : res?.data || []);
         setPageData(res);
@@ -147,6 +196,7 @@ const SearchResults = () => {
     fetchListings();
   }, [router.isReady, slug, cityName, filters]);
 
+  // ── LOAD MORE ──
   const handleLoadMore = async () => {
     if (!pageData?.has_more || isLoadingMore) return;
 
@@ -156,11 +206,11 @@ const SearchResults = () => {
         slug,
         cityName,
         pageData.next_page,
-        filters, // 🔥 PASS FILTERS
+        filters
       );
       if (res?.result?.length) {
-        setListings((prev) => [...prev, ...res.result]); // ✅ APPEND
-        setPageData(res); // update pagination data
+        setListings((prev) => [...prev, ...res.result]);
+        setPageData(res);
       }
     } catch (err) {
       console.error("Load more failed:", err);
@@ -169,9 +219,7 @@ const SearchResults = () => {
     }
   };
 
-  // -------------------------
-  //       ERROR UI
-  // -------------------------
+  // ── ERROR UI ──
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -188,48 +236,54 @@ const SearchResults = () => {
     );
   }
 
+  // Canonical values — prefer SSR props for first render stability
+  const canonicalSlug = slug || ssrSlug || "";
+  const canonicalCity = cityName || ssrCity || "";
+
   return (
     <>
       <section className="md:hidden">
         <Header />
       </section>
+
       <Head>
         {/* ===== META BASIC ===== */}
-        <title>{`Top ${slug} in ${cityName} | Best ${slug} Listings`}</title>
+        <title>{`Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
         <meta
           name="description"
-          content={`Find the best ${slug} in ${cityName}. Browse verified business listings, reviews, contact information, and more.`}
+          content={`Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`}
         />
         <meta
           name="keywords"
-          content={`${slug}, best ${slug} in ${cityName}, top ${slug}, ${cityName} business listings`}
+          content={`${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`}
         />
+        <meta name="robots" content="index, follow" />
 
         {/* ===== CANONICAL ===== */}
-        {/* <link
+        <link
           rel="canonical"
-          href={`${APP_URL}/${slug
+          href={`${APP_URL}/${canonicalSlug
             ?.toLowerCase()
-            .replace(/\s+/g, "-")}/${cityName
+            .replace(/\s+/g, "-")}/${canonicalCity
             ?.toLowerCase()
             .replace(/\s+/g, "-")}`}
-        /> */}
+        />
 
-        {/* ===== OPEN GRAPH (FACEBOOK / WHATSAPP) ===== */}
+        {/* ===== OPEN GRAPH ===== */}
         <meta property="og:type" content="website" />
         <meta
           property="og:title"
-          content={`Top ${slug} in ${cityName} | Business Listings`}
+          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
         />
         <meta
           property="og:description"
-          content={`Looking for the best ${slug} in ${cityName}? Visit our platform to explore verified listings and choose the right one.`}
+          content={`Looking for the best ${canonicalSlug} in ${canonicalCity}? Visit our platform to explore verified listings and choose the right one.`}
         />
         <meta
           property="og:url"
-          content={`${APP_URL}/${slug
+          content={`${APP_URL}/${canonicalSlug
             ?.toLowerCase()
-            .replace(/\s+/g, "-")}/${cityName
+            .replace(/\s+/g, "-")}/${canonicalCity
             ?.toLowerCase()
             .replace(/\s+/g, "-")}`}
         />
@@ -243,11 +297,11 @@ const SearchResults = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content={`Top ${slug} in ${cityName} | Business Listings`}
+          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
         />
         <meta
           name="twitter:description"
-          content={`Checkout the top ${slug} available in ${cityName}. Explore business listings, ratings, and contact details.`}
+          content={`Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details.`}
         />
         <meta
           name="twitter:image"
@@ -261,8 +315,8 @@ const SearchResults = () => {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ItemList",
-              name: `Top ${slug} in ${cityName}`,
-              url: `${APP_URL}/${slug}/${cityName}`,
+              name: `Top ${canonicalSlug} in ${canonicalCity}`,
+              url: `${APP_URL}/${canonicalSlug}/${canonicalCity}`,
               numberOfItems: listings?.length || 0,
               itemListElement: listings?.map((item, i) => ({
                 "@type": "ListItem",
@@ -275,21 +329,20 @@ const SearchResults = () => {
         />
       </Head>
 
-      {/* <Listings /> */}
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto  md:pb-20 pr-2">
           {/* Always visible */}
           <div className="mt-6 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
-              slug={slug}
-              city={cityName}
+              slug={canonicalSlug}
+              city={canonicalCity}
               length={pageData?.total}
               name={"business listings"}
             />
           </div>
 
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {slug} in {cityName}
+            Top {canonicalSlug} in {canonicalCity}
           </h1>
 
           <FilterBar
@@ -309,7 +362,6 @@ const SearchResults = () => {
             {/* LEFT SIDE LISTINGS */}
             <div className="flex flex-col my-2 md:my-4 gap-2 w-full max-md:mb-32">
               <div className="bg-white w-full  rounded-lg pl-2 ">
-                {/* SKELETON ONLY INSIDE LIST AREA */}
                 {isLoading ? (
                   <>
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -354,12 +406,10 @@ const SearchResults = () => {
                   </div>
                 ) : (
                   <>
-                    {/* EXISTING LISTINGS */}
                     {listings?.map((item, index) => (
                       <BusinessCard key={item.id || index} data={item} />
                     ))}
 
-                    {/* 👇 LOAD MORE SKELETONS (PUT HERE) */}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (
                         <BusinessCardSkeleton key={`more-${i}`} />
@@ -380,7 +430,7 @@ const SearchResults = () => {
 
             {/* RIGHT BUSINESS CARD ALWAYS VISIBLE */}
             <div className="mt-4 max-md:hidden">
-              <RightBusinessCard name={slug} />
+              <RightBusinessCard name={canonicalSlug} />
             </div>
           </div>
         </div>
