@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import DeleteConfirmModal from "../cities/deletemodal";
 import { deleteUser, getUsers, loginAsUser } from "@/api/uaeadminlogin";
+import { useAuth } from "@/context/AuthContext";
 
 const roleMap = {
   1: "Admin",
@@ -25,6 +26,7 @@ const roleRedirect = {
 
 export default function UsersTable() {
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,21 +72,22 @@ export default function UsersTable() {
   // LOGIN AS USER
   const handleLoginUser = async (userId) => {
     try {
-      const res = await loginAsUser(userId);
+      const response = await loginAsUser(userId);
+      const { authToken, adminBackupToken, user } = response?.data?.data;
 
-      const token = res?.data?.token;
-      const role = res?.data?.role;
+      localStorage.setItem("authToken", authToken);
+      localStorage.setItem("token", adminBackupToken);
 
-      if (token) {
-        localStorage.setItem("token", token);
+      if (user) {
+        setUser(user);
       }
 
-      router.push(roleRedirect[role] || "/dashboard");
+      // Open dashboard in a new tab
+      window.open("/dashboard", "_blank");
     } catch (error) {
       console.error("Login as user failed", error);
     }
   };
-
   return (
     <div className="w-full py-8">
       <div className="max-w-8xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-sm">

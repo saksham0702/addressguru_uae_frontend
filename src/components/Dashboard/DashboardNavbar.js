@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-const DashboardNavbar = ({ setPostAdd }) => {
+const DashboardNavbar = ({ setPostAdd,user }) => {
   const [logPop, setLogPop] = useState(false);
   const router = useRouter();
   const { setToken } = useAuth();
@@ -134,8 +134,8 @@ const DashboardNavbar = ({ setPostAdd }) => {
     localStorage.removeItem("authToken");
   };
 
-  const { user } = useAuth();
-  console.log("user from navbar", user);
+  // const { user } = useAuth();
+  // console.log("user from navbar", user);
   return (
     <nav className="bg-white h-[78px] pr-10 pl-5 py-3 z-[1] fixed w-[82.5%] max-md:hidden rounded-bl-xl shadow-sm  top-0 right-0">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
