@@ -1,11 +1,12 @@
 import React from "react";
 import InputWithTitle from "../InputWithTitle";
 import CheckBox from "../CheckBox";
-import DropDown from "../DropDown";
+
 import PriceInput from "../PriceInput";
+import AdditionalDropDown from "@/components/BusinessListingComponents/additional-field/dropdown";
 
 const AdditionalFieldRenderer = ({ field, value, onChange }) => {
-  console.log('additional ',field);
+  console.log("additional ", field);
 
   const handleChange = (e) => {
     onChange(field._id, e.target.value);
@@ -65,7 +66,7 @@ const AdditionalFieldRenderer = ({ field, value, onChange }) => {
       return (
         <div>
           <label className="font-medium">{field.field_label}</label>
-          <DropDown
+          <AdditionalDropDown
             options={field.dropdown_items || []}
             placeholder={field.placeholder || "Select"}
             value={value || ""}

@@ -146,7 +146,7 @@ function ImagePreview({ image, zoom, onNavigate, totalCount, currentIdx }) {
       onMouseLeave={onMouseUp}
       style={{
         width: "100%",
-        aspectRatio: "16/9",
+        aspectRatio: "8/5",
         borderRadius: 16,
         overflow: "hidden",
         position: "relative",
@@ -216,6 +216,7 @@ function ImagePreview({ image, zoom, onNavigate, totalCount, currentIdx }) {
               <IconChevronLeft />
             </span>
           </button>
+
           <button onClick={() => onNavigate(1)} style={navBtnStyle("right")}>
             <span
               style={{

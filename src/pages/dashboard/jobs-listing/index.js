@@ -18,11 +18,14 @@ import {
 import { get_job_edulvl, get_job_type } from "@/api/postAds";
 import { get_job_details } from "@/api/listings";
 import axios from "axios";
-import { API_URL } from "@/services/constants";
+import { AGE_OPTIONS, API_URL } from "@/services/constants";
 import Image from "next/image";
 import {
   add_job_listing,
   get_job_categories,
+  get_languages,
+  get_monthly_salary,
+  get_nationalities,
   save_job_company,
 } from "@/api/uae-job-listing";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
@@ -95,8 +98,7 @@ const JobListing = () => {
   const educationLevelRef = useRef(null);
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
-  const salaryFromRef = useRef(null);
-  const salaryToRef = useRef(null);
+
   const experienceRef = useRef(null);
   const openingsRef = useRef(null);
   const skillsRef = useRef(null);
@@ -127,6 +129,10 @@ const JobListing = () => {
   const [jobTypes, setJobTypes] = useState([]);
   const [educationLevels, setEducationLevels] = useState([]);
 
+  const [salaryOptions, setSalaryOptions] = useState([]);
+  const [nationalityOptions, setNationalityOptions] = useState([]);
+  const [languageOptions, setLanguageOptions] = useState([]);
+
   const [postJobData, setPostJobData] = useState({
     category_id: "",
     sub_category_id: "",
@@ -145,15 +151,10 @@ const JobListing = () => {
     workMode: "",
     experienceLevel: "",
 
-    salaryFrom: "",
-    salaryTo: "",
     salaryCurrency: "PKR",
     salaryPeriod: "monthly",
     salaryNegotiable: false,
     salaryHidden: false,
-
-    experienceFrom: "",
-    experienceTo: "",
 
     openings: "",
 
@@ -235,7 +236,35 @@ const JobListing = () => {
       }
     };
 
+    const fetchExtraData = async () => {
+      const salary = await get_monthly_salary();
+      const nationality = await get_nationalities();
+      const languages = await get_languages();
+
+      setSalaryOptions(
+        salary.map((item) => ({
+          value: item.value,
+          label: item.name,
+        })),
+      );
+
+      setNationalityOptions(
+        nationality.map((item) => ({
+          value: item.value,
+          label: item.name,
+        })),
+      );
+
+      setLanguageOptions(
+        languages.map((item) => ({
+          value: item.value,
+          label: item.name,
+        })),
+      );
+    };
+
     fetchDropdownData();
+    fetchExtraData();
   }, []);
 
   useEffect(() => {
@@ -302,8 +331,11 @@ const JobListing = () => {
       qualification: res.qualifications || [],
       title: res.title || "",
       description: res.description || "",
-      salaryFrom: res.salary_from || "",
-      salaryTo: res.salary_to || "",
+      salaryRange: res.salary_range || "",
+      minExperience: res.min_experience || "",
+      nationality: res.nationality || [],
+      languages: res.languages || [],
+
       experience: res.experience || "",
       openings: res.openings || "",
       skills: res.skills || [],
@@ -411,10 +443,6 @@ const JobListing = () => {
       education: educationLevelRef,
       title: titleRef,
       description: descriptionRef,
-      salaryFrom: salaryFromRef,
-      salaryTo: salaryToRef,
-      experienceFrom: experienceRef,
-      experienceTo: experienceRef,
       openings: openingsRef,
       skills: skillsRef,
       companyName: companyNameRef,
@@ -463,26 +491,10 @@ const JobListing = () => {
         newErrors.description = "Job description is required";
       }
 
-      if (isBlank(postJobData.salaryFrom)) {
-        newErrors.salaryFrom = "Minimum salary is required";
-      } else if (
-        !/^\d+(\.\d+)?$/.test(postJobData.salaryFrom.toString().trim())
-      ) {
-        newErrors.salaryFrom = "Salary must be a number";
+      if (!postJobData.salaryRange) {
+        newErrors.salaryRange = "Salary range is required";
       }
-      if (isBlank(postJobData.salaryTo)) {
-        newErrors.salaryTo = "Maximum salary is required";
-      } else if (
-        !/^\d+(\.\d+)?$/.test(postJobData.salaryTo.toString().trim())
-      ) {
-        newErrors.salaryTo = "Salary must be a number";
-      }
-      // Salary range validation
-      if (!isBlank(postJobData.salaryFrom) && !isBlank(postJobData.salaryTo)) {
-        if (Number(postJobData.salaryFrom) > Number(postJobData.salaryTo)) {
-          newErrors.salaryTo = "Max salary should be greater than Min salary";
-        }
-      }
+
       if (isBlank(postJobData.openings)) {
         newErrors.openings = "Total positions is required";
       } else if (
@@ -528,8 +540,6 @@ const JobListing = () => {
       1: {
         title: "title",
         description: "description",
-        salary_from: "salaryFrom",
-        salary_to: "salaryTo",
         experience: "experience",
         total_positions: "openings",
         skills: "skills",
@@ -607,16 +617,7 @@ const JobListing = () => {
         formData.append("total_positions", postJobData.openings);
 
         // salary JSON
-        const salaryObj = {
-          from: postJobData.salaryFrom ? Number(postJobData.salaryFrom) : null,
-          to: postJobData.salaryTo ? Number(postJobData.salaryTo) : null,
-          currency: postJobData.salaryCurrency || "PKR",
-          period: postJobData.salaryPeriod || "monthly",
-          isNegotiable: postJobData.salaryNegotiable || false,
-          isHidden: postJobData.salaryHidden || false,
-        };
-
-        formData.append("salary", JSON.stringify(salaryObj));
+        formData.append("salary_range", postJobData.salaryRange);
 
         // location JSON
         const locationObj = {
@@ -626,17 +627,7 @@ const JobListing = () => {
 
         formData.append("location", JSON.stringify(locationObj));
 
-        formData.append("education", postJobData.education);
-        const experienceObj = {
-          from: postJobData.experienceFrom
-            ? Number(postJobData.experienceFrom)
-            : 0,
-          to: postJobData.experienceTo
-            ? Number(postJobData.experienceTo)
-            : null,
-        };
-
-        formData.append("experienceYears", JSON.stringify(experienceObj));
+        formData.append("min_experience", postJobData.minExperience);
 
         formData.append("gender", postJobData.gender);
         formData.append("ageRange", postJobData.ageRange);
@@ -796,6 +787,8 @@ const JobListing = () => {
       placeholder: "Enter job title",
       ref: titleRef,
       required: true,
+      minlength: 20,
+      maxlength: 100,
     },
     {
       id: 4,
@@ -805,6 +798,8 @@ const JobListing = () => {
       placeholder: "Enter description",
       ref: descriptionRef,
       required: true,
+      minlength: 200,
+      maxlength: 500,
     },
     {
       id: 5,
@@ -879,20 +874,19 @@ const JobListing = () => {
     {
       id: 13,
       width: true,
-      name: "Salary From",
-      key: "salaryFrom",
-      type: "text",
-      ref: salaryFromRef,
+      name: "Monthly Salary",
+      key: "salaryRange",
+      type: "dropdown",
+      options: salaryOptions,
       required: true,
     },
+
     {
       id: 14,
       width: true,
-      name: "Salary To",
-      key: "salaryTo",
+      name: "Minimum Work Experience",
+      key: "minExperience",
       type: "text",
-      ref: salaryToRef,
-      required: true,
     },
     {
       id: 15,
@@ -911,30 +905,20 @@ const JobListing = () => {
       ref: educationLevelRef,
       options: educationOptions,
     },
+
     {
       id: 17,
       width: true,
-      name: "Experience From",
-      key: "experienceFrom",
-      type: "text",
-      ref: experienceRef,
+      name: "Age Range",
+      key: "ageRange",
+      type: "dropdown",
+      options: AGE_OPTIONS.map((a) => ({
+        value: a.value,
+        label: a.name,
+      })),
     },
     {
       id: 18,
-      width: true,
-      name: "Experience To",
-      key: "experienceTo",
-      type: "text",
-    },
-    {
-      id: 19,
-      width: true,
-      name: "Age Range",
-      key: "ageRange",
-      type: "text",
-    },
-    {
-      id: 20,
       width: true,
       name: "Total Positions",
       key: "openings",
@@ -944,13 +928,29 @@ const JobListing = () => {
       required: true,
     },
     {
-      id: 21,
+      id: 19,
       width: true,
       name: "Gender",
       key: "gender",
       type: "dropdown",
       options: genderOptions,
       required: true,
+    },
+
+    {
+      id: 20,
+      width: true,
+      name: "Nationality",
+      key: "nationality",
+      type: "search", // multi-select
+    },
+
+    {
+      id: 21,
+      width: true,
+      name: "Languages",
+      key: "languages",
+      type: "search",
     },
   ];
 
@@ -1144,6 +1144,8 @@ const JobListing = () => {
                         <>
                           <InputWithTitle
                             isTextarea={false}
+                            minLength={item?.minlength || ""}
+                            maxLength={item?.maxlength || ""}
                             required={item.required}
                             {...commonProps}
                           />
@@ -1159,6 +1161,8 @@ const JobListing = () => {
                         <>
                           <InputWithTitle
                             isTextarea={true}
+                            minLength={200}
+                            maxLength={500}
                             required={item.required}
                             rows={3}
                             {...commonProps}
@@ -1205,13 +1209,19 @@ const JobListing = () => {
                           </label>
                           <SearchableMultiSelect
                             item={item}
+                            options={
+                              item.key === "nationality"
+                                ? nationalityOptions
+                                : item.key === "languages"
+                                  ? languageOptions
+                                  : []
+                            }
                             value={postJobData[item.key] || []}
-                            onChange={(selectedSkills) => {
+                            onChange={(selected) => {
                               setPostJobData({
                                 ...postJobData,
-                                [item.key]: selectedSkills,
+                                [item.key]: selected,
                               });
-                              clearError(item.key);
                             }}
                           />
                           {errors[item.key] && (
