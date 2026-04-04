@@ -35,9 +35,11 @@ const Dashboard = () => {
   const [myMarketplace, setMyMarketplace] = useState(null);
   const [postAdd, setPostAdd] = useState(false);
 
+
+  const token = localStorage.getItem("authToken");
   useEffect(() => {
     if (loading) return;
-    if (!user) {
+    if (!user && !token) {
       router.replace("/");
     }
   }, [user, loading, router]);
@@ -48,7 +50,6 @@ const Dashboard = () => {
   //     setData(res?.data);
   //   }
   // };
-
   const getUserListings = async (type) => {
     const listres = await get_user_listings();
     const jobres = await get_job_listings();

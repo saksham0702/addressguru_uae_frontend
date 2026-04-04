@@ -9,14 +9,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [city, setCity] = useState("All Cities(UAE)");
+  const [admin, setAdmin] = useState(null);
 
   // fetch user using token
   const fetchUser = async (authToken) => {
     if (!authToken) return;
-
     const userData = await get_user_details(authToken);
-    console.log(userData);
-
     if (userData) {
       setUser(userData);
     } else {
@@ -25,9 +23,12 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
+        localStorage.removeItem("token");
       }
     }
   };
+
+
 
   // load token and city on first mount
   useEffect(() => {

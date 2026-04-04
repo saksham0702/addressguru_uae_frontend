@@ -2,6 +2,7 @@ import axios from "axios";
 
 // const API_URL = "http://192.168.31.104:5001";
 const API_URL = "https://addressguru.ae/api";
+// const API_URL = "http://localhost:5001";
 
 // const API_URL = "http://192.168.31.107:5001";
 
@@ -68,8 +69,40 @@ export const deleteUser = async (id) => {
   return axios.delete(`${API_URL}/admin/users/delete/${id}`);
 };
 
-export const loginAsUser = (id) => {
-  return axios.post(`${API_URL}/master/user-login/${id}`);
+// api/auth.js
+export const loginAsUser = async (id) => {
+  const response = await axios.post(`${API_URL}/user/user-login/${id}`, {}, {
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+    },
+    withCredentials: true,
+  });
+  console.log("login as user response:", response?.data?.data);
+  const { authToken, adminBackupToken } = response?.data?.data;
+  localStorage.setItem("adminBackupToken", adminBackupToken);
+  localStorage.setItem("authToken", authToken);
+  return response;
+};
+
+// ✅ Add this too — exit impersonation
+export const exitLoginAsUser = async () => {
+  const backupToken = localStorage.getItem("adminBackupToken");
+
+  const response = await axios.post(
+    `${API_URL}/impersonate/exit`,
+    null,
+    {
+      headers: { "x-admin-backup-token": backupToken },
+    }
+  );
+
+  const { authToken } = response?.data?.data;
+
+  // ✅ Restore admin token
+  localStorage.setItem("authToken", authToken);
+  localStorage.removeItem("adminBackupToken");
+
+  return response;
 };
 
 export const user_register = async (postdata) => {
@@ -107,5 +140,24 @@ export const verify_otp = async (postdata) => {
   } catch (error) {
     // console.log("error", error);
     return error?.response?.data?.message;
+  }
+};
+
+
+// admin stats 
+
+export const adminStats = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/admin/users/statistics`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      },
+      withCredentials: true,
+    });
+    console.log("admin stats response:", res?.data?.data);
+    return res?.data?.data;
+  } catch (error) {
+    console.log("error of getting admin stats", error);
+    return null;
   }
 };

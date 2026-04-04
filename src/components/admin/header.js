@@ -40,17 +40,15 @@ export default function AdminHeader() {
     <header className="sticky top-0 z-30 bg-white border-b border-orange-100">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Brand */}
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <span className="text-2xl font-bold text-orange-600">Address</span>
           <span className="text-2xl font-bold text-gray-800">Guru</span>
-        </div>
-
+        </div> */}
+        <span className="hidden sm:inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-600">
+          Admin Panel
+        </span>
         {/* Right Side */}
         <div className="flex items-center gap-6 relative" ref={dropdownRef}>
-          <span className="hidden sm:inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-600">
-            Admin Panel
-          </span>
-
           {/* Profile Button */}
           <button
             onClick={() => setOpen(!open)}

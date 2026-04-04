@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaChevronDown } from "react-icons/fa";
 
-const DropDown = ({
+const AdditionalDropDown = ({
   cities,
   options = [cities],
   placeholder = "Select an option",
@@ -9,9 +9,9 @@ const DropDown = ({
   value, // ✅ NEW (for edit mode)
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
 
-  // ✅ EDIT MODE SYNC (THIS IS THE FIX)
+  const [selected, setSelected] = useState("");
+
   useEffect(() => {
     if (value) {
       setSelected(value);
@@ -23,7 +23,6 @@ const DropDown = ({
     setIsOpen(false);
     if (onChange) onChange(option);
   };
-
   return (
     <div className="relative w-full">
       {/* Dropdown Button */}
@@ -32,7 +31,7 @@ const DropDown = ({
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex justify-between items-center w-full px-4 py-2 bg-white border border-gray-200 cursor-pointer rounded-lg shadow-sm text-left text-gray-800 hover:border-orange-600 focus:outline-none"
       >
-        <span>{selected ? selected.label : placeholder}</span>
+        <span>{selected || placeholder}</span>
         <FaChevronDown
           className={`w-5 h-5 text-orange-500 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -46,16 +45,14 @@ const DropDown = ({
           {options.length > 0 ? (
             options.map((option) => (
               <button
-                key={option.value}
+                key={option}
                 type="button"
                 onClick={() => handleSelect(option)}
                 className={`w-full px-4 py-2 text-left cursor-pointer text-sm font-semibold hover:bg-orange-100 ${
-                  selected?.value === option.value
-                    ? "bg-orange-50 text-orange-600"
-                    : ""
+                  selected === option ? "bg-orange-50 text-orange-600" : ""
                 }`}
               >
-                {option.label}
+                {option}
               </button>
             ))
           ) : (
@@ -67,4 +64,4 @@ const DropDown = ({
   );
 };
 
-export default DropDown;
+export default AdditionalDropDown;

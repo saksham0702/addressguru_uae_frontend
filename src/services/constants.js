@@ -9,6 +9,7 @@ import {
   User,
   UserIcon,
   Users,
+  WorkflowIcon,
 } from "lucide-react";
 import { FaBlog, FaCity } from "react-icons/fa";
 
@@ -386,6 +387,16 @@ export const BUSINESS_POSTING_TIPS = [
       },
     ],
   },
+];
+
+export const AGE_OPTIONS = [
+  { name: "18-25", value: "18-25" },
+  { name: "26-30", value: "26-30" },
+  { name: "31-35", value: "31-35" },
+  { name: "36-40", value: "36-40" },
+  { name: "41-45", value: "41-45" },
+  { name: "46-50", value: "46-50" },
+  { name: "50+", value: "50-100" },
 ];
 
 export const SITE_URL = "https://addressguru.ae";
@@ -989,6 +1000,11 @@ export const NAV_ROUTES = [
     name: "Followup Configs",
     icon: TableConfigIcon,
     href: "/admin/business-configs",
+  },
+  {
+    name: "Jobs Listings",
+    icon: WorkflowIcon,
+    href: "/admin/jobs-listings",
   },
 
   {
