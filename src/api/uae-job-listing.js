@@ -88,35 +88,33 @@ export const get_job_categories = async () => {
 //   }
 // };
 
-export const add_job_listing = async (formData) => {
+export const save_job = async ({ step, formData, isEdit = false }) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/jobs-listing/save-job/1`,
-      formData,
-      getAuthConfig(),
-    );
+    const url = `${API_URL}/jobs-listing/save-job/${step}`;
 
-    console.log("response from api of jobs", response?.data);
-    return response?.data;
+    // ✅ Decide method
+    const method = isEdit ? "put" : step === 1 ? "post" : "put";
+
+    const response = await axios({
+      method,
+      url,
+      data: formData,
+      ...getAuthConfig(),
+    });
+
+    console.log(`response from step ${step}`, response?.data);
+
+    return {
+      success: true,
+      data: response?.data,
+    };
   } catch (error) {
-    console.log("error of adding job listing", error?.response?.data);
-    return error?.response?.data;
-  }
-};
+    console.log(`error from step ${step}`, error?.response?.data);
 
-export const save_job_company = async (formData) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/jobs-listing/save-job/2`,
-      formData,
-      getAuthConfig(),
-    );
-
-    console.log("response from step 2 api", response?.data);
-    return response?.data;
-  } catch (error) {
-    console.log("error from step 2 api", error?.response?.data);
-    return error?.response?.data;
+    return {
+      success: false,
+      error: error?.response?.data,
+    };
   }
 };
 
@@ -156,6 +154,7 @@ export const get_all_jobs_listings = async ({ page, limit, status }) => {
 // };
 
 // REJECT JOB
+
 export const approve_reject_jobs_listing = async (id, body) => {
   try {
     const response = await axios.put(
@@ -171,6 +170,7 @@ export const approve_reject_jobs_listing = async (id, body) => {
     return error;
   }
 };
+
 export const get_monthly_salary = async () => {
   try {
     const res = await axios.get(`${API_URL}/jobs-listing/monthly-salary`);
@@ -193,7 +193,8 @@ export const get_nationalities = async () => {
 
 export const get_languages = async () => {
   try {
-    const res = await axios.get(`${API_URL}/jobs-listing/languages`);
+    const res = await axios.get(`${API_URL}/jobs-listing/language`);
+    console.log(res);
     return res.data.data;
   } catch (error) {
     console.log("error getting languages", error);
@@ -234,6 +235,66 @@ export const reject_jobs_listing = async (id, reason) => {
     return response.data;
   } catch (error) {
     console.log("error rejecting job", error);
+    return error;
+  }
+};
+
+export const get_job_by_slug = async (slug) => {
+  const authtoken = localStorage.getItem("authtoken");
+
+  try {
+    const response = await axios.get(
+      `${API_URL}/jobs-listing/get-job/${slug}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authtoken}`, // ✅ using authtoken
+        },
+      },
+    );
+
+    return response.data.data;
+  } catch (error) {
+    console.log("Error fetching job by slug:", error);
+
+    return {
+      success: false,
+      message: error?.response?.data?.message || "Failed to fetch job",
+    };
+  }
+};
+
+export const get_last_company_details = async () => {
+  const token = localStorage.getItem("authToken");
+
+  try {
+    const response = await axios.get(
+      `${API_URL}/jobs-listing/last-company-details`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    console.log("last company details response 👉", response?.data);
+
+    return response?.data;
+  } catch (error) {
+    console.log("error getting last company details", error?.response?.data);
+
+    return error?.response?.data;
+  }
+};
+
+export const get_job_benefits = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/jobs-listing/job-benefit`);
+
+    console.log("job benefits response", response);
+
+    return response.data.data; // ✅ return only data array
+  } catch (error) {
+    console.log("error getting job benefits", error);
     return error;
   }
 };

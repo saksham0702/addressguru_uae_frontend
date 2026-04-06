@@ -139,7 +139,7 @@ const Dashboard = () => {
               <MyMarketplaceListings data={myMarketplace} />
               <MyPropertyListings data={myProperties} />
 
-              {/* <MyJobListings data={myJobs} /> */}
+              <MyJobListings data={myJobs?.data} />
             </section>
           </div>
         );

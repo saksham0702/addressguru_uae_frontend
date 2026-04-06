@@ -23,22 +23,38 @@ export const get_user_listings = async (type) => {
   }
 };
 
-export const get_job_listings = async (type) => {
-  const token = localStorage.getItem("authToken");
-  //   const userId = localStorage.getItem("userId");
+export const get_job_listings = async (page = 1, limit = 10) => {
+  const authtoken = localStorage.getItem("authToken");
+
   try {
     const response = await axios.get(
-      `${API_URL}/job-listings/get-listing-by-user`,
+      `${API_URL}/jobs-listing/get-jobs-by-user`,
       {
+        params: {
+          page,
+          limit,
+        },
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authtoken}`, // ✅ using authtoken
         },
       },
     );
-    console.log("i am user listings ", response?.data);
-    return response?.data?.data;
+
+    console.log("response of job listing", response?.data);
+
+    return {
+      success: true,
+      data: response.data?.data?.jobs,
+      pagination: response.data?.pagination || null,
+    };
   } catch (error) {
-    console.log("Error fetching user listings:", error);
+    console.log("Error fetching user jobs:", error);
+
+    return {
+      success: false,
+      message: error?.response?.data?.message || "Failed to fetch user jobs",
+      error,
+    };
   }
 };
 
