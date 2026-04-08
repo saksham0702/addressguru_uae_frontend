@@ -13,14 +13,14 @@ import {
 } from "lucide-react";
 import { FaBlog, FaCity } from "react-icons/fa";
 
-// export const API_URL = "https:/addressguru.sg/api";
-export const API_URL = "http://localhost:5001";
+export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
 // mine
 export const GEMINI_KEY = "AIzaSyDYRKcWbV8oj1nfR_Z_PpJnCwKPnkg4rMc";
 // sir api
 // export const GEMINI_KEY = "AIzaSyDWHmk3K0KpZ0-qA7Z8Ea2FmTDorJnGJes"
 // export const API_URL = "http://127.0.0.1:8000/api/"
-export const APP_URL = "https:/addressguru.sg/api/";
+export const APP_URL = "https:/addressguru.sg/api";
 export const IMG_URL = "https://addressguru.ae/api";
 
 export const COUNTRY_CODES = [
@@ -246,17 +246,17 @@ export const REGISTER_STEPS = [
 export const REGISTER_REVIEWS = [
   {
     name: "Aniket Rawat",
-    text: "Got listed on AddressGuru UAE & started getting real leads within days. Super happy with the results.AddressGuru UAE really works!",
+    text: "Got listed on Address Guru & started getting real leads within days. Super happy with the results.Address Guru really works!",
     image: "/assets/register/review1.png",
   },
   {
     name: "Richha Chouhan",
-    text: "Got listed on AddressGuru UAE & started getting real leads within days.Super happy with the results.AddressGuru UAE really works!",
+    text: "Got listed on Address Guru & started getting real leads within days.Super happy with the results.Address Guru really works!",
     image: "/assets/register/review2.png",
   },
   {
     name: " Dr. K.L Suman",
-    text: "Got listed on AddressGuru UAE & started getting real leads within days. Super happy with the results.AddressGuru UAE really works!",
+    text: "Got listed on Address Guru & started getting real leads within days. Super happy with the results.Address Guru really works!",
     image: "/assets/register/review3.png",
   },
 ];
