@@ -43,7 +43,7 @@ const UserInformation = () => {
           risk.
         </li>
         <li>
-          Address Guru is not responsible for any transaction or payments,
+          AddressGuru UAE is not responsible for any transaction or payments,
           shipping guarantee, seller or buyer protections.
         </li>
         <li>

@@ -9,8 +9,8 @@ const StarRatingBadge = ({ value }) => {
   if (!value) return null;
 
   return (
-    <span className="text-sm font-semibold text-gray-700 align-middle">
-      · {value} Hotel
+    <span className=" text-[14px] font-medium text-gray-700 align-middle">
+      ({value} Hotel)
     </span>
   );
 };

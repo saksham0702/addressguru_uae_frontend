@@ -14,12 +14,15 @@ const BusinessInfo = ({
   errors,
   facilities,
   services,
+  courses,
   payment,
   schedule,
   setSchedule,
   selectedFacilities,
   selectedServices,
   setSelectedFacilities,
+  selectedCourses,
+  setSelectedCourses,
   setSelectedServices,
   setSelectedPayment,
   refs,
@@ -29,8 +32,6 @@ const BusinessInfo = ({
   const [loading, setLoading] = useState(false);
   const [availableModels, setAvailableModels] = useState([]);
   const [checkingModels, setCheckingModels] = useState(true);
-
-  console.log(facilities);
 
   const handleInputChange = (field, value, errorKey) => {
     handleChange(field, value);
@@ -226,9 +227,8 @@ const BusinessInfo = ({
             onChange={(ids) => {
               setSelectedFacilities(ids);
               if (clearError && ids.length > 0) {
-                // ADD THIS
-                clearError("facilities"); // ADD THIS
-              } // ADD THIS
+                clearError("facilities");
+              }
             }}
             errorRef={refs?.facilitiesRef}
           />
@@ -244,11 +244,27 @@ const BusinessInfo = ({
             onChange={(ids) => {
               setSelectedServices(ids);
               if (clearError && ids.length > 0) {
-                // ADD THIS
-                clearError("services"); // ADD THIS
-              } // ADD THIS
+                clearError("services");
+              }
             }}
             errorRef={refs?.servicesRef}
+          />
+        </div>
+      )}
+      {courses.length > 0 && (
+        <div ref={refs?.coursesRef}>
+          <CheckBox
+            error={errors?.courses}
+            heading="Courses"
+            options={courses}
+            selectedIds={selectedCourses}
+            onChange={(ids) => {
+              setSelectedCourses(ids);
+              if (clearError && ids.length > 0) {
+                clearError("courses");
+              }
+            }}
+            errorRef={refs?.coursesRef}
           />
         </div>
       )}

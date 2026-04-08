@@ -21,14 +21,14 @@ const AboutUs = () => {
         {/* about us  */}
         <Title text={"About Us"} icon={"about"} />
         <p className="text-sm font-[500] md:pl-1 md:pr-17 max-md:px-1">
-          Address Guru is an online business directory where businesses of every
-          category are listed and promoted. Address guru helps in getting locals
+          AddressGuru UAE is an online business directory where businesses of every
+          category are listed and promoted. AddressGuru UAE helps in getting locals
           as well as big businesses have an online presence and reach among the
           online audience. This is done through online posting of Ads on our
           website.
           <br />
           <br />
-          Address Guru makes sure you get the right and correct business
+          AddressGuru UAE makes sure you get the right and correct business
           information on our platform.
           <br />
           <br />
@@ -36,25 +36,25 @@ const AboutUs = () => {
           platform.
           <br />
           <br />
-          On Address Guru, sellers can advertise their business with banner ads
+          On AddressGuru UAE, sellers can advertise their business with banner ads
           and listing their businesses.
           <br />
           <br />
-          Addressguru is a bridge between the buyers looking for sellers and
-          manufacturers of a product and addressguru helps them discover their
-          preferred business easily in their area. For sellers, addressguru is
+          AddressGuru UAE is a bridge between the buyers looking for sellers and
+          manufacturers of a product and AddressGuru UAE helps them discover their
+          preferred business easily in their area. For sellers, AddressGuru UAE is
           providing a platform to display their business and get themselves in
           the eyes of the perspective buyers and get new clients and customers
           on board. This ultimately helps the businesses in their growth and
           popularity in both online and offline world.
           <br />
           <br />
-          With AddressGuru, both buyers and sellers can easily interact with
-          each other and do business. Address guru verifies the buyers and aims
+          With AddressGuru UAE, both buyers and sellers can easily interact with
+          each other and do business. AddressGuru UAE verifies the buyers and aims
           at listing only the correct information.
         </p>
         {/* mission */}
-        <Title text={"Address Guru's Mission"} icon={"mission"} />
+        <Title text={"AddressGuru UAE's Mission"} icon={"mission"} />
         <div className="text-sm  font-[500] pl-1 pr-17 max-md:pr-1">
           We aim at providing a single platform to all the sellers and buyers to
           discover and connect and conduct business easily and safely.
@@ -64,27 +64,27 @@ const AboutUs = () => {
         <Title text={"Corporation Background"} icon={"background-checking"} />
         <ol className="text-sm  font-[500] pl-5 max-w-[64rem] list-decimal">
           <li>
-            The company commenced in 2019 offering local business directories
+            The company commenced in 2019 offering local business directories 
             and then reaching out at country level and then to international
             level.
           </li>
           <li>The official addressguru website was launched in 2018.</li>
           <li>
-            Address Guru Search services provide a bridge to the businesses and
+            AddressGuru Search services provide a bridge to the businesses and
             its prospective buyers to discover and connect. It provides many
             opportunities to the businesses to market their business
             effectively.
           </li>
         </ol>
         {/* highlights */}
-        <Title text={"Key Highlights of Address Guru"} icon={"sparkle"} />
+        <Title text={"Key Highlights of AddressGuru UAE"} icon={"sparkle"} />
         <ul className="text-sm  font-[500] pl-5 max-w-[64rem] list-disc space-y-1">
           <li>
-            <strong>International Presence</strong> - Address Guru has an
+            <strong>International Presence</strong> - AddressGuru UAE has an
             international presence from India to.
           </li>
           <li>
-            <strong>Large Community of Users</strong> - Address Guru is having a
+            <strong>Large Community of Users</strong> - AddressGuru UAE is having a
             very large user base of sellers.
           </li>
           <li>
@@ -98,22 +98,22 @@ const AboutUs = () => {
         <Title text={"Infringement Policy"} icon={"violation"} />
         <p className="text-sm  font-[500] pl-1 pr-17 max-md:pr-1">
           All the trademark, logos, service names and other marks are property
-          of address guru and the vendors.
+          of AddressGuru UAE and the vendors.
           <br />
           <br />
-          Address Guru uses the marks and information of the vendors for the
-          distribution of information. Address guru have no intention to falsely
+          AddressGuru UAE uses the marks and information of the vendors for the
+          distribution of information. AddressGuru UAE have no intention to falsely
           claim any property owned by the vendors.
           <br />
           <br />
-          The infringement policy of Address Guru states that all the property
+          The infringement policy of AddressGuru UAE states that all the property
           provided on the website are owned by the vendors and users providing
-          information on the website which comply to the Address Guru rules of
+          information on the website which comply to the AddressGuru UAE rules of
           posting.
           <br />
           <br />
           If you find any information is violating any intellectual property,
-          then you can report the infringement at contact@addressguru.in
+          then you can report the infringement at contact@addressguru.ae
         </p>
 
         <Title text={"How to report listing infringement"} icon={"cancel"} />

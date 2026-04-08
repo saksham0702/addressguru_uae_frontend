@@ -28,7 +28,7 @@ const BlogDetail = () => {
       const response = await getBlogDetails(slugParam);
       if (response?.status == true) {
         setBlogDetail(response?.data);
-        console.log("Blog Detail:", response?.result);
+        console.log("Blog Detail:", response);
       } else {
         setError("Blog not found");
       }
@@ -244,22 +244,6 @@ const BlogDetail = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="font-medium">
-                    {blogDetail?.author?.name}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
                       d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
                       clipRule="evenodd"
                     />
@@ -379,6 +363,39 @@ const BlogDetail = () => {
                   return null;
                 }
               })()}
+
+            {/* author profile */}
+
+            <div className="bg-white rounded-lg shadow-md border border-gray-100 p-5 mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-1">
+                Author Profile
+              </h3>
+              <div className="w-16 h-1 bg-[#FF6E04] mb-5"></div>
+
+              {/* Avatar + Name + Job Title */}
+              <div className="flex items-center gap-4 mb-4">
+                <img
+                  className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-[#FF6E04]/20"
+                  src={`${APP_URL}/${blogDetail?.author?.avatar}`}
+                  alt="author-profile"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900 text-base leading-tight">
+                    {blogDetail?.author?.name}
+                  </p>
+                  <p className="text-sm text-[#FF6E04] font-medium mt-0.5">
+                    {blogDetail?.author?.JobTitle}
+                  </p>
+                </div>
+              </div>
+
+              {/* Bio */}
+              {blogDetail?.author?.bio && (
+                <p className="text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
+                  {blogDetail?.author?.bio}
+                </p>
+              )}
+            </div>
 
             {/* Related Blogs Section */}
             <div>

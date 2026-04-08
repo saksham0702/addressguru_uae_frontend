@@ -39,6 +39,7 @@ const ListingForms = () => {
   const uenNumberRef = useRef(null);
   const taxNumberRef = useRef(null);
   const facilitiesRef = useRef(null);
+  const coursesRef = useRef(null);
   const servicesRef = useRef(null);
   const websiteLinkRef = useRef(null);
   const videoLinkRef = useRef(null);
@@ -58,10 +59,12 @@ const ListingForms = () => {
   const [listingId, setListingId] = useState(null);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [service, setService] = useState([]);
   const [facility, setFacility] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [payment, setPayment] = useState([]);
   const [existingData, setExistingData] = useState(null);
   const [additional_fields, setadditional_fields] = useState([]);
@@ -194,6 +197,9 @@ const ListingForms = () => {
     if (savedData.selectedServices) {
       setSelectedServices(savedData.selectedServices);
     }
+    if (savedData.selectedCourses) {
+      setSelectedCourses(savedData.selectedCourses);
+    }
     if (savedData.selectedPayment) {
       setSelectedPayment(savedData.selectedPayment);
     }
@@ -257,6 +263,12 @@ const ListingForms = () => {
   }, [selectedServices]);
 
   useEffect(() => {
+    if (selectedCourses.length > 0) {
+      saveToSession("selectedCourses", selectedCourses);
+    }
+  }, [selectedCourses]);
+
+  useEffect(() => {
     if (selectedPayment.length > 0) {
       saveToSession("selectedPayment", selectedPayment);
     }
@@ -316,7 +328,6 @@ const ListingForms = () => {
         const res = await get_listing_data(name);
         console.log("res of existing  listing data", res?.data?.data);
         setExistingData(res?.data?.data);
-
         // console.log("response of single listing i am", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
@@ -414,6 +425,8 @@ const ListingForms = () => {
 
       setSelectedServices(existingData?.services?.map((s) => s._id) || []);
 
+      setSelectedCourses(existingData?.courses?.map((c) => c._id) || []);
+
       setSelectedPayment(existingData?.paymentModes?.map((p) => p._id) || []);
 
       setSchedule(existingData?.workingHours);
@@ -461,13 +474,16 @@ const ListingForms = () => {
 
       const facilities = res?.features?.facilities || [];
       const services = res?.features?.services || [];
+      const courses = res?.features?.courses || [];
       const payment = res?.payment_modes || [];
+
       // console.log("payment data: ", payment);
 
       const additional_fields = res?.additionalFields || [];
 
       setFacility(facilities.length > 0 ? facilities : []);
       setService(services.length > 0 ? services : []);
+      setCourses(courses.length > 0 ? courses : []);
       setPayment(payment.length > 0 ? payment : []);
       setadditional_fields(
         additional_fields.length > 0 ? additional_fields : [],
@@ -498,6 +514,7 @@ const ListingForms = () => {
       uenNumber: uenNumberRef,
       facilities: facilitiesRef,
       services: servicesRef,
+      courses: coursesRef,
       websiteLink: websiteLinkRef,
       videoLink: videoLinkRef,
       contactName: contactNameRef,
@@ -544,6 +561,9 @@ const ListingForms = () => {
       }
       if (service.length > 0 && selectedServices.length === 0) {
         newErrors.services = "Please select at least one service";
+      }
+      if (courses.length > 0 && selectedCourses.length === 0) {
+        newErrors.courses = "Please select at least one course";
       }
     }
     if (step === 2) {
@@ -638,6 +658,7 @@ const ListingForms = () => {
         uen_number: "uenNumber",
         facilities: "facilities",
         services: "services",
+        courses: "courses",
         payments: "payments",
         hours: "schedule",
       },
@@ -704,6 +725,7 @@ const ListingForms = () => {
 
         selectedFacilities.forEach((id) => formData.append("facilities[]", id));
         selectedServices.forEach((id) => formData.append("services[]", id));
+        selectedCourses.forEach((id) => formData.append("courses[]", id));
         selectedPayment.forEach((id) => formData.append("payments[]", id));
 
         formData.append("hours", JSON.stringify(schedule));
@@ -880,10 +902,13 @@ const ListingForms = () => {
               selectedServices={selectedServices}
               setSelectedFacilities={setSelectedFacilities}
               setSelectedServices={setSelectedServices}
+              selectedCourses={selectedCourses}
+              setSelectedCourses={setSelectedCourses}
               business={business}
               setBusiness={setBusiness}
               facilities={facility}
               services={service}
+              courses={courses}
               payment={payment}
               errors={errors}
               schedule={schedule}
@@ -897,6 +922,7 @@ const ListingForms = () => {
                 businessDescriptionRef,
                 facilitiesRef,
                 servicesRef,
+                coursesRef,
               }}
             />
 

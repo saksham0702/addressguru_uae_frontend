@@ -19,7 +19,7 @@ const Descriptions = () => {
       use our platform for commercial purposes but any other kind of use is
       strictly prohibited. We are free to ban any type of content or Ad which is
       not complying to our policies. Before posting anything or becoming a
-      partner of Address Guru, read carefully all the posting policies.
+      partner of AddressGuru UAE, read carefully all the posting policies.
       </p>
     </div>
   );

@@ -245,17 +245,17 @@ export const REGISTER_STEPS = [
 export const REGISTER_REVIEWS = [
   {
     name: "Aniket Rawat",
-    text: "Got listed on Address Guru & started getting real leads within days. Super happy with the results.Address Guru really works!",
+    text: "Got listed on AddressGuru UAE & started getting real leads within days. Super happy with the results.AddressGuru UAE really works!",
     image: "/assets/register/review1.png",
   },
   {
     name: "Richha Chouhan",
-    text: "Got listed on Address Guru & started getting real leads within days.Super happy with the results.Address Guru really works!",
+    text: "Got listed on AddressGuru UAE & started getting real leads within days.Super happy with the results.AddressGuru UAE really works!",
     image: "/assets/register/review2.png",
   },
   {
     name: " Dr. K.L Suman",
-    text: "Got listed on Address Guru & started getting real leads within days. Super happy with the results.Address Guru really works!",
+    text: "Got listed on AddressGuru UAE & started getting real leads within days. Super happy with the results.AddressGuru UAE really works!",
     image: "/assets/register/review3.png",
   },
 ];

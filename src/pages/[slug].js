@@ -257,7 +257,7 @@ const SeeDetails = ({ initialData }) => {
 
       {activePop && (
         <div
-          className="fixed min-h-screen w-full bg-black/20 left-0 p-3 flex z-50 items-center justify-center top-0"
+          className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0"
           onClick={closePopup}
         >
           <div onClick={(e) => e.stopPropagation()}>
@@ -349,10 +349,57 @@ const SeeDetails = ({ initialData }) => {
                   <span className="h-[1px] w-full bg-gray-200"></span>
                 </span>
 
-                <p className="md:text-[13.5px] text-[15px] mt-2 md:font-[500]">
+                <p className="md:text-[16px] text-[16px] mt-2 md:font-normal">
                   {data?.description}
                 </p>
               </div>
+
+              {/* COURSES */}
+              {data?.courses && data.courses.length > 0 && (
+                <div className="max-w-4xl mt-5 md:pl-2 px-1">
+                  <span className="flex gap-3 items-center">
+                    <h2 className="font-semibold uppercase md:text-xl">
+                      COURSES
+                    </h2>
+                    <span className="h-[1px] w-full bg-gray-200"></span>
+                  </span>
+
+                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
+                    {data?.businessAddress} provides the following courses:
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {data?.courses?.map((course, index) => (
+                      <div key={index} className="flex items-end space-x-2">
+                        {course?.iconSvg ? (
+                          <div
+                            className="icon-wrapper"
+                            dangerouslySetInnerHTML={{
+                              __html: course?.iconSvg,
+                            }}
+                          />
+                        ) : (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
+                            <path
+                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
+                              fill="#FF6E04"
+                            />
+                          </svg>
+                        )}
+                        <span className="md:text-[13.5px] text-[15px] font-semibold">
+                          {course.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* FACILITIES */}
               {data?.facilities && data.facilities.length > 0 && (
@@ -510,13 +557,13 @@ const SeeDetails = ({ initialData }) => {
 
                   <p>
                     Scroll to the top for more details about{" "}
-                    {data?.business_name}.
+                    {data?.businessName}.
                   </p>
 
                   <p>
-                    Found this listing helpful? Tell {data?.business_name} you
+                    Found this listing helpful? Tell {data?.businessName} you
                     discovered them on{" "}
-                    <strong className="text-[#FF6E04]">Address Guru</strong>.
+                    <strong className="text-[#FF6E04]">AddressGuru UAE</strong>.
                   </p>
                 </div>
               </div>
@@ -536,7 +583,7 @@ const SeeDetails = ({ initialData }) => {
 
               <div className="w-full h-[30rem] mb-7">
                 <GetMoreInfo
-                  name={data?.business_name}
+                  name={data?.businessName}
                   type={"listing"}
                   id={data?.id}
                   setType={setType}

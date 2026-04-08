@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -15,6 +16,10 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
   return (
     <div>
       <span className="text-sm flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
+
+        {/* home */}
+        <Link href="/" className="text-gray-500">Home</Link> <Slash />
+
         {/* City — always shown if available */}
         {city && <span className="text-gray-500">{city}</span>}
 
