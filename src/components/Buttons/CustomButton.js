@@ -48,7 +48,7 @@ const CustomButton = ({
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="whitespace-nowrap max-[375px]:!w-28 max-[375px]:!h-7 max-[375px]:!text-[9px]"
+      className="whitespace-nowrap max-[375px]:!w-28 hover:scale-105 transition-all duration-300 hover:cursor-pointer max-[375px]:!h-7 max-[375px]:!text-[9px]"
       style={{
         backgroundColor: currentBg,
         color: isToggled ? toggledTextColor : textColor,
