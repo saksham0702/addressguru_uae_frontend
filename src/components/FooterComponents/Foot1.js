@@ -28,7 +28,7 @@ const Foot1 = () => {
           <div className="mb-4 border w-50 p-2 border-dashed rounded-xl border-[#FF6E04] cursor-pointer">
             <Image
               src="/assets/addressguru_logo.png"
-              alt="Address Guru Logo"
+              alt="AddressGuru Logo"
               width={500}
               height={500}
               className="bg-white shadow-lg py-3 px-4 w-full rounded-xl"
@@ -38,7 +38,7 @@ const Foot1 = () => {
 
         {/* Description */}
         <p className="text-sm text-gray-900 font-semibold w-xs text-start mb-6">
-          Address Guru is an online local business directory that provides
+          AddressGuru UAE is an online local business directory that provides
           information about your daily needs just one click away.
         </p>
 

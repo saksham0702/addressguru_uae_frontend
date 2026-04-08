@@ -7,7 +7,7 @@ const HowDoesItWork = () => {
     <div className="bg-white md:shadow-lg rounded-md md:border border-gray-100   md:h-[450px] md:w-[70%] w-full flex flex-col gap-10 md:items-center md:text-center  pt-15">
       {/* heading section */}
       <div className="max-md:px-7">
-        <h3 className="md:text-3xl max-md:text-xl font-semibold">How does Address Guru work?</h3>
+        <h3 className="md:text-3xl max-md:text-xl font-semibold">How does AddressGuru UAE work?</h3>
         <p className="md:text-sm max-md:text-xs my-2 max-md:font-semibold font-[500]">
           List Your Business for FREE - Just 3 Easy Steps!
         </p>

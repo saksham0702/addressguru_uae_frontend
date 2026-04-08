@@ -33,7 +33,7 @@ const ListingDetails = () => {
       try {
         const res = await get_listing_data_single(slug);
         setData(res);
-        console.log("response of single listing", res);
+        // console.log("response of single listing", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
       }
@@ -281,11 +281,10 @@ const ListingDetails = () => {
                         </span>
                         {stat.change && (
                           <span
-                            className={`ml-2 text-xs px-2 max-md:px-[2px] font-bold max-md:text-[10px] py-0.5 rounded ${
-                              stat.changeType === "positive"
+                            className={`ml-2 text-xs px-2 max-md:px-[2px] font-bold max-md:text-[10px] py-0.5 rounded ${stat.changeType === "positive"
                                 ? "bg-green-500 text-white"
                                 : "bg-red-100 text-red-700"
-                            }`}
+                              }`}
                           >
                             {stat.change}
                           </span>
@@ -371,7 +370,7 @@ const ListingDetails = () => {
                     {" "}
                     45,000+
                   </strong>{" "}
-                  businesses trusts Address Guru to bring them closer to their
+                  businesses trusts AddressGuru UAE to bring them closer to their
                   customers & grow their reach..
                 </p>
 

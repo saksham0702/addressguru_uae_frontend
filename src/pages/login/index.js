@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { handleApiError } from "@/utils/ErrorHandler";
 import { useError } from "@/context/ErrorContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const {admin,setAdmin} = useAuth();
  
   const [errors, setErrors] = useState({
     email: "",
@@ -61,11 +63,13 @@ export default function LoginPage() {
       console.log("response of login user :", response);
 
       if (response.status) {
-        console.log("resonse", response.data);
+        console.log("resonse", response?.data?.data);
 
         localStorage.setItem("authToken", response?.data?.data?.authToken);
         localStorage.setItem("token", response?.data?.data?.authToken);
-
+        setAdmin(response?.data?.data?.user);
+        
+      
         router.push("/admin");
       } else {
         showError(response.data?.message || "Login failed");

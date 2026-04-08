@@ -280,7 +280,7 @@ const OurPlans = () => {
                 {" "}
                 45,000+
               </strong>{" "}
-              businesses trusts Address Guru to bring them closer to their
+              businesses trusts AddressGuru UAE to bring them closer to their
               customers & grow their reach..
             </p>
 

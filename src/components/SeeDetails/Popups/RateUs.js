@@ -3,7 +3,7 @@ import { Star, X } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { rate_us } from "@/api/queries";
 
-const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
+const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
   const recaptchaRef = useRef(null);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -35,7 +35,7 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
   const handleCaptchaChange = (value) => {
     if (value) {
       setFormData((prev) => ({ ...prev, captchaVerified: true }));
-      if (errors.captcha) {
+      if (errors?.captcha) {
         setErrors((prev) => ({ ...prev, captcha: "" }));
       }
     }
@@ -80,13 +80,16 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
 
     const payload = {
       rating: rating,
-      name: formData.fullName,
+      fullName: formData.fullName,
       email: formData.email,
-      message: formData.review || null,
+      reviewText: formData.review || null,
     };
 
+    // Map "listing" type to "business" for backend resolver
+    const listingType = type === "listing" ? "business" : type;
+
     try {
-      const res = await rate_us(type, id, payload);
+      const res = await rate_us(listingType, slug, payload);
       console.log(res);
 
       // Reset form
@@ -109,7 +112,7 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
       // Close modal after successful submission
       onClose();
     } catch (error) {
-      alert("Failed to submit rating. Please try again.");
+      alert(error?.message || "Failed to submit rating. Please try again.");
       console.error("Rating submission error:", error);
     } finally {
       setIsSubmitting(false);
@@ -161,11 +164,10 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
             disabled={isSubmitting}
           >
             <Star
-              className={`w-8 h-8 ${
-                index <= (hoveredRating || rating)
-                  ? "fill-orange-500 text-orange-500"
-                  : "text-gray-300"
-              }`}
+              className={`w-8 h-8 ${index <= (hoveredRating || rating)
+                ? "fill-orange-500 text-orange-500"
+                : "text-gray-300"
+                }`}
             />
           </button>
         ))}
@@ -183,9 +185,8 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
             onChange={handleChange}
             placeholder="Full Name *"
             disabled={isSubmitting}
-            className={`w-full px-3 py-2 border-2 ${
-              errors.fullName ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+            className={`w-full px-3 py-2 border-2 ${errors.fullName ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
           />
           {errors.fullName && (
             <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
@@ -200,9 +201,8 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
             onChange={handleChange}
             placeholder="Email Address *"
             disabled={isSubmitting}
-            className={`w-full px-3 py-2 border-2 ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+            className={`w-full px-3 py-2 border-2 ${errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
           />
           {errors.email && (
             <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -229,19 +229,18 @@ const RateUs = ({ onClose, id, type, setType, setThanksPop }) => {
             onExpired={handleCaptchaExpired}
             theme="light"
           />
-          {errors.captcha && (
-            <p className="text-red-500 text-sm mt-2">{errors.captcha}</p>
+          {errors?.captcha && (
+            <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
           )}
         </div>
 
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${
-            isSubmitting
-              ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-orange-600 hover:bg-orange-700 text-white"
-          }`}
+          className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isSubmitting
+            ? "bg-gray-400 cursor-not-allowed text-white"
+            : "bg-orange-600 hover:bg-orange-700 text-white"
+            }`}
         >
           {isSubmitting ? "Submitting..." : "Rate Us"}
         </button>

@@ -54,7 +54,7 @@ export const get_user_listings = async (type) => {
 export const get_listing_data = async (SLUG) => {
   try {
     const response = await axios.get(`${API_URL}/listing/${SLUG}`);
-    console.log("response of single listing", response?.data);
+    // console.log("response of single listing", response?.data);
     return response?.data?.data;
   } catch (error) {
     return null;
@@ -72,7 +72,7 @@ export const get_listing_data_single = async (SLUG) => {
         },
       },
     );
-    console.log("response of single listing", response?.data);
+    // console.log("response of single listing", response?.data);
     return response?.data;
   } catch (error) {
     return null;

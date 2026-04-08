@@ -1,6 +1,23 @@
 import React from "react";
 import BusinessHours from "./BusinessHours";
-import { Target } from "lucide-react";
+
+const CategoryIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
+    <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
+    <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
+    <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
+  </svg>
+);
+
+const PriceIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="20" height="14" rx="3" stroke="#333" strokeWidth="2" />
+    <rect x="6" y="8" width="12" height="8" rx="1.5" stroke="#333" strokeWidth="1.2" />
+    <line x1="9" y1="11" x2="15" y2="11" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="9" y1="13.5" x2="13" y2="13.5" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
 
 const QuickInformation = ({
   handlePop,
@@ -12,117 +29,75 @@ const QuickInformation = ({
   handleWebsiteClick,
   id,
 }) => {
-  const date = category?.updated_at;
-  console.log("price", price);
+  const categoryName = job ? category?.category_name : category?.name;
 
   return (
-    <div className=" w-full max-md:hidden  rounded-t-lg ">
+    <div className="w-full max-md:hidden rounded-t-lg">
+
+      {/* Header */}
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
         Quick Information
       </div>
-      <div className="bg-[#EEEEEE] p-4 text-sm space-y-1 border-b">
-        <p className="flex items-center gap-1">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect
-              x="3"
-              y="3"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="#333"
-              stroke-width="1.5"
-              fill="#323232"
-            />
-            <rect
-              x="13"
-              y="3"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="#333"
-              stroke-width="1.5"
-              fill="#323232"
-            />
-            <rect
-              x="3"
-              y="13"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="#333"
-              stroke-width="1.5"
-              fill="#323232"
-            />
-            <rect
-              x="13"
-              y="13"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="#333"
-              stroke-width="1.5"
-              fill="#323232"
-            />
-          </svg>
-          <span className="font-medium text-black">Category :</span>{" "}
-          <span className="font-bold text-orange-600">
-            {job ? category?.category_name : category?.name}
-          </span>
-        </p>
-        {price && (
-          <p>
-            <span className="font-medium text-[#5B5B5B] ">Starting Price :</span>
-            <span className="font-bold">
-              {" "}
-              <span>{price?.value?.currency}</span> {price?.value?.amount}
+
+      {/* Info Body */}
+      <div className="bg-[#EEEEEE] p-4 text-sm space-y-2 border-b">
+
+        {/* Category */}
+        {categoryName && (
+          <p className="flex items-center gap-2">
+            <CategoryIcon />
+            <span className="font-medium text-black">Category:</span>
+            <span className="font-bold text-orange-600">{categoryName}</span>
+          </p>
+        )}
+
+        {/* Starting Price */}
+        {price?.value?.amount && (
+          <p className="flex items-center gap-2">
+            <PriceIcon />
+            <span className="font-medium text-black">Starting Price:</span>
+            <span className="font-medium">
+              {price.value.currency} {price.value.amount}
             </span>
           </p>
         )}
-        <p>
-          {/* <span className="font-medium text-[#5B5B5B]">Posted At :</span>{" "} */}
-          <span className="font-bold">
-            {/* {new Date(date).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })} */}
-          </span>
-        </p>
-        {!job && BusinessHours && (
-          <BusinessHours openingHours={businesshours} mobile={""} />
+
+        {/* Business Hours */}
+        {!job && businesshours && (
+          <BusinessHours openingHours={businesshours} mobile="" />
         )}
 
-        {/* <p className="text-right text-xs  mt-2 text-[#5B5B5B]">
-          Ad Id : <span className="text-black">R1074662</span>
-        </p> */}
       </div>
-      <div className="flex justify-between items-center bg-white  max-md:p-3 p-1 border border-t-0 border-gray-200 rounded-b-lg">
-        <a
-          onClick={() => handleWebsiteClick(id, "website")}
-          href={link}
-          target="_blank"
-          className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded"
-        >
-          Visit Website
-        </a>
-        <button
+
+      {/* Footer Actions */}
+      <div className="flex justify-between items-center bg-white p-1 max-md:p-3 border border-t-0 border-gray-200 rounded-b-lg">
+
+        {link && (
+            <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => handleWebsiteClick(id, "website")}
+            className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded"
+          >
+            Visit Website
+          </a>
+        )}
+
+        <span
           onClick={() => handlePop("report")}
-          className="border  text-[#E06C5E] px-2 py-1 text-sm rounded"
+          className="font-medium text-red-600 px-2 py-1 text-sm cursor-pointer rounded"
         >
           Report
-        </button>
-        <button
-          className="bg-[#EEEEEE] text-[#838383]  px-2 py-1 text-sm rounded cursor-not-allowed"
+        </span>
+
+        <span
           onClick={() => handlePop("claim")}
+          className="font-medium bg-gray-100 text-gray-600 px-2 py-1 text-sm rounded cursor-pointer"
         >
           Claim this Business
-        </button>
+        </span>
+
       </div>
     </div>
   );

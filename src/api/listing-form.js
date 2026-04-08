@@ -54,7 +54,7 @@ export const get_listing_data = async (SLUG) => {
     const response = await axios.get(
       `${API_URL}/business-listing/get-listing-by-slug/${SLUG}`,
     );
-    console.log("response of single listing", response?.data);
+    // console.log("response of single listing", response?.data);
     return response;
   } catch (error) {
     return null;
@@ -66,7 +66,7 @@ export const get_all_listings = async (SLUG) => {
     const response = await axios.get(
       `${API_URL}/business-listing/get-all-listings/`,
     );
-    console.log("response of single listing", response?.data);
+    // console.log("response of single listing", response?.data);
     return response.data;
   } catch (error) {
     return null;
@@ -78,7 +78,7 @@ export const get_all_listings = async (SLUG) => {
 export const get_listing_by_businessslug = async (SLUG) => {
   try {
     const response = await axios.get(`${API_URL}/listing/${SLUG}`);
-    console.log("response of single listing", response?.data);
+    // console.log("response of single listing", response?.data);
     return response?.data?.data;
   } catch (error) {
     return null;

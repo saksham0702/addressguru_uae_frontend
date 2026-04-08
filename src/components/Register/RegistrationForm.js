@@ -67,7 +67,7 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
     }
 
     if (!formData.captchaVerified) {
-      newErrors.captcha = "Please verify you are not a robot";
+      newerrors?.captcha = "Please verify you are not a robot";
     }
 
     setErrors(newErrors);
@@ -77,7 +77,7 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
   const handleCaptchaChange = (value) => {
     if (value) {
       setFormData((prev) => ({ ...prev, captchaVerified: true }));
-      if (errors.captcha) {
+      if (errors?.captcha) {
         setErrors((prev) => ({ ...prev, captcha: "" }));
       }
     }
@@ -269,8 +269,8 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
               onExpired={handleCaptchaExpired}
               theme="light"
             />
-            {errors.captcha && (
-              <p className="text-red-500 text-sm z-50 ">{errors.captcha}</p>
+            {errors?.captcha && (
+              <p className="text-red-500 text-sm z-50 ">{errors?.captcha}</p>
             )}
           </div>
         </div>

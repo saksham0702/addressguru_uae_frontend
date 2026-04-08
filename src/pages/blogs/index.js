@@ -264,31 +264,31 @@ const Blogs = () => {
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
-                  <div className="sm:w-2/3 p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-[#FF6E04] text-xs font-medium border border-[#FF6E04] px-3 py-1 rounded-full">
-                        {blog?.category_id?.name}
-                      </span>
-                      <span className="text-gray-500 text-xs">
-                        {blog?.date}
-                      </span>
-                    </div>
+                  <div className="sm:w-2/3 px-6 py-4">
+
                     <Link
                       href={`/blogs/${blog?.slug}`}
                       className="text-lg font-semibold text-gray-800 mb-3 hover:text-[#FF6E04] transition-colors cursor-pointer"
                     >
                       {blog?.title}
                     </Link>
+                        <div className="flex items-center gap-3 my-2">
+                      {/* <span className="text-[#FF6E04] text-xs font-medium  rounded-full">
+                        {blog?.category_id?.name}
+                      </span> */}
+                      <span className="text-gray-500 text-xs">
+                        {blog?.date}
+                      </span>
+                    </div>
                     <p
                       dangerouslySetInnerHTML={{ __html: blog?.content }}
                       className="text-gray-600 text-xs mb-4 line-clamp-2"
                     />
-                    <Link
-                      href={`/blogs/${blog?.slug}`}
-                      className="text-[#FF6E04] border border-[#FF6E04] px-4 py-2 text-xs rounded hover:bg-[#FF6E04] hover:text-white transition-all duration-300 font-medium"
-                    >
-                      Continue Reading
-                    </Link>
+                      <span className="text-[#FF6E04] font-medium py-1 flex items-center gap-1 rounded-full">
+                        <h3 className=" ">
+                        {blog?.category_id?.name}
+                        </h3>
+                      </span>
                   </div>
                 </div>
               ))}

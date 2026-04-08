@@ -48,7 +48,7 @@ const UserLogin = ({ setShowLogin }) => {
             <h2 className="font-[500] text-xl">
               {" "}
               Listing Benefits With{" "}
-              <strong className="text-orange-400">Address Guru</strong>{" "}
+              <strong className="text-orange-400">AddressGuru UAE</strong>{" "}
             </h2>
 
             <ul className="flex flex-wrap list-disc pl-5 w-full mt-4 gap-x-6 gap-y-2">

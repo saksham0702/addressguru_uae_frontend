@@ -59,7 +59,7 @@ const DashboardSidebar = ({ activeTab, setActiveTab }) => {
           ></path>
         </svg>
       ),
-      label: "Visit Address Guru",
+      label: "Visit AddressGuru UAE",
       active: false,
       link: "/",
     },

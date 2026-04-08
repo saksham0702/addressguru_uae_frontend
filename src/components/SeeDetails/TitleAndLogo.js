@@ -16,6 +16,8 @@ const TitleAndLogo = ({
   data,
   rating,
   handleClick,
+  enquirePop,
+  setEnquirePop,
 }) => {
   console.log(name);
 
@@ -36,7 +38,6 @@ const TitleAndLogo = ({
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 items-center">
           <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
-          <StarRatingBadge value={getStarRating(data?.additionalFields)} />
         </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
@@ -97,6 +98,8 @@ const TitleAndLogo = ({
             <p className="2xl:text-md">AG</p>
             <p className="text-black">Verified</p>
           </span>
+          <StarRatingBadge value={getStarRating(data?.additionalFields)} />
+
         </div>
 
         {/* address section */}
@@ -139,6 +142,7 @@ const TitleAndLogo = ({
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 items-center mt-2">
           <CustomButton
+            hoverBgColor="red-300"
             showToggle={true}
             defaultText="SHOW NUMBER"
             toggledText={data?.mobileNumber}
@@ -180,7 +184,6 @@ const TitleAndLogo = ({
           />
 
           {/* enquire now */}
-
           <CustomButton
             defaultText="ENQUIRE NOW"
             icon={
@@ -220,17 +223,15 @@ const TitleAndLogo = ({
             textColor="#fff"
             width="140px"
             onClick={() => {
-              // Custom function when the button is clicked
-              console.log("Enquire Now clicked");
-              // Or trigger a modal, navigate, etc.
+              setEnquirePop(true)
             }}
           />
 
           {/* whatsap button */}
-
           <a
+            className="hover:scale-105 transition-all duration-100 hover:opacity-80"
             onClick={() => handleClick(data?.id, "whatsapp")}
-            href={`https://wa.me/${data?.mobile_number}`}
+            href={`https://wa.me/${data?.mobileNumber}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -260,6 +261,7 @@ const TitleAndLogo = ({
 
           {/* share button */}
           <span
+            className="hover:scale-105 transition-all duration-100 hover:opacity-80"
             onClick={() => {
               handlePop("share");
             }}

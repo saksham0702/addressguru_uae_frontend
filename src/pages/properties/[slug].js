@@ -969,7 +969,7 @@ const PropertySeeDetails = () => {
                   <p>
                     Found this listing helpful? Tell {data?.title} you
                     discovered them on{" "}
-                    <strong className="text-[#FF6E04]">Address Guru</strong>.
+                    <strong className="text-[#FF6E04]">AddressGuru UAE</strong>.
                   </p>
                 </div>
               </div>
