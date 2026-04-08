@@ -253,7 +253,7 @@ const SearchResults = () => {
           </div>
 
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {canonicalSlug} in {canonicalCity}
+            Top {listings?.[0]?.category?.name} in {canonicalCity}
           </h1>
 
           <FilterBar

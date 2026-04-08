@@ -145,7 +145,7 @@ const TitleAndLogo = ({
             hoverBgColor="red-300"
             showToggle={true}
             defaultText="SHOW NUMBER"
-            toggledText={data?.mobileNumber}
+            toggledText={data?.countryCode + data?.mobileNumber}
             icon={
               <svg
                 width="17"
@@ -330,10 +330,10 @@ const TitleAndLogo = ({
 
           {/* views */}
 
-          <div className="flex gap-1 items-center text-gray-600 text-sm">
+          {/* <div className="flex gap-1 items-center text-gray-600 text-sm">
             <FaUser />
             <p>{data?.views}</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
