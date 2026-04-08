@@ -20,7 +20,7 @@ import {
 
 import { BUSINESS_POSTING_TIPS } from "@/services/constants";
 import AdditionalInfo from "@/components/Forms/FormSections/AdditionalInfo";
-import { getBusinessListing } from "@/api/uaeAdminCategories";
+import { getBusinessFeatures } from "@/api/uaeAdminCategories";
 import { add_listings, get_listing_data } from "@/api/listing-form";
 import SuccessModal from "@/components/Forms/sucesspopup";
 
@@ -469,7 +469,7 @@ const ListingForms = () => {
   // get service and facilities
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
-      const res = await getBusinessListing(categoryId);
+      const res = await getBusinessFeatures(categoryId);
       console.log("res :", res);
 
       const facilities = res?.features?.facilities || [];

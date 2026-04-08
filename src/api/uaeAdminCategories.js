@@ -680,15 +680,15 @@ export const removeFeatureFromSubCategoryApi = async (
   }
 };
 
-export const getBusinessListing = async (id) => {
+export const getBusinessFeatures = async (id) => {
   try {
     const response = await axios.get(
       `${API_URL}/business-listing/get-features/${id}`,
     );
-    console.log("get business response", response);
+    console.log("get business features response", response);
     return response.data.data;
   } catch (error) {
-    console.log("Error fetching business listing:", error);
+    console.log("Error fetching business features:", error);
   }
 };
 

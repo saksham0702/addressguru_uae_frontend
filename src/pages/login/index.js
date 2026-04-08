@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const {admin,setAdmin} = useAuth();
  
   const [errors, setErrors] = useState({
     email: "",
@@ -67,7 +66,6 @@ export default function LoginPage() {
 
         localStorage.setItem("authToken", response?.data?.data?.authToken);
         localStorage.setItem("token", response?.data?.data?.authToken);
-        setAdmin(response?.data?.data?.user);
         
       
         router.push("/admin");
