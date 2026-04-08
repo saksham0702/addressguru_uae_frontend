@@ -7,7 +7,7 @@ const Foot2 = () => {
       {/* Section 1: Feedback */}
       <div className=" mb-4">
         <h3 className="font-semibold mb-1">Give Your Feedback</h3>
-        <p className="font-bold">Addressguruuae@gmail.com</p>
+        <p className="font-bold">contact@addressguru.ae</p>
         <p className="text-xs text-gray-500">Help us improve!</p>
       </div>
 
