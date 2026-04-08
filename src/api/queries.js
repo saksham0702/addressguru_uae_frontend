@@ -1,33 +1,12 @@
 import axios from "axios";
 import { API_URL } from "@/services/constants";
 
-// 🔹 Query API
-export const query = async (type, id, payload) => {
+// 🔹 Query API (Enquiry)
+export const query = async (type, slug, payload) => {
   console.log("payload", payload);
   try {
     const response = await axios.post(
-      `${API_URL}/query/${type}/${id}`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    console.log(response);
-    return response?.data?.message;
-  } catch (error) {
-    console.error("Job query error:", error);
-    return error;
-  }
-};
-
-// report api
-export const report = async (type, id, payload) => {
-  console.log(payload);
-  try {
-    const response = await axios.post(
-      `${API_URL}/report/${type}/${id}`,
+      `${API_URL}/${type}/${slug}/enquiry`,
       payload,
       {
         headers: {
@@ -38,16 +17,51 @@ export const report = async (type, id, payload) => {
     console.log(response);
     return response?.data;
   } catch (error) {
-    console.log(error, "report error", error);
+    console.error("Enquiry error:", error);
+    throw error?.response?.data || error;
   }
 };
 
-// 🔹 Rate Us API
-export const rate_us = async (type, id, payload) => {
-  console.log("api payload", payload, type, id);
+// report api
+export const report = async (type, slug, payload) => {
+  const url = `${API_URL}/${type}/${slug}/report`;
+  console.log("report url", url);
+
   try {
     const response = await axios.post(
-      `${API_URL}/ratings/${type}/${id}`,
+      `${API_URL}/${type}/${slug}/report`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    console.log(response);
+    return response?.data;
+  } catch (error) {
+    console.error("Report error:", error);
+    throw error?.response?.data || error;
+  }
+};
+
+// get report reasons
+export const get_report_reasons = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/report-reasons`);
+    return response?.data?.data;
+  } catch (error) {
+    console.error("Error fetching report reasons:", error);
+    return [];
+  }
+};
+
+// 🔹 Rate Us API (Review)
+export const rate_us = async (type, slug, payload) => {
+  console.log("api payload", payload, type, slug);
+  try {
+    const response = await axios.post(
+      `${API_URL}/${type}/${slug}/review`,
       payload,
       {
         headers: {
@@ -56,19 +70,19 @@ export const rate_us = async (type, id, payload) => {
       },
     );
     console.log("rating response", response?.data);
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Error in rating API:", error);
-    return error;
+    throw error?.response?.data || error;
   }
 };
 
 // 🔹 Claim Business API
-export const claim_business = async (payload, type, id) => {
+export const claim_business = async (payload, type, slug) => {
   console.log(payload);
   try {
     const response = await axios.post(
-      `${API_URL}/claim/${type}/${id}`,
+      `${API_URL}/${type}/${slug}/claim`,
       payload,
       {
         headers: {
@@ -80,7 +94,7 @@ export const claim_business = async (payload, type, id) => {
     return response.data;
   } catch (error) {
     console.error("Claim business error:", error);
-    return error; // Re-throw to handle in component
+    throw error?.response?.data || error;
   }
 };
 

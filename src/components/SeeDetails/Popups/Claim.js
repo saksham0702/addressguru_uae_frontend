@@ -3,7 +3,9 @@ import { X } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { claim_business } from "@/api/queries";
 
-export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
+export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
+  console.log("type", type);
+  console.log("id", id);
   const recaptchaRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -57,7 +59,7 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
   const handleCaptchaChange = (value) => {
     if (value) {
       setFormData((prev) => ({ ...prev, captchaVerified: true }));
-      if (errors.captcha) {
+      if (errors?.captcha) {
         setErrors((prev) => ({ ...prev, captcha: "" }));
       }
     }
@@ -76,15 +78,18 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
       setIsSubmitting(true);
 
       const payload = {
-        name: formData.fullName,
+        fullName: formData.fullName,
         email: formData.email,
-        phone: formData.mobile,
-        message: formData.reason,
+        mobileNumber: formData.mobile,
+        reasonForClaim: formData.reason,
       };
 
+      // Map "listing" type to "business" for backend resolver
+      const listingType = type === "listing" ? "business" : type;
+
       try {
-        const res = await claim_business(payload, type, id);
-        console.log(res?.data);
+        const res = await claim_business(payload, listingType, slug);
+        console.log(res);
 
         setFormData({
           fullName: "",
@@ -104,7 +109,7 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
         setType("claim");
         onClose();
       } catch (error) {
-        alert("Failed to submit claim. Please try again.");
+        alert(error?.message || "Failed to submit claim. Please try again.");
         console.error("Claim submission error:", error);
       } finally {
         setIsSubmitting(false);
@@ -145,9 +150,8 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            className={`w-full px-4 py-1.5 border-1 ${
-              errors.fullName ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
+            className={`w-full px-4 py-1.5 border-1 ${errors.fullName ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
             placeholder="Enter your full name"
           />
           {errors.fullName && (
@@ -164,9 +168,8 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-4 py-1.5 border-1 ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
+            className={`w-full px-4 py-1.5 border-1 ${errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
             placeholder="your.email@example.com"
           />
           {errors.email && (
@@ -183,9 +186,8 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
             name="mobile"
             value={formData.mobile}
             onChange={handleChange}
-            className={`w-full px-4 py-1.5 border-1 ${
-              errors.mobile ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
+            className={`w-full px-4 py-1.5 border-1 ${errors.mobile ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors`}
             placeholder="1234567890"
           />
           {errors.mobile && (
@@ -203,9 +205,8 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
             value={formData.reason}
             onChange={handleChange}
             rows="3"
-            className={`w-full px-4 py-1.5 border-1 ${
-              errors.reason ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:border-blue-500 transition-colors resize-none`}
+            className={`w-full px-4 py-1.5 border-1 ${errors.reason ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors resize-none`}
             placeholder="Please explain why you are claiming ownership of this business..."
           />
           {errors.reason && (
@@ -221,8 +222,8 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
             onExpired={handleCaptchaExpired}
             theme="light"
           />
-          {errors.captcha && (
-            <p className="text-red-500 text-sm mt-2">{errors.captcha}</p>
+          {errors?.captcha && (
+            <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
           )}
         </div>
 
@@ -252,11 +253,10 @@ export const Claim = ({ onClose, type, id, setThanksPop, setType }) => {
         <button
           onClick={handleSubmit}
           disabled={!isFormValid || isSubmitting}
-          className={`w-full py-3 rounded-lg font-bold text-sm transition-all transform ${
-            isFormValid && !isSubmitting
-              ? "bg-blue-500 text-white hover:scale-[1.02] shadow-lg"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          className={`w-full py-3 rounded-lg font-bold text-sm transition-all transform ${isFormValid && !isSubmitting
+            ? "bg-blue-500 text-white hover:scale-[1.02] shadow-lg"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
         >
           {isSubmitting ? "Submitting..." : "Claim Business"}
         </button>

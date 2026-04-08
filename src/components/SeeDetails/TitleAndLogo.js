@@ -16,6 +16,8 @@ const TitleAndLogo = ({
   data,
   rating,
   handleClick,
+  enquirePop,
+  setEnquirePop,
 }) => {
   console.log(name);
 
@@ -221,9 +223,7 @@ const TitleAndLogo = ({
             textColor="#fff"
             width="140px"
             onClick={() => {
-              // Custom function when the button is clicked
-              console.log("Enquire Now clicked");
-              // Or trigger a modal, navigate, etc.
+              setEnquirePop(true)
             }}
           />
 

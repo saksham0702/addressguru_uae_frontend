@@ -264,7 +264,8 @@ const SeeDetails = ({ initialData }) => {
             {activePop === "share" && <Share onClose={closePopup} />}
             {activePop === "claim" && (
               <Claim
-                id={data?.id}
+                id={data?._id}
+                slug={data?.slug}
                 type={"listing"}
                 setType={setType}
                 setThanksPop={setThanksPop}
@@ -273,7 +274,8 @@ const SeeDetails = ({ initialData }) => {
             )}
             {activePop === "rateus" && (
               <RateUs
-                id={data?.id}
+                id={data?._id}
+                slug={data?.slug}
                 type={"listing"}
                 setType={setType}
                 setThanksPop={setThanksPop}
@@ -282,7 +284,8 @@ const SeeDetails = ({ initialData }) => {
             )}
             {activePop === "report" && (
               <Report
-                id={data?.id}
+                id={data?._id}
+                slug={data?.slug}
                 type={"listing"}
                 setType={setType}
                 setThanksPop={setThanksPop}
@@ -295,9 +298,8 @@ const SeeDetails = ({ initialData }) => {
 
       {/* MAIN CONTENT */}
       <div
-        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
-          preview === "true" ? "pointer-events-none opacity-90" : ""
-        }`}
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "pointer-events-none opacity-90" : ""
+          }`}
       >
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
@@ -319,6 +321,8 @@ const SeeDetails = ({ initialData }) => {
               ratings={data?.ratings}
               handleClick={handleClick}
               openingHours={data?.workingHours}
+              enquirePop={enquirePop}
+              setEnquirePop={setEnquirePop}
             />
           </div>
 
@@ -544,9 +548,8 @@ const SeeDetails = ({ initialData }) => {
 
                 <div className="md:text-[13.5px] text-[15px] md:font-[500] flex flex-col gap-5 mt-2 max-w-4xl">
                   <p>
-                    {`${
-                      data?.businessName
-                    } is located at ${data?.businessAddress}, ${serverCity}.`}
+                    {`${data?.businessName
+                      } is located at ${data?.businessAddress}, ${serverCity}.`}
                     {data?.facilities && data.facilities.length > 0 && (
                       <span>
                         {" Their facilities include: "}
@@ -622,13 +625,14 @@ const SeeDetails = ({ initialData }) => {
       {/* ENQUIRE POPUP */}
       {enquirePop && (
         <div
-          className="inset-0 flex items-center fixed justify-center backdrop-blur-sm z-50 py-20 px-5"
+          className="inset-0 flex items-center fixed justify-center backdrop-blur-xs z-50 py-20 px-5"
           onClick={() => setEnquirePop(false)}
         >
           <div onClick={(e) => e.stopPropagation()}>
             <GetMoreInfo
               type={"listing"}
-              id={data?.id}
+              id={data?._id}
+              slug={data?.slug}
               setEnquirePop={setEnquirePop}
               name={data?.business_name}
             />

@@ -1,21 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { X, AlertTriangle } from "lucide-react";
-import { report } from "@/api/queries";
+import { report, get_report_reasons } from "@/api/queries";
 import ReCAPTCHA from "react-google-recaptcha";
 
-const Report = ({ onClose, id, type, setType, setThanksPop }) => {
+const Report = ({ onClose, id, slug, type, setType, setThanksPop }) => {
   const recaptchaRef = useRef(null);
 
   const [selectedReason, setSelectedReason] = useState("");
   const [otherText, setOtherText] = useState("");
-  const [formData, setFormData] = useState({
-    captchaVerified: false,
-    captchaToken: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const reportReasons = [
+  const [reportReasons, setReportReasons] = useState([
     "Illegal/Fraudulent",
     "Spam Ad",
     "Duplicate Ad",
@@ -23,7 +16,28 @@ const Report = ({ onClose, id, type, setType, setThanksPop }) => {
     "Against Posting Rules",
     "Adult Content",
     "Other",
-  ];
+  ]);
+
+  const [formData, setFormData] = useState({
+    captchaVerified: false,
+    captchaToken: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const fetchReasons = async () => {
+      try {
+        const reasons = await get_report_reasons();
+        if (reasons && reasons.length > 0) {
+          setReportReasons([...reasons, "Other"]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch report reasons:", err);
+      }
+    };
+    fetchReasons();
+  }, []);
 
   const handleRadioChange = (reason) => {
     setSelectedReason(reason);
@@ -41,7 +55,7 @@ const Report = ({ onClose, id, type, setType, setThanksPop }) => {
         captchaToken: value, // <-- store token
       }));
 
-      if (errors.captcha) {
+      if (errors?.captcha) {
         setErrors((prev) => ({ ...prev, captcha: "" }));
       }
     }
@@ -80,18 +94,23 @@ const Report = ({ onClose, id, type, setType, setThanksPop }) => {
     }
 
     const payload = {
-      report: selectedReason === "Other" ? otherText.trim() : selectedReason,
-      grc_response: formData.captchaToken, // <-- Send token here
+      reason: selectedReason,
+      description: otherText.trim() || undefined,
+      grc_response: formData.captchaToken,
     };
 
+    // Map "listing" type to "business" for backend resolver
+    const listingType = type === "listing" ? "business" : type;
+
     try {
-      const res = await report(type, id, payload);
+      const res = await report(listingType, slug, payload);
+      console.log(res);
       setType("report");
       setThanksPop(true);
       handleClose();
     } catch (error) {
       console.error("Error submitting report:", error);
-      alert("Failed to submit report. Please try again.");
+      alert(error?.message || "Failed to submit report. Please try again.");
     }
   };
 
@@ -184,19 +203,18 @@ const Report = ({ onClose, id, type, setType, setThanksPop }) => {
           onExpired={handleCaptchaExpired}
           theme="light"
         />
-        {errors.captcha && (
-          <p className="text-red-500 text-sm mt-2">{errors.captcha}</p>
+        {errors?.captcha && (
+          <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
         )}
       </div>
 
       <button
         onClick={handleSubmit}
         disabled={!isFormValid}
-        className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${
-          isFormValid
-            ? "bg-red-600 hover:bg-red-700 text-white"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
+        className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isFormValid
+          ? "bg-red-600 hover:bg-red-700 text-white"
+          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
       >
         Submit Report
       </button>
