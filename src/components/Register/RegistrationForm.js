@@ -5,8 +5,9 @@ import { social_login } from "@/api/userAuth";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { user_register } from "@/api/uaeadminlogin";
+import { FcGoogle } from "react-icons/fc";
 
 const RegistrationForm = ({ setPop, setUserId, type }) => {
   const router = useRouter();
@@ -24,26 +25,39 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
 
   const { user, setUser, setToken, login } = useAuth();
 
-  const handleGoogle = async (code, random) => {
+  const handleGoogle = async (tokenData) => {
     try {
       const payload = {
-        auth_code: code,
-        g_token: random,
+        provider: "google",
+        accessToken: tokenData.access_token,
       };
       const res = await social_login(payload);
       console.log("response of google", res);
-      if (res?.status === 200) {
+      
+      if (res?.success) {
+        const authToken = res?.data?.accessToken;
+        localStorage.setItem("authToken", authToken);
         if (login) {
-          login(res?.access_token);
+          login(authToken);
         }
-        setToken(res?.access_token);
+        setToken(authToken);
         router.push("/dashboard");
+      } else {
+        setErrors({ google: res?.error || "Google login failed. Please try again." });
       }
     } catch (error) {
       console.error("Google login error:", error);
-      setErrors({ google: "Google login failed. Please try again." });
+      setErrors({ google: "Google authentication error. Please try again." });
     }
   };
+
+  const googleLoginTrigger = useGoogleLogin({
+    onSuccess: (tokenResponse) => handleGoogle(tokenResponse),
+    onError: (error) => {
+      console.log("Login Failed", error);
+      setErrors({ google: "Google Authentication Failed" });
+    },
+  });
 
   const validate = () => {
     let newErrors = {};
@@ -67,7 +81,7 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
     }
 
     if (!formData.captchaVerified) {
-      newerrors?.captcha = "Please verify you are not a robot";
+      newErrors.captcha = "Please verify you are not a robot";
     }
 
     setErrors(newErrors);
@@ -131,8 +145,7 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
   };
 
   return (
-    <GoogleOAuthProvider clientId="477872652143-tciloohp49r48l80d7j6tqituovm9nu0.apps.googleusercontent.com">
-      <div className=" bg-white rounded-lg px-4 py-3 w-full min-h-[480px] space-y-3 ">
+    <div className="bg-white rounded-lg px-4 py-3 w-full min-h-[480px] space-y-3 ">
         {/* all the inputs  */}
         <InputWithSvg
           field={name}
@@ -282,27 +295,27 @@ const RegistrationForm = ({ setPop, setUserId, type }) => {
           Register
         </button>
         <div className="w-full text-center text-xs ">OR</div>
-        <div className="w-45  h-11  ">
-          <GoogleLogin
-            onSuccess={(res) => {
-              // console.log(res);
-              const code = res?.credential;
-              const random = crypto.randomUUID(); // or any random string generator
-              // setGoogleCode(code);
-              handleGoogle(code, random); // <-- CALL THE FUNCTION HERE
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
-          />
+        <div className="w-full max-w-[320px] mx-auto">
+          <button
+            onClick={() => googleLoginTrigger()}
+            className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-200 rounded-lg bg-white hover:bg-orange-50 hover:border-orange-200 transition-all duration-300 group relative overflow-hidden active:scale-[0.98]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <FcGoogle className="text-xl" />
+            <span className="text-gray-700 text-sm font-medium whitespace-nowrap">
+              Continue with Google
+            </span>
+          </button>
         </div>
+        {errors.google && (
+          <p className="text-red-500 text-[10px] text-center">{errors.google}</p>
+        )}
 
         <div className="text-[8px] text-center flex gap-1 w-full mx-auto font-[500] whitespace-nowrap">
           By continuing, you agree to our <u>Terms of Use</u> <u>Privacy</u> &
           <u>Infringement Policy</u>
-        </div>
       </div>
-    </GoogleOAuthProvider>
+    </div>
   );
 };
 

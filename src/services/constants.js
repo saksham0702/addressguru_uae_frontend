@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { FaBlog, FaCity } from "react-icons/fa";
 
-export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+// export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+export const API_URL = ""
+console.log("API_URL ::", API_URL);
+
 
 // mine
 export const GEMINI_KEY = "AIzaSyDYRKcWbV8oj1nfR_Z_PpJnCwKPnkg4rMc";

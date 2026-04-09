@@ -3,17 +3,13 @@ import InputWithSvg from "../InputWithSvg";
 import Image from "next/image";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
-import { forgot_password, social_login, user_login } from "@/api/userAuth";
+import { social_login } from "@/api/userAuth";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
-// import ResponseAlert from "../ResponseAlert";
 import OTPPopup from "../Register/OTPPopup";
-import {
-  useGoogleLogin,
-  GoogleLogin,
-  GoogleOAuthProvider,
-} from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { loginUser } from "@/api/uaeadminlogin";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = ({ setShowLogin }) => {
   const [forgot, setforgot] = useState(false);
@@ -81,25 +77,46 @@ const Login = ({ setShowLogin }) => {
     }
   };
 
-  const handleGoogle = async (code, random) => {
-    const payload = {
-      auth_code: code,
-      g_token: random,
-    };
-    const res = await social_login(payload);
-    console.log("response of google", res);
-    if (res?.status === 200) {
-      login(res?.access_token);
-      setToken(res?.access_token);
-      router.push("/dashboard");
+  const handleGoogle = async (tokenData) => {
+    setLoading(true);
+    setResError(null);
+    try {
+      const payload = {
+        provider: "google",
+        accessToken: tokenData.access_token,
+      };
+      const res = await social_login(payload);
+      console.log("response of google", res);
+      
+      if (res?.success) {
+        const authToken = res?.data?.accessToken;
+        localStorage.setItem("authToken", authToken);
+        login(authToken);
+        setToken(authToken);
+        router.push("/dashboard");
+      } else {
+        setResError(res?.error || "Google login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      setResError("Something went wrong with Google login");
+    } finally {
+      setLoading(false);
     }
   };
+
+  const googleLoginTrigger = useGoogleLogin({
+    onSuccess: (tokenResponse) => handleGoogle(tokenResponse),
+    onError: (error) => {
+      console.log("Login Failed", error);
+      setResError("Google Authentication Failed");
+    },
+  });
   // const g_login = useGoogleLogin({
   //   onSuccess: (tokenResponse) => console.log(tokenResponse),
   // });
   return (
-    <GoogleOAuthProvider clientId="477872652143-tciloohp49r48l80d7j6tqituovm9nu0.apps.googleusercontent.com">
-      <div className="my-12 flex flex-col gap-3 items-center max-md:mt-20 max-md:w-xs mx-auto max-md:space-y-3  relative">
+    <div className="my-12 flex flex-col gap-3 items-center max-md:mt-20 max-md:w-xs mx-auto max-md:space-y-3  relative">
         {/* title and svg section */}
         {forgot === true ? (
           <Image
@@ -296,22 +313,21 @@ const Login = ({ setShowLogin }) => {
               <span className="h-[1px] w-[45%] bg-gray-300"></span>
             </div>
 
-            {/*google login button */}
-            <div className="w-fit mx-auto  flex items-center justify-center ">
-              <GoogleLogin
-                onSuccess={(res) => {
-                  // console.log(res);
-
-                  const code = res?.credential;
-                  const random = crypto.randomUUID(); // or any random string generator
-
-                  // setGoogleCode(code);
-                  handleGoogle(code, random); // <-- CALL THE FUNCTION HERE
-                }}
-                onError={() => {
-                  console.log("Login Failed");
-                }}
-              />
+            <div className="w-full max-w-[320px] mx-auto">
+              <button
+                onClick={() => googleLoginTrigger()}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 rounded-lg bg-white hover:bg-orange-50 hover:border-orange-200 transition-all duration-300 group relative overflow-hidden active:scale-[0.98]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                <FcGoogle className="text-xl" />
+                <span className="text-gray-700 font-medium whitespace-nowrap">
+                  Continue with Google
+                </span>
+                {loading && (
+                    <div className="ml-2 w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                )}
+              </button>
             </div>
             <span className="flex gap-1 max-md:mt-3 text-center text-xs mt-2 font-[500]">
               <p>Not Registered Yet?</p>
@@ -337,13 +353,8 @@ const Login = ({ setShowLogin }) => {
           </button>
         )}
 
-        {otpPop && <OTPPopup setPop={setOtpPop} userId={userId} />}
-        {/* Error Alert */}
-        {/* {resError && (
-        <ResponseAlert text={resError} onClose={() => setResError(null)} />
-      )} */}
-      </div>
-    </GoogleOAuthProvider>
+      {otpPop && <OTPPopup setPop={setOtpPop} userId={userId} />}
+    </div>
   );
 };
 
