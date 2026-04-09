@@ -68,9 +68,9 @@ const AboutUs = () => {
             and then reaching out at country level and then to international
             level.
           </li>
-          <li>The official addressguru website was launched in 2018.</li>
+          <li>The official AddressGuru UAE website was launched in 2026.</li>
           <li>
-            AddressGuru Search services provide a bridge to the businesses and
+            AddressGuru UAE Search services provide a bridge to the businesses and
             its prospective buyers to discover and connect. It provides many
             opportunities to the businesses to market their business
             effectively.
@@ -118,7 +118,7 @@ const AboutUs = () => {
 
         <Title text={"How to report listing infringement"} icon={"cancel"} />
         <p className="text-sm font-[500]">
-          You infringement email should include these things :
+          Your infringement email should include these things :
         </p>
         <ul className="text-xs font-[500] pl-5 max-w-[64rem] list-disc space-y-1">
           <li>Identification of the infringed property</li>

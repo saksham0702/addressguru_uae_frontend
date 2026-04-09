@@ -5,17 +5,15 @@ import Link from "next/link";
 const menuLinks = [
   { name: "About Us", path: "/about-us" },
   { name: "Blogs", path: "/blogs" },
-  { name: "Become A Partner", path: "/partner" },
-  { name: "Posting Rules", path: "/posting-rules" },
   { name: "Marketplace", path: "/marketplace" },
+  { name: "Properties", path: "/properties" },
 ];
 
 const quickLinks = [
-  { name: "Post Ad", path: "/post-ad" },
-  { name: "Our Plans", path: "/plans" },
-  { name: "Infringement Policy", path: "/infringement-policy" },
+  { name: "Our Plans", path: "/our-plans" },
+  { name: "Contact Us", path: "/contact-us" },
   { name: "Privacy Policy", path: "/privacy-policy" },
-  { name: "Click Here To Open The App", path: "/app" },
+  // { name: "Click Here To Open The App", path: "/app" },
 ];
 
 const Foot1 = () => {

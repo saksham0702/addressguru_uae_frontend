@@ -61,7 +61,7 @@ const SliderCard = ({ images }) => {
 
       <style jsx global>{`
         .custom-dots {
-          bottom: 24px;
+          bottom: 14px;
           display: flex !important;
           justify-content: center;
           align-items: center;
