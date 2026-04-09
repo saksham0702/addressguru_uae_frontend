@@ -168,10 +168,10 @@ const FilterBar = ({
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search listings..."
               className="
-                pl-8 pr-7 py-1.5 text-sm bg-white rounded font-medium
+                pl-8 pr-7 py-1.5 text-sm bg-white rounded font-medium h-8.5
                 border border-gray-300
                 outline-none
-                w-40 focus:w-52
+                w-46 focus:w-52
                 transition-all duration-300
                 placeholder:text-gray-400
                 focus:border-orange-400
@@ -249,7 +249,7 @@ const FilterBar = ({
 
           {hasActiveFilters && (
             <button
-              className="text-sm bg-white px-2 whitespace-nowrap border-gray-300 border rounded-sm font-semibold"
+              className="text-sm bg-white h-8 px-2 whitespace-nowrap border-gray-300 border rounded-sm font-semibold"
               onClick={handleReset}
             >
               Clear all

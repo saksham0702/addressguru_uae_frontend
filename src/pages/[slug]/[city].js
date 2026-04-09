@@ -165,7 +165,7 @@ const SearchResults = () => {
 
         const query = buildQueryParams(1);
         const res = await axios.get(
-          `http://localhost:5001/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
         );
 
         const data = res?.data?.data;
@@ -195,7 +195,7 @@ const SearchResults = () => {
       setIsLoadingMore(true);
       const query = buildQueryParams(pageData.nextPage);
       const res = await axios.get(
-        `http://localhost:5001/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
+        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
       );
       const data = res?.data?.data;
       if (data?.listings?.length) {
