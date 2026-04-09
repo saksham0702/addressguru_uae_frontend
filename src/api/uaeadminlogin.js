@@ -39,7 +39,9 @@ export const logoutUser = async () => {
 };
 
 export const createUser = async (data) => {
-  const res = await axios.post(`${API_URL}/admin/users/create`, data);
+  const res = await axios.post(`${API_URL}/admin/users/create`, data, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -56,17 +58,23 @@ export const updateUser = async (id, payload) => {
 };
 
 export const getUsers = async () => {
-  const res = await axios.get(`${API_URL}/admin/users/get-all`);
+  const res = await axios.get(`${API_URL}/admin/users/get-all`, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
 export const getUserById = (id) => {
-  const res = axios.get(`${API_URL}/admin/users/get-one/${id}`);
+  const res = axios.get(`${API_URL}/admin/users/get-one/${id}`, {
+    withCredentials: true,
+  });
   return res;
 };
 
 export const deleteUser = async (id) => {
-  return axios.delete(`${API_URL}/admin/users/delete/${id}`);
+  return axios.delete(`${API_URL}/admin/users/delete/${id}`, {
+    withCredentials: true,
+  });
 };
 
 // api/auth.js
@@ -93,6 +101,7 @@ export const exitLoginAsUser = async () => {
     null,
     {
       headers: { "x-admin-backup-token": backupToken },
+      withCredentials: true,
     }
   );
 
@@ -107,7 +116,9 @@ export const exitLoginAsUser = async () => {
 
 export const user_register = async (postdata) => {
   try {
-    const response = await axios.post(`${API_URL}/user/register`, postdata);
+    const response = await axios.post(`${API_URL}/user/register`, postdata, {
+      withCredentials: true,
+    });
     return response?.data;
   } catch (error) {
     // console.log("error is this", error?.response?.data);
@@ -123,6 +134,7 @@ export const get_user_details = async () => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
     });
 
     // console.log("res of user", res?.data);
@@ -135,7 +147,9 @@ export const get_user_details = async () => {
 
 export const verify_otp = async (postdata) => {
   try {
-    const response = await axios.post(`${API_URL}/user/verify-otp`, postdata);
+    const response = await axios.post(`${API_URL}/user/verify-otp`, postdata, {
+      withCredentials: true,
+    });
     return response?.data;
   } catch (error) {
     // console.log("error", error);

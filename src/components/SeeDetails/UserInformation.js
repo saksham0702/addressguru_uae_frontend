@@ -2,7 +2,7 @@ import React from "react";
 
 const UserInformation = () => {
   return (
-    <div class="max-w-lg mx-auto px-3 py-2 border border-gray-100 rounded-md shadow-sm">
+    <div class="max-w-lg mx-auto px-3  md:mt-10 py-2 border border-gray-100 rounded-md shadow-sm">
       <div class="flex items-center gap-5 p-2 mb-2">
         <svg
           width="28"

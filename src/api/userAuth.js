@@ -1,9 +1,14 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants";
+// import { API_URL } from "@/services/constants";
+
+const API_URL = "https://addressguru.ae/api";
+// const API_URL = "http://localhost:5001/api";
 
 export const user_login = async (postdata) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, postdata);
+    const response = await axios.post(`${API_URL}/login`, postdata, {
+      withCredentials: true,
+    });
     return response?.data;
   } catch (error) {
     console.log(error?.response?.data);
@@ -65,10 +70,13 @@ export const user_google_login = async (postdata) => {
 
 export const social_login = async (postdata) => {
   try {
-    const res = await axios.post(`${API_URL}/social-login`, postdata);
+    const res = await axios.post(`${API_URL}/social-login/auth/exchange`, postdata, {
+      withCredentials: true,
+    });
     // console.log("social response",res);
     return res?.data;
   } catch (error) {
     console.log("error of social", error);
+    return error?.response?.data || { status: 500, error: "Server error" };
   }
 };
