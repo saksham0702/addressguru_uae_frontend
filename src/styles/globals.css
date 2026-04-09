@@ -125,3 +125,18 @@ button{
 .btn:hover {
   background: #f3f4f6;
 }
+
+@keyframes dropDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-drop {
+  animation: dropDown 0.18s ease-out forwards;
+}

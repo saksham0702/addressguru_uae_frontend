@@ -79,13 +79,15 @@ const FilterItem = ({
     <div className="relative">
       <div
         onClick={handleClick}
-        className={`flex items-center whitespace-nowrap gap-1 px-2 py-1.5 cursor-pointer rounded text-sm font-semibold transition-colors
-          ${
-            active
-              ? "bg-orange-100 text-orange-600"
-              : "bg-white border-gray-300 border hover:bg-gray-50"
-          }
-        `}
+        className={`flex items-center whitespace-nowrap gap-1 px-2 py-1.5 cursor-pointer rounded text-sm font-semibold transition-all duration-200
+    ${
+      active
+        ? "bg-orange-100 text-orange-600 border border-orange-300 border-b-2 border-b-orange-500"
+        : isOpen
+          ? "bg-white border border-gray-300 border-b-2 border-b-orange-500 text-orange-500"
+          : "bg-white border border-gray-300 hover:bg-gray-50 hover:border-b-2 hover:border-b-orange-300"
+    }
+  `}
       >
         {icon && <span className="text-orange-500">{icon}</span>}
         <span>{label}</span>
@@ -114,7 +116,8 @@ const FilterItem = ({
         !isMultiple &&
         isOpen &&
         dropdownItems.length > 0 && (
-          <div className="absolute top-full left-0 z-50 mt-2 w-40 bg-white shadow-lg rounded border border-gray-100 text-sm">
+          <div className="animate-drop absolute top-full left-0 z-50 mt-2 w-40 bg-white shadow-lg rounded border border-gray-100 text-sm">
+            {" "}
             {dropdownItems.map((item, idx) => (
               <div
                 key={idx}
@@ -132,7 +135,8 @@ const FilterItem = ({
 
       {/* Checkbox Dropdown (Multiple Select) */}
       {isMultiple && isOpen && multiOptions.length > 0 && (
-        <div className="absolute top-full left-0 z-50 mt-3 w-76 bg-white shadow-lg rounded  text-sm">
+        <div className="animate-drop absolute top-full left-0 z-50 mt-3 w-76 bg-white shadow-lg rounded text-sm">
+          {" "}
           <div className="p-2 space-y-1 max-h-64 z-50 overflow-y-auto">
             {multiOptions.map((option) => (
               <label

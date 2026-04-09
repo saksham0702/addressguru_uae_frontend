@@ -1,5 +1,4 @@
 "use client";
-import { get_listing_by_slug } from "@/api/showlistings";
 import { useAuth } from "@/context/AuthContext";
 import BusinessCardSkeleton from "@/components/BusinessListingComponents/BusinessCardSkeleton";
 import BreadCrumbs from "@/components/BreadCrumbs";
@@ -7,17 +6,13 @@ import BusinessCard from "@/components/BusinessListingComponents/BusinessCard";
 import RightBusinessCard from "@/components/BusinessListingComponents/RightBusinessCard";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Head from "next/head";
-import { APP_URL } from "@/services/constants";
+import { APP_URL, BASE_URL } from "@/services/constants";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
-import { get_listing_filters } from "@/api/listingfilters";
 import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
-import {
-  getBusinessFeatures,
-  getListingsByCategoryAndCity,
-} from "@/api/uaeAdminCategories";
+import axios from "axios";
 
 const SearchResults = () => {
   const router = useRouter();
@@ -25,26 +20,28 @@ const SearchResults = () => {
   const { slug } = router.query;
 
   const cityName =
-    typeof globalCity === "string"
-      ? globalCity
-      : globalCity?.name || "";
+    typeof globalCity === "string" ? globalCity : globalCity?.name || "";
 
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pageData, setPageData] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const [dynamicFilters, setDynamicFilters] = useState({
-    facilitis: null,
-    service: null,
-    paymentMode: null,
+    facilities: [],
+    services: [],
+    courses: [],
+    paymentModes: [],
   });
   const [filters, setFilters] = useState({
     sort_by: null,
     ag_verified: false,
     facilities_id: [],
     services_id: [],
+    courses_id: [],
     payment_mode_id: [],
+    search: "",
   });
 
   const hasFetchedFilters = useRef(false);
@@ -54,48 +51,97 @@ const SearchResults = () => {
     filters.ag_verified !== false ||
     filters.facilities_id.length > 0 ||
     filters.services_id.length > 0 ||
-    filters.payment_mode_id.length > 0;
+    filters.courses_id.length > 0 ||
+    filters.payment_mode_id.length > 0 ||
+    filters.search.length > 0;
 
   const handleReset = () => {
+    setSearchInput("");
     setFilters({
       sort_by: null,
       ag_verified: false,
       facilities_id: [],
       services_id: [],
+      courses_id: [],
       payment_mode_id: [],
+      search: "",
     });
   };
 
-  // ── FETCH FILTERS ──
+  // ── BUILD QUERY PARAMS from filters ──
+  const buildQueryParams = (extraPage = 1) => {
+    const params = new URLSearchParams();
+    params.set("page", extraPage);
+    params.set("limit", "10");
+
+    if (filters.sort_by) params.set("sort_by", filters.sort_by);
+    if (filters.ag_verified) params.set("ag_verified", "true");
+    if (filters.search?.trim()) params.set("search", filters.search.trim());
+    if (filters.facilities_id.length > 0)
+      params.set("facilities_id", filters.facilities_id.join(","));
+    if (filters.services_id.length > 0)
+      params.set("services_id", filters.services_id.join(","));
+    if (filters.courses_id.length > 0)
+      params.set("courses_id", filters.courses_id.join(","));
+    if (filters.payment_mode_id.length > 0)
+      params.set("payment_mode_id", filters.payment_mode_id.join(","));
+
+    return params.toString();
+  };
+
+  // Debounce search — waits 500ms after user stops typing then fires API
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: searchInput }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // ── FETCH CATEGORY FEATURES ──
   useEffect(() => {
     if (!router.isReady || !slug || hasFetchedFilters.current) return;
     hasFetchedFilters.current = true;
 
-    const fetchFilters = async () => {
+    const fetchCategoryFeatures = async () => {
       try {
-        const [featuresRes] = await Promise.allSettled([
-          getBusinessFeatures(slug),
-        ]);
-
-        if (featuresRes.status === "fulfilled" && featuresRes.value) {
-          setDynamicFilters((prev) => ({ ...prev, ...featuresRes.value }));
-        }
+        const res = await axios.get(
+          `http://localhost:5001/business-listing/features/${slug}`,
+        );
+        const data = res?.data?.data;
+        setDynamicFilters({
+          facilities:
+            data?.features?.facilities?.map((f) => ({
+              id: f._id,
+              name: f.name,
+            })) || [],
+          services:
+            data?.features?.services?.map((s) => ({
+              id: s._id,
+              name: s.name,
+            })) || [],
+          courses:
+            data?.features?.courses?.map((c) => ({
+              id: c._id,
+              name: c.name,
+            })) || [],
+          paymentModes:
+            data?.payment_modes?.map((p) => ({ id: p._id, name: p.name })) ||
+            [],
+        });
       } catch (err) {
-        console.error("Filter fetch error:", err);
+        console.error("categoryFeatures error:", err);
       }
     };
 
-    fetchFilters();
+    fetchCategoryFeatures();
   }, [router.isReady, slug]);
 
   // ── REDIRECT WHEN GLOBAL CITY CHANGES ──
   useEffect(() => {
     if (!router.isReady || !slug || !cityName) return;
-
     const newCitySlug = cityName.toLowerCase().replace(/\s+/g, "-");
     const categorySlug = slug.toLowerCase().replace(/\s+/g, "-");
     const expectedPath = `/${categorySlug}/${newCitySlug}`;
-
     if (router.asPath.split("?")[0] !== expectedPath) {
       router.replace({ pathname: expectedPath });
     }
@@ -117,9 +163,14 @@ const SearchResults = () => {
         setListings([]);
         setPageData(null);
 
-        const res = await getListingsByCategoryAndCity(slug, citySlug);
-        setListings(Array.isArray(res) ? res : res?.data || []);
-        setPageData(Array.isArray(res) ? null : res);
+        const query = buildQueryParams(1);
+        const res = await axios.get(
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
+        );
+
+        const data = res?.data?.data;
+        setListings(data?.listings || []);
+        setPageData(data?.pagination || null);
       } catch (err) {
         console.error("Listings fetch error:", err);
         setError(true);
@@ -133,19 +184,23 @@ const SearchResults = () => {
 
   // ── LOAD MORE ──
   const handleLoadMore = async () => {
-    if (!pageData?.has_more || isLoadingMore) return;
+    if (!pageData?.hasMore || isLoadingMore) return;
+
+    const citySlug = cityName
+      .toLowerCase()
+      .replace(/\(.*\)/, "")
+      .replace(/\s+/g, "-");
 
     try {
       setIsLoadingMore(true);
-      const res = await get_listing_by_slug(
-        slug,
-        cityName,
-        pageData.next_page,
-        filters
+      const query = buildQueryParams(pageData.nextPage);
+      const res = await axios.get(
+        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
       );
-      if (res?.result?.length) {
-        setListings((prev) => [...prev, ...res.result]);
-        setPageData(res);
+      const data = res?.data?.data;
+      if (data?.listings?.length) {
+        setListings((prev) => [...prev, ...data.listings]);
+        setPageData(data.pagination);
       }
     } catch (err) {
       console.error("Load more failed:", err);
@@ -157,7 +212,6 @@ const SearchResults = () => {
   const canonicalSlug = slug || "";
   const canonicalCity = cityName || "";
 
-  // ── ERROR UI ──
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -209,7 +263,10 @@ const SearchResults = () => {
           content={`${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`}
         />
         <meta property="og:site_name" content="Your Website Name" />
-        <meta property="og:image" content={`${APP_URL}/seo/default-og-image.jpg`} />
+        <meta
+          property="og:image"
+          content={`${APP_URL}/seo/default-og-image.jpg`}
+        />
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
@@ -219,7 +276,10 @@ const SearchResults = () => {
           name="twitter:description"
           content={`Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details.`}
         />
-        <meta name="twitter:image" content={`${APP_URL}/seo/default-og-image.jpg`} />
+        <meta
+          name="twitter:image"
+          content={`${APP_URL}/seo/default-og-image.jpg`}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -242,7 +302,6 @@ const SearchResults = () => {
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
-
           <div className="mt-6 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
               slug={canonicalSlug}
@@ -253,7 +312,8 @@ const SearchResults = () => {
           </div>
 
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {listings?.[0]?.category?.name} in {canonicalCity}
+            Top {listings?.[0]?.category?.name || canonicalSlug} in{" "}
+            {canonicalCity}
           </h1>
 
           <FilterBar
@@ -261,13 +321,14 @@ const SearchResults = () => {
             handleReset={handleReset}
             dynamicFilters={dynamicFilters}
             filters={filters}
+            searchInput={searchInput}
+            onSearchChange={(val) => setSearchInput(val)}
             onFilterChange={(updatedFilters) =>
               setFilters((prev) => ({ ...prev, ...updatedFilters }))
             }
           />
 
           <div className="flex w-full gap-4">
-            {/* LEFT — LISTINGS */}
             <div className="flex flex-col my-2 md:my-4 gap-2 w-full max-md:mb-32">
               <div className="bg-white w-full rounded-lg pl-2">
                 {isLoading ? (
@@ -311,7 +372,7 @@ const SearchResults = () => {
                 ) : (
                   <>
                     {listings.map((item, index) => (
-                      <BusinessCard key={item.id || index} data={item} />
+                      <BusinessCard key={item._id || index} data={item} />
                     ))}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (
@@ -321,7 +382,7 @@ const SearchResults = () => {
                 )}
               </div>
 
-              {pageData?.has_more && (
+              {pageData?.hasMore && (
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
@@ -332,7 +393,6 @@ const SearchResults = () => {
               )}
             </div>
 
-            {/* RIGHT SIDEBAR */}
             <div className="mt-4 max-md:hidden">
               <RightBusinessCard name={canonicalSlug} />
             </div>
