@@ -598,7 +598,7 @@ const SeeDetails = ({ initialData }) => {
           </div>
 
           {/* MOBILE USER INFO */}
-          <div className="md:hidden">
+          <div className="md:hidden mt-10">
             <UserInformation />
           </div>
 
@@ -629,11 +629,12 @@ const SeeDetails = ({ initialData }) => {
         >
           <div onClick={(e) => e.stopPropagation()}>
             <GetMoreInfo
+              isPop={true}
               type={"listing"}
+              name={data?.businessName}
               id={data?._id}
               slug={data?.slug}
               setEnquirePop={setEnquirePop}
-              name={data?.business_name}
             />
           </div>
         </div>

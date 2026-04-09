@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Clock, ChevronDown } from "lucide-react";
 
-const ORDERED_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const ORDERED_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const formatTime = (time) => {
   if (!time) return "";

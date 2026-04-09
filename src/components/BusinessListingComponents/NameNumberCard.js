@@ -62,7 +62,7 @@ const NameNumberCard = ({ layout, formData, setFormData }) => {
           placeholder="Enter your name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full outline-none text-sm pl-3 font-bold bg-transparent"
+          className="w-full outline-none text-sm pl-3 font-medium bg-transparent"
         />
       </div>
 
@@ -87,7 +87,7 @@ const NameNumberCard = ({ layout, formData, setFormData }) => {
           placeholder="Enter your email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full outline-none text-sm pl-3 font-bold bg-transparent"
+          className="w-full outline-none text-sm pl-3 font-medium bg-transparent"
         />
       </div>
     </div>

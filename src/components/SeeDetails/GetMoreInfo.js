@@ -5,7 +5,7 @@ import { query } from "@/api/queries";
 import ResponseAlert from "@/components/ResponseAlert";
 import ReCAPTCHA from "react-google-recaptcha";
 
-const GetMoreInfo = ({ setEnquirePop, name, type, id, slug }) => {
+const GetMoreInfo = ({ setEnquirePop, name, type, id, slug, isPop }) => {
   const recaptchaRef = useRef(null);
 
   const [res, setRes] = useState(null);
@@ -140,15 +140,17 @@ const GetMoreInfo = ({ setEnquirePop, name, type, id, slug }) => {
   };
 
   return (
-    <div className="bg-[#FFF8F3] w-full pt-4 pb-20 max-md:pb-24 max-md:h-[480px] relative rounded-xl shadow-md">
+    <div className="bg-[#FFF8F3] w-full pt-4 pb-20 max-md:pb-24 md:min-w-[400px] min-w-[340px] max-md:h-[480px] border-b-4 shadow-orange-100 border-b-orange-600 relative rounded-xl shadow-md">
 
       {/* Close Button */}
-      <span
-        onClick={() => setEnquirePop(false)}
-        className="absolute right-3 top-3 cursor-pointer z-10"
-      >
-        ❌
-      </span>
+      {isPop && (
+          <span
+            onClick={() => setEnquirePop(false)}
+            className="absolute right-3 top-3 cursor-pointer z-10"
+          >
+            ❌
+          </span>
+        )}
 
       {/* Title */}
       <h3 className="font-semibold text-[15px] max-md:text-[13px] text-center mt-3 mb-3 px-3">
