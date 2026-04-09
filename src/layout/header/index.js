@@ -80,7 +80,7 @@ const Header = () => {
       try {
         // const res = await axios.get(`${API_URL}/cities`);
         const res = await getCities();
-        console.log("city response from top header", res);
+        // console.log("city response from top header", res);
 
         setCities(res?.data);
       } catch (err) {

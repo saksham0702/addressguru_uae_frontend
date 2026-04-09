@@ -182,7 +182,6 @@ const SeeDetails = ({ initialData }) => {
     return <LandingPageSkeleton />;
   }
 
-  console.log("working hours data:", data.workingHours);
 
   return (
     <>

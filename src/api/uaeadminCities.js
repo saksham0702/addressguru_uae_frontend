@@ -4,7 +4,7 @@ const API_URL = "https://addressguru.ae/api";
 
 export const getCities = async () => {
   const res = await axios.get(`${API_URL}/cities/get-cities`);
-  console.log("get cities respose", res);
+  // console.log("get cities respose", res);
 
   return res?.data;
 };

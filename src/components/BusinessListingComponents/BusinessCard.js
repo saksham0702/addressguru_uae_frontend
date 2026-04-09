@@ -167,7 +167,7 @@ const BusinessCard = ({ data }) => {
               <CustomButton
                 showToggle={true}
                 defaultText="SHOW NUMBER"
-                toggledText={data?.mobileNumber}
+                toggledText={data?.countryCode + data?.mobileNumber}
                 icon={
                   <svg
                     width="17"
@@ -256,7 +256,7 @@ const BusinessCard = ({ data }) => {
               {/* whatsap button */}
               <a
                 onClick={() => handleShowNumber("whatsapp")}
-                href={`https://wa.me/${data?.mobileNumber}`}
+                href={`https://wa.me/${data?.countryCode + data?.mobileNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
