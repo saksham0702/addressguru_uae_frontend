@@ -51,6 +51,7 @@ const THEMES = {
 
 // ─── Single Plan Card ─────────────────────────────────────────────────────────
 const PlanCard = ({ plan, isSelected, onSelect }) => {
+  console.log("plan", plan);
   const theme = THEMES[plan?.theme] ?? THEMES.default;
   const isFree = !plan?.price || parseFloat(plan?.price) === 0;
   const isHighlighted = plan?.isHighlighted;
@@ -135,7 +136,7 @@ const PlanCard = ({ plan, isSelected, onSelect }) => {
 
 // ─── Main PricingTable ────────────────────────────────────────────────────────
 const PricingTable = ({
-  plans = [],
+  plans,
   selectedPlanId,
   setSelectedPlanId,
   onSelect,

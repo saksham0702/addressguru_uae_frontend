@@ -71,6 +71,7 @@ const OurPlans = () => {
     getPlans();
   }, []);
 
+  console.log("plans", plans);
   return (
     <div className="flex items-center h-full w-full overflow-hidden justify-center">
       <div className="w-[80%] bg-white">
@@ -107,142 +108,13 @@ const OurPlans = () => {
               />
             </svg>
           </span>
-
           {/* para section */}
           <p className="text-xs font-[500]">
             Explore plans tailored to your selected categories. Choose one &
             start growing your business today.
           </p>
-
-          {/* table section */}
-          {/* <div className="overflow-x-auto p-4">
-          {plans?.map(() => (
-              <table className="w-full table-auto border-collapse ">
-                <thead>
-                  <tr className="text-white text-center text-sm">
-                    <th className="bg-white px-4 py-3 text-base font-bold"></th>
-                    <th className="bg-[linear-gradient(90deg,_#0876FE_0%,_#054798_100%)] rounded-tl-md px-4 py-3 text-lg font-semibold">
-                      FREE
-                      <br />
-                    </th>
-                    <th className="bg-[linear-gradient(90deg,_#E06C5E_0%,_#7A3B33_100%)] px-4 py-3 text-lg font-semibold">
-                      PROFESSIONAL
-                      <br />
-                    </th>
-                    <th className="bg-[linear-gradient(90deg,_#00B5A1,_#004F46)] px-4 py-3 text-lg rounded-tr-md font-semibold">
-                      PREMIUM
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-center text-sm">
-                  <tr className="border border-gray-200 rounded-md font-bold text-xl">
-                    <td className="text-left text-lg font-bold px-4 py-2 border border-gray-200">
-                      Features List
-                    </td>
-                    <td className="border border-gray-200">
-                      <span className="text-lg ">₹0</span>
-                    </td>
-                    <td className="py-2 border border-gray-200">
-                      <span className="text-lg">
-                        ₹1,299<span className="text-sm">/Year</span>
-                      </span>
-                    </td>
-                    <td className="py-2 border border-gray-200">
-                      <div className="text-xs font-semibold ml-20">
-                        Save 1500/-
-                      </div>
-                      <div className="text-lg font-bold">
-                        ₹4,999
-                        <span className="text-sm font-semibold">/5Years</span>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      No Lead Sharing
-                    </td>
-                    <td className="py-2 border border-gray-200">✅</td>
-                    <td className="py-2 border border-gray-200">✅</td>
-                    <td className="py-2 border border-gray-200">❌</td>
-                  </tr>
-
-                  <tr className="bg-gray-50">
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      Ads Free Listing
-                    </td>
-                    <td className="py-2 border border-gray-200">❌</td>
-                    <td className="py-2 border border-gray-200">✅</td>
-                    <td className="py-2 border border-gray-200">✅</td>
-                  </tr>
-
-                  <tr>
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      No Other Competitor Ads
-                    </td>
-                    <td className="py-2 border border-gray-200">✅</td>
-                    <td className="py-2 border border-gray-200">❌</td>
-                    <td className="py-2 border border-gray-200">❌</td>
-                  </tr>
-
-                  <tr className="bg-gray-50">
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      Lead Show
-                    </td>
-                    <td className="py-2 border border-gray-200">10 Leads</td>
-                    <td className="py-2 border border-gray-200">
-                      Unlimited Leads
-                    </td>
-                    <td className="py-2 border border-gray-200">
-                      Unlimited Leads
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      Support
-                    </td>
-                    <td className="py-2 border border-gray-200">Email</td>
-                    <td className="py-2 border border-gray-200">
-                      Email+Call+Whatsapp+SMS
-                    </td>
-                    <td className="py-2 border border-gray-200">
-                      Email+Call+Whatsapp+SMS
-                    </td>
-                  </tr>
-
-                  <tr className="bg-gray-50">
-                    <td className="text-left px-4 py-2 border border-gray-200">
-                      Photos
-                    </td>
-                    <td className="py-2 border border-gray-200">5</td>
-                    <td className="py-2 border border-gray-200">10</td>
-                    <td className="py-2 border border-gray-200">15</td>
-                  </tr>
-
-                  <tr>
-                    <td className=""></td>
-                    <td className="py-3 border border-gray-200 ">
-                      <button className="bg-white hover:bg-orange-500 text-orange-500 cursor-pointer border-orange-500 border hover:text-white mx-4 px-3 py-2 rounded font-semibold text-xs">
-                        SELECT PLAN
-                      </button>
-                    </td>
-                    <td className="py-3 border border-gray-200">
-                      <button className="bg-white hover:bg-orange-500 text-orange-500 cursor-pointer border-orange-500 border hover:text-white mx-4 px-3 py-2 rounded font-semibold text-xs">
-                        SELECT PLAN
-                      </button>
-                    </td>
-                    <td className="py-3 border border-gray-200">
-                      <button className="bg-white hover:bg-orange-500 text-orange-500 cursor-pointer border-orange-500 border hover:text-white mx-4 px-3 py-2 rounded font-semibold text-xs">
-                        SELECT PLAN
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-          ))}
-          </div> */}
-          <PricingTable plans={plans} />
+          <p>{plans?.length}</p>
+          {plans && <PricingTable plans={plans} />}
         </section>
 
         {/* slider section */}
@@ -301,7 +173,6 @@ const OurPlans = () => {
         <WhatWeOffer />
         <div className="flex justify-between px-3 py-10 gap-2 w-full h-full ">
           <NeedSupport />
-
           <FAQ />
         </div>
       </div>
