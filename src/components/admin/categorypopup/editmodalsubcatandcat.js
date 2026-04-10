@@ -35,6 +35,7 @@ import AssignStep from "@/components/admin/add-feature/assignstep";
 export default function EditCategoryPage() {
   const router = useRouter();
   const { id, type } = router.query;
+  const APP_URL = "https://addressguru.ae/api/";
 
   const [activeTab, setActiveTab] = useState("category");
   const [loading, setLoading] = useState(false);
@@ -118,6 +119,15 @@ export default function EditCategoryPage() {
           id: data.category._id,
           name: data.category.name || "",
           status: data.category.isActive ? "Active" : "Inactive",
+          slug: data.category.slug || "",
+          color: data.category.color || "",
+          svg: data.category.iconSvg || "",
+          iconPng: data.category.iconPng || "",
+          type: data.category.type || "business",
+          textColor: data.category.textColor || "",
+          metaTitle: data.category.metaTitle || "",
+          metaDescription: data.category.metaDescription || "",
+          ogImage: data.category.ogImage || "",
         });
 
         setFacilities(data.facilities || []);
@@ -157,17 +167,21 @@ export default function EditCategoryPage() {
 
       const res = await getallfeaturesdatabyCategory(id);
       const data = res?.data?.data;
+      console.log("data", data);
 
       // CATEGORY
       setEntity({
-        id: data.category._id,
-        name: data.category.name || "",
-        slug: data.category.slug || "",
-        color: data.category.color || "",
-        svg: data.category.iconSvg || "",
-        iconPng: data.category.iconPng || "",
-        type: data.category.type || "business",
+        id: data?.category?._id,
+        name: data?.category?.name || "",
+        slug: data?.category?.slug || "",
+        svg: data?.category?.iconSvg || "",
+        iconPng: data?.category?.iconPng || "",
+        type: data?.category?.type || "business",
         status: data.category.isActive ? "Active" : "Inactive",
+        // ✅ ADD THESE
+        metaTitle: data?.category?.seo?.title || "",
+        metaDescription: data?.category?.seo?.description || "",
+        ogImage: data?.category?.seo?.ogImage || "", // existing URL
       });
 
       // FACILITIES
@@ -229,35 +243,33 @@ export default function EditCategoryPage() {
     try {
       setLoading(true);
 
-      if (isSubCategory) {
-        await createOrUpdateSubCategory({
-          id: entity.id,
-          name: entity.name,
-        });
-      } else {
-        await createOrUpdateCategory({
-          id: entity.id,
-          name: entity.name,
-          slug: entity.slug || entity.name.toLowerCase().replace(/\s+/g, "-"),
-          color: entity.color,
-          iconSvg: entity.svg,
-          iconPng: entity.iconPng,
-          isActive: entity.status === "Active",
-        });
+      const formData = new FormData();
+
+      formData.append("name", entity.name);
+      formData.append("slug", entity.slug);
+      formData.append("color", entity.color);
+      formData.append("iconSvg", entity.svg);
+      formData.append("isActive", entity.status === "Active");
+
+      formData.append("metaTitle", entity.metaTitle || "");
+      formData.append("metaDescription", entity.metaDescription || "");
+
+      if (entity.ogImage instanceof File) {
+        formData.append("ogImage", entity.ogImage);
       }
 
-      setSuccess(
-        isSubCategory
-          ? "Sub Category updated successfully."
-          : "Category updated successfully.",
-      );
+      await createOrUpdateCategory({
+        id: entity.id,
+        formData,
+      });
+
+      setSuccess("Category updated successfully.");
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
     }
   };
-
   /* ================= SAVE / UPDATE FEATURES ================= */
 
   const handleAssignSave = async () => {
@@ -416,11 +428,80 @@ export default function EditCategoryPage() {
                     status: e.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-gray-200 px-3 py-2"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option>Active</option>
                 <option>Inactive</option>
               </select>
+            </div>
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-md font-semibold text-gray-800">
+                SEO Settings
+              </h3>
+
+              {/* Meta Title */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Meta Title
+                </label>
+                <input
+                  value={entity?.metaTitle || ""}
+                  onChange={(e) =>
+                    setEntity((prev) => ({
+                      ...prev,
+                      metaTitle: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
+              {/* Meta Description */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Meta Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={entity?.metaDescription || ""}
+                  onChange={(e) =>
+                    setEntity((prev) => ({
+                      ...prev,
+                      metaDescription: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">OG Image</label>
+
+              {/* Preview */}
+              {entity?.ogImage && (
+                <img
+                  src={
+                    entity.ogImage instanceof File
+                      ? URL.createObjectURL(entity.ogImage) // new upload
+                      : entity.ogImage.startsWith("http")
+                        ? entity.ogImage // full URL from API
+                        : APP_URL + entity.ogImage // relative path from API
+                  }
+                  alt="og"
+                  className="w-40 h-24 object-cover mb-2 rounded border"
+                />
+              )}
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setEntity((prev) => ({
+                    ...prev,
+                    ogImage: e.target.files[0], // file
+                  }))
+                }
+              />
             </div>
 
             <div className="flex justify-end">

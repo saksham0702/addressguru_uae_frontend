@@ -64,7 +64,7 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
           <>
             <Slash />
             <strong className="text-gray-800 capitalize flex items-center gap-1">
-              {length && <span>{length}+</span>}
+              {length && <span>{length}</span>}
               {name}
             </strong>
           </>

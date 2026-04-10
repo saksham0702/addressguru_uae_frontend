@@ -1,5 +1,5 @@
 import BreadCrumbs from "@/components/BreadCrumbs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import TitleAndLogo from "@/components/SeeDetails/TitleAndLogo";
 import SliderCard from "@/components/SeeDetails/SliderCard";
@@ -8,100 +8,60 @@ import GetMoreInfo from "@/components/SeeDetails/GetMoreInfo";
 import UserInformation from "@/components/SeeDetails/UserInformation";
 import RecentCustomerReviewCard from "@/components/BusinessListingComponents/RecentCustomerReviewCard";
 import TitleAndLogoMobile from "@/components/SeeDetails/TitleAndLogoMobile";
-
+import { track_event } from "@/api/listingStats";
 import { Share } from "@/components/SeeDetails/Popups/Share";
 import { Claim } from "@/components/SeeDetails/Popups/Claim";
 import RateUs from "@/components/SeeDetails/Popups/RateUs";
 import Report from "@/components/SeeDetails/Popups/Report";
 import { useRouter } from "next/router";
-import Loader from "@/components/Loader";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
 import LandingPageSkeleton from "@/components/BusinessListingComponents/LandingPageSkeleton";
 import Head from "next/head";
 import { useAuth } from "@/context/AuthContext";
 import { APP_URL } from "@/services/constants";
-import { get_view } from "@/api/queries";
-import Header from "@/layout/header";
-import LandingPage from "@/components/HeadersMobile/LandingPage";
 import {
-  approve_listing,
-  get_listing_by_businessslug,
   get_listing_data,
+  approve_listing,
   reject_listing,
 } from "@/api/listing-form";
 import Link from "next/link";
+import LandingPage from "@/components/HeadersMobile/LandingPage";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SSR: fetch listing on the server so crawlers receive full HTML
-// ─────────────────────────────────────────────────────────────────────────────
 export async function getServerSideProps(context) {
   const { slug } = context.params;
-
   try {
     const result = await get_listing_data(slug);
-
-    if (!result?.data?.data) {
-      return { notFound: true }; // renders Next.js 404 page
-    }
-
-    return {
-      props: {
-        initialData: result.data.data,
-      },
-    };
+    if (!result?.data?.data) return { notFound: true };
+    return { props: { initialData: result.data.data } };
   } catch (err) {
     console.error("SSR listing fetch error:", err);
     return { notFound: true };
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Page component — initialData comes from SSR, everything else unchanged
-// ─────────────────────────────────────────────────────────────────────────────
 const SeeDetails = ({ initialData }) => {
-  // Seed state with SSR data so the page renders immediately (no skeleton flash)
   const [data, setData] = useState(initialData ?? null);
-  const [loading, setLoading] = useState(!initialData); // skip loading if SSR gave us data
+  const [loading, setLoading] = useState(!initialData);
   const [activePop, setActivePop] = useState(null);
   const [thanksPop, setThanksPop] = useState(false);
   const [type, setType] = useState(null);
   const [enquirePop, setEnquirePop] = useState(false);
-  const [userIP, setUserIP] = useState(null);
   const API_URL = "https://addressguru.ae";
 
   const router = useRouter();
   const { slug, preview } = router.query;
   const { city, user } = useAuth();
-  console.log("user response", user);
-
   const serverCity = city;
 
-  /* ----------------------- FETCH USER IP ----------------------- */
-  useEffect(() => {
-    const getIP = async () => {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const ip = await res.json();
-        setUserIP(ip.ip);
-      } catch (err) {
-        console.log("IP fetch error:", err);
-      }
-    };
-    getIP();
-  }, []);
-
   /* ----------------------- FETCH LISTING DATA (client fallback) ----------------------- */
-  // Only re-fetches if SSR didn't provide data (e.g. client-side navigation)
   useEffect(() => {
-    if (data) return; // SSR already populated — skip
-    if (!slug || !userIP) return;
+    if (data) return;
+    if (!slug) return;
 
     const fetchListing = async () => {
       setLoading(true);
       try {
         const result = await get_listing_data(slug);
-        console.log("listing data: ", result);
-
         if (result) {
           setData(result?.data?.data);
         } else {
@@ -115,34 +75,35 @@ const SeeDetails = ({ initialData }) => {
     };
 
     fetchListing();
-  }, [slug, userIP]);
+  }, [slug]);
 
-  /* ----------------------- SAFE VIEW HIT ----------------------- */
-  useEffect(() => {
-    if (!data?.id || !userIP) return;
+/* ----------------------- TRACK VIEW ----------------------- */
+const viewTracked = useRef(false);
 
-    const sendView = async () => {
-      try {
-        const res = await get_view("listing", data.id, null, userIP);
-        console.log("View Hit:", res);
-      } catch (err) {
-        console.error("View hit error:", err);
-      }
-    };
+useEffect(() => {
+  if (!data?.slug || viewTracked.current) return;
+  viewTracked.current = true;
 
-    sendView();
-  }, [data?.id, userIP]);
-
-  // 🔁 EDIT LISTING
-  const handleEditListing = () => {
-    router.push(``);
+  const sendView = async () => {
+    try {
+      await track_event("business", data?.slug, "view");
+    } catch (err) {
+      console.error("View track error:", err);
+    }
   };
 
-  // ✅ APPROVE LISTING
+  sendView();
+}, [data?.slug]);
+
+  /* ----------------------- CLICK HANDLER (for call / website_visit later) ----------------------- */
+  const handleClick = async (id, clickType) => {
+    // will wire up track_event here for call and website_visit
+  };
+
+  // ✅ APPROVE
   const handleApprove = async () => {
     try {
-      const res = await approve_listing(data?._id);
-      console.log("Approved:", res);
+      await approve_listing(data?._id);
       alert("Listing Approved ✅");
     } catch (err) {
       console.error(err);
@@ -150,11 +111,10 @@ const SeeDetails = ({ initialData }) => {
     }
   };
 
-  // ❌ REJECT LISTING
+  // ❌ REJECT
   const handleReject = async () => {
     try {
-      const res = await reject_listing(data?._id);
-      console.log("Rejected:", res);
+      await reject_listing(data?._id);
       alert("Listing Rejected ❌");
     } catch (err) {
       console.error(err);
@@ -162,26 +122,10 @@ const SeeDetails = ({ initialData }) => {
     }
   };
 
-  /* ----------------------- CLICK HANDLER ----------------------- */
-  const handleClick = async (id, clickType) => {
-    try {
-      const res = await get_view("listing", id, clickType, userIP);
-      console.log("Click tracked:", res);
-    } catch (err) {
-      console.error("Click track error:", err);
-    }
-  };
-
-  /* ----------------------- PREVIEW MODE ----------------------- */
-
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
 
-  /* ----------------------- LOADING SKELETON ----------------------- */
-  if (loading || !data) {
-    return <LandingPageSkeleton />;
-  }
-
+  if (loading || !data) return <LandingPageSkeleton />;
 
   return (
     <>
@@ -189,13 +133,10 @@ const SeeDetails = ({ initialData }) => {
         <title>
           {data?.seo?.title} | {serverCity} | AddressGuru
         </title>
-
         <meta
           name="description"
           content={data?.seo?.description?.substring(0, 160)}
         />
-
-        {/* OG Tags */}
         <meta property="og:title" content={data?.business_name} />
         <meta
           property="og:description"
@@ -204,8 +145,6 @@ const SeeDetails = ({ initialData }) => {
         <meta property="og:image" content={data?.images?.[0]} />
         <meta property="og:url" content={`${API_URL}/${data?.slug}`} />
         <meta property="og:type" content="business.business" />
-
-        {/* Twitter Tags */}
         <meta name="twitter:title" content={data?.business_name} />
         <meta
           name="twitter:description"
@@ -213,11 +152,7 @@ const SeeDetails = ({ initialData }) => {
         />
         <meta name="twitter:image" content={data?.images?.[0]} />
         <meta name="twitter:card" content="summary_large_image" />
-
-        {/* Canonical */}
         <link rel="canonical" href={`/${data?.slug}`} />
-
-        {/* Schema JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -242,6 +177,7 @@ const SeeDetails = ({ initialData }) => {
           }}
         />
       </Head>
+
       <div className="md:hidden">
         <LandingPage />
       </div>
@@ -254,6 +190,7 @@ const SeeDetails = ({ initialData }) => {
         />
       </div>
 
+      {/* POPUPS */}
       {activePop && (
         <div
           className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0"
@@ -297,8 +234,7 @@ const SeeDetails = ({ initialData }) => {
 
       {/* MAIN CONTENT */}
       <div
-        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "pointer-events-none opacity-90" : ""
-          }`}
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "pointer-events-none opacity-90" : ""}`}
       >
         <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
@@ -325,13 +261,12 @@ const SeeDetails = ({ initialData }) => {
             />
           </div>
 
-          <div className="flex w-full justify-between max-md:flex-col  md:mt-4">
+          <div className="flex w-full justify-between max-md:flex-col md:mt-4">
             {/* LEFT */}
-            <div className="md:w-[64.5%] ">
+            <div className="md:w-[64.5%]">
               <SliderCard images={data?.images} />
 
-              {/* Mobile */}
-              <div className="md:hidden mx-auto  w-full">
+              <div className="md:hidden mx-auto w-full">
                 <TitleAndLogoMobile
                   data={data}
                   openingHours={data?.workingHours}
@@ -351,7 +286,6 @@ const SeeDetails = ({ initialData }) => {
                   </h3>
                   <span className="h-[1px] w-full bg-gray-200"></span>
                 </span>
-
                 <p className="md:text-[16px] text-[16px] mt-2 md:font-normal">
                   {data?.description}
                 </p>
@@ -366,11 +300,9 @@ const SeeDetails = ({ initialData }) => {
                     </h2>
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
-
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessAddress} provides the following courses:
                   </p>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.courses?.map((course, index) => (
                       <div key={index} className="flex items-end space-x-2">
@@ -413,11 +345,9 @@ const SeeDetails = ({ initialData }) => {
                     </h2>
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
-
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessAddress} provides the following facilities:
                   </p>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.facilities?.map((facility, index) => (
                       <div key={index} className="flex items-end space-x-2">
@@ -460,11 +390,9 @@ const SeeDetails = ({ initialData }) => {
                     </h2>
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
-
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessAddress} provides the following services:
                   </p>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.services?.map((service, index) => (
                       <div key={index} className="flex items-center space-x-2">
@@ -498,11 +426,9 @@ const SeeDetails = ({ initialData }) => {
                     </h2>
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
-
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessName} accepts the following payment methods:
                   </p>
-
                   <div className="flex flex-col gap-4">
                     {data?.paymentModes?.map((payment, index) => (
                       <div key={index} className="flex items-center space-x-2">
@@ -544,11 +470,9 @@ const SeeDetails = ({ initialData }) => {
                   </h3>
                   <span className="h-[1px] w-full bg-gray-200"></span>
                 </span>
-
                 <div className="md:text-[13.5px] text-[15px] md:font-[500] flex flex-col gap-5 mt-2 max-w-4xl">
                   <p>
-                    {`${data?.businessName
-                      } is located at ${data?.businessAddress}, ${serverCity}.`}
+                    {`${data?.businessName} is located at ${data?.businessAddress}, ${serverCity}.`}
                     {data?.facilities && data.facilities.length > 0 && (
                       <span>
                         {" Their facilities include: "}
@@ -556,12 +480,10 @@ const SeeDetails = ({ initialData }) => {
                       </span>
                     )}
                   </p>
-
                   <p>
                     Scroll to the top for more details about{" "}
                     {data?.businessName}.
                   </p>
-
                   <p>
                     Found this listing helpful? Tell {data?.businessName} you
                     discovered them on{" "}
@@ -571,7 +493,7 @@ const SeeDetails = ({ initialData }) => {
               </div>
             </div>
 
-            {/* RIGHT SECTION */}
+            {/* RIGHT */}
             <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
               <QuickInformation
                 id={data?.id}
@@ -582,7 +504,6 @@ const SeeDetails = ({ initialData }) => {
                 handlePop={handlePop}
                 handleWebsiteClick={handleClick}
               />
-
               <div className="w-full h-[30rem] mb-7">
                 <GetMoreInfo
                   name={data?.businessName}
@@ -592,7 +513,6 @@ const SeeDetails = ({ initialData }) => {
                   setThanksPop={setThanksPop}
                 />
               </div>
-
               <UserInformation />
             </div>
           </div>
@@ -610,7 +530,6 @@ const SeeDetails = ({ initialData }) => {
                   Recent Customer Reviews
                 </h2>
               </div>
-
               <div className="py-2 md:pl-4 flex md:justify-between overflow-x-scroll hide-scroll w-full gap-5">
                 {data?.ratings?.map((item, index) => (
                   <RecentCustomerReviewCard key={index} data={item} />
@@ -644,26 +563,16 @@ const SeeDetails = ({ initialData }) => {
       {preview === "true" && (
         <div className="fixed top-0 left-0 w-full z-[10000] backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-            {/* LEFT SIDE */}
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-semibold text-gray-700 tracking-wide">
-                Preview Mode
-              </h2>
-            </div>
-
-            {/* RIGHT SIDE ACTIONS */}
+            <h2 className="text-sm font-semibold text-gray-700 tracking-wide">
+              Preview Mode
+            </h2>
             <div className="flex items-center gap-2">
-              {/* ✏️ EDIT */}
               <Link
-                href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(
-                  data?.businessName,
-                )}&name=${encodeURIComponent(data?.slug)}`}
+                href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(data?.businessName)}&name=${encodeURIComponent(data?.slug)}`}
                 className="flex items-center gap-1.5 px-4 py-1.5 cursor-pointer text-sm font-medium rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
               >
                 ✏️ Edit
               </Link>
-
-              {/* ✅ APPROVE */}
               {user?.data?.roles[0] == 1 && (
                 <button
                   onClick={handleApprove}
@@ -672,7 +581,6 @@ const SeeDetails = ({ initialData }) => {
                   ✔ Approve
                 </button>
               )}
-
               {user?.data?.roles[0] == 1 && (
                 <button
                   onClick={handleReject}
@@ -681,8 +589,6 @@ const SeeDetails = ({ initialData }) => {
                   ✖ Reject
                 </button>
               )}
-
-              {/* 🔙 BACK */}
               <button
                 onClick={() => router.back()}
                 className="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
@@ -695,7 +601,6 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* THANK YOU POPUP */}
       {thanksPop && (
         <ThanksPop onClose={() => setThanksPop(false)} type={type} />
       )}
