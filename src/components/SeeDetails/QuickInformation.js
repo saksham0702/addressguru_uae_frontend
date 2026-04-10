@@ -46,7 +46,7 @@ const QuickInformation = ({
         {categoryName && (
           <p className="flex items-center gap-2">
             <CategoryIcon />
-            <span className="font-medium text-black">Category:</span>
+            <span className="font-semibold text-[16px] text-black">Category:</span>
             <span className="font-bold text-orange-600">{categoryName}</span>
           </p>
         )}

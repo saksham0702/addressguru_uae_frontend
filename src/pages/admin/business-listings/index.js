@@ -610,24 +610,14 @@ const BusinessListings = () => {
                       ${isSelected ? "bg-blue-50/50" : "hover:bg-slate-50/60"}`}
                   >
                     {/* Checkbox */}
-                    <td className="px-4 py-4 w-10 border-r border-slate-200 align-top">
+                    <td className="px-4 py-4 w-10 space-y-1 border-r border-slate-200 align-top">
                       <button
                         onClick={() => toggleSelect(listing._id)}
                         className="flex items-center justify-center mt-0.5"
                       >
                         <CheckboxIcon checked={isSelected} />
                       </button>
-                    </td>
-
-                    {/* Sr No */}
-                    {/* <TD vAlign="top" className="w-14">
-                     
-                    </TD> */}
-
-                    <TD vAlign="top" className="min-w-[300px]">
-                      {/* TOP ROW */}
-                      <div className="flex gap-3">
-                        {/* IMAGE */}
+                          {/* IMAGE */}
                         <div className="w-14 h-10 flex-shrink-0">
                           <img
                             className="w-14 h-14 rounded-xl object-contain border border-slate-200 bg-white shadow-sm"
@@ -635,19 +625,30 @@ const BusinessListings = () => {
                             alt={listing.businessName}
                           />
                         </div>
+                    </td>
+
+                    {/* Sr No */}
+                    {/* <TD vAlign="top" className="w-14">
+                     
+                    </TD> */}
+
+                    <TD vAlign="top" className="min-w-[250px]">
+                      {/* TOP ROW */}
+                      <div className="flex gap-3">
+                    
 
                         {/* TITLE ONLY */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1  min-w-0">
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="text-sm font-bold text-gray-900">
                               {String(
                                 (page - 1) * showEntries + idx + 1,
                               ).padStart(2, "0")}
-                              )
+                              
                             </span>
 
                             <a
-                              className="font-semibold text-blue-600 text-md truncate"
+                              className="font-semibold max-w-50 line-clamp-2 text-blue-600 text-md truncate"
                               href={`/${listing?.slug}?preview=true`}
                             >
                               {listing.businessName}
