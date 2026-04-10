@@ -89,7 +89,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
           className="flex items-center gap-1.5 text-sm w-full text-left"
         >
           <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="font-medium text-black">Business Hours:</span>
+          <span className="font-semibold text-[16px] text-black">Business Hours:</span>
           <span className={`text-xs ml-1 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
             {isOpenToday
               ? `Open`
@@ -125,7 +125,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
       {/* Trigger row */}
       <div className={`flex items-center gap-1.5 text-sm cursor-pointer py-1 rounded transition-colors ${isOpen ? "bg-white text-black" : "hover:bg-white hover:text-black"}`}>
         <Clock className={`w-4 h-4 text-gray-500 flex-shrink-0 ${isOpen ? "hidden" : ""}`} />
-        <span className={`font-medium ${isOpen ? "ml-5" : ""} text-black `}>Business Hours:</span>
+        <span className={`font-semibold text-[16px] ${isOpen ? "ml-5" : ""} text-black `}>Business Hours:</span>
         <span className={`text-xs ml-0.5 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
           {isOpenToday
             ? `Open`

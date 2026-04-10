@@ -214,6 +214,7 @@ const SearchResults = () => {
     }
   };
 
+  console.log("listings", listings);
   const canonicalSlug = slug || "";
   const canonicalCity = cityName || "";
 
@@ -239,10 +240,10 @@ const SearchResults = () => {
         <Header />
       </section>
       <Head>
-        <title>{`Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
+        <title>{`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
         <meta
           name="description"
-          content={`Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`}
+          content={`${listings[0]?.category?.seo?.description}` || `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`}
         />
         <meta
           name="keywords"
@@ -256,11 +257,11 @@ const SearchResults = () => {
         <meta property="og:type" content="website" />
         <meta
           property="og:title"
-          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
+          content={`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
         />
         <meta
           property="og:description"
-          content={`Looking for the best ${canonicalSlug} in ${canonicalCity}? Visit our platform to explore verified listings and choose the right one.`}
+          content={`${listings[0]?.category?.seo?.description}` || `Looking for the best ${canonicalSlug} in ${canonicalCity}? Visit our platform to explore verified listings and choose the right one.`}
         />
         <meta
           property="og:url"
@@ -269,20 +270,20 @@ const SearchResults = () => {
         <meta property="og:site_name" content="Your Website Name" />
         <meta
           property="og:image"
-          content={`${APP_URL}/seo/default-og-image.jpg`}
+          content={`${listings[0]?.category?.seo?.ogImage || APP_URL}/seo/default-og-image.jpg`}
         />
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
+          content={`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
         />
         <meta
           name="twitter:description"
-          content={`Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details.`}
+          content={`${listings[0]?.category?.seo?.description}` || `Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details. `}
         />
         <meta
           name="twitter:image"
-          content={`${APP_URL}/seo/default-og-image.jpg`}
+          content={`${listings[0]?.category?.seo?.ogImage || APP_URL}/seo/default-og-image.jpg`}
         />
         <script
           type="application/ld+json"
@@ -307,9 +308,9 @@ const SearchResults = () => {
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
           {/* ads space */}
 
-          <section className="h-[100px] w-[900px] border mt-2 border-orange-600  mx-auto rounded-lg ">
+          <section className="h-[100px] w-[900px] border mt-2 mx-auto rounded-lg ">
             <div className="h-full w-full text-lg  tect-center flex justify-center items-center">
-              space for ads
+              <img src="/assets/ads-city-slug.jpeg" alt="ad1" className="h-full w-full" />
             </div>
           </section>
           <div className="mt-5 max-md:ml-2.5 md:mb-2">
