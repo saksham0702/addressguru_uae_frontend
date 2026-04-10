@@ -24,7 +24,6 @@ const SearchResults = () => {
   const cityName =
     typeof globalCity === "string" ? globalCity : globalCity?.name || "";
 
-    
   const handleClose = () => {
     setLoginPop(false);
   };
@@ -197,7 +196,6 @@ const SearchResults = () => {
       .toLowerCase()
       .replace(/\(.*\)/, "")
       .replace(/\s+/g, "-");
-
     try {
       setIsLoadingMore(true);
       const query = buildQueryParams(pageData.nextPage);
@@ -240,9 +238,6 @@ const SearchResults = () => {
       <section className="md:hidden">
         <Header />
       </section>
- {/* ads space */}
-
-
       <Head>
         <title>{`Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
         <meta
@@ -308,10 +303,16 @@ const SearchResults = () => {
           }}
         />
       </Head>
-
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
-          <div className="mt-6 max-md:ml-2.5 md:mb-2">
+          {/* ads space */}
+
+          <section className="h-[100px] w-[900px] border mt-2 border-orange-600  mx-auto rounded-lg ">
+            <div className="h-full w-full text-lg  tect-center flex justify-center items-center">
+              space for ads
+            </div>
+          </section>
+          <div className="mt-5 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
               slug={canonicalSlug}
               city={canonicalCity}
@@ -319,14 +320,6 @@ const SearchResults = () => {
               name="business listings"
             />
           </div>
-
-           <section className="h-40 w-220 border border-orange-600  mx-auto rounded-lg ">
-       <div className="h-full w-full text-lg tect-center flex justify-center items-center">
-        space for ads
-       </div>
- </section>
-
-
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
             Top {listings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
@@ -484,39 +477,38 @@ const SearchResults = () => {
 
       {loginPop && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50">
-        <div className="h-[60vh]  w-xl m-auto top-0 flex  fixed inset-0  z-50 rounded-xl bg-white">
-          <div className="mt-2 relative w-full pl-2  ">
-            {/* Close icon */}
-            <button
-              onClick={handleClose}
-              className="absolute right-3 border rounded-full border-orange-500 p-1
+          <div className="h-[60vh]  w-xl m-auto top-0 flex  fixed inset-0  z-50 rounded-xl bg-white">
+            <div className="mt-2 relative w-full pl-2  ">
+              {/* Close icon */}
+              <button
+                onClick={handleClose}
+                className="absolute right-3 border rounded-full border-orange-500 p-1
                top-2 z-50 text-[#FF6E04]"
-              aria-label="Close"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                aria-label="Close"
               >
-                <path
-                  d="M18 6L6 18M6 6L18 18"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
 
-            {/* Login component */}
-            <Login setShowLogin={true} />
+              {/* Login component */}
+              <Login setShowLogin={true} />
+            </div>
           </div>
         </div>
-        </div>
       )}
-
 
       <MobileFooter />
     </>

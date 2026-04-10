@@ -15,7 +15,7 @@ import { FaBlog, FaCity } from "react-icons/fa";
 
 // export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const API_URL = ""
-console.log("API_URL ::", API_URL);
+// console.log("API_URL ::", API_URL);
 
 
 // mine

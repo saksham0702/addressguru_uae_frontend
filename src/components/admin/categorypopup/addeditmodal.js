@@ -235,6 +235,7 @@ export default function AddEditForm({
   onClose,
   onCategoryCreated,
   categoryType,
+  category,
 }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -253,6 +254,12 @@ export default function AddEditForm({
   const [form, setForm] = useState({
     name: "",
     iconSvg: "",
+    iconPng: null, // ✅ NEW
+    seo: {
+      title: "",
+      description: "",
+      ogImage: null, // ✅ NEW
+    },
     facilities: [],
     services: [],
     courses: [],
@@ -330,27 +337,36 @@ export default function AddEditForm({
     setSubmitError("");
 
     try {
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("iconSvg", form.iconSvg);
+      formData.append("type", categoryType);
+
+      // ✅ NEW FIELDS (IMPORTANT — matches backend)
+      formData.append("metaTitle", form.seo.title || "");
+      formData.append("metaDescription", form.seo.description || "");
+
+      // ✅ FILE
+      if (form.seo.ogImage instanceof File) {
+        formData.append("ogImage", form.seo.ogImage);
+      }
+
       const res = await createOrUpdateCategory({
-        name: form.name,
-        iconSvg: form.iconSvg,
-        type: categoryType,
+        formData, // ✅ SEND THIS
       });
 
       if (res?.status) {
         setCategoryId(res.data._id);
         setStep(2);
 
-        // trigger category refresh
         if (onCategoryCreated) {
           onCategoryCreated();
         }
       }
     } catch (err) {
       console.error("Create category error:", err);
-
-      const message = err?.message || "Failed to create category";
-
-      setSubmitError(message);
+      setSubmitError(err?.message || "Failed to create category");
     } finally {
       setLoading(false);
     }
@@ -391,6 +407,12 @@ export default function AddEditForm({
         setForm({
           name: "",
           iconSvg: "",
+          iconPng: null,
+          seo: {
+            title: "",
+            description: "",
+            ogImage: null,
+          },
           facilities: [],
           services: [],
           courses: [],
@@ -408,7 +430,27 @@ export default function AddEditForm({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    if (category) {
+      setForm({
+        name: category.name || "",
+        iconSvg: category.iconSvg || "",
+        iconPng: null,
 
+        seo: {
+          title: category?.seo?.title || "",
+          description: category?.seo?.description || "",
+          ogImage: null,
+        },
+
+        facilities: [],
+        services: [],
+        courses: [],
+      });
+
+      setCategoryId(category._id); // ✅ CRITICAL
+    }
+  }, [category]);
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
@@ -427,10 +469,12 @@ export default function AddEditForm({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Create Category
+                  {category ? "Edit Category" : "Create Category"}
                 </h2>
                 <p className="text-sm text-slate-500">
-                  Configure your new category
+                  {category
+                    ? "Update your category"
+                    : "Configure your new category"}
                 </p>
               </div>
             </div>
@@ -447,7 +491,7 @@ export default function AddEditForm({
         </div>
 
         {/* BODY */}
-        <div className="p-8">
+        <div className="p-8 overflow-y-scroll h-[60vh]">
           <Stepper steps={STEPS} currentStep={step} />
 
           <div className="mt-6">
@@ -509,6 +553,65 @@ export default function AddEditForm({
                         />
                       </div>
                     )}
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        SEO Title
+                      </label>
+
+                      <input
+                        value={form.seo.title}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            seo: { ...form.seo, title: e.target.value },
+                          })
+                        }
+                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        SEO Description
+                      </label>
+
+                      <textarea
+                        value={form.seo.description}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            seo: { ...form.seo, description: e.target.value },
+                          })
+                        }
+                        rows={3}
+                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        OG Image
+                      </label>
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            seo: { ...form.seo, ogImage: e.target.files[0] },
+                          })
+                        }
+                      />
+
+                      {form.seo.ogImage && (
+                        <img
+                          src={URL.createObjectURL(form.seo.ogImage)}
+                          className="w-24 h-24 object-cover rounded-lg mt-2"
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <p className="text-xs text-slate-400">
@@ -658,7 +761,7 @@ export default function AddEditForm({
                   </>
                 ) : (
                   <>
-                    Create & Continue
+                    {categoryId ? "Update & Continue" : "Create & Continue"}{" "}
                     <ChevronRight size={18} />
                   </>
                 )}

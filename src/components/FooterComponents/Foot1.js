@@ -6,13 +6,14 @@ const menuLinks = [
   { name: "About Us", path: "/about-us" },
   { name: "Blogs", path: "/blogs" },
   { name: "Marketplace", path: "/marketplace" },
-  { name: "Properties", path: "/properties" },
+  { name: "Posting Rules", path: "/posting-rules" },
 ];
 
 const quickLinks = [
   { name: "Our Plans", path: "/our-plans" },
   { name: "Contact Us", path: "/contact-us" },
   { name: "Privacy Policy", path: "/privacy-policy" },
+  { name: "Infringement Policy", path: "/infringement-policy" },
   // { name: "Click Here To Open The App", path: "/app" },
 ];
 
