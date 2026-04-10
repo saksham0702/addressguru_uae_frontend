@@ -15,22 +15,24 @@ const BusinessListingCategories = ({ categories }) => {
       const res = await get_subCategories(categoryId);
       console.log("sub categories :", res);
 
-      if (res && res.length > 0) {
-        // Has subcategories, show them
-        setSubCategories(res);
+      // Normalize to array regardless of response shape
+      const subCatsArray = Array.isArray(res)
+        ? res
+        : res?.data
+          ? res.data
+          : res?.subCategories
+            ? res.subCategories
+            : [];
+
+      if (subCatsArray.length > 0) {
+        setSubCategories(subCatsArray); // Always an array now
         setCurrentView("subcategories");
       } else {
-        // No subcategories, redirect directly to listing forms with category name
-        window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(
-          categoryName,
-        )}`;
+        window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`;
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
-      // On error, redirect to listing forms with just category and name
-      window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(
-        categoryName,
-      )}`;
+      window.location.href = `/dashboard/listing-forms?category=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`;
     } finally {
       setLoading(false);
     }
