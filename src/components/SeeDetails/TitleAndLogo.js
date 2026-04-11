@@ -180,7 +180,7 @@ const TitleAndLogo = ({
             textColor="#FF6E04"
             toggledTextColor="#fff"
             width="150px"
-            onClick={() => handleClick(data?._id, "phone")}
+            onClick={() => handleClick(data?.slug, "phone")}
           />
 
           {/* enquire now */}

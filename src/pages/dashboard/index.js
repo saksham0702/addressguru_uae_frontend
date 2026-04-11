@@ -22,6 +22,7 @@ import {
   get_property_listings,
   get_user_listings,
 } from "@/api/uae-dashboard";
+import { get_listing_stats } from "@/api/listingStats";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -37,11 +38,19 @@ const Dashboard = () => {
 
 
   const token = localStorage.getItem("authToken");
+
+  const getListingStats = async () => {
+    const res = await get_listing_stats();
+    if (res?.status) {
+      setData(res?.data);
+    }
+  }
   useEffect(() => {
     if (loading) return;
     if (!user && !token) {
       router.replace("/");
     }
+    getListingStats();
   }, [user, loading, router]);
 
   // const getDashboardData = async () => {
@@ -73,6 +82,7 @@ const Dashboard = () => {
     if (!user) return;
     // getDashboardData();
     getUserListings("listing");
+    getListingStats();
     // getUserListings("jobs");
     // getUserListings("property");
     // getUserListings("marketplace");
@@ -80,16 +90,18 @@ const Dashboard = () => {
 
   if (loading || !user) return null;
 
+  console.log("data", data);
+
   const countData = [
-    { image: "/count-listing", title: "YOUR LISTING", count: data?.listings },
-    { image: "/count-products", title: "PRODUCTS", count: data?.products },
-    { image: "/count-jobs", title: "JOBS", count: data?.jobs },
+    { image: "/count-listing", title: "YOUR LISTING", count: data?.listingCounts?.business },
+    { image: "/count-products", title: "PRODUCTS", count: data?.listingCounts?.products },
+    { image: "/count-jobs", title: "JOBS", count: data?.listingCounts?.jobs },
     {
       image: "/count-properties",
       title: "PROPERTIES",
-      count: data?.properties,
+      count: data?.listingCounts?.properties,
     },
-    { image: "/count-reviews", title: "REVIEWS", count: data?.reviews },
+    { image: "/count-reviews", title: "REVIEWS", count: data?.overview?.totalReviews },
   ];
 
   const renderSection = () => {
@@ -149,25 +161,25 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyListings data={myListings} /> */}
+              <MyListings data={myListings} APP_URL={API_URL} />
             </section>
           </div>
         );
 
-      // case "my-jobs":
-      //   return (
-      //     <div className="md-max-w-[80%] w-full max-w-[80%]">
-      //       <section className="my-5 space-y-5">
-      //         <MyJobListings data={myJobs} />
-      //       </section>
-      //     </div>
-      //   );
+      case "my-jobs":
+        return (
+          <div className="md-max-w-[80%] w-full max-w-[80%]">
+            <section className="my-5 space-y-5">
+              <MyJobListings data={myJobs} />
+            </section>
+          </div>
+        );
 
       case "my-marketplace":
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyMarketplaceListings data={myMarketplace} /> */}
+              <MyMarketplaceListings data={myMarketplace} />
             </section>
           </div>
         );
@@ -176,7 +188,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyPropertyListings data={myProperties} /> */}
+              <MyPropertyListings data={myProperties} />
             </section>
           </div>
         );

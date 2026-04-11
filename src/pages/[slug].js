@@ -26,6 +26,8 @@ import {
 } from "@/api/listing-form";
 import Link from "next/link";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
+import FullWidthGallery from "@/components/SeeDetails/FullWidthGallery";
+import RoomsSection from "@/components/SeeDetails/RoomsSection";
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
@@ -74,6 +76,8 @@ const SeeDetails = ({ initialData }) => {
   const [confirmAction, setConfirmAction] = useState(null);
   const [rejectModalData, setRejectModalData] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   const [toast, setToast] = useState(null);
   const API_URL = "https://addressguru.ae";
 
@@ -82,8 +86,7 @@ const SeeDetails = ({ initialData }) => {
   const { city, user } = useAuth();
   const serverCity = city;
 
-
-  const isAdmin = user?.data?.roles?.[0] == 1 ;
+  const isAdmin = user?.data?.roles?.[0] == 1;
   const status = data?.status || "pending";
   const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
 
@@ -124,6 +127,17 @@ const SeeDetails = ({ initialData }) => {
   };
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize(); // initial check
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
     if (data) return;
     if (!slug) return;
     const fetchListing = async () => {
@@ -145,14 +159,22 @@ const SeeDetails = ({ initialData }) => {
   useEffect(() => {
     if (!data?.slug || viewTracked.current) return;
     viewTracked.current = true;
-    track_event("business", data?.slug, "view").catch(console.error);
+    track_event("business", data?.slug, "view").catch(console.log("view"));
   }, [data?.slug]);
 
-  const handleClick = async (id, clickType) => {};
+  const handleWebsiteClick = async (slug) => {
+    track_event("business", slug, "website_visit").catch(console.log("website_visit"));
+  };
+  const handleClick = async (slug) => {
+    track_event("business", slug, "call").catch(console.log("call"));
+  };
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
 
   if (loading || !data) return <LandingPageSkeleton />;
+
+  const isSliderFull =
+    data?.category?.name === "Hotel" || data?.category?.name === "Yoga Studio";
 
   return (
     <>
@@ -529,7 +551,7 @@ const SeeDetails = ({ initialData }) => {
       <div
         className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "pointer-events-none opacity-90" : ""}`}
       >
-        <div className="flex flex-col md:w-[80%] max-w-[98%] bg-white md:px-5 px-2 md:pb-7">
+        <div className="flex flex-col md:w-[80%] max-w-[98%] relative bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
             <BreadCrumbs
               slug={data?.category?.slug}
@@ -539,7 +561,7 @@ const SeeDetails = ({ initialData }) => {
             />
           </div>
 
-          <div className="max-md:hidden">
+          <div className="max-md:hidden md:w-[64.5%]">
             <TitleAndLogo
               handlePop={handlePop}
               name={data?.businessName}
@@ -554,12 +576,28 @@ const SeeDetails = ({ initialData }) => {
             />
           </div>
 
+          {/* FULL WIDTH HERO (Desktop + Special Category) */}
+          {isSliderFull && !isMobile && (
+            <div className="w-full px-2 md:px-0 mb-4">
+              <FullWidthGallery images={data?.images} />
+            </div>
+          )}
+
+          {/* SLIDER (Mobile OR Normal Categories) */}
+          {(isMobile || !isSliderFull) && (
+            <div className={`${!isMobile ? "md:w-[64.5%]" : "w-full"}`}>
+              <SliderCard slider={false} images={data?.images} />
+            </div>
+          )}
+          {/* <SliderCard slider={false} images={data?.images} /> */}
+
           <div className="flex w-full justify-between max-md:flex-col md:mt-4">
             {/* LEFT */}
-            <div className="md:w-[64.5%]">
-              <SliderCard images={data?.images} />
 
-              <div className="md:hidden mx-auto w-full">
+            <div className="md:w-[64.5%]">
+              {/* <SliderCard slider={false} images={data?.images} /> */}
+
+              <div className="md:hidden mx-auto  w-full">
                 <TitleAndLogoMobile
                   data={data}
                   openingHours={data?.workingHours}
@@ -570,7 +608,6 @@ const SeeDetails = ({ initialData }) => {
                   handleClick={handleClick}
                 />
               </div>
-
               {/* ABOUT */}
               <div className="mt-5 md:pl-2 px-1">
                 <span className="flex gap-3 items-center">
@@ -787,28 +824,194 @@ const SeeDetails = ({ initialData }) => {
             </div>
 
             {/* RIGHT */}
-            <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
+
+            <div
+              className={`md:w-[34%] ${isSliderFull ? "" : "md:absolute md:top-49 md:right-0"} max-md:hidden h-auto mb-10 flex flex-col gap-5`}
+            >
               <QuickInformation
                 id={data?.id}
                 businesshours={data?.workingHours}
                 price={data?.additionalFields?.[2]}
                 category={data?.category}
-                link={data?.website_link}
+                link={data?.websiteLink}
                 handlePop={handlePop}
-                handleWebsiteClick={handleClick}
+                handleWebsiteClick={handleWebsiteClick}
               />
-              <div className="w-full h-[30rem] mb-7">
-                <GetMoreInfo
-                  name={data?.businessName}
-                  type="listing"
-                  id={data?.id}
-                  setType={setType}
-                  setThanksPop={setThanksPop}
+              {/* booking sections */}
+              {data?.category?.name === "Yoga Studio" && (
+                <RoomsSection
+                  category="Yoga Studio"
+                  data={{
+                    startingFrom: 1200,
+                    daysNights: "3 Days | 2 Nights",
+                    batchSize: 30,
+                    language: "Hindi & English",
+                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                    rooms: [
+                      {
+                        name: "Shared room",
+                        price: 1200,
+                        roomType: "Shared",
+                        capacity: 30,
+                      },
+                      {
+                        name: "Private room",
+                        price: 2000,
+                        roomType: "Private",
+                        capacity: 10,
+                      },
+                    ],
+                  }}
                 />
-              </div>
+              )}
+
+              {data?.category?.name === "Hotel" && (
+                <RoomsSection
+                  category="hotel"
+                  data={{
+                    startingFrom: 3500,
+                    checkIn: "12:00 PM",
+                    checkOut: "11:00 AM",
+                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                    rooms: [
+                      {
+                        name: "Standard room",
+                        price: 3500,
+                        roomType: "Standard",
+                        capacity: 2,
+                      },
+                      {
+                        name: "Luxury suite",
+                        price: 8900,
+                        roomType: "Luxury",
+                        capacity: 4,
+                      },
+                    ],
+                  }}
+                />
+              )}
+              {data?.category?.name === "Hostel" && (
+                <RoomsSection
+                  category="hostel"
+                  data={{
+                    startingFrom: 600,
+                    checkIn: "2:00 PM",
+                    checkOut: "10:00 AM",
+                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                    rooms: [
+                      {
+                        name: "6-bed dorm",
+                        price: 600,
+                        roomType: "Shared",
+                        capacity: 6,
+                      },
+                      {
+                        name: "Private room",
+                        price: 1800,
+                        roomType: "Private",
+                        capacity: 2,
+                      },
+                    ],
+                  }}
+                />
+              )}
+
+              {!data?.category?.name === "Hotel" ||
+                !data?.category?.name === "Hostel" ||
+                (!data?.category?.name === "Yoga Studio" && (
+                  <div className="w-full h-[30rem] mb-7">
+                    <GetMoreInfo
+                      name={data?.businessName}
+                      type="listing"
+                      id={data?.id}
+                      setType={setType}
+                      setThanksPop={setThanksPop}
+                    />
+                  </div>
+                ))}
               <UserInformation />
             </div>
           </div>
+          {/* sections */}
+          <section className="md:hidden mt-10">
+            {data?.category?.name === "Yoga Studio" && (
+              <RoomsSection
+                category="Yoga Studio"
+                data={{
+                  startingFrom: 1200,
+                  daysNights: "3 Days | 2 Nights",
+                  batchSize: 30,
+                  language: "Hindi & English",
+                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                  rooms: [
+                    {
+                      name: "Shared room",
+                      price: 1200,
+                      roomType: "Shared",
+                      capacity: 30,
+                    },
+                    {
+                      name: "Private room",
+                      price: 2000,
+                      roomType: "Private",
+                      capacity: 10,
+                    },
+                  ],
+                }}
+              />
+            )}
+
+            {data?.category?.name === "Hotel" && (
+              <RoomsSection
+                category="hotel"
+                data={{
+                  startingFrom: 3500,
+                  checkIn: "12:00 PM",
+                  checkOut: "11:00 AM",
+                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                  rooms: [
+                    {
+                      name: "Standard room",
+                      price: 3500,
+                      roomType: "Standard",
+                      capacity: 2,
+                    },
+                    {
+                      name: "Luxury suite",
+                      price: 8900,
+                      roomType: "Luxury",
+                      capacity: 4,
+                    },
+                  ],
+                }}
+              />
+            )}
+            {data?.category?.name === "Hostel" && (
+              <RoomsSection
+                category="hostel"
+                data={{
+                  startingFrom: 600,
+                  checkIn: "2:00 PM",
+                  checkOut: "10:00 AM",
+                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
+                  rooms: [
+                    {
+                      name: "6-bed dorm",
+                      price: 600,
+                      roomType: "Shared",
+                      capacity: 6,
+                    },
+                    {
+                      name: "Private room",
+                      price: 1800,
+                      roomType: "Private",
+                      capacity: 2,
+                    },
+                  ],
+                }}
+              />
+            )}
+          </section>
 
           {/* MOBILE USER INFO */}
           <div className="md:hidden mt-10">

@@ -195,7 +195,7 @@ const TitleAndLogoMobile = ({
       </div>
 
       {/* prices and features section */}
-      <div className="flex flex-wrap w-full whitespace-nowrap tracking-tight gap-1 my-2 text-[10px] font-[500] max-[340px]:flex-wrap">
+      {/* <div className="flex flex-wrap w-full whitespace-nowrap tracking-tight gap-1 my-2 text-[10px] font-[500] max-[340px]:flex-wrap">
         {data?.services?.slice(0, 3)?.map((item, index) => {
           return (
             <span
@@ -206,7 +206,7 @@ const TitleAndLogoMobile = ({
             </span>
           );
         })}
-      </div>
+      </div> */}
 
       {/* <hr className="text-gray-200 max-w-full relative top-1" /> */}
 

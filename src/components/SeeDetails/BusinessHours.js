@@ -88,15 +88,15 @@ const BusinessHours = ({ openingHours, mobile }) => {
           onClick={() => setIsOpen((p) => !p)}
           className="flex items-center gap-1.5 text-sm w-full text-left"
         >
-          <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="font-semibold text-[16px] text-black">Business Hours:</span>
+          <Clock className="w-4 h-4 text-black flex-shrink-0" />
+          <span className="md:font-semibold  md:text-[16px] text-[14px]  text-black">Business Hours:</span>
           <span className={`text-sm ml-1  ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
             {isOpenToday
               ? `Open`
               : "Closed Today"}
           </span>
           <ChevronDown
-            className={`w-3.5 h-3.5 text-gray-400 ml-auto transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            className={`w-3.5 h-3.5 text-gray-900 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
         { isOpen && (
@@ -123,8 +123,8 @@ const BusinessHours = ({ openingHours, mobile }) => {
       )}
 
       {/* Trigger row */}
-      <div className={`flex items-center gap-1.5 text-sm cursor-pointer py-1 rounded transition-colors ${isOpen ? "bg-white text-black" : "hover:bg-white hover:text-black"}`}>
-        <Clock className={`w-4 h-4 text-gray-500 flex-shrink-0 ${isOpen ? "hidden" : ""}`} />
+      <div className={`flex items-center gap-1.5 text-sm cursor-pointer  rounded transition-colors ${isOpen ? "bg-white text-black" : "hover:bg-white hover:text-black"}`}>
+        <Clock className={`w-4 h-4 text-black flex-shrink-0 ${isOpen ? "hidden" : ""}`} />
         <span className={`font-semibold text-[16px] ${isOpen ? "ml-5" : ""} text-black `}>Business Hours:</span>
         <span className={`text-[16px] font-semibold ml-0.5 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
           {isOpenToday

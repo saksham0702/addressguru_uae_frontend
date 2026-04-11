@@ -1,11 +1,11 @@
 import React from "react";
 import Graph from "./Graph";
 
-const DashboardOverview = ({data}) => {
+const DashboardOverview = ({ data }) => {
   const statsData = [
     {
       title: "TOTAL VIEWS",
-      value: data?.views || 0,
+      value: data?.overview?.totalViews || 0,
       // change: "+2.1%",
       changeType: "positive",
       subtitle: "Since last week",
@@ -28,7 +28,7 @@ const DashboardOverview = ({data}) => {
     },
     {
       title: "TOTAL CALLS",
-      value: data?.calls || 0,
+      value: data?.overview?.totalCalls || 0,
       // change: "+6.1%",
       changeType: "positive",
       subtitle: "Since last week",
@@ -53,7 +53,7 @@ const DashboardOverview = ({data}) => {
     },
     {
       title: "TOTAL LEADS",
-      value: data?.leads || 0,
+      value: data?.overview?.totalLeads || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",
@@ -82,7 +82,7 @@ const DashboardOverview = ({data}) => {
     },
     {
       title: "TOTAL REVIEWS",
-      value: data?.reviews || 0,
+      value: data?.overview?.totalReviews || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",
@@ -105,7 +105,7 @@ const DashboardOverview = ({data}) => {
     },
     {
       title: "WEBSITE VISIT",
-      value: data?.website || 0,
+      value: data?.overview?.websiteVisits || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",

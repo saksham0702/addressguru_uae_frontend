@@ -3,15 +3,16 @@ import axios from "axios";
 // const API_URL = "http://localhost:5001";
 const API_URL = "https://addressguru.ae/api";
 
-export const get_listing_stats = async (listingId) => {
+export const get_listing_stats = async () => {
     try {
         const response = await axios.get(`${API_URL}/statistics/overview/`,{
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
         });
-        return response.data;
+        console.log("response of listing stats", response?.data);
+        return response?.data;
     } catch (error) {   
         console.log("error getting listing stats", error);
         return error;

@@ -27,7 +27,7 @@ const NextArrow = ({ onClick }) => (
   </button>
 );
 
-const SliderCard = ({ images }) => {
+const SliderCard = ({ images,slider }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
