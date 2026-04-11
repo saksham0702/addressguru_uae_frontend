@@ -8,14 +8,16 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Head from "next/head";
-import { APP_URL, BASE_URL } from "@/services/constants";
+// import { APP_URL, BASE_URL } from "@/services/constants";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
 import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
 import axios from "axios";
 import Login from "@/components/UserLogin/Login";
 
+
 const SearchResults = () => {
+  const APP_URL = "https://addressguru.ae/api";
   const router = useRouter();
   const { city: globalCity } = useAuth();
   const { slug } = router.query;
@@ -234,81 +236,86 @@ const SearchResults = () => {
     );
   }
 
+  const seoTitle       = listings[0]?.category?.seo?.title       || null;
+const seoDescription = listings[0]?.category?.seo?.description || null;
+const seoOgImage     = listings[0]?.category?.seo?.ogImage     || null;
+ 
+const pageTitle = seoTitle
+  ?? `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
+ 
+const pageDescription = seoDescription
+  ?? `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`;
+ 
+const pageKeywords = `${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`;
+ 
+const canonicalUrl = `${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
+ 
+// OG image MUST be absolute — social crawlers never resolve relative paths.
+// If the DB value already starts with "http", trust it.
+// Otherwise prefix APP_URL. Fall back to your default share card.
+const rawOgImage = seoOgImage ?? "/seo/default-og-image.jpg";
+const absoluteOgImage = rawOgImage.startsWith("http")
+  ? rawOgImage
+  : `${APP_URL}${rawOgImage.startsWith("/") ? "" : "/"}${rawOgImage}`;
+ 
+const ogDescription = seoDescription
+  ?? `Looking for the best ${canonicalSlug} in ${canonicalCity}? Explore verified listings and find the right one.`;
+ 
+const twitterDescription = seoDescription
+  ?? `Checkout the top ${canonicalSlug} in ${canonicalCity}. Explore business listings, ratings, and contact details.`;
+
   return (
     <>
       <section className="md:hidden">
         <Header />
       </section>
-      <Head>
-        <title>{`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
-        <meta
-          name="description"
-          content={`${listings[0]?.category?.seo?.description}` || `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`}
-        />
-        <meta
-          name="keywords"
-          content={`${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`}
-        />
-        <meta name="robots" content="index, follow" />
-        <link
-          rel="canonical"
-          href={`${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`}
-        />
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:title"
-          content={`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
-        />
-        <meta
-          property="og:description"
-          content={`${listings[0]?.category?.seo?.description}` || `Looking for the best ${canonicalSlug} in ${canonicalCity}? Visit our platform to explore verified listings and choose the right one.`}
-        />
-        <meta
-          property="og:url"
-          content={`${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`}
-        />
-        <meta property="og:site_name" content="Your Website Name" />
-        <meta
-          property="og:image"
-          content={`${listings[0]?.category?.seo?.ogImage || APP_URL}/seo/default-og-image.jpg`}
-        />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={`${listings[0]?.category?.seo?.title}` || `Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
-        />
-        <meta
-          name="twitter:description"
-          content={`${listings[0]?.category?.seo?.description}` || `Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details. `}
-        />
-        <meta
-          name="twitter:image"
-          content={`${listings[0]?.category?.seo?.ogImage || APP_URL}/seo/default-og-image.jpg`}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              name: `Top ${canonicalSlug} in ${canonicalCity}`,
-              url: `${APP_URL}/${canonicalSlug}/${canonicalCity}`,
-              numberOfItems: listings?.length || 0,
-              itemListElement: listings?.map((item, i) => ({
-                "@type": "ListItem",
-                position: i + 1,
-                name: item?.name,
-                url: `${APP_URL}/listing/${item?.slug}`,
-              })),
-            }),
-          }}
-        />
-      </Head>
+    <Head>
+  <title>{pageTitle}</title>
+  <meta name="description"  content={pageDescription} />
+  <meta name="keywords"     content={pageKeywords} />
+  <meta name="robots"       content="index, follow" />
+  <link rel="canonical"     href={canonicalUrl} />
+ 
+  <meta property="og:type"         content="website" />
+  <meta property="og:title"        content={pageTitle} />
+  <meta property="og:description"  content={ogDescription} />
+  <meta property="og:url"          content={canonicalUrl} />
+  <meta property="og:site_name"    content="AddressGuru" />
+  <meta property="og:image"        content={absoluteOgImage} />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"    content={pageTitle} />
+ 
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={pageTitle} />
+  <meta name="twitter:description" content={twitterDescription} />
+  <meta name="twitter:image"       content={absoluteOgImage} />
+  <meta name="twitter:image:alt"   content={pageTitle} />
+ 
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: pageTitle,
+        url: canonicalUrl,
+        numberOfItems: pageData?.total ?? listings.length,
+        itemListElement: listings.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: item?.businessName ?? item?.name,
+          url: `${APP_URL}/listing/${item?.slug}`,
+        })),
+      }),
+    }}
+  />
+</Head>
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
           {/* ads space */}
 
-          <section className="h-[100px] w-[900px] border mt-2 mx-auto rounded-lg ">
+          <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg ">
             <div className="h-full w-full text-lg  tect-center flex justify-center items-center">
               <img src="/assets/ads-city-slug.jpeg" alt="ad1" className="h-full w-full" />
             </div>

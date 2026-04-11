@@ -82,7 +82,9 @@ const SeeDetails = ({ initialData }) => {
   const { city, user } = useAuth();
   const serverCity = city;
 
-  const isAdmin = user?.data?.roles?.[0] == 1;
+  const token = localStorage.getItem("token");
+
+  const isAdmin = user?.data?.roles?.[0] == 1 || token;
   const status = data?.status || "pending";
   const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
 
