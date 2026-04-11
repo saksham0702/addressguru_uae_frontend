@@ -270,8 +270,9 @@ const JobListing = () => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get(`${API_URL}/cities`);
-        setCities(res?.data);
+        const res = await axios.get(`https://addressguru.ae/api/cities/get-cities`);
+        console.log("cities response", res);
+        setCities(res?.data?.data);
       } catch (err) {
         console.error("Client-side error:", err);
       }
@@ -750,8 +751,8 @@ const JobListing = () => {
   ];
 
   const cityOptions = cities?.map((city) => ({
-    value: city, // important → ID
-    label: city, // display name
+    value: city?.slug, // important → ID
+    label: city?.name, // display name
   }));
 
   const getSelectedOption = (options = [], value) => {
