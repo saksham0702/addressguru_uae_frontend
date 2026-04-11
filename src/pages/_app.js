@@ -14,7 +14,6 @@ import SideNav from "@/components/admin/sidebar/sidebar";
 import AdminHeader from "@/components/admin/header";
 import { ErrorProvider } from "@/context/ErrorContext";
 
-
 export default function App({ Component, pageProps }) {
   const router = useRouter();
 
@@ -79,7 +78,7 @@ export default function App({ Component, pageProps }) {
   }, [router]);
 
   return (
-    <GoogleOAuthProvider clientId="477872652143-tciloohp49r48l80d7j6tqituovm9nu0.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
         <ErrorProvider>
           <div className="flex justify-center">
