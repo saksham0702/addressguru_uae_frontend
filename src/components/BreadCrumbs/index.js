@@ -47,17 +47,18 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
         )}
 
         {/* Type */}
-        {type && (
-          <>
-            <Slash />
-            <span
-              onClick={() => router.back()}
-              className="text-gray-500 capitalize cursor-pointer hover:text-orange-500 transition-colors"
-            >
-              {type}
-            </span>
-          </>
-        )}
+   {/* Type */}
+{type && type !== true && (
+  <>
+    <Slash />
+    <span
+      onClick={() => router.back()}
+      className="text-gray-500 capitalize cursor-pointer hover:text-orange-500 transition-colors"
+    >
+      {type}
+    </span>
+  </>
+)}
 
         {/* Name — final crumb, not clickable */}
         {name && (

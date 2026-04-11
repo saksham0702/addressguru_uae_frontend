@@ -723,6 +723,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/posting-rules",
   },
   {
     text: "Our Plans",
@@ -778,6 +779,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/infringement-policy",
   },
   {
     text: "Privacy Policy",
@@ -815,6 +817,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/privacy-policy",
   },
 ];
 

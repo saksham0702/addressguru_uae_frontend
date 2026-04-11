@@ -69,8 +69,8 @@ const BusinessHours = ({ openingHours, mobile }) => {
               isToday && is_open
                 ? "text-green-700 font-semibold"
                 : !is_open
-                ? "text-red-500"
-                : "text-gray-700"
+                ? "text-red-500 font-semibold"
+                : "text-gray-700 font-semibold"
             }>
               {is_open ? `${formatTime(open_time)} – ${formatTime(close_time)}` : "Closed"}
             </span>
@@ -90,7 +90,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
         >
           <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
           <span className="font-semibold text-[16px] text-black">Business Hours:</span>
-          <span className={`text-xs ml-1 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
+          <span className={`text-sm ml-1  ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
             {isOpenToday
               ? `Open`
               : "Closed Today"}
@@ -126,7 +126,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
       <div className={`flex items-center gap-1.5 text-sm cursor-pointer py-1 rounded transition-colors ${isOpen ? "bg-white text-black" : "hover:bg-white hover:text-black"}`}>
         <Clock className={`w-4 h-4 text-gray-500 flex-shrink-0 ${isOpen ? "hidden" : ""}`} />
         <span className={`font-semibold text-[16px] ${isOpen ? "ml-5" : ""} text-black `}>Business Hours:</span>
-        <span className={`text-xs ml-0.5 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
+        <span className={`text-[16px] font-semibold ml-0.5 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
           {isOpenToday
             ? `Open`
             : "Closed Today"}
