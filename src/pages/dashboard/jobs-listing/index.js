@@ -270,7 +270,9 @@ const JobListing = () => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get(`https://addressguru.ae/api/cities/get-cities`);
+        const res = await axios.get(
+          `https://addressguru.ae/api/cities/get-cities`,
+        );
         console.log("cities response", res);
         setCities(res?.data?.data);
       } catch (err) {
@@ -622,16 +624,45 @@ const JobListing = () => {
 
         // location JSON
         const locationObj = {
-          city: postJobData.location,
+          city: postJobData.location
+            ? {
+                _id: postJobData.location._id,
+                name: postJobData.location.name,
+                slug: postJobData.location.slug,
+              }
+            : null,
           isRemote: postJobData.workMode === "remote",
         };
 
         formData.append("location", JSON.stringify(locationObj));
 
         formData.append("min_experience", postJobData.minExperience);
+        let ageFrom = null,
+          ageTo = null;
+        if (postJobData.ageRange) {
+          if (
+            typeof postJobData.ageRange === "object" &&
+            postJobData.ageRange.from !== undefined
+          ) {
+            ageFrom = postJobData.ageRange.from;
+            ageTo = postJobData.ageRange.to;
+          } else if (
+            typeof postJobData.ageRange === "string" &&
+            postJobData.ageRange.includes("-")
+          ) {
+            const parts = postJobData.ageRange
+              .split("-")
+              .map((s) => s.trim().replace(/[^0-9]/g, ""));
+            ageFrom = parts[0] ? Number(parts[0]) : null;
+            ageTo = parts[1] ? Number(parts[1]) : null;
+          }
+        }
 
+        formData.append(
+          "ageRange",
+          JSON.stringify({ from: ageFrom, to: ageTo }),
+        );
         formData.append("gender", postJobData.gender);
-        formData.append("ageRange", postJobData.ageRange);
 
         break;
       case 2:
@@ -668,6 +699,7 @@ const JobListing = () => {
       let res;
 
       if (stepNumber === 1) {
+        console.log("formData", formData);
         res = await add_job_listing(formData);
       }
 
@@ -751,8 +783,11 @@ const JobListing = () => {
   ];
 
   const cityOptions = cities?.map((city) => ({
-    value: city?.slug, // important → ID
-    label: city?.name, // display name
+    value: city?.slug,
+    label: city?.name,
+    _id: city?._id, // add this
+    slug: city?.slug, // add this
+    name: city?.name, // add this
   }));
 
   const getSelectedOption = (options = [], value) => {
@@ -1108,19 +1143,28 @@ const JobListing = () => {
                           <DropDown
                             options={item.options || []}
                             placeholder={item.placeholder}
-                            value={getSelectedOption(
-                              item.options || [],
-                              postJobData[item.key],
-                            )}
+                            value={
+                              item.key === "location"
+                                ? postJobData.location || null // ← already full object, use directly
+                                : getSelectedOption(
+                                    item.options || [],
+                                    postJobData[item.key],
+                                  )
+                            }
                             onChange={(option) => {
                               if (!option) return;
 
-                              // Special handling for category
                               if (item.key === "category_id") {
                                 setPostJobData({
                                   ...postJobData,
                                   category_id: option.value,
-                                  sub_category_id: "", // reset subcategory
+                                  sub_category_id: "",
+                                });
+                              } else if (item.key === "location") {
+                                // ← ADD THIS BLOCK
+                                setPostJobData({
+                                  ...postJobData,
+                                  location: option, // store full option object, not just option.value
                                 });
                               } else {
                                 setPostJobData({
