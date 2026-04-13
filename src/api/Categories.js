@@ -25,7 +25,7 @@ export const get_subCategories = async (ID) => {
 
 export const get_marketplace_subcategories = async (ID) => {
   try {
-    const res = await axios.get(`http://localhost:5001/subCategories/category/${ID}`);
+    const res = await axios.get(`${API_URL}/subCategories/category/${ID}`);
     return res?.data;
   } catch (error) {
     console.log(error);

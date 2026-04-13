@@ -996,33 +996,43 @@ export const NAV_ROUTES = [
     icon: User,
     href: "/admin/users",
   },
+ {
+  name: "listings",
+  icon: ShoppingBag,
+  children: [
+    { name: "Business Listings", href: "/admin/business-listings" },
+    { name: "Jobs Listings", href: "/admin/jobs-listings" },
+    { name: "Marketplace Listings", href: "/admin/marketplace-listings" },
+    { name: "Property Listings", href: "/admin/property-listings" },
+  ],
+ },
 
-  {
-    name: "Business Listings",
-    icon: ShoppingBag,
-    href: "/admin/business-listings",
-  },
+  // {
+  //   name: "Business Listings",
+  //   icon: ShoppingBag,
+  //   href: "/admin/business-listings",
+  // },
   {
     name: "Followup Configs",
     icon: TableConfigIcon,
     href: "/admin/business-configs",
   },
-  {
-    name: "Jobs Listings",
-    icon: WorkflowIcon,
-    href: "/admin/jobs-listings",
-  },
+  // {
+  //   name: "Jobs Listings",
+  //   icon: WorkflowIcon,
+  //   href: "/admin/jobs-listings",
+  // },
 
-  {
-    name: "Marketplace Listings",
-    href: "/admin/marketplace-listings",
-    icon: ShoppingBag,
-  },
-  {
-    name: "Property Listings",
-    href: "/admin/property-listings",
-    icon: HomeIcon,
-  },
+  // {
+  //   name: "Marketplace Listings",
+  //   href: "/admin/marketplace-listings",
+  //   icon: ShoppingBag,
+  // },
+  // {
+  //   name: "Property Listings",
+  //   href: "/admin/property-listings",
+  //   icon: HomeIcon,
+  // },
 
   // {
   //   name: "Users",

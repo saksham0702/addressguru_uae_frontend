@@ -11,7 +11,6 @@ export const get_listing_stats = async () => {
                 Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
         });
-        console.log("response of listing stats", response?.data);
         return response?.data;
     } catch (error) {   
         console.log("error getting listing stats", error);

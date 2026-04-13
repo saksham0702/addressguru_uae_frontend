@@ -11,7 +11,7 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
 
   return (
     <div>
-      <span className="text-sm flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
+      <span className="text-xs flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
         {/* Home */}
         <Link
           href="/"
