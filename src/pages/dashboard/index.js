@@ -90,7 +90,6 @@ const Dashboard = () => {
 
   if (loading || !user) return null;
 
-  console.log("data", data);
 
   const countData = [
     { image: "/count-listing", title: "YOUR LISTING", count: data?.listingCounts?.business },
@@ -149,8 +148,8 @@ const Dashboard = () => {
 
             <section className="my-5 space-y-5">
               <MyListings data={myListings} APP_URL={API_URL} />
-              <MyMarketplaceListings data={myMarketplace} />
-              <MyPropertyListings data={myProperties} />
+              {/* <MyMarketplaceListings data={myMarketplace} />
+              <MyPropertyListings data={myProperties} /> */}
 
               {/* <MyJobListings data={myJobs} /> */}
             </section>

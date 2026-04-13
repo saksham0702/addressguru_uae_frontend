@@ -8,7 +8,8 @@ const FilterItem = ({
   isOpen,
   index,
   setOpenIndex,
-  onSelect,
+  onSelect, // called on APPLY → triggers API in parent
+  onDismiss, // NEW: called when X is clicked on active pill → local filter only
   active = false,
   isRadio = false,
   isMultiple = false,
@@ -41,6 +42,7 @@ const FilterItem = ({
         setTempSelectedMultiIds(selectedMultiIds || []);
       }
     } else {
+      // Toggle-style (AG Verified) — clicking the pill body still triggers API
       onSelect?.();
     }
   };
@@ -48,23 +50,28 @@ const FilterItem = ({
   const handleApply = () => {
     if (isRadio && tempSelectedId !== null) {
       const selectedOption = radioOptions.find(
-        (opt) => opt.id === tempSelectedId
+        (opt) => opt.id === tempSelectedId,
       );
       onSelect?.(selectedOption);
       setOpenIndex(null);
     } else if (isMultiple) {
       const selectedOptions = multiOptions.filter((opt) =>
-        tempSelectedMultiIds.includes(opt.id)
+        tempSelectedMultiIds.includes(opt.id),
       );
       onSelect?.(selectedOptions);
       setOpenIndex(null);
     }
   };
 
+  const sortByLabel = (arr) =>
+    [...arr].sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
+  // Called from inside the dropdown's own "Clear" button — triggers API (resets that filter)
   const handleClearDropdown = () => {
     if (isMultiple) {
       setTempSelectedMultiIds([]);
-      // Only fire API if something was previously committed
       if ((selectedMultiIds || []).length > 0) {
         onSelect?.([]);
       }
@@ -74,15 +81,22 @@ const FilterItem = ({
         onSelect?.(null);
       }
     } else if (hasDropdown) {
-      // Sort by — always had a value if active, so always call
       onSelect?.(null);
     }
     setOpenIndex(null);
   };
 
-  // Dismiss active selection without opening dropdown
+  // Called when the X button is clicked on an active pill — LOCAL ONLY, no API
   const handleDismiss = (e) => {
     e.stopPropagation();
+
+    // If parent provided a dedicated onDismiss, use it (local filter)
+    if (onDismiss) {
+      onDismiss();
+      return;
+    }
+
+    // Fallback to onSelect if onDismiss not provided (backwards compatible)
     if (label === "AG Verified") {
       onSelect?.();
       return;
@@ -98,7 +112,7 @@ const FilterItem = ({
     setTempSelectedMultiIds((prev) =>
       prev.includes(optionId)
         ? prev.filter((id) => id !== optionId)
-        : [...prev, optionId]
+        : [...prev, optionId],
     );
   };
 
@@ -113,8 +127,8 @@ const FilterItem = ({
             active
               ? "bg-orange-50 text-orange-600 border border-orange-300 border-b-2 border-b-orange-500"
               : isOpen
-              ? "bg-white border border-gray-300 border-b-2 border-b-orange-500 text-orange-500"
-              : "bg-white border border-gray-300 hover:bg-gray-50 hover:border-b-2 hover:border-b-orange-300 text-gray-700"
+                ? "bg-white border border-gray-300 border-b-2 border-b-orange-500 text-orange-500"
+                : "bg-white border border-gray-300 hover:bg-gray-50 hover:border-b-2 hover:border-b-orange-300 text-gray-700"
           }
         `}
       >
@@ -139,7 +153,7 @@ const FilterItem = ({
           </svg>
         )}
 
-        {/* X dismiss button when active and dropdown is closed */}
+        {/* X dismiss button — calls handleDismiss → local filter only */}
         {active && !isOpen && (
           <button
             onClick={handleDismiss}
@@ -159,43 +173,51 @@ const FilterItem = ({
       </div>
 
       {/* Regular Dropdown */}
-      {hasDropdown && !isRadio && !isMultiple && isOpen && dropdownItems.length > 0 && (
-        <div className="animate-drop absolute top-full left-1/2 -translate-x-1/2 z-50 mt-2 w-44 bg-white shadow-lg rounded-md border border-gray-100 text-sm overflow-hidden">
-          {dropdownItems.map((item, idx) => (
-            <div
-              key={idx}
-              className="px-3 py-2.5 hover:bg-orange-50 cursor-pointer font-semibold text-gray-700 hover:text-orange-600 transition-colors"
-              onClick={() => {
-                onSelect?.(item);
-                setOpenIndex(null);
-              }}
-            >
-              {item}
+      {hasDropdown &&
+        !isRadio &&
+        !isMultiple &&
+        isOpen &&
+        dropdownItems.length > 0 && (
+          <div className="animate-drop absolute top-full left-1/2 -translate-x-1/2 z-50 mt-2 w-44 bg-white shadow-lg rounded-md border border-gray-100 text-sm overflow-hidden">
+            {dropdownItems.map((item, idx) => (
+              <div
+                key={idx}
+                className="px-3 py-2.5 hover:bg-orange-50 cursor-pointer font-semibold text-gray-700 hover:text-orange-600 transition-colors"
+                onClick={() => {
+                  onSelect?.(item);
+                  setOpenIndex(null);
+                }}
+              >
+                {item}
+              </div>
+            ))}
+            <div className="border-t border-gray-100 px-3 py-2">
+              <button
+                onClick={handleClearDropdown}
+                className="w-full text-xs text-gray-400 hover:text-red-500 font-semibold text-left transition-colors"
+              >
+                Clear
+              </button>
             </div>
-          ))}
-          <div className="border-t border-gray-100 px-3 py-2">
-            <button
-              onClick={handleClearDropdown}
-              className="w-full text-xs text-gray-400 hover:text-red-500 font-semibold text-left transition-colors"
-            >
-              Clear
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Checkbox Dropdown (Multiple Select) */}
       {isMultiple && isOpen && multiOptions.length > 0 && (
-        <div className="animate-drop absolute top-full left-1/2 -translate-x-1/2 z-50 mt-3  w-[880px] max-w-[calc(100vw-2rem)] bg-white shadow-xl rounded-lg border border-gray-100 text-sm">
+        <div className="animate-drop absolute top-full left-1/2 -translate-x-1/2 z-50 mt-3 w-[880px] max-w-[calc(100vw-2rem)] bg-white shadow-xl rounded-lg border border-gray-100 text-sm">
           {/* Header */}
           <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-gray-100">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {label}
+            </span>
             {tempSelectedMultiIds.length > 0 && (
               <div className="flex items-center gap-1.5">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold">
                   {tempSelectedMultiIds.length}
                 </span>
-                <span className="text-xs text-gray-400 font-medium">selected</span>
+                <span className="text-xs text-gray-400 font-medium">
+                  selected
+                </span>
               </div>
             )}
           </div>
@@ -224,11 +246,20 @@ const FilterItem = ({
                     />
                     <div
                       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0
-                        ${checked ? "border-orange-500 bg-orange-500" : "border-gray-300 bg-white"}
+                        ${
+                          checked
+                            ? "border-orange-500 bg-orange-500"
+                            : "border-gray-300 bg-white"
+                        }
                       `}
                     >
                       {checked && (
-                        <svg width="8" height="6" viewBox="0 0 12 9" fill="none">
+                        <svg
+                          width="8"
+                          height="6"
+                          viewBox="0 0 12 9"
+                          fill="none"
+                        >
                           <path
                             d="M1 4.5L4.5 8L11 1"
                             stroke="white"
@@ -254,7 +285,7 @@ const FilterItem = ({
           </div>
 
           {/* Apply + Clear row */}
-          <div className="border-t border-gray-100 px-4 py-3  mb-2 flex items-center justify-end gap-3">
+          <div className="border-t border-gray-100 px-4 py-3 mb-2 flex items-center justify-end gap-3">
             <button
               onClick={handleClearDropdown}
               className="h-9 px-5 border border-gray-300 hover:border-red-400 text-gray-500 hover:text-red-500 font-semibold rounded-md text-sm transition-colors"

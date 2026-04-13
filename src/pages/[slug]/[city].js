@@ -8,16 +8,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Head from "next/head";
-// import { APP_URL, BASE_URL } from "@/services/constants";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
 import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
 import axios from "axios";
 import Login from "@/components/UserLogin/Login";
 
-
 const SearchResults = () => {
-  const APP_URL = "https://addressguru.ae/api";
+  const APP_URL = "https://addressguru.ae";
   const router = useRouter();
   const { city: globalCity } = useAuth();
   const { slug } = router.query;
@@ -26,11 +24,14 @@ const SearchResults = () => {
   const cityName =
     typeof globalCity === "string" ? globalCity : globalCity?.name || "";
 
-  const handleClose = () => {
-    setLoginPop(false);
-  };
+  const handleClose = () => setLoginPop(false);
 
-  const [listings, setListings] = useState([]);
+  // ── API data (last fetched from server) ──
+  const [apiListings, setApiListings] = useState([]);
+
+  // ── Local filter overrides (null = show API data as-is) ──
+  const [localFilters, setLocalFilters] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pageData, setPageData] = useState(null);
@@ -42,6 +43,8 @@ const SearchResults = () => {
     courses: [],
     paymentModes: [],
   });
+
+  // filters = what was last sent to the API
   const [filters, setFilters] = useState({
     sort_by: null,
     ag_verified: false,
@@ -54,16 +57,95 @@ const SearchResults = () => {
 
   const hasFetchedFilters = useRef(false);
 
-  const hasActiveFilters =
-    filters.sort_by !== null ||
-    filters.ag_verified !== false ||
-    filters.facilities_id.length > 0 ||
-    filters.services_id.length > 0 ||
-    filters.courses_id.length > 0 ||
-    filters.payment_mode_id.length > 0 ||
-    filters.search.length > 0;
+  // ── activeFilters: what FilterBar sees (local overrides take priority) ──
+  const activeFilters = localFilters ?? filters;
 
+  const hasActiveFilters =
+    activeFilters.sort_by !== null ||
+    activeFilters.ag_verified !== false ||
+    activeFilters.facilities_id.length > 0 ||
+    activeFilters.services_id.length > 0 ||
+    activeFilters.courses_id.length > 0 ||
+    activeFilters.payment_mode_id.length > 0 ||
+    activeFilters.search.length > 0;
+
+  // ── LOCAL FILTER FUNCTION ──
+  // Runs client-side on apiListings — no network request
+  const applyLocalFilters = (data, f) => {
+    let result = [...data];
+
+    if (f.search?.trim()) {
+      const q = f.search.trim().toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.businessName?.toLowerCase().includes(q) ||
+          item.name?.toLowerCase().includes(q)
+      );
+    }
+
+    if (f.ag_verified) {
+      result = result.filter((item) => item.ag_verified === true);
+    }
+
+    if (f.facilities_id?.length > 0) {
+      result = result.filter((item) =>
+        f.facilities_id.some((id) => item.facilities_id?.includes(id))
+      );
+    }
+
+    if (f.services_id?.length > 0) {
+      result = result.filter((item) =>
+        f.services_id.some((id) => item.services_id?.includes(id))
+      );
+    }
+
+    if (f.courses_id?.length > 0) {
+      result = result.filter((item) =>
+        f.courses_id.some((id) => item.courses_id?.includes(id))
+      );
+    }
+
+    if (f.payment_mode_id?.length > 0) {
+      result = result.filter((item) =>
+        f.payment_mode_id.some((id) => item.payment_mode_id?.includes(id))
+      );
+    }
+
+    if (f.sort_by === "newest") {
+      result = result.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+    } else if (f.sort_by === "oldest") {
+      result = result.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+    }
+
+    return result;
+  };
+
+  // ── What actually gets rendered ──
+  const listings = localFilters
+    ? applyLocalFilters(apiListings, localFilters)
+    : apiListings;
+
+  // ── onFilterChange → clears local overrides, updates filters → hits API ──
+  const handleFilterChange = (updatedFilters) => {
+    setLocalFilters(null);
+    setFilters((prev) => ({ ...prev, ...updatedFilters }));
+  };
+
+  // ── onFilterRemove → local only, no API ──
+  const handleFilterRemove = (patch) => {
+    setLocalFilters((prev) => ({
+      ...(prev ?? filters),
+      ...patch,
+    }));
+  };
+
+  // ── handleReset → full reset, clears local overrides, hits API ──
   const handleReset = () => {
+    setLocalFilters(null);
     setSearchInput("");
     setFilters({
       sort_by: null,
@@ -76,7 +158,7 @@ const SearchResults = () => {
     });
   };
 
-  // ── BUILD QUERY PARAMS from filters ──
+  // ── BUILD QUERY PARAMS from filters (API filters, not local) ──
   const buildQueryParams = (extraPage = 1) => {
     const params = new URLSearchParams();
     params.set("page", extraPage);
@@ -97,9 +179,11 @@ const SearchResults = () => {
     return params.toString();
   };
 
-  // Debounce search — waits 500ms after user stops typing then fires API
+  // ── Debounce search — waits 500ms then fires API ──
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Search input goes through API path (not local)
+      setLocalFilters(null);
       setFilters((prev) => ({ ...prev, search: searchInput }));
     }, 500);
     return () => clearTimeout(timer);
@@ -113,7 +197,7 @@ const SearchResults = () => {
     const fetchCategoryFeatures = async () => {
       try {
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/features/${slug}`,
+          `https://addressguru.ae/api/business-listing/features/${slug}`
         );
         const data = res?.data?.data;
         setDynamicFilters({
@@ -155,7 +239,7 @@ const SearchResults = () => {
     }
   }, [cityName, router.isReady, slug]);
 
-  // ── FETCH LISTINGS ──
+  // ── FETCH LISTINGS → stores into apiListings, clears localFilters ──
   useEffect(() => {
     if (!router.isReady || !slug || !cityName) return;
 
@@ -168,16 +252,17 @@ const SearchResults = () => {
       try {
         setIsLoading(true);
         setError(false);
-        setListings([]);
+        setApiListings([]);
+        setLocalFilters(null); // clear local overrides whenever a fresh API call runs
         setPageData(null);
 
         const query = buildQueryParams(1);
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`
         );
 
         const data = res?.data?.data;
-        setListings(data?.listings || []);
+        setApiListings(data?.listings || []);
         setPageData(data?.pagination || null);
       } catch (err) {
         console.error("Listings fetch error:", err);
@@ -202,11 +287,11 @@ const SearchResults = () => {
       setIsLoadingMore(true);
       const query = buildQueryParams(pageData.nextPage);
       const res = await axios.get(
-        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
+        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`
       );
       const data = res?.data?.data;
       if (data?.listings?.length) {
-        setListings((prev) => [...prev, ...data.listings]);
+        setApiListings((prev) => [...prev, ...data.listings]);
         setPageData(data.pagination);
       }
     } catch (err) {
@@ -216,7 +301,6 @@ const SearchResults = () => {
     }
   };
 
-  console.log("listings", listings);
   const canonicalSlug = slug || "";
   const canonicalCity = cityName || "";
 
@@ -236,90 +320,98 @@ const SearchResults = () => {
     );
   }
 
-  const seoTitle       = listings[0]?.category?.seo?.title       || null;
-const seoDescription = listings[0]?.category?.seo?.description || null;
-const seoOgImage     = listings[0]?.category?.seo?.ogImage     || null;
- 
-const pageTitle = seoTitle
-  ?? `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
- 
-const pageDescription = seoDescription
-  ?? `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`;
- 
-const pageKeywords = `${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`;
- 
-const canonicalUrl = `${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
- 
-// OG image MUST be absolute — social crawlers never resolve relative paths.
-// If the DB value already starts with "http", trust it.
-// Otherwise prefix APP_URL. Fall back to your default share card.
-const rawOgImage = seoOgImage ?? "/seo/default-og-image.jpg";
-const absoluteOgImage = rawOgImage.startsWith("http")
-  ? rawOgImage
-  : `${APP_URL}${rawOgImage.startsWith("/") ? "" : "/"}${rawOgImage}`;
- 
-const ogDescription = seoDescription
-  ?? `Looking for the best ${canonicalSlug} in ${canonicalCity}? Explore verified listings and find the right one.`;
- 
-const twitterDescription = seoDescription
-  ?? `Checkout the top ${canonicalSlug} in ${canonicalCity}. Explore business listings, ratings, and contact details.`;
+  const seoTitle = listings[0]?.category?.seo?.title || null;
+  const seoDescription = listings[0]?.category?.seo?.description || null;
+  const seoOgImage = listings[0]?.category?.seo?.ogImage || null;
+
+  const pageTitle =
+    seoTitle ??
+    `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
+
+  const pageDescription =
+    seoDescription ??
+    `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`;
+
+  const pageKeywords = `${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`;
+
+  const canonicalUrl = `${APP_URL}/${canonicalSlug
+    .toLowerCase()
+    .replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
+
+  const rawOgImage = seoOgImage ?? "/seo/default-og-image.jpg";
+  const absoluteOgImage = rawOgImage.startsWith("http")
+    ? rawOgImage
+    : `${APP_URL}${rawOgImage.startsWith("/") ? "" : "/"}${rawOgImage}`;
+
+  const ogDescription =
+    seoDescription ??
+    `Looking for the best ${canonicalSlug} in ${canonicalCity}? Explore verified listings and find the right one.`;
+
+  const twitterDescription =
+    seoDescription ??
+    `Checkout the top ${canonicalSlug} in ${canonicalCity}. Explore business listings, ratings, and contact details.`;
 
   return (
     <>
       <section className="md:hidden">
         <Header />
       </section>
-    <Head>
-  <title>{pageTitle}</title>
-  <meta name="description"  content={pageDescription} />
-  <meta name="keywords"     content={pageKeywords} />
-  <meta name="robots"       content="index, follow" />
-  <link rel="canonical"     href={canonicalUrl} />
- 
-  <meta property="og:type"         content="website" />
-  <meta property="og:title"        content={pageTitle} />
-  <meta property="og:description"  content={ogDescription} />
-  <meta property="og:url"          content={canonicalUrl} />
-  <meta property="og:site_name"    content="AddressGuru" />
-  <meta property="og:image"        content={absoluteOgImage} />
-  <meta property="og:image:width"  content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt"    content={pageTitle} />
- 
-  <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content={pageTitle} />
-  <meta name="twitter:description" content={twitterDescription} />
-  <meta name="twitter:image"       content={absoluteOgImage} />
-  <meta name="twitter:image:alt"   content={pageTitle} />
- 
-  <script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{
-      __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: pageTitle,
-        url: canonicalUrl,
-        numberOfItems: pageData?.total ?? listings.length,
-        itemListElement: listings.map((item, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          name: item?.businessName ?? item?.name,
-          url: `${APP_URL}/listing/${item?.slug}`,
-        })),
-      }),
-    }}
-  />
-</Head>
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={pageKeywords} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="AddressGuru" />
+        <meta property="og:image" content={absoluteOgImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={pageTitle} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={twitterDescription} />
+        <meta name="twitter:image" content={absoluteOgImage} />
+        <meta name="twitter:image:alt" content={pageTitle} />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              name: pageTitle,
+              url: canonicalUrl,
+              numberOfItems: pageData?.total ?? listings.length,
+              itemListElement: listings.map((item, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: item?.businessName ?? item?.name,
+                url: `${APP_URL}/listing/${item?.slug}`,
+              })),
+            }),
+          }}
+        />
+      </Head>
+
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
           {/* ads space */}
-
-          <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg ">
-            <div className="h-full w-full text-lg  tect-center flex justify-center items-center">
-              <img src="/assets/ads-city-slug.jpeg" alt="ad1" className="h-full w-full" />
+          <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg">
+            <div className="h-full w-full text-lg tect-center flex justify-center items-center">
+              <img
+                src="/assets/ads-city-slug.jpeg"
+                alt="ad1"
+                className="h-full w-full"
+              />
             </div>
           </section>
+
           <div className="mt-5 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
               slug={canonicalSlug}
@@ -328,8 +420,9 @@ const twitterDescription = seoDescription
               name="business listings"
             />
           </div>
+
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {listings?.[0]?.category?.name || canonicalSlug} in{" "}
+            Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
           </h1>
 
@@ -337,12 +430,11 @@ const twitterDescription = seoDescription
             hasActiveFilters={hasActiveFilters}
             handleReset={handleReset}
             dynamicFilters={dynamicFilters}
-            filters={filters}
+            filters={activeFilters}
             searchInput={searchInput}
             onSearchChange={(val) => setSearchInput(val)}
-            onFilterChange={(updatedFilters) =>
-              setFilters((prev) => ({ ...prev, ...updatedFilters }))
-            }
+            onFilterChange={handleFilterChange}
+            onFilterRemove={handleFilterRemove}
           />
 
           <div className="flex w-full gap-4">
@@ -465,7 +557,8 @@ const twitterDescription = seoDescription
                 )}
               </div>
 
-              {pageData?.hasMore && (
+              {/* Only show Load More when no local overrides are active */}
+              {!localFilters && pageData?.hasMore && (
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
@@ -485,13 +578,11 @@ const twitterDescription = seoDescription
 
       {loginPop && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50">
-          <div className="h-[60vh]  w-xl m-auto top-0 flex  fixed inset-0  z-50 rounded-xl bg-white">
-            <div className="mt-2 relative w-full pl-2  ">
-              {/* Close icon */}
+          <div className="h-[60vh] w-xl m-auto top-0 flex fixed inset-0 z-50 rounded-xl bg-white">
+            <div className="mt-2 relative w-full pl-2">
               <button
                 onClick={handleClose}
-                className="absolute right-3 border rounded-full border-orange-500 p-1
-               top-2 z-50 text-[#FF6E04]"
+                className="absolute right-3 border rounded-full border-orange-500 p-1 top-2 z-50 text-[#FF6E04]"
                 aria-label="Close"
               >
                 <svg
@@ -510,8 +601,6 @@ const twitterDescription = seoDescription
                   />
                 </svg>
               </button>
-
-              {/* Login component */}
               <Login setShowLogin={true} />
             </div>
           </div>

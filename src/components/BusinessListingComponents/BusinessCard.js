@@ -62,9 +62,9 @@ const BusinessCard = ({ data }) => {
             </div>
             {/* Address */}
             <div className="text-xs 2xl:text-[13.5px] text-gray-700 font-medium flex items-center gap-1">
-              <span className="truncate max-md:w-50 max-[340px]:!text-xs max-[340px]:!w-20  max-md:text-[11px]">
+              <h4 title={data?.businessAddress} className="truncate max-md:w-50  md:max-w-120 max-[340px]:!text-xs max-[340px]:!w-20  max-md:text-[11px]">
                 {data?.businessAddress}
-              </span>
+              </h4>
             </div>
 
             {/* Ratings & Badges */}

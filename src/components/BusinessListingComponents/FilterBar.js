@@ -6,11 +6,18 @@ const FilterBar = ({
   filters,
   hasActiveFilters,
   onFilterChange,
+  onFilterRemove, // NEW: called for removals — local filter only, no API
   onSearchChange,
   searchInput,
   dynamicFilters,
   handleReset,
 }) => {
+  // Sorts any array of { id, name } objects alphabetically by name
+  const sortByName = (arr) =>
+    [...arr].sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
   const filterItems = [
     {
       label: "Sort by",
@@ -22,7 +29,7 @@ const FilterBar = ({
           {
             label: "Facilities",
             isMultiple: true,
-            multiOptions: dynamicFilters.facilities.map((f) => ({
+            multiOptions: sortByName(dynamicFilters.facilities).map((f) => ({
               id: f.id,
               label: f.name,
               value: f.id,
@@ -35,7 +42,7 @@ const FilterBar = ({
           {
             label: "Services",
             isMultiple: true,
-            multiOptions: dynamicFilters.services.map((s) => ({
+            multiOptions: sortByName(dynamicFilters.services).map((s) => ({
               id: s.id,
               label: s.name,
               value: s.id,
@@ -48,7 +55,7 @@ const FilterBar = ({
           {
             label: "Courses",
             isMultiple: true,
-            multiOptions: dynamicFilters.courses.map((c) => ({
+            multiOptions: sortByName(dynamicFilters.courses).map((c) => ({
               id: c.id,
               label: c.name,
               value: c.id,
@@ -61,7 +68,7 @@ const FilterBar = ({
           {
             label: "Payment Mode",
             isMultiple: true,
-            multiOptions: dynamicFilters.paymentModes.map((p) => ({
+            multiOptions: sortByName(dynamicFilters.paymentModes).map((p) => ({
               id: p.id,
               label: p.name,
               value: p.id,
@@ -92,6 +99,7 @@ const FilterBar = ({
   const [openIndex, setOpenIndex] = useState(null);
   const containerRef = useRef(null);
 
+  // handleFilterSelect is called by FilterItem — only on APPLY actions → triggers API
   const handleFilterSelect = (label, value = null) => {
     switch (label) {
       case "Sort by":
@@ -136,7 +144,8 @@ const FilterBar = ({
     activeChips.push({
       key: "search",
       label: `"${filters.search.trim()}"`,
-      onRemove: () => onSearchChange(""),
+      // Search removal → local only
+      onRemove: () => onFilterRemove({ search: "" }),
     });
   }
   if (filters.sort_by) {
@@ -145,72 +154,91 @@ const FilterBar = ({
     activeChips.push({
       key: "sort_by",
       label: `Sort: ${sorted}`,
-      onRemove: () => onFilterChange({ sort_by: null }),
+      // Sort removal → local only
+      onRemove: () => onFilterRemove({ sort_by: null }),
     });
   }
   if (filters.ag_verified) {
     activeChips.push({
       key: "ag_verified",
       label: "AG Verified",
-      onRemove: () => onFilterChange({ ag_verified: false }),
+      // AG Verified removal → local only
+      onRemove: () => onFilterRemove({ ag_verified: false }),
     });
   }
 
   const facilityMap = Object.fromEntries(
-    (dynamicFilters?.facilities || []).map((f) => [f.id, f.name])
+    (dynamicFilters?.facilities || []).map((f) => [f.id, f.name]),
   );
   (filters.facilities_id || []).forEach((id) => {
     activeChips.push({
       key: `facility-${id}`,
       label: facilityMap[id] || id,
+      // Individual facility removal → local only
       onRemove: () =>
-        onFilterChange({
+        onFilterRemove({
           facilities_id: filters.facilities_id.filter((x) => x !== id),
         }),
     });
   });
 
   const serviceMap = Object.fromEntries(
-    (dynamicFilters?.services || []).map((s) => [s.id, s.name])
+    (dynamicFilters?.services || []).map((s) => [s.id, s.name]),
   );
   (filters.services_id || []).forEach((id) => {
     activeChips.push({
       key: `service-${id}`,
       label: serviceMap[id] || id,
+      // Individual service removal → local only
       onRemove: () =>
-        onFilterChange({
+        onFilterRemove({
           services_id: filters.services_id.filter((x) => x !== id),
         }),
     });
   });
 
   const courseMap = Object.fromEntries(
-    (dynamicFilters?.courses || []).map((c) => [c.id, c.name])
+    (dynamicFilters?.courses || []).map((c) => [c.id, c.name]),
   );
   (filters.courses_id || []).forEach((id) => {
     activeChips.push({
       key: `course-${id}`,
       label: courseMap[id] || id,
+      // Individual course removal → local only
       onRemove: () =>
-        onFilterChange({
+        onFilterRemove({
           courses_id: filters.courses_id.filter((x) => x !== id),
         }),
     });
   });
 
   const paymentMap = Object.fromEntries(
-    (dynamicFilters?.paymentModes || []).map((p) => [p.id, p.name])
+    (dynamicFilters?.paymentModes || []).map((p) => [p.id, p.name]),
   );
   (filters.payment_mode_id || []).forEach((id) => {
     activeChips.push({
       key: `payment-${id}`,
       label: paymentMap[id] || id,
+      // Individual payment mode removal → local only
       onRemove: () =>
-        onFilterChange({
+        onFilterRemove({
           payment_mode_id: filters.payment_mode_id.filter((x) => x !== id),
         }),
     });
   });
+
+  // Clears all filters locally (no API) — used by chips-row "Clear all"
+  const handleLocalClearAll = () => {
+    onFilterRemove({
+      search: "",
+      sort_by: null,
+      ag_verified: false,
+      facilities_id: [],
+      services_id: [],
+      courses_id: [],
+      payment_mode_id: [],
+    });
+  };
 
   return (
     <div className="w-full">
@@ -224,8 +252,10 @@ const FilterBar = ({
 
       {/* ── Desktop filter row ── */}
       <div className="flex items-center max-md:bg-gray-100 max-md:py-1 md:w-full px-2 py-1 max-md:w-[90vh] max-md:max-w-[350px] max-md:ml-2 max-md:my-2 rounded-lg">
-        <div ref={containerRef} className="relative z-40 flex items-center gap-2.5 max-md:hidden flex-wrap">
-
+        <div
+          ref={containerRef}
+          className="relative z-40 flex items-center gap-2.5 max-md:hidden flex-wrap"
+        >
           {/* ── SEARCH INPUT ── */}
           <div className="relative flex items-center">
             <svg
@@ -300,12 +330,12 @@ const FilterBar = ({
                 item.label === "Facilities"
                   ? filters?.facilities_id
                   : item.label === "Services"
-                  ? filters?.services_id
-                  : item.label === "Courses"
-                  ? filters?.courses_id
-                  : item.label === "Payment Mode"
-                  ? filters?.payment_mode_id
-                  : []
+                    ? filters?.services_id
+                    : item.label === "Courses"
+                      ? filters?.courses_id
+                      : item.label === "Payment Mode"
+                        ? filters?.payment_mode_id
+                        : []
               }
               isRadio={item.isRadio}
               radioOptions={item.radioOptions}
@@ -315,20 +345,21 @@ const FilterBar = ({
                 item.label === "AG Verified"
                   ? filters?.ag_verified
                   : item.label === "Sort by"
-                  ? Boolean(filters?.sort_by)
-                  : item.label === "Facilities"
-                  ? filters?.facilities_id?.length > 0
-                  : item.label === "Services"
-                  ? filters?.services_id?.length > 0
-                  : item.label === "Courses"
-                  ? filters?.courses_id?.length > 0
-                  : item.label === "Payment Mode"
-                  ? filters?.payment_mode_id?.length > 0
-                  : false
+                    ? Boolean(filters?.sort_by)
+                    : item.label === "Facilities"
+                      ? filters?.facilities_id?.length > 0
+                      : item.label === "Services"
+                        ? filters?.services_id?.length > 0
+                        : item.label === "Courses"
+                          ? filters?.courses_id?.length > 0
+                          : item.label === "Payment Mode"
+                            ? filters?.payment_mode_id?.length > 0
+                            : false
               }
             />
           ))}
 
+          {/* "Clear all" in the filter bar → calls handleReset → hits API */}
           {hasActiveFilters && (
             <>
               <div className="h-6 w-px bg-gray-200" />
@@ -371,8 +402,9 @@ const FilterBar = ({
               </button>
             </span>
           ))}
+          {/* "Clear all" in chips row → local only, no API */}
           <button
-            onClick={handleReset}
+            onClick={handleLocalClearAll}
             className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors ml-1"
           >
             Clear all
