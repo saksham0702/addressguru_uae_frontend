@@ -26,7 +26,7 @@ export const APP_URL = "https:/addressguru.sg/api";
 export const IMG_URL = "https://addressguru.ae/api";
 
 export const COUNTRY_CODES = [
-  { code: "+65", country: "Singapore", flag: "🇸🇬" },
+  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪" },
   { code: "+93", country: "Afghanistan", flag: "🇦🇫" },
   { code: "+355", country: "Albania", flag: "🇦🇱" },
   { code: "+213", country: "Algeria", flag: "🇩🇿" },
@@ -184,6 +184,7 @@ export const COUNTRY_CODES = [
   { code: "+381", country: "Serbia", flag: "🇷🇸" },
   { code: "+248", country: "Seychelles", flag: "🇸🇨" },
   { code: "+232", country: "Sierra Leone", flag: "🇸🇱" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬" },
   { code: "+421", country: "Slovakia", flag: "🇸🇰" },
   { code: "+386", country: "Slovenia", flag: "🇸🇮" },
   { code: "+677", country: "Solomon Islands", flag: "🇸🇧" },
@@ -213,7 +214,6 @@ export const COUNTRY_CODES = [
   { code: "+688", country: "Tuvalu", flag: "🇹🇻" },
   { code: "+256", country: "Uganda", flag: "🇺🇬" },
   { code: "+380", country: "Ukraine", flag: "🇺🇦" },
-  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪" },
   { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
   { code: "+1", country: "United States", flag: "🇺🇸" },
   { code: "+598", country: "Uruguay", flag: "🇺🇾" },

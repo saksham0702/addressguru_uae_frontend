@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ResponseAlert from "@/components/ResponseAlert";
+import SuccessModal from "@/components/Forms/sucesspopup";
 import {
   saveToSession,
   getFromSession,
@@ -18,7 +19,7 @@ import {
 import { get_job_edulvl, get_job_type } from "@/api/postAds";
 import { get_job_details } from "@/api/listings";
 import axios from "axios";
-import { AGE_OPTIONS, API_URL } from "@/services/constants";
+import { AGE_OPTIONS, API_URL, COUNTRY_CODES } from "@/services/constants";
 import Image from "next/image";
 import {
   add_job_listing,
@@ -122,6 +123,7 @@ const JobListing = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [cities, setCities] = useState([]);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   // Dropdown data states
   const [categories, setCategories] = useState([]);
@@ -133,8 +135,19 @@ const JobListing = () => {
   const [nationalityOptions, setNationalityOptions] = useState([]);
   const [languageOptions, setLanguageOptions] = useState([]);
 
+  const [countryCodeOpen, setCountryCodeOpen] = useState(false);
+  const [countryCodeSearch, setCountryCodeSearch] = useState("");
+  const countryCodeRef = useRef(null);
+
+  const filteredCountryCodes = COUNTRY_CODES.filter((item) =>
+    `${item.country} ${item.code}`
+      .toLowerCase()
+      .includes(countryCodeSearch.toLowerCase()),
+  );
+
   const [postJobData, setPostJobData] = useState({
     category_id: "",
+    categorySlug: "",
     sub_category_id: "",
     slug: "",
 
@@ -151,7 +164,7 @@ const JobListing = () => {
     workMode: "",
     experienceLevel: "",
 
-    salaryCurrency: "PKR",
+    salaryCurrency: "AED",
     salaryPeriod: "monthly",
     salaryNegotiable: false,
     salaryHidden: false,
@@ -171,6 +184,7 @@ const JobListing = () => {
     name: "",
     email: "",
     phone: "",
+    countryCode: "+971",
     city: "",
     address: "",
     zipCode: "",
@@ -225,11 +239,11 @@ const JobListing = () => {
       try {
         // Replace these with your actual API calls
         const categoriesData = await get_job_categories();
-        const jobTypesData = await get_job_type();
-        const educationData = await get_job_edulvl();
+        // const jobTypesData = await get_job_type();
+        // const educationData = await get_job_edulvl();
         setCategories(categoriesData);
-        setJobTypes(jobTypesData?.data?.types);
-        setEducationLevels(educationData?.data?.education_level);
+        // setJobTypes(jobTypesData?.data?.types);
+        // setEducationLevels(educationData?.data?.education_level);
         console.log("job category response", categoriesData);
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
@@ -290,10 +304,11 @@ const JobListing = () => {
 
   useEffect(() => {
     const fetchSubCategories = async () => {
-      if (!postJobData.category_id) return;
+      console.log("postJobData", postJobData);
+      if (!postJobData.categorySlug) return;
 
       try {
-        const res = await getSubCategoriesByCategory(postJobData.category_id);
+        const res = await getSubCategoriesByCategory(postJobData.categorySlug);
 
         // adjust depending on API response structure
         const formatted = (res?.data || []).map((sub) => ({
@@ -308,13 +323,15 @@ const JobListing = () => {
     };
 
     fetchSubCategories();
-  }, [postJobData.category_id]);
+  }, [postJobData.categorySlug]);
 
   const getJobDetails = async (jobId) => {
     const res = await get_job_details(jobId);
     console.log("response of edit job", res);
     if (res.category_id) {
-      const subRes = await getSubCategoriesByCategory(res.category_id);
+      // Find the category slug from categories array, or use category_slug from response
+      const catSlug = res.category_slug || categories?.find(c => c._id === res.category_id)?.slug || res.category_id;
+      const subRes = await getSubCategoriesByCategory(catSlug);
 
       const formatted = (subRes?.data || []).map((sub) => ({
         value: sub._id,
@@ -330,6 +347,7 @@ const JobListing = () => {
       ...prev,
       jobType: res.job_type_id || "",
       category_id: res.category_id || "",
+      categorySlug: res.category_slug || categories?.find(c => c._id === res.category_id)?.slug || "",
       sub_category_id: res.sub_category_id || "",
       qualification: res.qualifications || [],
       title: res.title || "",
@@ -351,6 +369,7 @@ const JobListing = () => {
       name: res.company?.contact_person || "",
       email: res.company?.email || "",
       phone: res.company?.phone || "",
+      countryCode: res.company?.country_code || "+971",
       city: res.company?.city || "",
       address: res.company?.address || "",
       zipCode: res.company?.zip || "",
@@ -397,6 +416,16 @@ const JobListing = () => {
   }, [steps]);
 
   // Clear session on page leave
+  // Close country code dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (countryCodeRef.current && !countryCodeRef.current.contains(e.target))
+        setCountryCodeOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       clearSession();
@@ -481,6 +510,9 @@ const JobListing = () => {
       if (!postJobData.category_id) {
         newErrors.category_id = "Job category is required";
       }
+      if (subCategories.length > 0 && !postJobData.sub_category_id) {
+        newErrors.sub_category_id = "Sub category is required";
+      }
       if (!postJobData.jobType) {
         newErrors.jobType = "Job type is required";
       }
@@ -520,9 +552,10 @@ const JobListing = () => {
       }
       if (!postJobData.phone) {
         newErrors.phone = "Phone number is required";
-      } else if (!/^\d{10}$/.test(postJobData.phone)) {
-        newErrors.phone = "Phone number must be 10 digits";
-      }
+      } 
+      // else if (!/^\d{10}$/.test(postJobData.phone)) {
+      //   newErrors.phone = "Phone number must be 10 digits";
+      // }
       if (postJobData.zipCode && postJobData.zipCode !== "") {
         if (!/^\d+$/.test(postJobData.zipCode)) {
           newErrors.zipCode = "Zip Code must be numeric";
@@ -673,6 +706,7 @@ const JobListing = () => {
           name: postJobData.name,
           email: postJobData.email,
           phone: String(postJobData.phone),
+          country_code: postJobData.countryCode,
         };
 
         formData.append("contact", JSON.stringify(contactObj));
@@ -682,7 +716,7 @@ const JobListing = () => {
           description: postJobData.companyDescription,
           website: postJobData.companyWebsite,
           address: postJobData.address,
-          city: postJobData.city,
+          city: postJobData.city || postJobData.city || "",
           zip_code: postJobData.zipCode,
         };
 
@@ -730,15 +764,7 @@ const JobListing = () => {
       if (stepNumber === 2) {
         clearSession();
         setResponse("");
-        setResponse(res?.message || "Job listing posted successfully!");
-
-        // Redirect after successful submission
-        if (res?.job_id) {
-          console.log("jobID", res?.job_id);
-          setTimeout(() => {
-            router.push(`/dashboard`);
-          }, 2000);
-        }
+        setShowSuccessPopup(true);
       } else {
         setActiveStep(stepNumber + 1);
       }
@@ -770,6 +796,7 @@ const JobListing = () => {
   const categoryOptions = (categories || []).map((cat) => ({
     value: cat._id,
     label: cat.name,
+    slug: cat.slug,
   }));
 
   const educationOptions = [
@@ -806,15 +833,20 @@ const JobListing = () => {
       ref: categoryRef,
       options: categoryOptions,
     },
-    {
-      id: 2,
-      name: "Sub Category",
-      key: "sub_category_id",
-      type: "dropdown",
-      placeholder: "Select sub category",
-      ref: subCategoryRef,
-      options: subCategories,
-    },
+    ...(subCategories.length > 0
+      ? [
+          {
+            id: 2,
+            name: "Sub Category",
+            key: "sub_category_id",
+            type: "dropdown",
+            placeholder: "Select sub category",
+            required: true,
+            ref: subCategoryRef,
+            options: subCategories,
+          },
+        ]
+      : []),
     {
       id: 3,
       name: "Job Title",
@@ -1047,7 +1079,7 @@ const JobListing = () => {
       width: true,
       name: "Phone",
       key: "phone",
-      type: "text",
+      type: "phone",
       placeholder: "Enter phone number",
       required: true,
       ref: phoneRef,
@@ -1144,8 +1176,8 @@ const JobListing = () => {
                             options={item.options || []}
                             placeholder={item.placeholder}
                             value={
-                              item.key === "location"
-                                ? postJobData.location || null // ← already full object, use directly
+                              item.key === "location" || item.key === "city"
+                                ? postJobData[item.key] || null
                                 : getSelectedOption(
                                     item.options || [],
                                     postJobData[item.key],
@@ -1158,13 +1190,13 @@ const JobListing = () => {
                                 setPostJobData({
                                   ...postJobData,
                                   category_id: option.value,
+                                  categorySlug: option.slug || "",
                                   sub_category_id: "",
                                 });
-                              } else if (item.key === "location") {
-                                // ← ADD THIS BLOCK
+                              } else if (item.key === "location" || item.key === "city") {
                                 setPostJobData({
                                   ...postJobData,
-                                  location: option, // store full option object, not just option.value
+                                  [item.key]: option,
                                 });
                               } else {
                                 setPostJobData({
@@ -1194,6 +1226,95 @@ const JobListing = () => {
                             required={item.required}
                             {...commonProps}
                           />
+                          {errors[item.key] && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors[item.key]}
+                            </p>
+                          )}
+                        </>
+                      )}
+
+                      {item.type === "phone" && (
+                        <>
+                          <label className="text-gray-500 font-semibold">
+                            {item.name}
+                            {item.required && (
+                              <span className="text-red-600 font-semibold ml-1">
+                                &#42;
+                              </span>
+                            )}
+                          </label>
+                          <div className="flex">
+                            <div
+                              ref={countryCodeRef}
+                              className="relative w-16 border border-gray-300 rounded-l-lg bg-gray-50"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setCountryCodeOpen(!countryCodeOpen)}
+                                className="w-full py-2 text-sm font-medium text-gray-700"
+                              >
+                                {postJobData.countryCode || "+971"}
+                              </button>
+
+                              {countryCodeOpen && (
+                                <div className="absolute z-50 bg-white border outline-none border-gray-200 rounded-lg shadow-md w-64">
+                                  <div className="p-2 border-b outline-none border-gray-200">
+                                    <input
+                                      type="text"
+                                      placeholder="Search country..."
+                                      value={countryCodeSearch}
+                                      onChange={(e) => setCountryCodeSearch(e.target.value)}
+                                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-orange-500"
+                                    />
+                                  </div>
+                                  <div className="max-h-52 overflow-y-auto">
+                                    {filteredCountryCodes.length > 0 ? (
+                                      filteredCountryCodes.map((cc, idx) => (
+                                        <div
+                                          key={idx}
+                                          onClick={() => {
+                                            setPostJobData({
+                                              ...postJobData,
+                                              countryCode: cc.code,
+                                            });
+                                            setCountryCodeOpen(false);
+                                            setCountryCodeSearch("");
+                                          }}
+                                          className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
+                                        >
+                                          <span>{cc.flag}</span>
+                                          <span>{cc.country}</span>
+                                          <span className="ml-auto">{cc.code}</span>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                        No country found
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <input
+                              type="tel"
+                              placeholder={item.placeholder}
+                              value={postJobData[item.key] || ""}
+                              onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, "");
+                                setPostJobData({
+                                  ...postJobData,
+                                  [item.key]: digits,
+                                });
+                                clearError(item.key);
+                              }}
+                              className={`flex-1 border border-l-0 border-gray-300 rounded-r-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none ${
+                                errors[item.key] ? "border-red-500" : ""
+                              }`}
+                            />
+                          </div>
                           {errors[item.key] && (
                             <p className="text-red-500 text-sm mt-1">
                               {errors[item.key]}
@@ -1433,7 +1554,25 @@ const JobListing = () => {
         </div>
       </div>
 
-      <ResponseAlert text={response} onClose={() => setResponse("")} />
+      <SuccessModal
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="Thank You!"
+        message={
+          <>
+            Your job listing has been successfully submitted on{" "}
+            <span className="font-semibold text-gray-800">
+              AddressGuru.ae
+            </span>
+            .
+            <br />
+            Our team will review it shortly. Once approved, your job post will
+            be visible to all users.
+          </>
+        }
+        redirectTo="/dashboard"
+      />
+        <ResponseAlert text={response} onClose={() => setResponse("")} />
     </>
   );
 };
