@@ -4,6 +4,7 @@ import Link from "next/link";
 
 const MyJobListings = ({ data }) => {
   // Helper function to parse JSON strings safely
+  console.log("i am data", data);
   const parseJSON = (jsonString) => {
     try {
       return JSON.parse(jsonString);
@@ -61,7 +62,7 @@ const MyJobListings = ({ data }) => {
 
       {/* Job Cards */}
       <div className="md:p-4 p-2 space-y-4">
-        {data?.map((job) => {
+        {data?.jobs?.map((job) => {
           const skills = parseJSON(job?.skills);
           const roles = parseJSON(job?.roles);
           const statusInfo = getStatusBadge(job?.status, job?.step);

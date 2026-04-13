@@ -52,9 +52,12 @@ const BusinessListingCategories = ({ categories }) => {
   };
 
   // Filter categories based on search query
-  const filteredCategories = categories?.filter((category) =>
-    category?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredCategories = categories
+    ?.slice() // avoid mutating original array
+    ?.sort((a, b) => a.name.localeCompare(b.name))
+    ?.filter((category) =>
+      category?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
 
   // Filter subcategories based on search query
   const filteredSubCategories = subCategories?.filter((subCategory) =>

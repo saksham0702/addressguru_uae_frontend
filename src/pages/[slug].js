@@ -281,9 +281,7 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════
-          FIXED RIGHT ADMIN PANEL  (always visible for admin / preview)
-      ══════════════════════════════════════════════════ */}
+      {/* FIXED RIGHT ADMIN PANEL  (always visible for admin / preview)*/}
       {(isAdmin || preview === "true") && (
         <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9999] flex flex-col items-end gap-2 pr-0 max-md:hidden">
           {/* ── Action icon strip ── */}
@@ -578,7 +576,7 @@ const SeeDetails = ({ initialData }) => {
 
           {/* FULL WIDTH HERO (Desktop + Special Category) */}
           {isSliderFull && !isMobile && (
-            <div className="w-full px-2 md:px-0 mb-4">
+            <div className="w-full mt-1 px-2 md:px-0 mb-4">
               <FullWidthGallery images={data?.images} />
             </div>
           )}

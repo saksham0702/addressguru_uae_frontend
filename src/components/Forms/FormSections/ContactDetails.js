@@ -142,7 +142,7 @@ const ContactDetails = ({
           <div className="flex">
             <div
               ref={countryRef}
-              className="relative w-24 border border-gray-300 rounded-l-lg bg-gray-50"
+              className="relative w-16 border border-gray-300 rounded-l-lg bg-gray-50"
             >
               <button
                 onClick={() => setCountryOpen(!countryOpen)}
@@ -218,7 +218,7 @@ const ContactDetails = ({
           <div className="flex">
             <div
               ref={altCountryRef}
-              className="relative w-24 border border-gray-300 rounded-l-lg bg-gray-50"
+              className="relative w-16 border border-gray-300 rounded-l-lg bg-gray-50"
             >
               <button
                 onClick={() => setAltCountryOpen(!altCountryOpen)}
