@@ -13,6 +13,7 @@ import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
 import axios from "axios";
 import Login from "@/components/UserLogin/Login";
+import InfoListSection from "@/components/BusinessListingComponents/InfoListSection";
 
 const SearchResults = () => {
   const APP_URL = "https://addressguru.ae";
@@ -79,7 +80,7 @@ const SearchResults = () => {
       result = result.filter(
         (item) =>
           item.businessName?.toLowerCase().includes(q) ||
-          item.name?.toLowerCase().includes(q)
+          item.name?.toLowerCase().includes(q),
       );
     }
 
@@ -89,35 +90,35 @@ const SearchResults = () => {
 
     if (f.facilities_id?.length > 0) {
       result = result.filter((item) =>
-        f.facilities_id.some((id) => item.facilities_id?.includes(id))
+        f.facilities_id.some((id) => item.facilities_id?.includes(id)),
       );
     }
 
     if (f.services_id?.length > 0) {
       result = result.filter((item) =>
-        f.services_id.some((id) => item.services_id?.includes(id))
+        f.services_id.some((id) => item.services_id?.includes(id)),
       );
     }
 
     if (f.courses_id?.length > 0) {
       result = result.filter((item) =>
-        f.courses_id.some((id) => item.courses_id?.includes(id))
+        f.courses_id.some((id) => item.courses_id?.includes(id)),
       );
     }
 
     if (f.payment_mode_id?.length > 0) {
       result = result.filter((item) =>
-        f.payment_mode_id.some((id) => item.payment_mode_id?.includes(id))
+        f.payment_mode_id.some((id) => item.payment_mode_id?.includes(id)),
       );
     }
 
     if (f.sort_by === "newest") {
       result = result.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => new Date(b.created_at) - new Date(a.created_at),
       );
     } else if (f.sort_by === "oldest") {
       result = result.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
       );
     }
 
@@ -197,7 +198,7 @@ const SearchResults = () => {
     const fetchCategoryFeatures = async () => {
       try {
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/features/${slug}`
+          `https://addressguru.ae/api/business-listing/features/${slug}`,
         );
         const data = res?.data?.data;
         setDynamicFilters({
@@ -258,7 +259,7 @@ const SearchResults = () => {
 
         const query = buildQueryParams(1);
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
         );
 
         const data = res?.data?.data;
@@ -287,7 +288,7 @@ const SearchResults = () => {
       setIsLoadingMore(true);
       const query = buildQueryParams(pageData.nextPage);
       const res = await axios.get(
-        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`
+        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
       );
       const data = res?.data?.data;
       if (data?.listings?.length) {
@@ -573,6 +574,15 @@ const SearchResults = () => {
               <RightBusinessCard name={canonicalSlug} />
             </div>
           </div>
+          <InfoListSection
+            title={`Top ${canonicalSlug} in ${canonicalCity}`}
+            items={listings?.map((item) => ({
+              title: item?.businessName || item?.name,
+              description:
+                item?.description || item?.about || "No description available.",
+              address: item?.address || item?.location || canonicalCity,
+            }))}
+          />
         </div>
       </div>
 

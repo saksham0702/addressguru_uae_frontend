@@ -360,17 +360,33 @@ const FilterBar = ({
           ))}
 
           {/* "Clear all" in the filter bar → calls handleReset → hits API */}
-          {hasActiveFilters && (
-            <>
-              <div className="h-6 w-px bg-gray-200" />
-              <button
-                className="text-sm text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2.5 whitespace-nowrap border border-red-200 hover:border-red-300 rounded-md font-semibold transition-colors"
-                onClick={handleReset}
-              >
-                Clear all
-              </button>
-            </>
-          )}
+        {hasActiveFilters && (
+  <>
+    <div className="h-6 w-px bg-gray-200" />
+    <button
+      className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2.5 whitespace-nowrap border border-red-200 hover:border-red-300 rounded-md font-semibold transition-colors"
+      onClick={handleReset}
+    >
+      {/* Dustbin Icon */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0h8l-1 12a2 2 0 01-2 2H9a2 2 0 01-2-2L6 7z"
+        />
+      </svg>
+
+      Clear all
+    </button>
+  </>
+)}
         </div>
       </div>
 

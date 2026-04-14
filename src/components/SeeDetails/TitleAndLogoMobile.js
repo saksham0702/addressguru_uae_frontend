@@ -26,7 +26,10 @@ const TitleAndLogoMobile = ({
         {data?.businessName}
       </h3>
       {/* address  */}
-      <div className=" text-black font-[500] flex items-center  w-full gap-1">
+      <div
+        title={data?.businessAddress || data?.address}
+        className=" text-gray-700  font-[500] flex items-center  w-full gap-1"
+      >
         <svg
           width="13"
           height="18"
@@ -39,7 +42,7 @@ const TitleAndLogoMobile = ({
             fill="#8C8C8C"
           />
         </svg>
-        <span className="truncate text-[13px] mr-2  sm:w-44">
+        <span className="truncate text-[11px] mr-2  sm:w-44">
           {data?.businessAddress || data?.address}
         </span>
 
@@ -353,23 +356,29 @@ const TitleAndLogoMobile = ({
             target="_blank"
             rel="noopener noreferrer"
             className="border border-[#EEEEEE] text-[#838383] px-3 py-1 rounded flex items-center gap-1"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
           >
-            <circle cx="12" cy="12" r="9" stroke="#838383" strokeWidth="1.8" />
-            <path
-              d="M12 3c-2 3-3 5.5-3 9s1 6 3 9M12 3c2 3 3 5.5 3 9s-1 6-3 9M3 12h18"
-              stroke="#838383"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            />
-          </svg>
-        </a>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="#838383"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M12 3c-2 3-3 5.5-3 9s1 6 3 9M12 3c2 3 3 5.5 3 9s-1 6-3 9M3 12h18"
+                stroke="#838383"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </a>
         )}
       </div>
       {reviewPop && (

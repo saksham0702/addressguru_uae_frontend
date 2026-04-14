@@ -116,7 +116,7 @@ const MobileFilterDrawer = ({
               ag_verified: !prev.ag_verified,
             }));
           }}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm ${
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-medium text-xs ${
             isActive
               ? "border-orange-500 bg-orange-50 text-orange-600"
               : "border-gray-200 bg-white text-gray-700"
@@ -164,7 +164,7 @@ const MobileFilterDrawer = ({
               }
             >
               <span
-                className={`font-semibold text-sm ${
+                className={`font-medium text-xs ${
                   tempFilters.sort_by === opt.id
                     ? "text-orange-600"
                     : "text-gray-700"
@@ -206,7 +206,7 @@ const MobileFilterDrawer = ({
               onClick={() => handleTempToggleMulti(key, opt.id)}
             >
               <span
-                className={`font-semibold text-sm ${
+                className={`font-medium text-xs ${
                   selected.includes(opt.id)
                     ? "text-orange-600"
                     : "text-gray-700"
@@ -250,7 +250,7 @@ const MobileFilterDrawer = ({
                 handleFilterSelect(item.label, opt);
                 setIsOpen(false);
               }}
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-semibold text-sm cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all"
+              className="px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-medium text-xs cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all"
             >
               {opt}
             </div>
@@ -267,7 +267,7 @@ const MobileFilterDrawer = ({
       {/* Mobile Filter Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="relative flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+        className="relative flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         {/* Filter icon SVG */}
         <svg
@@ -341,7 +341,7 @@ const MobileFilterDrawer = ({
                   handleReset();
                   setIsOpen(false);
                 }}
-                className="text-sm font-semibold text-orange-500"
+                className="text-xs font-medium text-orange-500"
               >
                 Clear all
               </button>
@@ -387,7 +387,7 @@ const MobileFilterDrawer = ({
               value={searchInput}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search business..."
-              className="w-full pl-10 pr-8 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              className="w-full pl-10 pr-8 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-xs"
             />
             {searchInput.length > 0 && (
               <button
@@ -436,7 +436,7 @@ const MobileFilterDrawer = ({
                     setOpenAccordion(isAccordionOpen ? null : index)
                   }
                 >
-                  <span className="flex items-center gap-2 font-semibold text-sm text-gray-800">
+                  <span className="flex items-center gap-2 font-medium text-xs text-gray-800">
                     {item.icon && (
                       <span className="text-orange-500">{item.icon}</span>
                     )}
@@ -481,7 +481,7 @@ const MobileFilterDrawer = ({
         <div className="px-4 py-4 border-t border-gray-100 bg-white">
           <button
             onClick={handleApplyAll}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors text-sm"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors text-xs"
           >
             Apply Filters {activeCount > 0 && `(${activeCount} active)`}
           </button>

@@ -674,7 +674,7 @@ const SeeDetails = ({ initialData }) => {
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessAddress} provides the following facilities:
+                    {data?.businessName} provides the following facilities:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.facilities?.map((facility, index) => (
@@ -701,7 +701,7 @@ const SeeDetails = ({ initialData }) => {
                           </svg>
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
-                          {facility.name}
+                          {facility?.name}
                         </span>
                       </div>
                     ))}
@@ -719,7 +719,7 @@ const SeeDetails = ({ initialData }) => {
                     <span className="h-[1px] w-full bg-gray-200"></span>
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessAddress} provides the following services:
+                    {data?.businessName} provides the following services:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data?.services?.map((service, index) => (
@@ -805,6 +805,7 @@ const SeeDetails = ({ initialData }) => {
                       <span>
                         {" Their facilities include: "}
                         {data?.facilities?.name?.join(", ")}.
+                        
                       </span>
                     )}
                   </p>

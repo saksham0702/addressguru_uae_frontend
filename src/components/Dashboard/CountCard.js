@@ -5,7 +5,7 @@ const CountCard = ({ data }) => {
   return (
     <div className="bg-white rounded-l-full rounded-r-xs flex md:gap-7 max-md:gap-1 max-md:p-2 px-4  py-4 2xl:min-w-56  items-center justify-between">
       <Image
-        src={`/assets/Dashboard${data.image}.png`}
+        src={`/assets/dashboard${data.image}.png`}
         alt={data?.title}
         width={500}
         height={500}
