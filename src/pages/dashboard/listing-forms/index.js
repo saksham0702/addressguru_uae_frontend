@@ -1,5 +1,4 @@
 // ========== ListingForms.jsx (COMPLETE WITH SESSION STORAGE) ==========
-import { get_payment_mode, get_service_facility } from "@/api/forms";
 import { get_plans } from "@/api/plans";
 import BusinessInfo from "@/components/Forms/FormSections/BusinessInfo";
 import ContactDetails from "@/components/Forms/FormSections/ContactDetails";
@@ -495,14 +494,7 @@ const ListingForms = () => {
     }
   }, [categoryId]);
 
-  //get payment methods
-  // useEffect(() => {
-  //   const getPaymentMode = async () => {
-  //     const res = await get_payment_mode();
-  //     setPayment(res);
-  //   };
-  //   getPaymentMode();
-  // }, []);
+
 
   // Scroll to first error field
   const scrollToError = (errorKey) => {
@@ -663,8 +655,8 @@ const ListingForms = () => {
         hours: "schedule",
       },
       2: {
-        website_link: "websiteLink",
-        video_link: "videoLink",
+        websiteLink: "websiteLink",
+        videoLink: "videoLink",
       },
       3: {
         name: "contactName",
@@ -748,8 +740,8 @@ const ListingForms = () => {
         break;
 
       case 2:
-        formData.append("website_link", social.websiteLink || "");
-        formData.append("video_link", social.videoLink || "");
+        formData.append("websiteLink", social.websiteLink || "");
+        formData.append("videoLink", social.videoLink || "");
         formData.append("facebook", social.facebook || "");
         formData.append("instagram", social.instagram || "");
         formData.append("twitter", social.twitter || "");
