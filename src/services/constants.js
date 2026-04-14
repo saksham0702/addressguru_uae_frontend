@@ -18,9 +18,8 @@ export const API_URL = "https://addressguru.ae/api";
 // console.log("API_URL ::", API_URL);
 
 // mine
-export const GEMINI_KEY = "AIzaSyDYRKcWbV8oj1nfR_Z_PpJnCwKPnkg4rMc";
+export const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 // sir api
-// export const GEMINI_KEY = "AIzaSyDWHmk3K0KpZ0-qA7Z8Ea2FmTDorJnGJes"
 // export const API_URL = "http://127.0.0.1:8000/api/"
 export const APP_URL = "https:/addressguru.sg/api";
 export const IMG_URL = "https://addressguru.ae/api";

@@ -704,7 +704,7 @@ const BusinessListings = () => {
                           </div>
                         )}
 
-                        <div className="flex items-center gap-2 text-[12.5px] font-medium text-gray-800">
+                        <div className="flex items-center gap-2 text-[10.5px]  text-gray-800">
                           <CalIcon className="w-4 h-4 text-gray-500" />
 
                           <span className="tracking-[0.2px]">

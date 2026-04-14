@@ -14,6 +14,7 @@ const SearchEngine = ({ seo, setSeo, business, error, clearError, refs }) => {
   useEffect(() => {
     const fetchAvailableModels = async () => {
       setCheckingModels(true);
+      console.log("geminikey",GEMINI_KEY)
       try {
         if (!GEMINI_KEY) {
           console.error("❌ GEMINI_KEY is not set");
