@@ -89,18 +89,16 @@ const Dashboard = () => {
   }, [user]);
 
   if (loading || !user) return null;
-
-
   const countData = [
-    { image: "/count-listing", title: "YOUR LISTING", count: data?.listingCounts?.business },
-    { image: "/count-products", title: "PRODUCTS", count: data?.listingCounts?.products },
-    { image: "/count-jobs", title: "JOBS", count: data?.listingCounts?.jobs },
+    { image: "/listing", title: "YOUR LISTING", count: data?.listingCounts?.business },
+    { image: "/products", title: "PRODUCTS", count: data?.listingCounts?.products },
+    { image: "/jobs", title: "JOBS", count: data?.listingCounts?.jobs },
     {
-      image: "/count-properties",
+      image: "/properties",
       title: "PROPERTIES",
       count: data?.listingCounts?.properties,
     },
-    { image: "/count-reviews", title: "REVIEWS", count: data?.overview?.totalReviews },
+    { image: "/reviews", title: "REVIEWS", count: data?.overview?.totalReviews },
   ];
 
   const renderSection = () => {
@@ -127,7 +125,7 @@ const Dashboard = () => {
               </div>
               <div className="max-h-45 md:p-3 w-[40%] max-md:min-w-[40%] relative">
                 <Image
-                  src="/assets/dashboard/illustrator1.png"
+                  src="/assets/dashboard/illustrator.png"
                   alt="illustrator"
                   height={500}
                   width={500}
