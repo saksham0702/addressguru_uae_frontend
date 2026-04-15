@@ -313,11 +313,11 @@ const ListingForms = () => {
   const getPlans = async () => {
     try {
       const res = await get_plans();
-      console.log("plan response", res);
+      // console.log("plan response", res);
 
       setPlans(res?.data?.plans);
     } catch (error) {
-      console.log("error in frontend", error);
+      // console.log("error in frontend", error);
     }
   };
 
@@ -378,7 +378,6 @@ const ListingForms = () => {
 
   useEffect(() => {
     if (existingData && name && !isInitialized) {
-      console.log("Mapping existingData:", existingData);
 
       // ✅ Business Info
       setBusiness({
@@ -405,8 +404,8 @@ const ListingForms = () => {
 
       // ✅ Social Links
       setSocial({
-        websiteLink: existingData?.socialLinks?.website || "",
-        videoLink: existingData?.socialLinks?.video || "",
+        websiteLink: existingData?.websiteLink || "",
+        videoLink: existingData?.videoLink || "",
         facebook: existingData?.socialLinks?.facebook || "",
         instagram: existingData?.socialLinks?.instagram || "",
         twitter: existingData?.socialLinks?.twitter || "",
@@ -469,8 +468,6 @@ const ListingForms = () => {
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
       const res = await getBusinessFeatures(categoryId);
-      console.log("res :", res);
-
       const facilities = res?.features?.facilities || [];
       const services = res?.features?.services || [];
       const courses = res?.features?.courses || [];
@@ -842,7 +839,7 @@ const ListingForms = () => {
 
       if (stepNumber === 6) {
         clearSession();
-        console.log("response from 6 ", response);
+        // console.log("response from 6 ", response);
         setShowSuccessPopup(true);
         // if (response?.status) {
         //   router.push({
@@ -854,7 +851,7 @@ const ListingForms = () => {
       }
 
       setIsSubmitting(false);
-      console.log("main response", response);
+      // console.log("main response", response);
       return true;
     } catch (error) {
       console.error(`Error submitting step ${stepNumber}:`, error);

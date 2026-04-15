@@ -36,7 +36,6 @@ const Dashboard = () => {
   const [myMarketplace, setMyMarketplace] = useState(null);
   const [postAdd, setPostAdd] = useState(false);
 
-
   const token = localStorage.getItem("authToken");
 
   const getListingStats = async () => {
@@ -44,21 +43,15 @@ const Dashboard = () => {
     if (res?.status) {
       setData(res?.data);
     }
-  }
+  };
   useEffect(() => {
     if (loading) return;
     if (!user && !token) {
       router.replace("/");
     }
     getListingStats();
-  }, [user, loading, router]);
+  }, [user, loading, router, token]);
 
-  // const getDashboardData = async () => {
-  //   const res = await get_dashboard_data();
-  //   if (res?.success) {
-  //     setData(res?.data);
-  //   }
-  // };
   const getUserListings = async (type) => {
     const listres = await get_user_listings();
     const jobres = await get_job_listings();
@@ -90,15 +83,36 @@ const Dashboard = () => {
 
   if (loading || !user) return null;
   const countData = [
-    { image: "/listing", title: "YOUR LISTING", count: data?.listingCounts?.business },
-    { image: "/products", title: "PRODUCTS", count: data?.listingCounts?.products },
-    { image: "/jobs", title: "JOBS", count: data?.listingCounts?.jobs },
     {
+      key: "my-listings",
+      image: "/listing",
+      title: "YOUR LISTING",
+      count: data?.listingCounts?.business,
+    },
+    {
+      key: "my-marketplace",
+      image: "/products",
+      title: "PRODUCTS",
+      count: data?.listingCounts?.products,
+    },
+    {
+      key: "my-jobs",
+      image: "/jobs",
+      title: "JOBS",
+      count: data?.listingCounts?.jobs,
+    },
+    {
+      key: "my-property",
       image: "/properties",
       title: "PROPERTIES",
       count: data?.listingCounts?.properties,
     },
-    { image: "/reviews", title: "REVIEWS", count: data?.overview?.totalReviews },
+    {
+      key: "dashboard",
+      image: "/reviews",
+      title: "REVIEWS",
+      count: data?.overview?.totalReviews,
+    },
   ];
 
   const renderSection = () => {
@@ -136,7 +150,12 @@ const Dashboard = () => {
 
             <div className="flex gap-2 max-md:flex-wrap my-5">
               {countData.map((item, index) => (
-                <CountCard key={index} data={item} />
+                <CountCard
+                  key={index}
+                  data={item}
+                  onClick={() => setActiveTab(item.key)}
+                  activeTab={activeTab}
+                />
               ))}
             </div>
 
@@ -217,7 +236,6 @@ const Dashboard = () => {
                 className="h-full"
               />
             </div>
-
           </div>
         </section>
       </div>
