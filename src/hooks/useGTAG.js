@@ -8,6 +8,8 @@
  *   trackEvent("listing", "enquiry_open", "Business Name");
  */
 
+import { GOOGLE_MEASUREMENT_ID } from "../services/constants";
+
 export function useGTAG() {
   /**
    * Fire a custom GA4 event.
@@ -35,7 +37,7 @@ export function useGTAG() {
     if (typeof window === "undefined" || typeof window.gtag !== "function") {
       return;
     }
-    window.gtag("config", process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXXXXXX", {
+    window.gtag("config", GOOGLE_MEASUREMENT_ID || "G-XXXXXXXXXX", {
       page_path: url,
     });
   };
