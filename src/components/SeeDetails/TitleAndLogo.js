@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import CustomButton from "@/components/Buttons/CustomButton";
-import { FaUser } from "react-icons/fa";
+import { FaEye, FaUser } from "react-icons/fa";
 import StarRatingBadge, {
   getStarRating,
 } from "../BusinessListingComponents/additional-field/hotel";
@@ -180,7 +180,7 @@ const TitleAndLogo = ({
             textColor="#FF6E04"
             toggledTextColor="#fff"
             width="150px"
-            onClick={() => handleClick(data?._id, "phone")}
+            onClick={() => handleClick(data?.slug, "phone")}
           />
 
           {/* enquire now */}
@@ -329,6 +329,10 @@ const TitleAndLogo = ({
           />
 
           {/* views */}
+          <div className="flex gap-1 items-center text-gray-600 text-sm">
+            <FaEye />
+            <p>{data?.views}</p>
+          </div>
 
           {/* <div className="flex gap-1 items-center text-gray-600 text-sm">
             <FaUser />

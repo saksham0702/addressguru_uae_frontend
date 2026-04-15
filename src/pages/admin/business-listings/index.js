@@ -54,11 +54,11 @@ function Toast({ toast }) {
   if (!toast) return null;
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border
-      ${toast.type === "error" ? "bg-red-50 border-red-200 text-red-600" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}
-      style={{ animation: "slideUp 0.2s ease" }}
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border
+      ${toast.type === "error" ? "border-red-300 text-red-600" : "border-emerald-300 text-emerald-700"}`}
+      style={{ animation: "slideUp 0.2s ease", background: "transparent" }}
     >
-      <span className="text-base">{toast.type === "error" ? "✕" : "✓"}</span>
+      <span className="text-sm">{toast.type === "error" ? "✕" : "✓"}</span>
       {toast.msg}
     </div>
   );
@@ -235,6 +235,7 @@ const BusinessListings = () => {
   const [statusFilter, setStatusFilter] = useState("pending");
   const [rejectModalData, setRejectModalData] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [totallistings, settotallistings] = useState(0);
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
@@ -560,6 +561,7 @@ const BusinessListings = () => {
                   </button>
                 </th>
                 {/* <TH_Cell className="w-14">Sr No.</TH_Cell> */}
+                <TH_Cell className="w-20">Image</TH_Cell>
                 <TH_Cell highlight className="min-w-[228px]">
                   Client Info
                 </TH_Cell>
@@ -575,7 +577,7 @@ const BusinessListings = () => {
               {paginated.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center py-20 text-slate-300 text-sm font-medium"
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -619,36 +621,42 @@ const BusinessListings = () => {
                       </button>
                     </td>
 
+                    {/* Image */}
+                    <TD vAlign="top" className="w-20">
+                      <div className="w-14 h-14 flex-shrink-0">
+                        <img
+                          className="w-14 h-14 rounded-xl object-contain border border-slate-200 bg-white shadow-sm"
+                          src={`https://addressguru.ae/api/${listing.logo}`}
+                          alt={listing.businessName}
+                        />
+                      </div>
+                    </TD>
+
                     {/* Sr No */}
                     {/* <TD vAlign="top" className="w-14">
                      
                     </TD> */}
 
-                    <TD vAlign="top" className="min-w-[300px]">
+                    <TD vAlign="top" className="min-w-[250px]">
                       {/* TOP ROW */}
                       <div className="flex gap-3">
-                        {/* IMAGE */}
-                        <div className="w-14 h-10 flex-shrink-0">
-                          <img
-                            className="w-14 h-14 rounded-xl object-contain border border-slate-200 bg-white shadow-sm"
-                            src={`https://addressguru.ae/api/${listing.logo}`}
-                            alt={listing.businessName}
-                          />
-                        </div>
+                    
 
                         {/* TITLE ONLY */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1  min-w-0">
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="text-sm font-bold text-gray-900">
-                              {String(
+                              ({String(
                                 (page - 1) * showEntries + idx + 1,
-                              ).padStart(2, "0")}
-                              )
+                              ).padStart(2, "0")})
+                              
                             </span>
 
                             <a
-                              className="font-semibold text-blue-600 text-md truncate"
+                              className="font-semibold max-w-50 line-clamp-2 text-blue-600 text-md truncate"
                               href={`/${listing?.slug}?preview=true`}
+                              target="_blank"
+                              rel="noopener noreferrer"
                             >
                               {listing.businessName}
                             </a>
@@ -663,6 +671,7 @@ const BusinessListings = () => {
 
                             <Link
                               className="text-blue-500 font-semibold hover:underline"
+                            
                               href={`/dashboard/listing-forms?category=${
                                 listing?.category?._id
                               }&categoryName=${encodeURIComponent(
@@ -695,15 +704,14 @@ const BusinessListings = () => {
                           </div>
                         )}
 
-                        <div className="flex items-center gap-2 text-[12.5px] font-medium text-gray-800">
+                        <div className="flex items-center gap-2 text-[10.5px]  text-gray-800">
                           <CalIcon className="w-4 h-4 text-gray-500" />
 
                           <span className="tracking-[0.2px]">
                             {fmtDate(listing.createdAt)}{" "}
                             {fmtTime(listing.createdAt)}
                           </span>
-
-                          <span className="ml-.5 px-2 py-[2px] rounded-md text-[10.5px] font-semibold bg-slate-700 text-white">
+                          <span className="ml-.5 py-[2px] rounded-md text-[10.5px] font-semibold text-gray-600">
                             {daysAgo(listing.createdAt)}
                           </span>
                         </div>
@@ -713,15 +721,37 @@ const BusinessListings = () => {
                     <TD vAlign="top" className="w-32">
                       <div className="mt-0.5">
                         {listing?.plan?.name === "Free Plan" ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-600">
-                            Unpaid
-                          </span>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-600">
+                              Unpaid
+                            </span>
+                            <button
+                              className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+                              onClick={() => {
+                                /* TODO: open upgrade popup */
+                              }}
+                            >
+                              ↑ Upgrade
+                            </button>
+                          </div>
                         ) : (
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold  ${listing?.plan?.name ? "text-emerald-600 bg-emerald-100 " : "bg-red-100 text-red-600"}`}
-                          >
-                            {listing?.plan?.name || "Unpaid"}
-                          </span>
+                          <div className="flex flex-col gap-1.5">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold  ${listing?.plan?.name ? "text-emerald-600 bg-emerald-100 " : "bg-red-100 text-red-600"}`}
+                            >
+                              {listing?.plan?.name || "Unpaid"}
+                            </span>
+                            {!listing?.plan?.name && (
+                              <button
+                                className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+                                onClick={() => {
+                                  /* TODO: open upgrade popup */
+                                }}
+                              >
+                                ↑ Upgrade
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </TD>
@@ -838,7 +868,7 @@ const BusinessListings = () => {
                             {/* APPROVE */}
                             <button
                               onClick={() =>
-                                handleApproveReject(listing, "approved")
+                                setConfirmAction(listing)
                               }
                               disabled={loadingId === listing._id}
                               className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
@@ -925,7 +955,7 @@ const BusinessListings = () => {
                         {listing.status === "rejected" && (
                           <button
                             onClick={() =>
-                              handleApproveReject(listing, "approved")
+                              setConfirmAction(listing)
                             }
                             disabled={loadingId === listing._id}
                             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
@@ -1013,6 +1043,74 @@ const BusinessListings = () => {
           </button>
         </div>
       </div>
+
+      {/* ── CONFIRM APPROVE MODAL ── */}
+      {confirmAction && (
+        <div
+          className="fixed inset-0 z-[10001] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={() => setConfirmAction(null)}
+        >
+          <div
+            className="bg-white rounded-xl border border-gray-200 p-6 w-80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M2 8L6 12L14 4"
+                  stroke="#16a34a"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h3 className="text-[15px] font-semibold text-gray-900 mb-1">
+              Approve this listing?
+            </h3>
+            <p className="text-[13px] text-gray-500 mb-5">
+              This will make the listing live and visible to the public.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="px-4 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleApproveReject(confirmAction, "approved");
+                  setConfirmAction(null);
+                }}
+                disabled={loadingId === confirmAction?._id}
+                className="px-4 py-1.5 text-sm rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition flex items-center gap-1.5"
+              >
+                {loadingId === confirmAction?._id && (
+                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-25"
+                    />
+                    <path
+                      d="M22 12a10 10 0 00-10-10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-75"
+                    />
+                  </svg>
+                )}
+                Yes, approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── MODALS ── */}
       {followUpModal && (

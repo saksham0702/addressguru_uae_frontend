@@ -40,14 +40,14 @@ const QuickInformation = ({
       </div>
 
       {/* Info Body */}
-      <div className="bg-[#EEEEEE] p-4 text-sm space-y-2 border-b">
+      <div className="bg-[#EEEEEE] p-4 text-sm space-y-1 border-b">
 
         {/* Category */}
         {categoryName && (
           <p className="flex items-center gap-2">
             <CategoryIcon />
-            <span className="font-medium text-black">Category:</span>
-            <span className="font-bold text-orange-600">{categoryName}</span>
+            <span className="font-semibold text-[16px] text-black">Category:</span>
+            <span className="font-semibold text-[16px] text-orange-600">{categoryName}</span>
           </p>
         )}
 
@@ -55,8 +55,8 @@ const QuickInformation = ({
         {price?.value?.amount && (
           <p className="flex items-center gap-2">
             <PriceIcon />
-            <span className="font-medium text-black">Starting Price:</span>
-            <span className="font-medium">
+            <span className="font-semibold text-[16px] text-black">Starting Price:</span>
+            <span className="font-semibold text-[16px]">
               {price.value.currency} {price.value.amount}
             </span>
           </p>

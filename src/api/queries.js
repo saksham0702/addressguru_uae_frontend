@@ -130,7 +130,7 @@ export const get_view = async (type, id, viewType, userIP) => {
 export const send_listings_in_mail = async (payload) => {
   console.log("payload", payload);
   try {
-    const response = await axios.post(`${API_URL}/lead/send`, payload, {
+    const response = await axios.post(`https://addressguru.ae/api/business-listing/send-digest`, payload, {
       headers: {
         "Content-Type": "application/json",
       },

@@ -6,11 +6,18 @@ const FilterBar = ({
   filters,
   hasActiveFilters,
   onFilterChange,
+  onFilterRemove, // NEW: called for removals — local filter only, no API
   onSearchChange,
   searchInput,
   dynamicFilters,
   handleReset,
 }) => {
+  // Sorts any array of { id, name } objects alphabetically by name
+  const sortByName = (arr) =>
+    [...arr].sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
   const filterItems = [
     {
       label: "Sort by",
@@ -22,7 +29,7 @@ const FilterBar = ({
           {
             label: "Facilities",
             isMultiple: true,
-            multiOptions: dynamicFilters.facilities.map((f) => ({
+            multiOptions: sortByName(dynamicFilters.facilities).map((f) => ({
               id: f.id,
               label: f.name,
               value: f.id,
@@ -35,7 +42,7 @@ const FilterBar = ({
           {
             label: "Services",
             isMultiple: true,
-            multiOptions: dynamicFilters.services.map((s) => ({
+            multiOptions: sortByName(dynamicFilters.services).map((s) => ({
               id: s.id,
               label: s.name,
               value: s.id,
@@ -48,7 +55,7 @@ const FilterBar = ({
           {
             label: "Courses",
             isMultiple: true,
-            multiOptions: dynamicFilters.courses.map((c) => ({
+            multiOptions: sortByName(dynamicFilters.courses).map((c) => ({
               id: c.id,
               label: c.name,
               value: c.id,
@@ -61,7 +68,7 @@ const FilterBar = ({
           {
             label: "Payment Mode",
             isMultiple: true,
-            multiOptions: dynamicFilters.paymentModes.map((p) => ({
+            multiOptions: sortByName(dynamicFilters.paymentModes).map((p) => ({
               id: p.id,
               label: p.name,
               value: p.id,
@@ -92,10 +99,11 @@ const FilterBar = ({
   const [openIndex, setOpenIndex] = useState(null);
   const containerRef = useRef(null);
 
+  // handleFilterSelect is called by FilterItem — only on APPLY actions → triggers API
   const handleFilterSelect = (label, value = null) => {
     switch (label) {
       case "Sort by":
-        onFilterChange({ sort_by: value?.toLowerCase() });
+        onFilterChange({ sort_by: value?.toLowerCase() || null });
         break;
       case "Facilities":
         onFilterChange({ facilities_id: value?.map((f) => f?.id) || [] });
@@ -129,23 +137,124 @@ const FilterBar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  return (
-    <>
-      <div className="flex items-center max-md:bg-gray-100 max-md:py-1 md:w-[920px] px-2 py-1 max-md:w-[90vh] max-md:max-w-[350px] max-md:ml-2 max-md:my-2 rounded-lg">
-        {/* Filter icon */}
-        {/* <svg className="max-md:hidden border border-gray-300" width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="35" height="35" rx="6" fill="white"/>
-          <path d="M28.5501 27.8051C28.0174 27.8051 27.4846 27.8119 26.9525 27.801C26.7738 27.7975 26.6879 27.8498 26.6136 28.0223C26.0341 29.3628 24.6482 30.1479 23.1929 29.9767C21.785 29.811 20.6116 28.7084 20.3497 27.3046C20.041 25.6479 21.0302 24.0358 22.6615 23.5381C24.2351 23.0583 25.9537 23.8509 26.6109 25.375C26.6899 25.5585 26.78 25.6066 26.9683 25.6046C28.0504 25.5956 29.1331 25.595 30.2151 25.6032C30.7775 25.6073 31.2078 25.9978 31.2937 26.5546C31.3714 27.0571 31.0717 27.5645 30.576 27.7281C30.409 27.7831 30.2227 27.7989 30.0453 27.8023C29.5463 27.8113 29.0479 27.8051 28.5501 27.8051Z" fill="#5B5B5B"/>
-          <path d="M9.81472 20.0933C9.29089 20.0933 8.76638 20.0981 8.24255 20.0919C7.58054 20.0837 7.09177 19.6066 7.10071 18.9858C7.10896 18.3713 7.58879 17.9072 8.23911 17.9031C9.30464 17.8969 10.3702 17.8969 11.435 17.9052C11.6227 17.9065 11.7162 17.8584 11.7959 17.6742C12.4139 16.2471 13.9572 15.4503 15.471 15.7604C16.9971 16.0725 18.108 17.4267 18.1156 18.9824C18.1225 20.5401 17.0397 21.8827 15.4992 22.2257C14.004 22.5591 12.4387 21.7693 11.809 20.3463C11.7217 20.149 11.6234 20.0823 11.413 20.0885C10.8809 20.1036 10.3475 20.094 9.81472 20.0933Z" fill="#5B5B5B"/>
-          <path d="M24.7116 11.2777C24.7281 9.44431 26.1992 7.98487 28.0175 7.99999C29.8591 8.01512 31.3323 9.50343 31.3082 11.3258C31.2842 13.1448 29.7924 14.6132 27.9817 14.5994C26.1669 14.5857 24.6951 13.0905 24.7116 11.2777Z" fill="#5B5B5B"/>
-          <path d="M14.7999 12.3954C12.6187 12.3954 10.4367 12.3974 8.25547 12.394C7.48966 12.3933 6.97408 11.7636 7.13563 11.0425C7.23394 10.6018 7.59966 10.2726 8.07261 10.2059C8.16542 10.1928 8.26097 10.1914 8.35515 10.1914C12.6578 10.1907 16.9605 10.1907 21.2632 10.1914C21.8599 10.1914 22.2745 10.4527 22.4422 10.927C22.6959 11.6474 22.1762 12.3857 21.3966 12.3933C20.4349 12.4022 19.4731 12.3961 18.5107 12.3961C17.2733 12.3954 16.0366 12.3954 14.7999 12.3954Z" fill="#5B5B5B"/>
-          <path d="M12.6069 27.805C11.1722 27.805 9.73747 27.8071 8.30209 27.8043C7.66346 27.803 7.22075 27.4496 7.12176 26.8756C7.01245 26.2425 7.48335 25.6458 8.12886 25.6038C8.25741 25.5956 8.38665 25.6004 8.5152 25.6004C11.3158 25.6004 14.1172 25.5997 16.9178 25.6011C17.5062 25.6011 17.9503 25.9256 18.0699 26.4363C18.2404 27.1629 17.7214 27.7988 16.937 27.8036C15.7684 27.8112 14.6004 27.8057 13.4318 27.8057C13.1568 27.805 12.8818 27.805 12.6069 27.805Z" fill="#5B5B5B"/>
-          <path d="M25.8319 17.9018C27.2837 17.9018 28.7356 17.8956 30.1875 17.9046C30.9375 17.9094 31.4373 18.5473 31.2723 19.2595C31.1671 19.7119 30.7677 20.0535 30.3016 20.0872C30.2329 20.092 30.1641 20.0934 30.0954 20.0934C27.2342 20.0934 24.3738 20.0941 21.5127 20.0934C20.8699 20.0934 20.4368 19.7655 20.3296 19.2073C20.2017 18.5446 20.6726 17.9286 21.3477 17.9087C21.9918 17.8901 22.6359 17.9018 23.2808 17.9018C24.1311 17.9011 24.9815 17.9018 25.8319 17.9018Z" fill="#5B5B5B"/>
-        </svg> */}
+  // ── Build active chips for horizontal display ──
+  const activeChips = [];
 
+  if (filters.search?.trim()) {
+    activeChips.push({
+      key: "search",
+      label: `"${filters.search.trim()}"`,
+      // Search removal → local only
+      onRemove: () => onFilterRemove({ search: "" }),
+    });
+  }
+  if (filters.sort_by) {
+    const sorted =
+      filters.sort_by.charAt(0).toUpperCase() + filters.sort_by.slice(1);
+    activeChips.push({
+      key: "sort_by",
+      label: `Sort: ${sorted}`,
+      // Sort removal → local only
+      onRemove: () => onFilterRemove({ sort_by: null }),
+    });
+  }
+  if (filters.ag_verified) {
+    activeChips.push({
+      key: "ag_verified",
+      label: "AG Verified",
+      // AG Verified removal → local only
+      onRemove: () => onFilterRemove({ ag_verified: false }),
+    });
+  }
+
+  const facilityMap = Object.fromEntries(
+    (dynamicFilters?.facilities || []).map((f) => [f.id, f.name]),
+  );
+  (filters.facilities_id || []).forEach((id) => {
+    activeChips.push({
+      key: `facility-${id}`,
+      label: facilityMap[id] || id,
+      // Individual facility removal → local only
+      onRemove: () =>
+        onFilterRemove({
+          facilities_id: filters.facilities_id.filter((x) => x !== id),
+        }),
+    });
+  });
+
+  const serviceMap = Object.fromEntries(
+    (dynamicFilters?.services || []).map((s) => [s.id, s.name]),
+  );
+  (filters.services_id || []).forEach((id) => {
+    activeChips.push({
+      key: `service-${id}`,
+      label: serviceMap[id] || id,
+      // Individual service removal → local only
+      onRemove: () =>
+        onFilterRemove({
+          services_id: filters.services_id.filter((x) => x !== id),
+        }),
+    });
+  });
+
+  const courseMap = Object.fromEntries(
+    (dynamicFilters?.courses || []).map((c) => [c.id, c.name]),
+  );
+  (filters.courses_id || []).forEach((id) => {
+    activeChips.push({
+      key: `course-${id}`,
+      label: courseMap[id] || id,
+      // Individual course removal → local only
+      onRemove: () =>
+        onFilterRemove({
+          courses_id: filters.courses_id.filter((x) => x !== id),
+        }),
+    });
+  });
+
+  const paymentMap = Object.fromEntries(
+    (dynamicFilters?.paymentModes || []).map((p) => [p.id, p.name]),
+  );
+  (filters.payment_mode_id || []).forEach((id) => {
+    activeChips.push({
+      key: `payment-${id}`,
+      label: paymentMap[id] || id,
+      // Individual payment mode removal → local only
+      onRemove: () =>
+        onFilterRemove({
+          payment_mode_id: filters.payment_mode_id.filter((x) => x !== id),
+        }),
+    });
+  });
+
+  // Clears all filters locally (no API) — used by chips-row "Clear all"
+  const handleLocalClearAll = () => {
+    onFilterRemove({
+      search: "",
+      sort_by: null,
+      ag_verified: false,
+      facilities_id: [],
+      services_id: [],
+      courses_id: [],
+      payment_mode_id: [],
+    });
+  };
+
+  return (
+    <div className="w-full">
+      {/* ── Backdrop blur overlay when any dropdown is open ── */}
+      {openIndex !== null && (
+        <div
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px]"
+          onClick={() => setOpenIndex(null)}
+        />
+      )}
+
+      {/* ── Desktop filter row ── */}
+      <div className="flex items-center max-md:bg-gray-100 max-md:py-1 md:w-full px-2 py-1 max-md:w-[90vh] max-md:max-w-[350px] max-md:ml-2 max-md:my-2 rounded-lg">
         <div
           ref={containerRef}
-          className="flex items-center gap-3 max-md:hidden"
+          className="relative z-40 flex items-center gap-2.5 max-md:hidden flex-wrap"
         >
           {/* ── SEARCH INPUT ── */}
           <div className="relative flex items-center">
@@ -168,7 +277,7 @@ const FilterBar = ({
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search listings..."
               className="
-                pl-8 pr-7 py-1.5 text-sm bg-white rounded font-medium h-8.5
+                pl-8 pr-7 py-1.5 text-sm bg-white rounded-md font-medium h-9
                 border border-gray-300
                 outline-none
                 w-46 focus:w-52
@@ -200,6 +309,9 @@ const FilterBar = ({
               </button>
             )}
           </div>
+
+          {/* ── DIVIDER ── */}
+          <div className="h-6 w-px bg-gray-200" />
 
           {/* ── FILTER ITEMS ── */}
           {filterItems.map((item, index) => (
@@ -247,18 +359,75 @@ const FilterBar = ({
             />
           ))}
 
+          {/* "Clear all" in the filter bar → calls handleReset → hits API */}
           {hasActiveFilters && (
-            <button
-              className="text-sm bg-white h-8 px-2 whitespace-nowrap border-gray-300 border rounded-sm font-semibold"
-              onClick={handleReset}
-            >
-              Clear all
-            </button>
+            <>
+              <div className="h-6 w-px bg-gray-200" />
+              <button
+                className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2.5 whitespace-nowrap border border-red-200 hover:border-red-300 rounded-md font-semibold transition-colors"
+                onClick={handleReset}
+              >
+                {/* Dustbin Icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0h8l-1 12a2 2 0 01-2 2H9a2 2 0 01-2-2L6 7z"
+                  />
+                </svg>
+                Clear all
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {/* Mobile filter trigger */}
+      {/* ── Active filter chips (horizontal) ── */}
+      {activeChips.length > 0 && (
+        <div className="max-md:hidden flex items-center gap-2 px-2 pt-2 pb-1 flex-wrap">
+          <span className="text-xs text-gray-400 font-medium mr-0.5 flex-shrink-0">
+            Active:
+          </span>
+          {activeChips.map((chip) => (
+            <span
+              key={chip.key}
+              className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold rounded-full px-2.5 py-1 transition-all"
+            >
+              {chip.label}
+              <button
+                onClick={chip.onRemove}
+                className="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-orange-200 hover:bg-orange-400 text-orange-700 hover:text-white flex items-center justify-center transition-colors"
+                aria-label={`Remove ${chip.label}`}
+              >
+                <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
+                  <path
+                    d="M1 1l8 8M9 1L1 9"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </span>
+          ))}
+          {/* "Clear all" in chips row → local only, no API */}
+          <button
+            onClick={handleLocalClearAll}
+            className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors ml-1"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
+      {/* ── Mobile filter trigger ── */}
       <div className="md:hidden flex ml-2 items-center gap-2">
         <MobileFilterDrawer
           filterItems={filterItems}
@@ -266,11 +435,11 @@ const FilterBar = ({
           hasActiveFilters={hasActiveFilters}
           handleFilterSelect={handleFilterSelect}
           handleReset={handleReset}
-          searchInput={searchInput} // ← add
-          onSearchChange={onSearchChange} // ← add
+          searchInput={searchInput}
+          onSearchChange={onSearchChange}
         />
       </div>
-    </>
+    </div>
   );
 };
 

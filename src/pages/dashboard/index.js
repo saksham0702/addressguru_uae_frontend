@@ -22,6 +22,7 @@ import {
   get_property_listings,
   get_user_listings,
 } from "@/api/uae-dashboard";
+import { get_listing_stats } from "@/api/listingStats";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -35,21 +36,22 @@ const Dashboard = () => {
   const [myMarketplace, setMyMarketplace] = useState(null);
   const [postAdd, setPostAdd] = useState(false);
 
-
   const token = localStorage.getItem("authToken");
+
+  const getListingStats = async () => {
+    const res = await get_listing_stats();
+    if (res?.status) {
+      setData(res?.data);
+    }
+  };
   useEffect(() => {
     if (loading) return;
     if (!user && !token) {
       router.replace("/");
     }
-  }, [user, loading, router]);
+    getListingStats();
+  }, [user, loading, router, token]);
 
-  // const getDashboardData = async () => {
-  //   const res = await get_dashboard_data();
-  //   if (res?.success) {
-  //     setData(res?.data);
-  //   }
-  // };
   const getUserListings = async (type) => {
     const listres = await get_user_listings();
     const jobres = await get_job_listings();
@@ -73,23 +75,44 @@ const Dashboard = () => {
     if (!user) return;
     // getDashboardData();
     getUserListings("listing");
+    getListingStats();
     // getUserListings("jobs");
     // getUserListings("property");
     // getUserListings("marketplace");
   }, [user]);
 
   if (loading || !user) return null;
-
   const countData = [
-    { image: "/count-listing", title: "YOUR LISTING", count: data?.listings },
-    { image: "/count-products", title: "PRODUCTS", count: data?.products },
-    { image: "/count-jobs", title: "JOBS", count: data?.jobs },
     {
-      image: "/count-properties",
-      title: "PROPERTIES",
-      count: data?.properties,
+      key: "my-listings",
+      image: "/listing",
+      title: "YOUR LISTING",
+      count: data?.listingCounts?.business,
     },
-    { image: "/count-reviews", title: "REVIEWS", count: data?.reviews },
+    {
+      key: "my-marketplace",
+      image: "/products",
+      title: "PRODUCTS",
+      count: data?.listingCounts?.products,
+    },
+    {
+      key: "my-jobs",
+      image: "/jobs",
+      title: "JOBS",
+      count: data?.listingCounts?.jobs,
+    },
+    {
+      key: "my-property",
+      image: "/properties",
+      title: "PROPERTIES",
+      count: data?.listingCounts?.properties,
+    },
+    {
+      key: "dashboard",
+      image: "/reviews",
+      title: "REVIEWS",
+      count: data?.overview?.totalReviews,
+    },
   ];
 
   const renderSection = () => {
@@ -116,7 +139,7 @@ const Dashboard = () => {
               </div>
               <div className="max-h-45 md:p-3 w-[40%] max-md:min-w-[40%] relative">
                 <Image
-                  src="/assets/dashboard/illustrator1.png"
+                  src="/assets/dashboard/illustrator.png"
                   alt="illustrator"
                   height={500}
                   width={500}
@@ -127,7 +150,12 @@ const Dashboard = () => {
 
             <div className="flex gap-2 max-md:flex-wrap my-5">
               {countData.map((item, index) => (
-                <CountCard key={index} data={item} />
+                <CountCard
+                  key={index}
+                  data={item}
+                  onClick={() => setActiveTab(item.key)}
+                  activeTab={activeTab}
+                />
               ))}
             </div>
 
@@ -137,8 +165,8 @@ const Dashboard = () => {
 
             <section className="my-5 space-y-5">
               <MyListings data={myListings} APP_URL={API_URL} />
-              <MyMarketplaceListings data={myMarketplace} />
-              <MyPropertyListings data={myProperties} />
+              {/* <MyMarketplaceListings data={myMarketplace} />
+              <MyPropertyListings data={myProperties} /> */}
 
               {/* <MyJobListings data={myJobs} /> */}
             </section>
@@ -149,25 +177,25 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyListings data={myListings} /> */}
+              <MyListings data={myListings} APP_URL={API_URL} />
             </section>
           </div>
         );
 
-      // case "my-jobs":
-      //   return (
-      //     <div className="md-max-w-[80%] w-full max-w-[80%]">
-      //       <section className="my-5 space-y-5">
-      //         <MyJobListings data={myJobs} />
-      //       </section>
-      //     </div>
-      //   );
+      case "my-jobs":
+        return (
+          <div className="md-max-w-[80%] w-full max-w-[80%]">
+            <section className="my-5 space-y-5">
+              <MyJobListings data={myJobs} />
+            </section>
+          </div>
+        );
 
       case "my-marketplace":
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyMarketplaceListings data={myMarketplace} /> */}
+              <MyMarketplaceListings data={myMarketplace} />
             </section>
           </div>
         );
@@ -176,7 +204,7 @@ const Dashboard = () => {
         return (
           <div className="md-max-w-[80%] w-full max-w-[80%]">
             <section className="my-5 space-y-5">
-              {/* <MyPropertyListings data={myProperties} /> */}
+              <MyPropertyListings data={myProperties} />
             </section>
           </div>
         );
@@ -198,22 +226,13 @@ const Dashboard = () => {
         </div>
         <section className="h-full md:w-[82.5%] w-[99%] mx-auto [20000px]:w-full hide-scroll absolute flex top-21 right-0">
           {renderSection()}
-          <div className="flex flex-col fixed right-0 h-full max-md:hidden pb-2 w-[12.5%] mr-2 gap-2">
-            <div className="bg-red-100 w-full max-h-[43%] rounded-sm text-center">
+          <div className="flex  fixed right-0 h-full max-md:hidden pb-2 w-[12.5%] mr-2 gap-2">
+            <div className=" w-full h-[90%] rounded-sm text-center">
               <Image
-                src="/assets/dashboard/add.png"
+                src="/assets/ads-banner-dashboard.jpeg"
                 alt="ads"
-                height={500}
-                width={500}
-                className="h-full"
-              />
-            </div>
-            <div className="bg-red-100 w-full max-h-[43%] rounded-sm text-center">
-              <Image
-                src="/assets/dashboard/add.png"
-                alt="ads"
-                height={500}
-                width={500}
+                height={1000}
+                width={1000}
                 className="h-full"
               />
             </div>

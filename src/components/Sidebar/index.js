@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Login from "../UserLogin/Login";
 import { menuItems, socialMediaLinks } from "@/services/constants";
+import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = ({ onClose, handleLoginClick }) => {
+  const { user } = useAuth();
   return (
     <>
       <div className="relative h-[calc(100vh-70px)] w-[18rem] max-md:w-[20rem] bg-white z-50 flex flex-col rounded-br-3xl overflow-hidden">
@@ -35,6 +37,7 @@ const Sidebar = ({ onClose, handleLoginClick }) => {
                   fill="white"
                 />
               </svg>
+
               Login
             </button>
           </div>

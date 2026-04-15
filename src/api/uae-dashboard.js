@@ -28,14 +28,14 @@ export const get_job_listings = async (type) => {
   //   const userId = localStorage.getItem("userId");
   try {
     const response = await axios.get(
-      `${API_URL}/job-listings/get-listing-by-user`,
+      `${API_URL}/jobs-listing/get-jobs-by-user`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
-    console.log("i am user listings ", response?.data);
+    console.log("i am user jobs listings ", response?.data);
     return response?.data?.data;
   } catch (error) {
     console.log("Error fetching user listings:", error);

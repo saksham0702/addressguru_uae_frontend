@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// const API_URL = "http://192.168.31.107:5001";
+// const API_URL = "http://localhost:5001";
 const API_URL = "https://addressguru.ae/api";
 
 

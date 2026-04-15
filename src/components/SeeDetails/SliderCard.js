@@ -27,7 +27,7 @@ const NextArrow = ({ onClick }) => (
   </button>
 );
 
-const SliderCard = ({ images }) => {
+const SliderCard = ({ images,slider }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
@@ -61,7 +61,7 @@ const SliderCard = ({ images }) => {
 
       <style jsx global>{`
         .custom-dots {
-          bottom: 24px;
+          bottom: 20px;
           display: flex !important;
           justify-content: center;
           align-items: center;

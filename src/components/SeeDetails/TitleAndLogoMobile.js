@@ -26,7 +26,10 @@ const TitleAndLogoMobile = ({
         {data?.businessName}
       </h3>
       {/* address  */}
-      <div className=" text-black font-[500] flex items-center  w-full gap-1">
+      <div
+        title={data?.businessAddress || data?.address}
+        className=" text-gray-700  font-[500] flex items-center  w-full gap-1"
+      >
         <svg
           width="13"
           height="18"
@@ -39,7 +42,7 @@ const TitleAndLogoMobile = ({
             fill="#8C8C8C"
           />
         </svg>
-        <span className="truncate text-[13px] mr-2  sm:w-44">
+        <span className="truncate text-[11px] mr-2  sm:w-44">
           {data?.businessAddress || data?.address}
         </span>
 
@@ -62,9 +65,9 @@ const TitleAndLogoMobile = ({
       <div className="flex justify-between border-b pb-1 border-gray-200 items-center mt-2">
         <div className="flex items-center justify-between  pb-1 mt-2">
           {/* LEFT */}
-          <div className="flex items-center gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
             <div
-              className="scale-[0.6]"
+              className="h-8 scale-[0.8] flex items-end"
               dangerouslySetInnerHTML={{ __html: data?.category?.iconSvg }}
             />
 
@@ -185,20 +188,17 @@ const TitleAndLogoMobile = ({
           </svg>
           <p>{data?.city?.name}</p>
         </span>
-        {data?.views !== "" ? (
-          <span></span>
-        ) : (
+        {data?.views && (
           <span className="flex items-center text-sm gap-1">
             <FaRegEye />
             <p>Views - {data?.views}</p>
           </span>
         )}
-
-        {/* <BusinessHours openingHours={openingHours} mobile={true} />{" "} */}
+        <BusinessHours openingHours={openingHours} mobile={true} />{" "}
       </div>
 
       {/* prices and features section */}
-      <div className="flex flex-wrap w-full whitespace-nowrap tracking-tight gap-1 my-2 text-[10px] font-[500] max-[340px]:flex-wrap">
+      {/* <div className="flex flex-wrap w-full whitespace-nowrap tracking-tight gap-1 my-2 text-[10px] font-[500] max-[340px]:flex-wrap">
         {data?.services?.slice(0, 3)?.map((item, index) => {
           return (
             <span
@@ -209,7 +209,7 @@ const TitleAndLogoMobile = ({
             </span>
           );
         })}
-      </div>
+      </div> */}
 
       {/* <hr className="text-gray-200 max-w-full relative top-1" /> */}
 
@@ -217,7 +217,7 @@ const TitleAndLogoMobile = ({
       {/* buttons section */}
       <div className="flex justify-between gap-2 items-center md:hidden">
         <CustomButton
-          showToggle={true}
+          // showToggle={true}
           defaultText="CALL NOW"
           toggledText={data?.mobile_number}
           icon={
@@ -257,8 +257,8 @@ const TitleAndLogoMobile = ({
           height="35px"
           fontWeight="800"
           onClick={() => {
-            if (data?.mobile_number) {
-              window.location.href = `tel:${data.mobile_number}`;
+            if (data?.mobileNumber) {
+              window.location.href = `tel:${data?.countryCode}${data?.mobileNumber}`;
             }
           }}
         />
@@ -308,7 +308,7 @@ const TitleAndLogoMobile = ({
         />
         <a
           onClick={() => handleClick(data?.id, "whatsapp")}
-          href={`https://wa.me/${data?.mobile_number}`}
+          href={`https://wa.me/${data?.countryCode}${data?.mobileNumber}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -335,27 +335,52 @@ const TitleAndLogoMobile = ({
             />
           </svg>
         </a>
+         {data?.websiteLink && (
+          <a
+            href={data?.websiteLink || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-[#EEEEEE] text-[#838383] px-2 py-1 h-10 rounded flex items-center gap-1"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="#838383"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M12 3c-2 3-3 5.5-3 9s1 6 3 9M12 3c2 3 3 5.5 3 9s-1 6-3 9M3 12h18"
+                stroke="#838383"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </a>
+        )}
       </div>
       <hr className="text-gray-200 my-2" />
       <div className="flex justify-between items-center bg-white max-[375px]:text-[10px]  text-xs rounded-b-lg">
-        <Link
-          href={data?.website_link || "#"}
-          className="bg-white border border-[#EEEEEE] text-[#838383] px-3 py-1 rounded"
-        >
-          Visit website
-        </Link>
         <button
           onClick={() => handlePop("report")}
-          className="border  text-[#E06C5E] px-3 py-1  rounded"
+          className="  text-[#E06C5E] px-3 py-1  rounded"
         >
           Report
         </button>
         <button
-          className="bg-[#EEEEEE] text-[#838383]  px-3 py-1  rounded cursor-not-allowed"
+          className=" text-[#838383]  px-3 py-1  rounded cursor-not-allowed"
           onClick={() => handlePop("claim")}
         >
           Claim this Business
         </button>
+       
       </div>
       {reviewPop && (
         <div className=" inset-0 min-h-screen flex items-center z-50 fixed  bg-black/30 ">

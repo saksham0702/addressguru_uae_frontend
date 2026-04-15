@@ -18,7 +18,7 @@ export default function CategoryRow({
 }) {
   const router = useRouter();
 
-  const children = subCategories.filter((sub) => sub.parentId === category._id);
+  const children = subCategories?.filter((sub) => sub.parentId === category._id);
 
   const handleDelete = () => {
     if (onDelete) {

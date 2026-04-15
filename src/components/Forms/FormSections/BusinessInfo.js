@@ -117,8 +117,8 @@ const BusinessInfo = ({
         const prompt = `Write a detailed, engaging classified or business directory SEO optimized ad description for a business named "${
           business.name
         }" located at "${business.address}". It's in the category "${
-          category + " " + subCategory || "general"
-        }". Its facilities are ${facilityNames} and services it provides are ${serviceNames}. This is for a classified website. The description must be minimum 500 and maximum 700 characters . Be professional and attractive. Only provide the description text, nothing else. No icons, no emojis, no special characters. Use easy English with high readability.`;
+          category 
+        }". Its facilities are ${facilityNames} and services it provides are ${serviceNames}. This is for a classified website. The description must be minimum 500 and maximum 550 characters . Be professional and attractive. Only provide the description text, nothing else. No icons, no emojis, no special characters. Use easy English with high readability.`;
 
         const response = await axios.post(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`,
@@ -141,7 +141,6 @@ const BusinessInfo = ({
 
         const generatedText =
           response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        console.log("response", response);
 
         if (generatedText) {
           const cleanText = generatedText

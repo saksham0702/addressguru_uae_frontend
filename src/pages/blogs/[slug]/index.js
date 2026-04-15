@@ -10,8 +10,21 @@ import {
   getCategories,
   getMostViewedBlogs,
 } from "@/api/uae-blogs";
+import { FaTwitter, FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
 
 const BlogDetail = () => {
+  const getIcon = (name) => {
+    switch (name.toLowerCase()) {
+      case "twitter":
+        return <FaTwitter />;
+      case "linkedin":
+        return <FaLinkedin />;
+      case "github":
+        return <FaGithub />;
+      default:
+        return <FaGlobe />;
+    }
+  };
   const router = useRouter();
   const { slug } = router.query;
   const [blogDetail, setBlogDetail] = useState(null);
@@ -236,6 +249,12 @@ const BlogDetail = () => {
 
               {/* Blog Meta Information */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                {/* author */}
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-gray-900 text-base leading-tight">
+                    {blogDetail?.author?.name}
+                  </p>
+                </div>
                 <div className="flex items-center gap-2">
                   <svg
                     className="w-5 h-5"
@@ -395,6 +414,24 @@ const BlogDetail = () => {
                   {blogDetail?.author?.bio}
                 </p>
               )}
+
+              {/* social links */}
+              <div className="flex items-center gap-3 text-xl">
+                {Object.entries(blogDetail?.author?.social || {})
+                  .filter(([_, url]) => url) // remove empty links
+                  .map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-blue-500 transition flex items-center gap-1"
+                    >
+                      {getIcon(platform)}
+                      <span className="text-sm">{platform}</span>
+                    </a>
+                  ))}
+              </div>
             </div>
 
             {/* Related Blogs Section */}

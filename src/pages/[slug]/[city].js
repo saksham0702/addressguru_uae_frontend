@@ -8,21 +8,31 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Head from "next/head";
-import { APP_URL, BASE_URL } from "@/services/constants";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
 import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
 import axios from "axios";
+import Login from "@/components/UserLogin/Login";
+import InfoListSection from "@/components/BusinessListingComponents/InfoListSection";
 
 const SearchResults = () => {
+  const APP_URL = "https://addressguru.ae";
   const router = useRouter();
   const { city: globalCity } = useAuth();
   const { slug } = router.query;
+  const [loginPop, setLoginPop] = useState(false);
 
   const cityName =
     typeof globalCity === "string" ? globalCity : globalCity?.name || "";
 
-  const [listings, setListings] = useState([]);
+  const handleClose = () => setLoginPop(false);
+
+  // ── API data (last fetched from server) ──
+  const [apiListings, setApiListings] = useState([]);
+
+  // ── Local filter overrides (null = show API data as-is) ──
+  const [localFilters, setLocalFilters] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pageData, setPageData] = useState(null);
@@ -34,6 +44,8 @@ const SearchResults = () => {
     courses: [],
     paymentModes: [],
   });
+
+  // filters = what was last sent to the API
   const [filters, setFilters] = useState({
     sort_by: null,
     ag_verified: false,
@@ -46,16 +58,95 @@ const SearchResults = () => {
 
   const hasFetchedFilters = useRef(false);
 
-  const hasActiveFilters =
-    filters.sort_by !== null ||
-    filters.ag_verified !== false ||
-    filters.facilities_id.length > 0 ||
-    filters.services_id.length > 0 ||
-    filters.courses_id.length > 0 ||
-    filters.payment_mode_id.length > 0 ||
-    filters.search.length > 0;
+  // ── activeFilters: what FilterBar sees (local overrides take priority) ──
+  const activeFilters = localFilters ?? filters;
 
+  const hasActiveFilters =
+    activeFilters.sort_by !== null ||
+    activeFilters.ag_verified !== false ||
+    activeFilters.facilities_id.length > 0 ||
+    activeFilters.services_id.length > 0 ||
+    activeFilters.courses_id.length > 0 ||
+    activeFilters.payment_mode_id.length > 0 ||
+    activeFilters.search.length > 0;
+
+  // ── LOCAL FILTER FUNCTION ──
+  // Runs client-side on apiListings — no network request
+  const applyLocalFilters = (data, f) => {
+    let result = [...data];
+
+    if (f.search?.trim()) {
+      const q = f.search.trim().toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.businessName?.toLowerCase().includes(q) ||
+          item.name?.toLowerCase().includes(q),
+      );
+    }
+
+    if (f.ag_verified) {
+      result = result.filter((item) => item.ag_verified === true);
+    }
+
+    if (f.facilities_id?.length > 0) {
+      result = result.filter((item) =>
+        f.facilities_id.some((id) => item.facilities_id?.includes(id)),
+      );
+    }
+
+    if (f.services_id?.length > 0) {
+      result = result.filter((item) =>
+        f.services_id.some((id) => item.services_id?.includes(id)),
+      );
+    }
+
+    if (f.courses_id?.length > 0) {
+      result = result.filter((item) =>
+        f.courses_id.some((id) => item.courses_id?.includes(id)),
+      );
+    }
+
+    if (f.payment_mode_id?.length > 0) {
+      result = result.filter((item) =>
+        f.payment_mode_id.some((id) => item.payment_mode_id?.includes(id)),
+      );
+    }
+
+    if (f.sort_by === "newest") {
+      result = result.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at),
+      );
+    } else if (f.sort_by === "oldest") {
+      result = result.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      );
+    }
+
+    return result;
+  };
+
+  // ── What actually gets rendered ──
+  const listings = localFilters
+    ? applyLocalFilters(apiListings, localFilters)
+    : apiListings;
+
+  // ── onFilterChange → clears local overrides, updates filters → hits API ──
+  const handleFilterChange = (updatedFilters) => {
+    setLocalFilters(null);
+    setFilters((prev) => ({ ...prev, ...updatedFilters }));
+  };
+
+  // ── onFilterRemove → local only, no API ──
+  const handleFilterRemove = (patch) => {
+    setLocalFilters((prev) => ({
+      ...(prev ?? filters),
+      ...patch,
+    }));
+  };
+
+  // ── handleReset → full reset, clears local overrides, hits API ──
   const handleReset = () => {
+    setLocalFilters(null);
     setSearchInput("");
     setFilters({
       sort_by: null,
@@ -68,7 +159,7 @@ const SearchResults = () => {
     });
   };
 
-  // ── BUILD QUERY PARAMS from filters ──
+  // ── BUILD QUERY PARAMS from filters (API filters, not local) ──
   const buildQueryParams = (extraPage = 1) => {
     const params = new URLSearchParams();
     params.set("page", extraPage);
@@ -89,9 +180,11 @@ const SearchResults = () => {
     return params.toString();
   };
 
-  // Debounce search — waits 500ms after user stops typing then fires API
+  // ── Debounce search — waits 500ms then fires API ──
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Search input goes through API path (not local)
+      setLocalFilters(null);
       setFilters((prev) => ({ ...prev, search: searchInput }));
     }, 500);
     return () => clearTimeout(timer);
@@ -105,7 +198,7 @@ const SearchResults = () => {
     const fetchCategoryFeatures = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5001/business-listing/features/${slug}`,
+          `https://addressguru.ae/api/business-listing/features/${slug}`,
         );
         const data = res?.data?.data;
         setDynamicFilters({
@@ -147,7 +240,7 @@ const SearchResults = () => {
     }
   }, [cityName, router.isReady, slug]);
 
-  // ── FETCH LISTINGS ──
+  // ── FETCH LISTINGS → stores into apiListings, clears localFilters ──
   useEffect(() => {
     if (!router.isReady || !slug || !cityName) return;
 
@@ -160,7 +253,8 @@ const SearchResults = () => {
       try {
         setIsLoading(true);
         setError(false);
-        setListings([]);
+        setApiListings([]);
+        setLocalFilters(null); // clear local overrides whenever a fresh API call runs
         setPageData(null);
 
         const query = buildQueryParams(1);
@@ -169,7 +263,7 @@ const SearchResults = () => {
         );
 
         const data = res?.data?.data;
-        setListings(data?.listings || []);
+        setApiListings(data?.listings || []);
         setPageData(data?.pagination || null);
       } catch (err) {
         console.error("Listings fetch error:", err);
@@ -190,7 +284,6 @@ const SearchResults = () => {
       .toLowerCase()
       .replace(/\(.*\)/, "")
       .replace(/\s+/g, "-");
-
     try {
       setIsLoadingMore(true);
       const query = buildQueryParams(pageData.nextPage);
@@ -199,7 +292,7 @@ const SearchResults = () => {
       );
       const data = res?.data?.data;
       if (data?.listings?.length) {
-        setListings((prev) => [...prev, ...data.listings]);
+        setApiListings((prev) => [...prev, ...data.listings]);
         setPageData(data.pagination);
       }
     } catch (err) {
@@ -228,71 +321,78 @@ const SearchResults = () => {
     );
   }
 
+  const seoTitle = listings[0]?.category?.seo?.title || null;
+  const seoDescription = listings[0]?.category?.seo?.description || null;
+  const seoOgImage = listings[0]?.category?.seo?.ogImage || null;
+
+  const pageTitle =
+    seoTitle ??
+    `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
+
+  const pageDescription =
+    seoDescription ??
+    `Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`;
+
+  const pageKeywords = `${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`;
+
+  const canonicalUrl = `${APP_URL}/${canonicalSlug
+    .toLowerCase()
+    .replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
+
+  const rawOgImage = seoOgImage ?? "/seo/default-og-image.jpg";
+  const absoluteOgImage = rawOgImage.startsWith("http")
+    ? rawOgImage
+    : `${APP_URL}${rawOgImage.startsWith("/") ? "" : "/"}${rawOgImage}`;
+
+  const ogDescription =
+    seoDescription ??
+    `Looking for the best ${canonicalSlug} in ${canonicalCity}? Explore verified listings and find the right one.`;
+
+  const twitterDescription =
+    seoDescription ??
+    `Checkout the top ${canonicalSlug} in ${canonicalCity}. Explore business listings, ratings, and contact details.`;
+
   return (
     <>
       <section className="md:hidden">
         <Header />
       </section>
-
       <Head>
-        <title>{`Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`}</title>
-        <meta
-          name="description"
-          content={`Find the best ${canonicalSlug} in ${canonicalCity}. Browse verified business listings, reviews, contact information, and more.`}
-        />
-        <meta
-          name="keywords"
-          content={`${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`}
-        />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={pageKeywords} />
         <meta name="robots" content="index, follow" />
-        <link
-          rel="canonical"
-          href={`${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`}
-        />
+        <link rel="canonical" href={canonicalUrl} />
+
         <meta property="og:type" content="website" />
-        <meta
-          property="og:title"
-          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
-        />
-        <meta
-          property="og:description"
-          content={`Looking for the best ${canonicalSlug} in ${canonicalCity}? Visit our platform to explore verified listings and choose the right one.`}
-        />
-        <meta
-          property="og:url"
-          content={`${APP_URL}/${canonicalSlug.toLowerCase().replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`}
-        />
-        <meta property="og:site_name" content="Your Website Name" />
-        <meta
-          property="og:image"
-          content={`${APP_URL}/seo/default-og-image.jpg`}
-        />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="AddressGuru" />
+        <meta property="og:image" content={absoluteOgImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={pageTitle} />
+
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={`Top ${canonicalSlug} in ${canonicalCity} | Business Listings`}
-        />
-        <meta
-          name="twitter:description"
-          content={`Checkout the top ${canonicalSlug} available in ${canonicalCity}. Explore business listings, ratings, and contact details.`}
-        />
-        <meta
-          name="twitter:image"
-          content={`${APP_URL}/seo/default-og-image.jpg`}
-        />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={twitterDescription} />
+        <meta name="twitter:image" content={absoluteOgImage} />
+        <meta name="twitter:image:alt" content={pageTitle} />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ItemList",
-              name: `Top ${canonicalSlug} in ${canonicalCity}`,
-              url: `${APP_URL}/${canonicalSlug}/${canonicalCity}`,
-              numberOfItems: listings?.length || 0,
-              itemListElement: listings?.map((item, i) => ({
+              name: pageTitle,
+              url: canonicalUrl,
+              numberOfItems: pageData?.total ?? listings.length,
+              itemListElement: listings.map((item, i) => ({
                 "@type": "ListItem",
                 position: i + 1,
-                name: item?.name,
+                name: item?.businessName ?? item?.name,
                 url: `${APP_URL}/listing/${item?.slug}`,
               })),
             }),
@@ -302,7 +402,18 @@ const SearchResults = () => {
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
-          <div className="mt-6 max-md:ml-2.5 md:mb-2">
+          {/* ads space */}
+          <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg">
+            <div className="h-full w-full text-lg tect-center flex justify-center items-center">
+              <img
+                src="/assets/ads-city-slug.jpeg"
+                alt="ad1"
+                className="h-full w-full"
+              />
+            </div>
+          </section>
+
+          <div className="mt-5 max-md:ml-2.5 md:mb-2">
             <BreadCrumbs
               slug={canonicalSlug}
               city={canonicalCity}
@@ -312,7 +423,7 @@ const SearchResults = () => {
           </div>
 
           <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
-            Top {listings?.[0]?.category?.name || canonicalSlug} in{" "}
+            Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
           </h1>
 
@@ -320,12 +431,11 @@ const SearchResults = () => {
             hasActiveFilters={hasActiveFilters}
             handleReset={handleReset}
             dynamicFilters={dynamicFilters}
-            filters={filters}
+            filters={activeFilters}
             searchInput={searchInput}
             onSearchChange={(val) => setSearchInput(val)}
-            onFilterChange={(updatedFilters) =>
-              setFilters((prev) => ({ ...prev, ...updatedFilters }))
-            }
+            onFilterChange={handleFilterChange}
+            onFilterRemove={handleFilterRemove}
           />
 
           <div className="flex w-full gap-4">
@@ -336,12 +446,13 @@ const SearchResults = () => {
                     <BusinessCardSkeleton key={i} />
                   ))
                 ) : listings.length === 0 ? (
-                  <div className="flex justify-center items-center">
-                    <div className="flex flex-col items-center justify-center min-h-[60vh] py-10 w-full bg-white text-center px-4">
-                      <div className="w-40 h-40 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+                  <div className="flex justify-center items-center py-12 px-4">
+                    <div className="flex flex-col items-center text-center max-w-md w-full">
+                      {/* Icon */}
+                      <div className="w-22 h-22 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center mb-6 p-5">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-20 w-20 text-orange-500"
+                          className="h-10 w-10 text-orange-500"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -350,23 +461,88 @@ const SearchResults = () => {
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M9.75 9.75h.008v.008H9.75V9.75zm4.5 0h.008v.008h-.008V9.75zm-4.5 4.5h.008v.008H9.75v-.008zm4.5 0h.008v.008h-.008v-.008zM3 12a9 9 0 1118 0 9 9 0 01-18 0z"
+                            d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z"
                           />
                         </svg>
                       </div>
-                      <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                        No Listings Found
+
+                      {/* City badge */}
+                      <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-full px-3 py-1 mb-4">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3.5 w-3.5 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                          />
+                        </svg>
+                        <span className="text-xs font-medium text-orange-600">
+                          {globalCity}
+                        </span>
+                      </div>
+
+                      {/* Heading */}
+                      <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                        Be the first to list your business here!
                       </h2>
-                      <p className="text-gray-500 max-w-md mb-6">
-                        We couldn&apos;t find any listings matching your search.
-                        Try adjusting your filters or check back later.
+
+                      {/* Description */}
+                      <p className="text-sm text-gray-500 mb-1 leading-relaxed">
+                        No listings yet in{" "}
+                        <span className="font-medium text-gray-700">
+                          {globalCity}
+                        </span>{" "}
+                        under{" "}
+                        <span className="font-medium text-gray-700">
+                          {slug}
+                        </span>
+                        .
                       </p>
-                      <Link
-                        href="/"
-                        className="bg-orange-500 hover:bg-orange-600 capitalize text-white px-6 py-2 rounded-lg shadow transition-all"
-                      >
-                        Go to Home
-                      </Link>
+                      <p className="text-sm text-gray-500 mb-7 leading-relaxed">
+                        Get ahead of the competition — add your business and
+                        start reaching local customers today.
+                      </p>
+
+                      {/* Buttons */}
+                      <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                        <button
+                          onClick={() => setLoginPop(true)}
+                          className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                          </svg>
+                          Post your ad
+                        </button>
+                      </div>
+
+                      {/* Trust line */}
+                      <p className="text-xs text-gray-400 mt-5">
+                        Free to list &nbsp;·&nbsp; Reach local buyers
+                        &nbsp;·&nbsp; Takes under 2 minutes
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -382,7 +558,8 @@ const SearchResults = () => {
                 )}
               </div>
 
-              {pageData?.hasMore && (
+              {/* Only show Load More when no local overrides are active */}
+              {!localFilters && pageData?.hasMore && (
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
@@ -397,8 +574,48 @@ const SearchResults = () => {
               <RightBusinessCard name={canonicalSlug} />
             </div>
           </div>
+          <InfoListSection
+            title={`Top ${canonicalSlug} in ${canonicalCity}`}
+            items={listings?.map((item) => ({
+              title: item?.businessName || item?.name,
+              description:
+                item?.description || item?.about || "No description available.",
+              address: item?.address || item?.location || canonicalCity,
+            }))}
+          />
         </div>
       </div>
+
+      {loginPop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50">
+          <div className="h-[60vh] w-xl m-auto top-0 flex fixed inset-0 z-50 rounded-xl bg-white">
+            <div className="mt-2 relative w-full pl-2">
+              <button
+                onClick={handleClose}
+                className="absolute right-3 border rounded-full border-orange-500 p-1 top-2 z-50 text-[#FF6E04]"
+                aria-label="Close"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <Login setShowLogin={true} />
+            </div>
+          </div>
+        </div>
+      )}
 
       <MobileFooter />
     </>

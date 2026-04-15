@@ -2,6 +2,7 @@ import axios from "axios";
 // import { API_URL } from "@/services/constants";
 
 const API_URL = "https://addressguru.ae/api";
+// const API_URL = "http://localhost:5001/api";
 
 export const user_login = async (postdata) => {
   try {

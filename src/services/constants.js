@@ -28,7 +28,7 @@ export const GOOGLE_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 
 export const COUNTRY_CODES = [
-  { code: "+65", country: "Singapore", flag: "🇸🇬" },
+  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪" },
   { code: "+93", country: "Afghanistan", flag: "🇦🇫" },
   { code: "+355", country: "Albania", flag: "🇦🇱" },
   { code: "+213", country: "Algeria", flag: "🇩🇿" },
@@ -186,6 +186,7 @@ export const COUNTRY_CODES = [
   { code: "+381", country: "Serbia", flag: "🇷🇸" },
   { code: "+248", country: "Seychelles", flag: "🇸🇨" },
   { code: "+232", country: "Sierra Leone", flag: "🇸🇱" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬" },
   { code: "+421", country: "Slovakia", flag: "🇸🇰" },
   { code: "+386", country: "Slovenia", flag: "🇸🇮" },
   { code: "+677", country: "Solomon Islands", flag: "🇸🇧" },
@@ -215,7 +216,6 @@ export const COUNTRY_CODES = [
   { code: "+688", country: "Tuvalu", flag: "🇹🇻" },
   { code: "+256", country: "Uganda", flag: "🇺🇬" },
   { code: "+380", country: "Ukraine", flag: "🇺🇦" },
-  { code: "+971", country: "United Arab Emirates", flag: "🇦🇪" },
   { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
   { code: "+1", country: "United States", flag: "🇺🇸" },
   { code: "+598", country: "Uruguay", flag: "🇺🇾" },
@@ -551,6 +551,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/posting-rules",
   },
   {
     text: "Our Plans",
@@ -606,6 +607,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/infringement-policy",
   },
   {
     text: "Privacy Policy",
@@ -643,6 +645,7 @@ export const menuItems = [
         />
       </svg>
     ),
+    link: "/privacy-policy",
   },
 ];
 
@@ -822,33 +825,43 @@ export const NAV_ROUTES = [
     icon: User,
     href: "/admin/users",
   },
+ {
+  name: "listings",
+  icon: ShoppingBag,
+  children: [
+    { name: "Business Listings", href: "/admin/business-listings" },
+    { name: "Jobs Listings", href: "/admin/jobs-listings" },
+    { name: "Marketplace Listings", href: "/admin/marketplace-listings" },
+    { name: "Property Listings", href: "/admin/property-listings" },
+  ],
+ },
 
-  {
-    name: "Business Listings",
-    icon: ShoppingBag,
-    href: "/admin/business-listings",
-  },
+  // {
+  //   name: "Business Listings",
+  //   icon: ShoppingBag,
+  //   href: "/admin/business-listings",
+  // },
   {
     name: "Followup Configs",
     icon: TableConfigIcon,
     href: "/admin/business-configs",
   },
-  {
-    name: "Jobs Listings",
-    icon: WorkflowIcon,
-    href: "/admin/jobs-listings",
-  },
+  // {
+  //   name: "Jobs Listings",
+  //   icon: WorkflowIcon,
+  //   href: "/admin/jobs-listings",
+  // },
 
-  {
-    name: "Marketplace Listings",
-    href: "/admin/marketplace-listings",
-    icon: ShoppingBag,
-  },
-  {
-    name: "Property Listings",
-    href: "/admin/property-listings",
-    icon: HomeIcon,
-  },
+  // {
+  //   name: "Marketplace Listings",
+  //   href: "/admin/marketplace-listings",
+  //   icon: ShoppingBag,
+  // },
+  // {
+  //   name: "Property Listings",
+  //   href: "/admin/property-listings",
+  //   icon: HomeIcon,
+  // },
 
   // {
   //   name: "Users",

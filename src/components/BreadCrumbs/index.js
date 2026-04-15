@@ -9,51 +9,63 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
   const { city } = useAuth();
   const router = useRouter();
 
-  const handleSlugClick = () => {
-    if (slug && type) router.back();
-  };
-
   return (
     <div>
-      <span className="text-sm flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
+      <span className="text-xs flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
+        {/* Home */}
+        <Link
+          href="/"
+          className="text-gray-500 hover:text-orange-500 transition-colors"
+        >
+          Home
+        </Link>
 
-        {/* home */}
-        <Link href="/" className="text-gray-500">Home</Link> <Slash />
-
-        {/* City — always shown if available */}
-        {city && <span className="text-gray-500">{city}</span>}
+        {/* City */}
+        {city && (
+          <>
+            <Slash />
+            <span
+              onClick={() => router.push("/")}
+              className="text-gray-500 cursor-pointer hover:text-orange-500 transition-colors capitalize"
+            >
+              {city}
+            </span>
+          </>
+        )}
 
         {/* Slug */}
         {slug && (
           <>
             <Slash />
             <span
-              onClick={handleSlugClick}
-              className={`capitalize ${
-                type
-                  ? "text-orange-500 cursor-pointer hover:underline"
-                  : "text-gray-500"
-              }`}
+              onClick={() => router.back()}
+              className="text-gray-500 capitalize cursor-pointer hover:text-orange-500 transition-colors"
             >
               {slug}
             </span>
           </>
         )}
 
-        {/* Type — sits between slug and name */}
-        {type && (
-          <>
-            <Slash />
-            <span className="text-gray-500 capitalize">{type}</span>
-          </>
-        )}
+        {/* Type */}
+   {/* Type */}
+{type && type !== true && (
+  <>
+    <Slash />
+    <span
+      onClick={() => router.back()}
+      className="text-gray-500 capitalize cursor-pointer hover:text-orange-500 transition-colors"
+    >
+      {type}
+    </span>
+  </>
+)}
 
-        {/* Name — final crumb, bold */}
+        {/* Name — final crumb, not clickable */}
         {name && (
           <>
-            {/* <Slash /> */}
+            <Slash />
             <strong className="text-gray-800 capitalize flex items-center gap-1">
-              {length && <span>{length}+</span>}
+              {length && <span>{length}</span>}
               {name}
             </strong>
           </>

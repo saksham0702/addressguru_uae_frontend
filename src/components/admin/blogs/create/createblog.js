@@ -10,7 +10,6 @@ import {
   getCategories,
   createBlog,
   updateBlog,
-  adminGetAllBlogs,
   getBlogBySlug,
 } from "@/api/uae-blogs";
 

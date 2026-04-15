@@ -1,5 +1,4 @@
 // ========== ListingForms.jsx (COMPLETE WITH SESSION STORAGE) ==========
-import { get_payment_mode, get_service_facility } from "@/api/forms";
 import { get_plans } from "@/api/plans";
 import BusinessInfo from "@/components/Forms/FormSections/BusinessInfo";
 import ContactDetails from "@/components/Forms/FormSections/ContactDetails";
@@ -109,8 +108,8 @@ const ListingForms = () => {
     name: "",
     email: "",
     number: "",
-    countryCode: "+65",
-    altCountryCode: "+65",
+    countryCode: "+971",
+    altCountryCode: "+971",
     altNumber: "",
     city: "",
     cityId: "",
@@ -314,11 +313,11 @@ const ListingForms = () => {
   const getPlans = async () => {
     try {
       const res = await get_plans();
-      console.log("plan response", res);
+      // console.log("plan response", res);
 
       setPlans(res?.data?.plans);
     } catch (error) {
-      console.log("error in frontend", error);
+      // console.log("error in frontend", error);
     }
   };
 
@@ -379,7 +378,6 @@ const ListingForms = () => {
 
   useEffect(() => {
     if (existingData && name && !isInitialized) {
-      console.log("Mapping existingData:", existingData);
 
       // ✅ Business Info
       setBusiness({
@@ -406,8 +404,8 @@ const ListingForms = () => {
 
       // ✅ Social Links
       setSocial({
-        websiteLink: existingData?.socialLinks?.website || "",
-        videoLink: existingData?.socialLinks?.video || "",
+        websiteLink: existingData?.websiteLink || "",
+        videoLink: existingData?.videoLink || "",
         facebook: existingData?.socialLinks?.facebook || "",
         instagram: existingData?.socialLinks?.instagram || "",
         twitter: existingData?.socialLinks?.twitter || "",
@@ -470,8 +468,6 @@ const ListingForms = () => {
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
       const res = await getBusinessFeatures(categoryId);
-      console.log("res :", res);
-
       const facilities = res?.features?.facilities || [];
       const services = res?.features?.services || [];
       const courses = res?.features?.courses || [];
@@ -495,14 +491,7 @@ const ListingForms = () => {
     }
   }, [categoryId]);
 
-  //get payment methods
-  // useEffect(() => {
-  //   const getPaymentMode = async () => {
-  //     const res = await get_payment_mode();
-  //     setPayment(res);
-  //   };
-  //   getPaymentMode();
-  // }, []);
+
 
   // Scroll to first error field
   const scrollToError = (errorKey) => {
@@ -663,8 +652,8 @@ const ListingForms = () => {
         hours: "schedule",
       },
       2: {
-        website_link: "websiteLink",
-        video_link: "videoLink",
+        websiteLink: "websiteLink",
+        videoLink: "videoLink",
       },
       3: {
         name: "contactName",
@@ -748,8 +737,8 @@ const ListingForms = () => {
         break;
 
       case 2:
-        formData.append("website_link", social.websiteLink || "");
-        formData.append("video_link", social.videoLink || "");
+        formData.append("websiteLink", social.websiteLink || "");
+        formData.append("videoLink", social.videoLink || "");
         formData.append("facebook", social.facebook || "");
         formData.append("instagram", social.instagram || "");
         formData.append("twitter", social.twitter || "");
@@ -850,7 +839,7 @@ const ListingForms = () => {
 
       if (stepNumber === 6) {
         clearSession();
-        console.log("response from 6 ", response);
+        // console.log("response from 6 ", response);
         setShowSuccessPopup(true);
         // if (response?.status) {
         //   router.push({
@@ -862,7 +851,7 @@ const ListingForms = () => {
       }
 
       setIsSubmitting(false);
-      console.log("main response", response);
+      // console.log("main response", response);
       return true;
     } catch (error) {
       console.error(`Error submitting step ${stepNumber}:`, error);

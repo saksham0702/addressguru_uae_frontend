@@ -12,8 +12,7 @@ const CheckBox = ({
   onErrorClear,
 }) => {
   const [localSelectedIds, setLocalSelectedIds] = useState(selectedIds);
-  console.log("options", options);
-  console.log("selectedIds", selectedIds);
+
 
   useEffect(() => {
     setLocalSelectedIds(selectedIds);

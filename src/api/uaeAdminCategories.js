@@ -8,8 +8,11 @@ const API_URL = "https://addressguru.ae/api";
 // const API_URL = "http://localhost:5001";
 
 // const API_URL = "http://192.168.29.191:5001";
-
 export const createOrUpdateCategory = async (payload) => {
+  console.log("payload", payload);
+
+  const token = localStorage.getItem("token");
+
   try {
     const isEdit = Boolean(payload?.id);
 
@@ -19,12 +22,12 @@ export const createOrUpdateCategory = async (payload) => {
         ? `${API_URL}/categories/update-category/${payload.id}`
         : `${API_URL}/categories/create-category`,
 
-      data: {
-        ...payload,
-      },
+      // ✅ send already-built FormData
+      data: payload.formData,
 
       headers: {
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        // ❗ DO NOT set Content-Type manually
       },
 
       withCredentials: true,
@@ -32,7 +35,7 @@ export const createOrUpdateCategory = async (payload) => {
 
     console.log(
       `category ${isEdit ? "update" : "create"} response:`,
-      response.data,
+      response.data
     );
 
     return response.data;
@@ -45,7 +48,6 @@ export const createOrUpdateCategory = async (payload) => {
 
     console.log("category api error:", message);
 
-    // ✅ throw clean error
     throw new Error(message);
   }
 };
@@ -685,7 +687,7 @@ export const getBusinessFeatures = async (id) => {
     const response = await axios.get(
       `${API_URL}/business-listing/get-features/${id}`,
     );
-    console.log("get business features response", response);
+    // console.log("get business features response", response);
     return response.data.data;
   } catch (error) {
     console.log("Error fetching business features:", error);

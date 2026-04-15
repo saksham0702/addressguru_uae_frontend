@@ -18,7 +18,6 @@ import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
 // ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
 // TODO: Replace with your real GA4 Measurement ID
 
-
 export default function App({ Component, pageProps }) {
   const router = useRouter();
 
