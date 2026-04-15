@@ -470,9 +470,16 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
     if (clearError) clearError("logo");
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setCropImageSrc(ev.target.result);
-      setCropType("logo");
-      setRecropId(null);
+      setMedia((prev) => ({
+        ...prev,
+        logo: {
+          id: uid(),
+          file,
+          preview: ev.target.result,
+          name: file.name,
+          isExisting: false,
+        },
+      }));
     };
     reader.readAsDataURL(file);
   };
