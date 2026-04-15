@@ -339,7 +339,7 @@ const SearchResults = () => {
     .toLowerCase()
     .replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
 
-  const rawOgImage = seoOgImage ?? "/seo/default-og-image.jpg";
+  const rawOgImage = seoOgImage ?? "/home-og-image.jpg";
   const absoluteOgImage = rawOgImage.startsWith("http")
     ? rawOgImage
     : `${APP_URL}${rawOgImage.startsWith("/") ? "" : "/"}${rawOgImage}`;
