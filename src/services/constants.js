@@ -800,7 +800,7 @@ export const NAV_ROUTES = [
     icon: Layers2,
     children: [
       { name: "All Categories", href: "/admin/categories" },
-      // { name: 'Add Category', href: '/dashboard/categories/add' },
+      { name: 'Seo Content', href: '/admin/categories/seo-content' },
       // { name: 'Subcategories', href: '/dashboard/categories/sub' },
     ],
   },
