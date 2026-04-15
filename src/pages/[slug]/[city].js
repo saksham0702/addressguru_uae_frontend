@@ -14,6 +14,8 @@ import MobileFooter from "@/components/MobileFooter";
 import axios from "axios";
 import Login from "@/components/UserLogin/Login";
 import InfoListSection from "@/components/BusinessListingComponents/InfoListSection";
+import { get_seo_data } from "@/api/seoApi";
+import SeoContent from "@/components/BusinessListingComponents/SeoContent";
 
 const SearchResults = () => {
   const APP_URL = "https://addressguru.ae";
@@ -21,6 +23,7 @@ const SearchResults = () => {
   const { city: globalCity } = useAuth();
   const { slug } = router.query;
   const [loginPop, setLoginPop] = useState(false);
+  const [seoContent, setSeoContent] = useState(null);
 
   const cityName =
     typeof globalCity === "string" ? globalCity : globalCity?.name || "";
@@ -248,6 +251,18 @@ const SearchResults = () => {
       .toLowerCase()
       .replace(/\(.*\)/, "")
       .replace(/\s+/g, "-");
+
+      const fetchSeo = async () => {
+        try {
+          const res = await get_seo_data(slug, citySlug);
+          console.log("seo data", res);
+          setSeoContent(res);
+        } catch (err) {
+          console.error("Seo fetch error:", err);
+        }
+      };
+
+      fetchSeo();
 
     const fetchListings = async () => {
       try {
@@ -574,6 +589,7 @@ const SearchResults = () => {
               <RightBusinessCard name={canonicalSlug} />
             </div>
           </div>
+          <hr className="border-gray-200 my-2" />
           <InfoListSection
             title={`Top ${canonicalSlug} in ${canonicalCity}`}
             items={listings?.map((item) => ({
@@ -583,6 +599,8 @@ const SearchResults = () => {
               address: item?.address || item?.location || canonicalCity,
             }))}
           />
+          <hr className="border-gray-200 my-2" />
+          <SeoContent categorySlug={slug} citySlug={canonicalCity} seoContent={seoContent} />
         </div>
       </div>
 

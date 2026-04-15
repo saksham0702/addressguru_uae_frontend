@@ -295,7 +295,7 @@ const SeoEditor = () => {
       {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-[22px] font-bold text-gray-900 m-0 tracking-tight">SEO Content</h1>
+          <h1 className="text-[22px] font-semibold text-gray-900 m-0 tracking-tight">SEO Content</h1>
           <p className="text-[13px] text-gray-500 mt-1 mb-0">Manage category-specific content for cities</p>
         </div>
         <button
@@ -315,7 +315,7 @@ const SeoEditor = () => {
           { label: "Cities Covered", value: new Set(data.flatMap((d) => d.city_ids || [])).size },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-3 flex flex-col gap-0.5">
-            <span className="text-[22px] font-bold text-orange-500 leading-none">{s.value}</span>
+            <span className="text-[22px] font-semibold text-orange-500 leading-none">{s.value}</span>
             <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{s.label}</span>
           </div>
         ))}
@@ -360,7 +360,7 @@ const SeoEditor = () => {
             {/* Modal header */}
             <div className="flex justify-between items-start px-6 py-5 border-b border-gray-100 gap-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 m-0">
+                <h2 className="text-lg font-semibold text-gray-900 m-0">
                   {isEdit ? "Edit SEO Entry" : "New SEO Entry"}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5 mb-0">

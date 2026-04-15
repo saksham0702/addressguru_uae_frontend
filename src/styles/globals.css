@@ -140,3 +140,50 @@ button{
 .animate-drop {
   animation: dropDown 0.18s ease-out forwards;
 }
+
+
+.seo-content {
+  color: #374151; /* gray-700 */
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Headings */
+.seo-content h1,
+.seo-content h2,
+.seo-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+/* Paragraphs */
+.seo-content p {
+  margin-bottom: 10px;
+  color: #4b5563; /* gray-600 */
+}
+
+/* Bold text */
+.seo-content strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Lists */
+.seo-content ul,
+.seo-content ol {
+  padding-left: 18px;
+  margin-bottom: 10px;
+}
+
+.seo-content li {
+  margin-bottom: 4px;
+}
+
+/* Links */
+.seo-content a {
+  color: #ea580c; /* orange-600 */
+  font-weight: 500;
+}

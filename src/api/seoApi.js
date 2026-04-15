@@ -12,7 +12,7 @@ export const get_seo_data = async (category_slug, city_slug) => {
       `${API_URL}/seo-content?category_slug=${category_slug}&city_slug=${city_slug}`
     );
 
-    return response?.data;
+    return response?.data?.data;
   } catch (error) {
     console.log("error fetching seo data", error);
     return error;

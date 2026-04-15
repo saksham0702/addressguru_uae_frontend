@@ -36,7 +36,28 @@ import {
   RemoveFormatting,
 } from "lucide-react";
 
-// ── FontSize extension ────────────────────────────────────────────────────────
+// ── Fix 2 & 3: CleanPaste — strips font-size from pasted HTML ────────────────
+const CleanPaste = Extension.create({
+  name: "cleanPaste",
+  addOptions() {
+    return {};
+  },
+  // transformPastedHTML runs before Tiptap parses the clipboard HTML
+  onBeforeCreate() {},
+  addProseMirrorPlugins() {
+    return [];
+  },
+  // Use the built-in transformPastedHTML hook
+}).extend({
+  addOptions() {
+    return {};
+  },
+});
+
+// We use the editor's transformPastedHTML option instead (cleaner approach):
+// See useEditor config below — transformPastedHTML is passed directly.
+
+// ── Fix 3: FontSize — skips headings ─────────────────────────────────────────
 const FontSize = Extension.create({
   name: "fontSize",
   addOptions() {
@@ -61,8 +82,11 @@ const FontSize = Extension.create({
     return {
       setFontSize:
         (size) =>
-        ({ chain }) =>
-          chain().setMark("textStyle", { fontSize: size }).run(),
+        ({ chain, editor }) => {
+          // Fix 3: Do nothing when cursor is inside a heading
+          if (editor.isActive("heading")) return false;
+          return chain().setMark("textStyle", { fontSize: size }).run();
+        },
       unsetFontSize:
         () =>
         ({ chain }) =>
@@ -84,10 +108,7 @@ const ToolBtn = ({ onClick, active, disabled, title, children }) => (
     className={`
       inline-flex items-center justify-center w-[30px] h-[30px] rounded-md flex-shrink-0
       border-none transition-colors duration-150
-      ${active
-        ? "bg-orange-600 text-white"
-        : "bg-transparent text-gray-700 hover:bg-orange-50"
-      }
+      ${active ? "bg-orange-600 text-white" : "bg-transparent text-gray-700 hover:bg-orange-50"}
       ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
     `}
   >
@@ -98,6 +119,21 @@ const ToolBtn = ({ onClick, active, disabled, title, children }) => (
 const Divider = () => (
   <div className="w-px h-[22px] bg-gray-200 mx-1 flex-shrink-0" />
 );
+
+// ── Fix 2: strip font-size from pasted HTML ───────────────────────────────────
+function stripFontSizeFromHTML(html) {
+  // Remove font-size from all inline style attributes
+  return html.replace(
+    /(<[^>]+style\s*=\s*["'])([^"']*)(["'])/gi,
+    (match, open, styleStr, close) => {
+      const cleaned = styleStr
+        .split(";")
+        .filter((rule) => !/^\s*font-size\s*:/i.test(rule))
+        .join(";");
+      return `${open}${cleaned}${close}`;
+    },
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 const TiptapEditor = ({
@@ -110,7 +146,7 @@ const TiptapEditor = ({
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Underline,
       TextStyle,
-      FontSize,
+      FontSize, // Fix 3: heading-aware FontSize
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Link.configure({
         openOnClick: false,
@@ -124,6 +160,10 @@ const TiptapEditor = ({
     ],
     content: value || "",
     immediatelyRender: false,
+    // Fix 2: strip font-size on every paste
+    transformPastedHTML(html) {
+      return stripFontSizeFromHTML(html);
+    },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
 
@@ -135,48 +175,87 @@ const TiptapEditor = ({
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
     } else {
-      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: url })
+        .run();
     }
   }, [editor]);
 
   const insertTable = useCallback(() => {
     if (!editor) return;
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
   }, [editor]);
 
   if (!editor) return null;
 
-  const FONT_SIZES = ["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px", "36px", "48px"];
+  const FONT_SIZES = [
+    "12px",
+    "14px",
+    "16px",
+    "18px",
+    "20px",
+    "24px",
+    "28px",
+    "32px",
+    "36px",
+    "48px",
+  ];
 
   return (
-    <div className="border-[1.5px] border-gray-200 rounded-xl overflow-hidden bg-white">
-      {/* ── Toolbar ── */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2.5 py-2 bg-gray-50 border-b border-gray-200">
-
-        {/* Undo / Redo */}
-        <ToolBtn onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo">
+    // Fix 4: outer wrapper is a flex column with fixed height
+    <div className="border-[1.5px] border-gray-200 rounded-xl overflow-hidden bg-white flex flex-col h-[600px]">
+      {/* Fix 4: toolbar is flex-none (never shrinks) */}
+      <div className="flex-none flex flex-wrap items-center gap-0.5 px-2.5 py-2 bg-gray-50 border-b border-gray-200 z-10">
+        <ToolBtn
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          title="Undo"
+        >
           <Undo size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo">
+        <ToolBtn
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          title="Redo"
+        >
           <Redo size={14} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Headings */}
-        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1">
+        <ToolBtn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
+          active={editor.isActive("heading", { level: 1 })}
+          title="Heading 1"
+        >
           <Heading1 size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2">
+        <ToolBtn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
+          active={editor.isActive("heading", { level: 2 })}
+          title="Heading 2"
+        >
           <Heading2 size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Heading 3">
+        <ToolBtn
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          active={editor.isActive("heading", { level: 3 })}
+          title="Heading 3"
+        >
           <Heading3 size={14} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Font size */}
         <select
           title="Font Size"
           onChange={(e) => {
@@ -188,105 +267,183 @@ const TiptapEditor = ({
         >
           <option value="">Size</option>
           {FONT_SIZES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
-
         <Divider />
-
-        {/* Inline marks */}
-        <ToolBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          active={editor.isActive("bold")}
+          title="Bold"
+        >
           <Bold size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italic">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          active={editor.isActive("italic")}
+          title="Italic"
+        >
           <Italic size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} title="Underline">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          active={editor.isActive("underline")}
+          title="Underline"
+        >
           <UnderlineIcon size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} title="Strikethrough">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          active={editor.isActive("strike")}
+          title="Strikethrough"
+        >
           <Strikethrough size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive("code")} title="Inline Code">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          active={editor.isActive("code")}
+          title="Inline Code"
+        >
           <Code size={14} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Alignment */}
-        <ToolBtn onClick={() => editor.chain().focus().setTextAlign("left").run()} active={editor.isActive({ textAlign: "left" })} title="Align Left">
+        <ToolBtn
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          active={editor.isActive({ textAlign: "left" })}
+          title="Align Left"
+        >
           <AlignLeft size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().setTextAlign("center").run()} active={editor.isActive({ textAlign: "center" })} title="Align Center">
+        <ToolBtn
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          active={editor.isActive({ textAlign: "center" })}
+          title="Align Center"
+        >
           <AlignCenter size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().setTextAlign("right").run()} active={editor.isActive({ textAlign: "right" })} title="Align Right">
+        <ToolBtn
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          active={editor.isActive({ textAlign: "right" })}
+          title="Align Right"
+        >
           <AlignRight size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().setTextAlign("justify").run()} active={editor.isActive({ textAlign: "justify" })} title="Justify">
+        <ToolBtn
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          active={editor.isActive({ textAlign: "justify" })}
+          title="Justify"
+        >
           <AlignJustify size={14} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Lists + blocks */}
-        <ToolBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet List">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          active={editor.isActive("bulletList")}
+          title="Bullet List"
+        >
           <List size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Numbered List">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          active={editor.isActive("orderedList")}
+          title="Numbered List"
+        >
           <ListOrdered size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} title="Blockquote">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          active={editor.isActive("blockquote")}
+          title="Blockquote"
+        >
           <Quote size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} title="Code Block">
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          active={editor.isActive("codeBlock")}
+          title="Code Block"
+        >
           <Code size={14} strokeWidth={1.5} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Link + Table + HR */}
-        <ToolBtn onClick={setLink} active={editor.isActive("link")} title="Insert / Edit Link">
+        <ToolBtn
+          onClick={setLink}
+          active={editor.isActive("link")}
+          title="Insert / Edit Link"
+        >
           <LinkIcon size={14} />
         </ToolBtn>
         <ToolBtn onClick={insertTable} title="Insert Table">
           <TableIcon size={14} />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Horizontal Rule">
+        <ToolBtn
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          title="Horizontal Rule"
+        >
           <Minus size={14} />
         </ToolBtn>
-
         <Divider />
-
-        {/* Clear formatting */}
-        <ToolBtn onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} title="Clear Formatting">
+        <ToolBtn
+          onClick={() =>
+            editor.chain().focus().clearNodes().unsetAllMarks().run()
+          }
+          title="Clear Formatting"
+        >
           <RemoveFormatting size={14} />
         </ToolBtn>
       </div>
 
-      {/* ── Editor content ── */}
+      {/* Fix 4: content area is flex-1 + overflow-y-auto → scrollable */}
       <EditorContent
         editor={editor}
-        className="min-h-[280px] px-5 py-4 text-[15px] leading-relaxed text-gray-900"
+        className="flex-1 overflow-y-auto px-5 py-4 text-[15px] leading-relaxed text-gray-900"
       />
 
-      {/* ── Contextual table controls ── */}
+      {/* Fix 4: table bar is flex-none (sticks to bottom of the flex column) */}
       {editor.isActive("table") && (
-        <div className="flex flex-wrap gap-1.5 px-3 py-2 bg-orange-50 border-t border-orange-200">
+        <div className="flex-none flex flex-wrap gap-1.5 px-3 py-2 bg-orange-50 border-t border-orange-200 z-10">
           {[
-            { label: "+ Row Below", fn: () => editor.chain().focus().addRowAfter().run() },
-            { label: "- Delete Row", fn: () => editor.chain().focus().deleteRow().run() },
-            { label: "+ Col After", fn: () => editor.chain().focus().addColumnAfter().run() },
-            { label: "- Delete Col", fn: () => editor.chain().focus().deleteColumn().run() },
-            { label: "Merge Cells", fn: () => editor.chain().focus().mergeCells().run() },
-            { label: "Split Cell", fn: () => editor.chain().focus().splitCell().run() },
-            { label: "Toggle Header Row", fn: () => editor.chain().focus().toggleHeaderRow().run() },
-            { label: "Delete Table", fn: () => editor.chain().focus().deleteTable().run() },
+            {
+              label: "+ Row Below",
+              fn: () => editor.chain().focus().addRowAfter().run(),
+            },
+            {
+              label: "- Delete Row",
+              fn: () => editor.chain().focus().deleteRow().run(),
+            },
+            {
+              label: "+ Col After",
+              fn: () => editor.chain().focus().addColumnAfter().run(),
+            },
+            {
+              label: "- Delete Col",
+              fn: () => editor.chain().focus().deleteColumn().run(),
+            },
+            {
+              label: "Merge Cells",
+              fn: () => editor.chain().focus().mergeCells().run(),
+            },
+            {
+              label: "Split Cell",
+              fn: () => editor.chain().focus().splitCell().run(),
+            },
+            {
+              label: "Toggle Header Row",
+              fn: () => editor.chain().focus().toggleHeaderRow().run(),
+            },
+            {
+              label: "Delete Table",
+              fn: () => editor.chain().focus().deleteTable().run(),
+            },
           ].map(({ label, fn }) => (
             <button
               key={label}
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); fn(); }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                fn();
+              }}
               className="text-[11px] font-medium px-2.5 py-0.5 rounded-md border border-orange-300 bg-white text-orange-700 cursor-pointer hover:bg-orange-50 transition-colors"
             >
               {label}
@@ -305,9 +462,19 @@ const TiptapEditor = ({
           float: left;
           height: 0;
         }
-        .ProseMirror h1 { font-size: 2em; font-weight: 700; margin: 0.6em 0 0.3em; color: #111827; }
-        .ProseMirror h2 { font-size: 1.5em; font-weight: 600; margin: 0.6em 0 0.3em; color: #111827; }
-        .ProseMirror h3 { font-size: 1.25em; font-weight: 600; margin: 0.6em 0 0.3em; color: #111827; }
+
+        /* Fix 1: lock heading sizes — !important beats any inline style */
+        .ProseMirror h1,
+        .ProseMirror h1 * { font-size: 28px !important; font-weight: 700; }
+        .ProseMirror h2,
+        .ProseMirror h2 * { font-size: 22px !important; font-weight: 600; }
+        .ProseMirror h3,
+        .ProseMirror h3 * { font-size: 18px !important; font-weight: 600; }
+
+        .ProseMirror h1 { margin: 12px 0 6px; }
+        .ProseMirror h2 { margin: 10px 0 5px; }
+        .ProseMirror h3 { margin: 8px 0 4px; }
+
         .ProseMirror p { margin: 0.4em 0; }
         .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 0.4em 0; }
         .ProseMirror blockquote {
