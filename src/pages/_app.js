@@ -13,6 +13,10 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import SideNav from "@/components/admin/sidebar/sidebar";
 import AdminHeader from "@/components/admin/header";
 import { ErrorProvider } from "@/context/ErrorContext";
+import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
+
+// ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
+// TODO: Replace with your real GA4 Measurement ID
 
 
 export default function App({ Component, pageProps }) {
@@ -78,8 +82,24 @@ export default function App({ Component, pageProps }) {
     };
   }, [router]);
 
+  /* ------------------ GA4 PAGE VIEW TRACKING ------------------ */
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag("config", GOOGLE_MEASUREMENT_ID, {
+          page_path: url,
+        });
+      }
+    };
+
+    router.events.on("routeChangeComplete", handleRouteChange);
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [router.events]);
+
   return (
-    <GoogleOAuthProvider clientId="477872652143-tciloohp49r48l80d7j6tqituovm9nu0.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
         <ErrorProvider>
           <div className="flex justify-center">

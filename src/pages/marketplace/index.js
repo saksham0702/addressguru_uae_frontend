@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import HelpFull from "@/components/Helpfull";
 import Link from "next/link";
+import Head from "next/head";
 // import { get_marketplace_listing } from "@/api/showlistings";
 import { get_marketplace_filter } from "@/api/filter";
 import { useAuth } from "@/context/AuthContext";
@@ -131,6 +132,60 @@ const Marketplace = () => {
   // ── Main render ───────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col items-center w-full justify-center bg-[#F8F7F7]">
+      {/* ── SEO Head ─────────────────────────────────────────────────────────── */}
+      <Head>
+        <title>{`Top Marketplace Listings in ${city || "UAE"} | Buy & Sell | AddressGuru UAE`}</title>
+        <meta
+          name="description"
+          content={`Browse the best marketplace listings in ${city || "UAE"}. Find products to buy and sell — electronics, furniture, fashion, and more on AddressGuru UAE.`}
+        />
+        <meta
+          name="keywords"
+          content={`marketplace UAE, buy sell UAE, second hand Dubai, online marketplace UAE, products for sale ${city}, AddressGuru marketplace`}
+        />
+        <link rel="canonical" href={`https://addressguru.ae/marketplace`} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`Marketplace in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          property="og:description"
+          content={`Discover products for sale in ${city || "UAE"}. Buy and sell with ease on AddressGuru.`}
+        />
+        <meta property="og:url" content="https://addressguru.ae/marketplace" />
+        <meta property="og:image" content="https://addressguru.ae/seo/default-marketplace-og.jpg" />
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta property="og:locale" content="en_AE" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Marketplace in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          name="twitter:description"
+          content={`Find products to buy and sell in ${city || "UAE"} on AddressGuru.`}
+        />
+        <meta name="twitter:image" content="https://addressguru.ae/seo/default-marketplace-og.jpg" />
+
+        {/* JSON-LD: ItemList */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              name: `Marketplace Listings in ${city || "UAE"}`,
+              url: "https://addressguru.ae/marketplace",
+              numberOfItems: listings?.length || 0,
+              itemListElement: listings?.slice(0, 10).map((item, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: item?.title || item?.name,
+                url: `https://addressguru.ae/marketplace/${item?.slug}`,
+              })) || [],
+            }),
+          }}
+        />
+      </Head>
       <div className="md:w-[80%] max-md:w-[96%] bg-white max-md:border border-gray-200 max-md:rounded-lg pb-10 md:pl-3">
         <div className="flex items-center justify-between max-md:p-2 py-2 max-md:pt-3">
           <BreadCrumbs length={pageData?.total} slug={"marketplace "} />

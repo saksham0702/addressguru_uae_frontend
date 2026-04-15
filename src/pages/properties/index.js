@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import HelpFull from "@/components/Helpfull";
 import Link from "next/link";
-
+import Head from "next/head";
 import { get_property_filter } from "@/api/filter";
 import { useAuth } from "@/context/AuthContext";
 import MobileMarketplaceFilter from "@/components/MarketplaceAndToLet/MobileMarketplaceFilter";
@@ -130,6 +130,60 @@ const Properties = () => {
   // ── Main render ───────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col items-center w-full justify-center bg-[#F8F7F7]">
+      {/* ── SEO Head ─────────────────────────────────────────────────────────── */}
+      <Head>
+        <title>{`Properties for Sale & Rent in ${city || "UAE"} | AddressGuru UAE`}</title>
+        <meta
+          name="description"
+          content={`Find properties for sale and rent in ${city || "UAE"}. Browse apartments, villas, offices and commercial properties. Verified listings on AddressGuru UAE.`}
+        />
+        <meta
+          name="keywords"
+          content={`properties UAE, apartments for rent Dubai, villas for sale UAE, real estate ${city}, property listings UAE, AddressGuru properties`}
+        />
+        <link rel="canonical" href="https://addressguru.ae/properties" />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`Properties in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          property="og:description"
+          content={`Discover the best properties for rent and sale in ${city || "UAE"}. Apartments, villas, offices and more.`}
+        />
+        <meta property="og:url" content="https://addressguru.ae/properties" />
+        <meta property="og:image" content="https://addressguru.ae/seo/default-property-og.jpg" />
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta property="og:locale" content="en_AE" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Properties in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          name="twitter:description"
+          content={`Find properties for sale and rent in ${city || "UAE"} on AddressGuru UAE.`}
+        />
+        <meta name="twitter:image" content="https://addressguru.ae/seo/default-property-og.jpg" />
+
+        {/* JSON-LD: RealEstateListing collection */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              name: `Properties in ${city || "UAE"}`,
+              url: "https://addressguru.ae/properties",
+              numberOfItems: listings?.length || 0,
+              itemListElement: listings?.slice(0, 10).map((item, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: item?.title || item?.name,
+                url: `https://addressguru.ae/properties/${item?.slug}`,
+              })) || [],
+            }),
+          }}
+        />
+      </Head>
       <div className="md:w-[80%] max-md:w-[96%] bg-white max-md:border border-gray-200 max-md:rounded-lg pb-10 md:pl-3">
         <div className="flex items-center justify-between max-md:p-2 py-2 max-md:pt-3">
           <BreadCrumbs length={pageData?.total} slug={"properties "} />

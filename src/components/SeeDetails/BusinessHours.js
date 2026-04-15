@@ -33,7 +33,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
   const todayData = hoursMap[today];
   const isOpenToday = todayData?.is_open;
 
-  const formattedHours = ORDERED_DAYS.map((day) => ({
+  const formattedHours = ORDERED_DAYS?.map((day) => ({
     day,
     is_open: hoursMap[day]?.is_open ?? false,
     open_time: hoursMap[day]?.open_time ?? null,
@@ -69,8 +69,8 @@ const BusinessHours = ({ openingHours, mobile }) => {
               isToday && is_open
                 ? "text-green-700 font-semibold"
                 : !is_open
-                ? "text-red-500"
-                : "text-gray-700"
+                  ? "text-red-500"
+                  : "text-gray-700"
             }>
               {is_open ? `${formatTime(open_time)} – ${formatTime(close_time)}` : "Closed"}
             </span>
@@ -99,7 +99,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
             className={`w-3.5 h-3.5 text-gray-400 ml-auto transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
-        { isOpen && (
+        {isOpen && (
           <div className="mt-1 bg-white  rounded-md border border-gray-200 ">
             <HoursList />
           </div>
