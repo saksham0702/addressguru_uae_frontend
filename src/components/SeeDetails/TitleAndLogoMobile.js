@@ -335,31 +335,16 @@ const TitleAndLogoMobile = ({
             />
           </svg>
         </a>
-      </div>
-      <hr className="text-gray-200 my-2" />
-      <div className="flex justify-between items-center bg-white max-[375px]:text-[10px]  text-xs rounded-b-lg">
-        <button
-          onClick={() => handlePop("report")}
-          className="  text-[#E06C5E] px-3 py-1  rounded"
-        >
-          Report
-        </button>
-        <button
-          className=" text-[#838383]  px-3 py-1  rounded cursor-not-allowed"
-          onClick={() => handlePop("claim")}
-        >
-          Claim this Business
-        </button>
-        {data?.websiteLink && (
+         {data?.websiteLink && (
           <a
             href={data?.websiteLink || "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="border border-[#EEEEEE] text-[#838383] px-3 py-1 rounded flex items-center gap-1"
+            className="border border-[#EEEEEE] text-[#838383] px-2 py-1 h-10 rounded flex items-center gap-1"
           >
             <svg
-              width="16"
-              height="16"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -380,6 +365,22 @@ const TitleAndLogoMobile = ({
             </svg>
           </a>
         )}
+      </div>
+      <hr className="text-gray-200 my-2" />
+      <div className="flex justify-between items-center bg-white max-[375px]:text-[10px]  text-xs rounded-b-lg">
+        <button
+          onClick={() => handlePop("report")}
+          className="  text-[#E06C5E] px-3 py-1  rounded"
+        >
+          Report
+        </button>
+        <button
+          className=" text-[#838383]  px-3 py-1  rounded cursor-not-allowed"
+          onClick={() => handlePop("claim")}
+        >
+          Claim this Business
+        </button>
+       
       </div>
       {reviewPop && (
         <div className=" inset-0 min-h-screen flex items-center z-50 fixed  bg-black/30 ">

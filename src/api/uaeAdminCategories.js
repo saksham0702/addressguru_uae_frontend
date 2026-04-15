@@ -687,7 +687,7 @@ export const getBusinessFeatures = async (id) => {
     const response = await axios.get(
       `${API_URL}/business-listing/get-features/${id}`,
     );
-    console.log("get business features response", response);
+    // console.log("get business features response", response);
     return response.data.data;
   } catch (error) {
     console.log("Error fetching business features:", error);

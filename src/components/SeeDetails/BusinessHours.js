@@ -90,7 +90,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
         >
           <Clock className="w-4 h-4 text-black flex-shrink-0" />
           <span className="md:font-semibold  md:text-[16px] text-[14px]  text-black">Business Hours:</span>
-          <span className={`text-sm ml-1  ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
+          <span className={`text-sm ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
             {isOpenToday
               ? `Open`
               : "Closed Today"}
@@ -126,13 +126,13 @@ const BusinessHours = ({ openingHours, mobile }) => {
       <div className={`flex items-center gap-1.5 text-sm cursor-pointer  rounded transition-colors ${isOpen ? "bg-white text-black" : "hover:bg-white hover:text-black"}`}>
         <Clock className={`w-4 h-4 text-black flex-shrink-0 ${isOpen ? "hidden" : ""}`} />
         <span className={`font-semibold text-[16px] ${isOpen ? "ml-5" : ""} text-black `}>Business Hours:</span>
-        <span className={`text-[16px] font-semibold ml-0.5 ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
+        <span className={`text-[16px] font-semibold ${isOpenToday ? "text-green-700" : "text-red-500"}`}>
           {isOpenToday
             ? `Open`
             : "Closed Today"}
         </span>
         <ChevronDown
-          className={`w-4 h-4 text-gray-900 mr-5 ml-auto transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-gray-900 mr-5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </div>
     </div>

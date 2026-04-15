@@ -141,7 +141,6 @@ const BusinessInfo = ({
 
         const generatedText =
           response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        console.log("response", response);
 
         if (generatedText) {
           const cleanText = generatedText
