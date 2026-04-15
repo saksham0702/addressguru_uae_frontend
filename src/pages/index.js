@@ -107,7 +107,7 @@ export default function Home() {
         <meta property="og:url" content={APP_URL} />
         <meta
           property="og:image"
-          content={`${APP_URL}/seo/default-home-og.jpg`}
+          content={`${APP_URL}/home-og.jpg`}
         />
         <meta property="og:site_name" content="AddressGuru UAE" />
         <meta property="og:locale" content="en_AE" />
@@ -124,7 +124,7 @@ export default function Home() {
         />
         <meta
           name="twitter:image"
-          content={`${APP_URL}/seo/default-home-og.jpg`}
+          content={`${APP_URL}/home-og.jpg`}
         />
 
         {/* ======= JSON-LD SCHEMA (SEO BOOST) ======= */}

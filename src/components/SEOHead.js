@@ -15,7 +15,7 @@ import Head from "next/head";
 
 const SITE_NAME = "AddressGuru UAE";
 const SITE_URL = "https://addressguru.ae";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/seo/default-home-og.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/home-og.jpg`;
 const TWITTER_HANDLE = "@AddressGuruUAE"; // TODO: update with real handle
 
 export default function SEOHead({
