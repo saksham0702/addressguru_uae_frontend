@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Disallow admin & dashboard routes from indexing
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login/
+Disallow: /register/
+Disallow: /agent-register/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://addressguru.ae/sitemap.xml

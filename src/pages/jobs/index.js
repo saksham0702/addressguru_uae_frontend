@@ -83,7 +83,8 @@ const JobsListings = ({ initialJobs, filters }) => {
           content={`Browse the latest job vacancies in ${city}. Verified companies with salary information.`}
         />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Your Website Name" />
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta property="og:locale" content="en_AE" />
         <meta
           property="og:image"
           content={`${APP_URL}/seo/default-job-og.jpg`}
@@ -117,7 +118,7 @@ const JobsListings = ({ initialJobs, filters }) => {
                   position: i + 1,
                   name: job?.title,
                   description: job?.shortDescription,
-                  url: `${APP_URL}/job/${job?.slug}`,
+                  url: `https://addressguru.ae/jobs/${job?.slug}`,
                 })) || [],
             }),
           }}

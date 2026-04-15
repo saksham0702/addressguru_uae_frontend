@@ -201,24 +201,35 @@ const SeeDetails = ({ initialData }) => {
         />
         <meta name="twitter:image" content={data?.images?.[0]} />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href={`/${data?.slug}`} />
+
+        {/* Canonical — full absolute URL required by Google */}
+        <link rel="canonical" href={`https://addressguru.ae/${data?.slug}`} />
+
+        {/* Schema JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
-              name: data?.business_name,
-              description: data?.ad_description,
+              name: data?.business_name || data?.businessName,
+              description: data?.ad_description || data?.description,
               image: data?.images,
-              address: data?.business_address,
-              url: `https://addressguru.ae/${data?.slug}`,
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue:
-                  data?.ratings?.length > 0 ? data?.ratings[0]?.rating : 4,
-                reviewCount: data?.ratings?.length || 1,
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: data?.business_address || data?.businessAddress,
+                addressLocality: data?.city || "Dubai",
+                addressCountry: "AE",
               },
+              url: `https://addressguru.ae/${data?.slug}`,
+              aggregateRating:
+                data?.ratings?.length > 0
+                  ? {
+                      "@type": "AggregateRating",
+                      ratingValue: data?.ratings[0]?.rating ?? 4,
+                      reviewCount: data?.ratings?.length,
+                    }
+                  : undefined,
               openingHours: data?.workingHours,
               telephone: data?.phone,
               priceRange: "$$",

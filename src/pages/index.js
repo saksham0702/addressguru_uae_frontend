@@ -79,16 +79,16 @@ export default function Home() {
     <>
       <Head>
         {/* ======= BASIC SEO ======= */}
-        <title>Find Local Businesses, Services & Jobs | Addressguru SG</title>
+        <title>Find Local Businesses, Services & Jobs in UAE | AddressGuru UAE</title>
 
         <meta
           name="description"
-          content="Find top local businesses, nearby services, jobs, professionals, and shops. Browse categories, explore services, and discover the latest listings near you."
+          content="Find top local businesses, services, jobs, marketplace listings and properties in UAE. Browse verified categories and discover the best listings near you on AddressGuru."
         />
 
         <meta
           name="keywords"
-          content="local businesses, services near me, jobs near me, find services, business directory, nearby shops"
+          content="local businesses UAE, services near me Dubai, jobs in UAE, find services UAE, business directory UAE, Dubai shops, Abu Dhabi businesses, AddressGuru UAE"
         />
 
         {/* ======= CANONICAL URL ======= */}
@@ -109,7 +109,8 @@ export default function Home() {
           property="og:image"
           content={`${APP_URL}/seo/default-home-og.jpg`}
         />
-        <meta property="og:site_name" content="Your Website Name" />
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta property="og:locale" content="en_AE" />
 
         {/* ======= TWITTER CARDS ======= */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -151,13 +152,14 @@ export default function Home() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Your Website Name",
+              name: "AddressGuru UAE",
               url: APP_URL,
-              logo: `${APP_URL}/logo.png`,
+              logo: `${APP_URL}/assets/logo.png`,
+              // TODO: Replace the sameAs URLs below with real AddressGuru UAE social media profiles
               sameAs: [
-                "https://facebook.com/yourpage",
-                "https://instagram.com/yourpage",
-                "https://www.linkedin.com/company/yourpage",
+                "https://www.facebook.com/addressguruuae",
+                "https://www.instagram.com/addressguruuae",
+                "https://www.linkedin.com/company/addressguru",
               ],
             }),
           }}

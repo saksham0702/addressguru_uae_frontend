@@ -27,7 +27,7 @@ const Blogs = () => {
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [mostViewedBlogs, setMostViewedBlogs] = useState([]);
   const [blogsByCategory, setBlogsByCategory] = useState([]);
-  const APP_URL = "https://addressguru.ae/api";
+  const APP_URL = "https://addressguru.ae";
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -187,10 +187,40 @@ const Blogs = () => {
         <meta name="geo.position" content="25.2048;55.2708" />
         <meta name="ICBM" content="25.2048, 55.2708" />
 
-        {/* Structured Data (JSON-LD) */}
+        {/* Structured Data (JSON-LD) — Blog collection page */}
         <script
           type="application/ld+json"
-          // dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Blog",
+              name: "AddressGuru UAE Blog",
+              description:
+                "Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in UAE.",
+              url: "https://addressguru.ae/blogs",
+              publisher: {
+                "@type": "Organization",
+                name: "AddressGuru UAE",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://addressguru.ae/assets/logo.png",
+                },
+              },
+              blogPost: blogs?.slice(0, 5).map((blog) => ({
+                "@type": "BlogPosting",
+                headline: blog?.title,
+                url: `https://addressguru.ae/blogs/${blog?.slug}`,
+                datePublished: blog?.date || blog?.createdAt,
+                image: blog?.coverImage
+                  ? `${APP_URL}/${blog.coverImage}`
+                  : `${APP_URL}/seo/default-blog-og.jpg`,
+                author: {
+                  "@type": "Organization",
+                  name: "AddressGuru UAE",
+                },
+              })) || [],
+            }),
+          }}
         />
       </Head>
       <div className="min-h-screen bg-white max-md:w-full max-w-[2000px] w-[80%] p-6 mx-auto py-8">
