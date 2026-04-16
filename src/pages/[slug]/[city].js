@@ -600,7 +600,7 @@ const SearchResults = () => {
             }))}
           />
           <hr className="border-gray-200 my-2" />
-          <SeoContent categorySlug={slug} citySlug={canonicalCity} seoContent={seoContent} />
+          <SeoContent categorySlug={slug} city={canonicalCity} seoContent={seoContent} />
         </div>
       </div>
 

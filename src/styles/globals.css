@@ -5,25 +5,7 @@
   --foreground: #ffffff;
 }
 
-/*
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #000000;
-  }
-} */
-
-/* body {
-  background: var(--background);
-  color: var(--foreground);
-} */
 
 body {
    font-family: 'Poppins', sans-serif;
@@ -34,26 +16,6 @@ body {
   height: 24px;
   display: block;
 }
-
-
- /* .custom-dots .swiper-pagination-bullet {
-  width: 6px;
-  height: 6px;
-  background: #ffffff70; 
-  border-radius: 9999px;
-  opacity: 1;
-  transition: all 0.3s ease;
-  cursor: pointer;  
-} 
-
-.custom-dots .swiper-pagination-bullet-active {
-  width: 6px;
-  height: 6px;
-  box-shadow: 0 0 10px 2px #ffffff;
-  background: #ffffff;
-  border-radius: 9999px;
-
-}  */
 
 
 
@@ -142,21 +104,25 @@ button{
 }
 
 
+
+/* seo content data */
+
 .seo-content {
   color: #374151; /* gray-700 */
-  font-size: 13px;
   line-height: 1.7;
 }
+.seo-content {
+  font-size: 16px !important; /* base text */
+}
 
-/* Headings */
 .seo-content h1,
 .seo-content h2,
 .seo-content h3 {
-  font-size: 16px;
+  font-size: 20px !important; /* 16 + 4 */
   font-weight: 600;
-  color: #111827; /* gray-900 */
+  color: #111827;
+  margin-top: 22px;
   margin-bottom: 8px;
-  margin-top: 12px;
 }
 
 /* Paragraphs */
@@ -165,7 +131,7 @@ button{
   color: #4b5563; /* gray-600 */
 }
 
-/* Bold text */
+/* Bold */
 .seo-content strong {
   color: #111827;
   font-weight: 600;
@@ -186,4 +152,55 @@ button{
 .seo-content a {
   color: #ea580c; /* orange-600 */
   font-weight: 500;
+}
+/* Wrapper for scroll */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+/* Base table */
+.seo-content table {
+  border-collapse: collapse;
+}
+
+/* Borders FIXED */
+.seo-content th,
+.seo-content td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+}
+
+/* Header */
+.seo-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+}
+
+/* Text */
+.seo-content td {
+  color: #374151;
+}
+
+/* Zebra */
+.seo-content tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Width logic */
+.seo-content table.table-small {
+  width: 40%;
+  min-width: 300px;
+}
+
+.seo-content table.table-medium {
+  width: 65%;
+  min-width: 500px;
+}
+
+.seo-content table.table-full {
+  width: 100%;
 }
