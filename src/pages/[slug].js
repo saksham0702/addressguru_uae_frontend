@@ -28,6 +28,7 @@ import Link from "next/link";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import FullWidthGallery from "@/components/SeeDetails/FullWidthGallery";
 import RoomsSection from "@/components/SeeDetails/RoomsSection";
+import { get_rooms_by_listing } from "@/api/rooms";
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
@@ -77,6 +78,7 @@ const SeeDetails = ({ initialData }) => {
   const [rejectModalData, setRejectModalData] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [rooms, setRooms] = useState([]);
 
   const [toast, setToast] = useState(null);
   const API_URL = "https://addressguru.ae";
@@ -136,22 +138,59 @@ const SeeDetails = ({ initialData }) => {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const fetch_rooms = async (id) => {
+    try {
+      const result = await get_rooms_by_listing(id);
+      console.log("rooms", result);
+
+      const roomData = result?.data;
+
+      console.log("rooms", roomData);
+
+      setRooms(roomData); // ✅ THIS IS IMPORTANT
+    } catch (err) {
+      console.error("Rooms fetch error:", err);
+    }
+  };
+
+  const formattedRoomsData = rooms
+    ? {
+        startingFrom: rooms.startingFrom,
+        checkIn: rooms.checkIn,
+        checkOut: rooms.checkOut,
+        availableDates: [],
+        rooms: rooms.rooms?.map((room) => ({
+          name: room.roomType,
+          price: room.price,
+          roomType: room.roomType,
+          capacity: room.capacity,
+          images: room.images ?? [], // ← pass images through
+        })),
+      }
+    : null;
 
   useEffect(() => {
-    if (data) return;
     if (!slug) return;
+
     const fetchListing = async () => {
       setLoading(true);
       try {
         const result = await get_listing_data(slug);
-        if (result) setData(result?.data?.data);
-        else router.push("/404");
+
+        if (result?.data?.data) {
+          const listing = result.data.data;
+          setData(listing);
+          fetch_rooms(listing._id);
+        } else {
+          router.push("/404");
+        }
       } catch (err) {
         console.error("Listing fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchListing();
   }, [slug]);
 
@@ -163,7 +202,9 @@ const SeeDetails = ({ initialData }) => {
   }, [data?.slug]);
 
   const handleWebsiteClick = async (slug) => {
-    track_event("business", slug, "website_visit").catch(console.log("website_visit"));
+    track_event("business", slug, "website_visit").catch(
+      console.log("website_visit"),
+    );
   };
   const handleClick = async (slug) => {
     track_event("business", slug, "call").catch(console.log("call"));
@@ -816,7 +857,6 @@ const SeeDetails = ({ initialData }) => {
                       <span>
                         {" Their facilities include: "}
                         {data?.facilities?.name?.join(", ")}.
-                        
                       </span>
                     )}
                   </p>
@@ -847,181 +887,18 @@ const SeeDetails = ({ initialData }) => {
                 handlePop={handlePop}
                 handleWebsiteClick={handleWebsiteClick}
               />
-              {/* booking sections */}
-              {data?.category?.name === "Yoga Studio" && (
-                <RoomsSection
-                  category="Yoga Studio"
-                  data={{
-                    startingFrom: 1200,
-                    daysNights: "3 Days | 2 Nights",
-                    batchSize: 30,
-                    language: "Hindi & English",
-                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                    rooms: [
-                      {
-                        name: "Shared room",
-                        price: 1200,
-                        roomType: "Shared",
-                        capacity: 30,
-                      },
-                      {
-                        name: "Private room",
-                        price: 2000,
-                        roomType: "Private",
-                        capacity: 10,
-                      },
-                    ],
-                  }}
-                />
-              )}
 
-              {data?.category?.name === "Hotel" && (
+              {rooms && (
                 <RoomsSection
-                  category="hotel"
-                  data={{
-                    startingFrom: 3500,
-                    checkIn: "12:00 PM",
-                    checkOut: "11:00 AM",
-                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                    rooms: [
-                      {
-                        name: "Standard room",
-                        price: 3500,
-                        roomType: "Standard",
-                        capacity: 2,
-                      },
-                      {
-                        name: "Luxury suite",
-                        price: 8900,
-                        roomType: "Luxury",
-                        capacity: 4,
-                      },
-                    ],
-                  }}
+                  enquirePop={enquirePop}
+                  setEnquirePop={setEnquirePop}
+                  category={rooms?.categoryType?.toLowerCase()}
+                  data={formattedRoomsData}
                 />
               )}
-              {data?.category?.name === "Hostel" && (
-                <RoomsSection
-                  category="hostel"
-                  data={{
-                    startingFrom: 600,
-                    checkIn: "2:00 PM",
-                    checkOut: "10:00 AM",
-                    availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                    rooms: [
-                      {
-                        name: "6-bed dorm",
-                        price: 600,
-                        roomType: "Shared",
-                        capacity: 6,
-                      },
-                      {
-                        name: "Private room",
-                        price: 1800,
-                        roomType: "Private",
-                        capacity: 2,
-                      },
-                    ],
-                  }}
-                />
-              )}
-
-              {!data?.category?.name === "Hotel" ||
-                !data?.category?.name === "Hostel" ||
-                (!data?.category?.name === "Yoga Studio" && (
-                  <div className="w-full h-[30rem] mb-7">
-                    <GetMoreInfo
-                      name={data?.businessName}
-                      type="listing"
-                      id={data?.id}
-                      setType={setType}
-                      setThanksPop={setThanksPop}
-                    />
-                  </div>
-                ))}
               <UserInformation />
             </div>
           </div>
-          {/* sections */}
-          <section className="md:hidden mt-10">
-            {data?.category?.name === "Yoga Studio" && (
-              <RoomsSection
-                category="Yoga Studio"
-                data={{
-                  startingFrom: 1200,
-                  daysNights: "3 Days | 2 Nights",
-                  batchSize: 30,
-                  language: "Hindi & English",
-                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                  rooms: [
-                    {
-                      name: "Shared room",
-                      price: 1200,
-                      roomType: "Shared",
-                      capacity: 30,
-                    },
-                    {
-                      name: "Private room",
-                      price: 2000,
-                      roomType: "Private",
-                      capacity: 10,
-                    },
-                  ],
-                }}
-              />
-            )}
-
-            {data?.category?.name === "Hotel" && (
-              <RoomsSection
-                category="hotel"
-                data={{
-                  startingFrom: 3500,
-                  checkIn: "12:00 PM",
-                  checkOut: "11:00 AM",
-                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                  rooms: [
-                    {
-                      name: "Standard room",
-                      price: 3500,
-                      roomType: "Standard",
-                      capacity: 2,
-                    },
-                    {
-                      name: "Luxury suite",
-                      price: 8900,
-                      roomType: "Luxury",
-                      capacity: 4,
-                    },
-                  ],
-                }}
-              />
-            )}
-            {data?.category?.name === "Hostel" && (
-              <RoomsSection
-                category="hostel"
-                data={{
-                  startingFrom: 600,
-                  checkIn: "2:00 PM",
-                  checkOut: "10:00 AM",
-                  availableDates: ["Sat, 12 July", "Sun, 13 July"],
-                  rooms: [
-                    {
-                      name: "6-bed dorm",
-                      price: 600,
-                      roomType: "Shared",
-                      capacity: 6,
-                    },
-                    {
-                      name: "Private room",
-                      price: 1800,
-                      roomType: "Private",
-                      capacity: 2,
-                    },
-                  ],
-                }}
-              />
-            )}
-          </section>
 
           {/* MOBILE USER INFO */}
           <div className="md:hidden mt-10">

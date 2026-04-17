@@ -59,6 +59,12 @@ const SearchResults = () => {
     search: "",
   });
 
+  const matchIds = (itemArray = [], selectedIds = []) => {
+    return itemArray.some((entry) => {
+      const id = typeof entry === "string" ? entry : entry?._id;
+      return selectedIds.includes(id);
+    });
+  };
   const hasFetchedFilters = useRef(false);
 
   // ── activeFilters: what FilterBar sees (local overrides take priority) ──
@@ -74,7 +80,6 @@ const SearchResults = () => {
     activeFilters.search.length > 0;
 
   // ── LOCAL FILTER FUNCTION ──
-  // Runs client-side on apiListings — no network request
   const applyLocalFilters = (data, f) => {
     let result = [...data];
 
@@ -88,46 +93,37 @@ const SearchResults = () => {
     }
 
     if (f.ag_verified) {
-      result = result.filter((item) => item.ag_verified === true);
+      result = result.filter((item) => item.isVerified === true);
     }
 
     if (f.facilities_id?.length > 0) {
       result = result.filter((item) =>
-        f.facilities_id.some((id) => item.facilities_id?.includes(id)),
+        matchIds(item.facilities, f.facilities_id),
       );
     }
 
     if (f.services_id?.length > 0) {
-      result = result.filter((item) =>
-        f.services_id.some((id) => item.services_id?.includes(id)),
-      );
+      result = result.filter((item) => matchIds(item.services, f.services_id));
     }
 
     if (f.courses_id?.length > 0) {
-      result = result.filter((item) =>
-        f.courses_id.some((id) => item.courses_id?.includes(id)),
-      );
+      result = result.filter((item) => matchIds(item.courses, f.courses_id));
     }
 
     if (f.payment_mode_id?.length > 0) {
       result = result.filter((item) =>
-        f.payment_mode_id.some((id) => item.payment_mode_id?.includes(id)),
+        matchIds(item.paymentModes, f.payment_mode_id),
       );
     }
 
     if (f.sort_by === "newest") {
-      result = result.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at),
-      );
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (f.sort_by === "oldest") {
-      result = result.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at),
-      );
+      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }
 
     return result;
   };
-
   // ── What actually gets rendered ──
   const listings = localFilters
     ? applyLocalFilters(apiListings, localFilters)
@@ -140,11 +136,26 @@ const SearchResults = () => {
   };
 
   // ── onFilterRemove → local only, no API ──
+  const isFiltersEmpty = (f) =>
+    f.sort_by === null &&
+    f.ag_verified === false &&
+    f.facilities_id.length === 0 &&
+    f.services_id.length === 0 &&
+    f.courses_id.length === 0 &&
+    f.payment_mode_id.length === 0 &&
+    f.search.length === 0;
+
   const handleFilterRemove = (patch) => {
-    setLocalFilters((prev) => ({
-      ...(prev ?? filters),
+    const merged = {
+      ...(localFilters ?? filters),
       ...patch,
-    }));
+    };
+    // If everything is now cleared → reset fully and hit API
+    if (isFiltersEmpty(merged)) {
+      handleReset();
+    } else {
+      setLocalFilters(merged);
+    }
   };
 
   // ── handleReset → full reset, clears local overrides, hits API ──
@@ -252,17 +263,17 @@ const SearchResults = () => {
       .replace(/\(.*\)/, "")
       .replace(/\s+/g, "-");
 
-      const fetchSeo = async () => {
-        try {
-          const res = await get_seo_data(slug, citySlug);
-          console.log("seo data", res);
-          setSeoContent(res);
-        } catch (err) {
-          console.error("Seo fetch error:", err);
-        }
-      };
+    const fetchSeo = async () => {
+      try {
+        const res = await get_seo_data(slug, citySlug);
+        // console.log("seo data", res);
+        setSeoContent(res);
+      } catch (err) {
+        console.error("Seo fetch error:", err);
+      }
+    };
 
-      fetchSeo();
+    fetchSeo();
 
     const fetchListings = async () => {
       try {
@@ -276,6 +287,7 @@ const SearchResults = () => {
         const res = await axios.get(
           `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${citySlug}?${query}`,
         );
+        // console.log("listings", res);
 
         const data = res?.data?.data;
         setApiListings(data?.listings || []);
@@ -600,7 +612,11 @@ const SearchResults = () => {
             }))}
           />
           <hr className="border-gray-200 my-2" />
-          <SeoContent categorySlug={slug} city={canonicalCity} seoContent={seoContent} />
+          <SeoContent
+            categorySlug={slug}
+            city={canonicalCity}
+            seoContent={seoContent}
+          />
         </div>
       </div>
 

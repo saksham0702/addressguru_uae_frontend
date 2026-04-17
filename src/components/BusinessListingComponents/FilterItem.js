@@ -48,6 +48,7 @@ const FilterItem = ({
   };
 
   const handleApply = () => {
+    console.log("handleApply multiOptions selected:", tempSelectedMultiIds);
     if (isRadio && tempSelectedId !== null) {
       const selectedOption = radioOptions.find(
         (opt) => opt.id === tempSelectedId,
