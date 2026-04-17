@@ -213,9 +213,10 @@ const SeeDetails = ({ initialData }) => {
   const closePopup = () => setActivePop(null);
 
   if (loading || !data) return <LandingPageSkeleton />;
-
   const isSliderFull =
-    data?.category?.name === "Hotel" || data?.category?.name === "Yoga Studio";
+    (data?.category?.name === "Hotel" ||
+      data?.category?.name === "Yoga Studio") &&
+    data?.images?.length >= 5;
 
   return (
     <>
@@ -599,7 +600,7 @@ const SeeDetails = ({ initialData }) => {
 
       {/* MAIN CONTENT */}
       <div
-        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "pointer-events-none opacity-90" : ""}`}
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? " opacity-100" : ""}`}
       >
         <div className="flex flex-col md:w-[80%] max-w-[98%] relative bg-white md:px-5 px-2 md:pb-7">
           <div className="max-md:hidden my-3">
@@ -888,12 +889,21 @@ const SeeDetails = ({ initialData }) => {
                 handleWebsiteClick={handleWebsiteClick}
               />
 
-              {rooms && (
+              {rooms?.rooms?.length > 0 ? (
                 <RoomsSection
                   enquirePop={enquirePop}
                   setEnquirePop={setEnquirePop}
                   category={rooms?.categoryType?.toLowerCase()}
                   data={formattedRoomsData}
+                />
+              ) : (
+                <GetMoreInfo
+                  isPop={false}
+                  type="listing"
+                  name={data?.businessName}
+                  id={data?._id}
+                  slug={data?.slug}
+                  setEnquirePop={setEnquirePop}
                 />
               )}
               <UserInformation />
