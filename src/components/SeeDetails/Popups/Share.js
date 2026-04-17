@@ -8,6 +8,12 @@ import {
   Music,
   X, // Close Icon
 } from "lucide-react";
+import {
+  FaFacebookF,
+  FaWhatsapp,
+  FaTwitter,
+  FaInstagram,
+} from "react-icons/fa";
 
 // Share Component
 export const Share = ({ onClose }) => {
@@ -19,40 +25,27 @@ export const Share = ({ onClose }) => {
   const shareLinks = [
     {
       name: "Facebook",
-      icon: Facebook,
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        currentUrl
-      )}`,
-      color: "bg-blue-600 hover:bg-blue-700",
+      icon: FaFacebookF,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`,
+      color: "bg-[#1877F2] hover:bg-[#166FE5]",
     },
     {
       name: "WhatsApp",
-      icon: MessageCircle,
-      url: `https://wa.me/?text=${encodeURIComponent(
-        pageTitle + " " + currentUrl
-      )}`,
-      color: "bg-green-600 hover:bg-green-700",
+      icon: FaWhatsapp,
+      url: `https://wa.me/?text=${encodeURIComponent(pageTitle + " " + currentUrl)}`,
+      color: "bg-[#25D366] hover:bg-[#1DA851]",
     },
     {
       name: "Twitter",
-      icon: Twitter,
-      url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-        currentUrl
-      )}&text=${encodeURIComponent(pageTitle)}`,
-      color: "bg-sky-500 hover:bg-sky-600",
+      icon: FaTwitter,
+      url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(pageTitle)}`,
+      color: "bg-[#1DA1F2] hover:bg-[#0d8ddb]",
     },
     {
       name: "Instagram",
-      icon: Instagram,
+      icon: FaInstagram,
       url: "https://www.instagram.com/",
-      color:
-        "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
-    },
-    {
-      name: "TikTok",
-      icon: Music,
-      url: "https://www.tiktok.com/",
-      color: "bg-black hover:bg-gray-900",
+      color: "bg-gradient-to-tr from-[#f58529] via-[#dd2a7b] to-[#8134af]",
     },
   ];
 

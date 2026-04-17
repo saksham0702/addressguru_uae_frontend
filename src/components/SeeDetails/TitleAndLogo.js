@@ -329,7 +329,7 @@ const TitleAndLogo = ({
           />
 
           {/* views */}
-          <div className="flex gap-1 items-center text-gray-600 text-sm">
+          <div className="flex border border-gray-300 rounded-sm px-2 py-1 gap-1 items-center text-gray-600 text-sm">
             <FaEye />
             <p>{data?.views}</p>
           </div>
