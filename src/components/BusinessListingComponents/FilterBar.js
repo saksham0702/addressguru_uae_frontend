@@ -101,6 +101,7 @@ const FilterBar = ({
 
   // handleFilterSelect is called by FilterItem — only on APPLY actions → triggers API
   const handleFilterSelect = (label, value = null) => {
+    
     switch (label) {
       case "Sort by":
         onFilterChange({ sort_by: value?.toLowerCase() || null });
@@ -226,19 +227,6 @@ const FilterBar = ({
         }),
     });
   });
-
-  // Clears all filters locally (no API) — used by chips-row "Clear all"
-  const handleLocalClearAll = () => {
-    onFilterRemove({
-      search: "",
-      sort_by: null,
-      ag_verified: false,
-      facilities_id: [],
-      services_id: [],
-      courses_id: [],
-      payment_mode_id: [],
-    });
-  };
 
   return (
     <div className="w-full">
@@ -419,7 +407,7 @@ const FilterBar = ({
           ))}
           {/* "Clear all" in chips row → local only, no API */}
           <button
-            onClick={handleLocalClearAll}
+            onClick={handleReset}
             className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors ml-1"
           >
             Clear all
