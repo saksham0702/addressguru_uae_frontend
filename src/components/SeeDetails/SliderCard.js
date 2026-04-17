@@ -11,7 +11,13 @@ const PrevArrow = ({ onClick }) => (
     className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
   >
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <path d="M15 18l-6-6 6-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M15 18l-6-6 6-6"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </button>
 );
@@ -22,12 +28,18 @@ const NextArrow = ({ onClick }) => (
     className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
   >
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <path d="M9 18l6-6-6-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 18l6-6-6-6"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </button>
 );
 
-const SliderCard = ({ images,slider }) => {
+const SliderCard = ({ images, slider }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
@@ -60,13 +72,15 @@ const SliderCard = ({ images,slider }) => {
       </Slider>
 
       <style jsx global>{`
-        .custom-dots {
-          bottom: 20px;
-          display: flex !important;
-          justify-content: center;
-          align-items: center;
-          gap: 5px;
-          z-index: 20;
+        .custom-dot {
+          width: 24px;
+          height: 4px;
+          border-radius: 999px;
+          background: #ff6e04;
+          opacity: 1; /* remove dull effect */
+          box-shadow: 0 0 6px rgba(255, 110, 4, 0.7); /* glow */
+          transition: all 0.3s ease;
+          cursor: pointer;
         }
         .custom-dots li {
           margin: 0;
@@ -78,18 +92,17 @@ const SliderCard = ({ images,slider }) => {
           width: 20px;
           height: 3px;
           border-radius: 999px;
-          background: #FF6E04;
+          background: #ff6e04;
           opacity: 0.75;
           transition: all 0.3s ease;
           cursor: pointer;
         }
         /* Active — white thin line, slightly wider */
         .custom-dots li.slick-active .custom-dot {
-          width: 28px;
-          height: 3px;
-          border-radius: 999px;
+          width: 32px;
+          height: 4px;
           background: #ffffff;
-          opacity: 1;
+          box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
         }
         .slick-slider {
           width: 100%;
@@ -106,6 +119,11 @@ const SliderCard = ({ images,slider }) => {
         .slick-prev,
         .slick-next {
           display: none !important;
+        }
+        @media (max-width: 768px) {
+          .custom-dots {
+            bottom: 13px; /* 20px - ~7px lower */
+          }
         }
       `}</style>
     </div>

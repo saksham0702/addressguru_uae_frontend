@@ -268,7 +268,7 @@ export default function RoomForm({
         </div>
 
         <Input label="Price (₹) *" value={common.price} onChange={setC("price")} type="number" placeholder="e.g. 2500" />
-        <Input label="Capacity *" value={common.capacity} onChange={setC("capacity")} type="number" placeholder="e.g. 2" />
+        <Input label="No of People Allowed *" value={common.capacity} onChange={setC("capacity")} type="number" placeholder="e.g. 2" />
         <div className="sm:col-span-2">
           <Input
             label="Available Dates (comma-separated)"
