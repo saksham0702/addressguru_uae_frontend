@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  if (!isLoaded) return null;
+  // if (!isLoaded) return null;
 
   return (
     <AuthContext.Provider
