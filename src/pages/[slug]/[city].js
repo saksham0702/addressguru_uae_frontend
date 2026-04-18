@@ -11,12 +11,15 @@ export async function getServerSideProps(context) {
   let ssrListings = [];
   let ssrPageData = null;
   let ssrSeoContent = null;
+  let ssrFilters = null;
 
   try {
     const res = await axios.get(
-      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
+      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=5`,
     );
+
     const data = res?.data?.data;
+    console.log(data);
     ssrListings = data?.listings || [];
     ssrPageData = data?.pagination || null;
   } catch (err) {
@@ -29,11 +32,30 @@ export async function getServerSideProps(context) {
     console.error("SSR seo fetch failed:", err.message);
   }
 
+  // ✅ ADD THIS BLOCK (filters API)
+  try {
+    const res = await axios.get(
+      `https://addressguru.ae/api/business-listing/features/${slug}`,
+    );
+
+    const data = res?.data?.data;
+
+    ssrFilters = {
+      facilities: data?.features?.facilities || [],
+      services: data?.features?.services || [],
+      courses: data?.features?.courses || [],
+      paymentModes: data?.payment_modes || [],
+    };
+  } catch (err) {
+    console.error("SSR filters fetch failed:", err.message);
+  }
+
   return {
     props: {
       ssrListings,
       ssrPageData,
-      ssrSeoContent: ssrSeoContent ?? null,
+      ssrSeoContent,
+      ssrFilters, // ✅ ADD THIS
       ssrSlug: slug,
       ssrCity: city,
     },

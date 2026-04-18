@@ -17,7 +17,6 @@ import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
 import LandingPageSkeleton from "@/components/BusinessListingComponents/LandingPageSkeleton";
 import Head from "next/head";
 import { useAuth } from "@/context/AuthContext";
-import { APP_URL } from "@/services/constants";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 import {
   get_listing_data,
@@ -30,19 +29,55 @@ import FullWidthGallery from "@/components/SeeDetails/FullWidthGallery";
 import RoomsSection from "@/components/SeeDetails/RoomsSection";
 import { get_rooms_by_listing } from "@/api/rooms";
 
+
+
+// ─────────────────────────────────────────────────────────────
+// SSR — fetch listing + rooms in parallel, never double-fetch
+// ─────────────────────────────────────────────────────────────
 export async function getServerSideProps(context) {
   const { slug } = context.params;
+
   try {
-    const result = await get_listing_data(slug);
-    if (!result?.data?.data) return { notFound: true };
-    return { props: { initialData: result.data.data } };
+    // Parallel fetch: listing + rooms
+    const [listingResult, roomsResult] = await Promise.allSettled([
+      get_listing_data(slug),
+      get_rooms_by_listing(slug),
+    ]);
+
+    // If listing failed or returned nothing → 404
+    if (
+      listingResult.status === "rejected" ||
+      !listingResult.value?.data?.data
+    ) {
+      return { notFound: true };
+    }
+
+    const listing = listingResult.value.data.data;
+
+    // Tell crawlers not to index unapproved listings
+    if (listing.status !== "approved") {
+      context.res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    }
+
+    // Rooms may not exist — that's fine
+    const rooms =
+      roomsResult.status === "fulfilled"
+        ? (roomsResult.value?.data ?? null)
+        : null;
+
+    return {
+      props: {
+        initialData: listing,
+        initialRooms: rooms,
+      },
+    };
   } catch (err) {
     console.error("SSR listing fetch error:", err);
     return { notFound: true };
   }
 }
 
-// ── Status config ──
+// ── Status badge config ──────────────────────────────────────
 const STATUS_CONFIG = {
   approved: {
     label: "Approved",
@@ -67,9 +102,77 @@ const STATUS_CONFIG = {
   },
 };
 
-const SeeDetails = ({ initialData }) => {
+const IMG_URL = "https://addressguru.ae/api";
+// ─────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────
+
+/** Compute average rating from ratings array */
+function computeAvgRating(ratings) {
+  if (!Array.isArray(ratings) || ratings.length === 0) return null;
+  const sum = ratings.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+  return (sum / ratings.length).toFixed(1);
+}
+
+/** Build opening-hours string array for Schema.org */
+function buildOpeningHours(workingHours) {
+  if (!workingHours) return undefined;
+  // If already an array of strings, use directly
+  if (Array.isArray(workingHours) && typeof workingHours[0] === "string") {
+    return workingHours;
+  }
+  // If it's an object map { Monday: { open: "09:00", close: "18:00" }, ... }
+  if (typeof workingHours === "object" && !Array.isArray(workingHours)) {
+    const dayAbbr = {
+      Monday: "Mo",
+      Tuesday: "Tu",
+      Wednesday: "We",
+      Thursday: "Th",
+      Friday: "Fr",
+      Saturday: "Sa",
+      Sunday: "Su",
+    };
+    return Object.entries(workingHours)
+      .filter(([, v]) => v && v.open && v.close)
+      .map(([day, v]) => `${dayAbbr[day] ?? day} ${v.open}-${v.close}`);
+  }
+  return undefined;
+}
+
+/** Format rooms data for RoomsSection component */
+function formatRooms(rooms) {
+  if (!rooms?.rooms?.length) return null;
+  return {
+    startingFrom: rooms.startingFrom,
+    checkIn: rooms.checkIn,
+    checkOut: rooms.checkOut,
+    availableDates: [],
+    rooms: rooms.rooms.map((room) => ({
+      name: room.roomType,
+      price: room.price,
+      roomType: room.roomType,
+      capacity: room.capacity,
+      images: room.images ?? [],
+    })),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────
+const SeeDetails = ({ initialData, initialRooms }) => {
+  const router = useRouter();
+  const { slug, preview } = router.query;
+  const { city, user } = useAuth();
+  const serverCity = city;
+
+  // ── State ────────────────────────────────────────────────
+  // SSR already hydrated data → no loading flash
   const [data, setData] = useState(initialData ?? null);
+  const [rooms, setRooms] = useState(initialRooms ?? null);
+  // Only show skeleton if SSR gave us nothing (shouldn't happen, but safe)
   const [loading, setLoading] = useState(!initialData);
+
   const [activePop, setActivePop] = useState(null);
   const [thanksPop, setThanksPop] = useState(false);
   const [type, setType] = useState(null);
@@ -78,25 +181,95 @@ const SeeDetails = ({ initialData }) => {
   const [rejectModalData, setRejectModalData] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [rooms, setRooms] = useState([]);
-
   const [toast, setToast] = useState(null);
-  const API_URL = "https://addressguru.ae";
 
-  const router = useRouter();
-  const { slug, preview } = router.query;
-  const { city, user } = useAuth();
-  const serverCity = city;
+  // ── Derived values ────────────────────────────────────────
+  const isAdmin = user?.data?.roles?.[0] === 1;
+  const status = data?.status ?? "pending";
+  const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+  const isSliderFull =
+    (data?.category?.name === "Hotel" ||
+      data?.category?.name === "Yoga Studio") &&
+    data?.images?.length >= 5;
 
-  const isAdmin = user?.data?.roles?.[0] == 1;
-  const status = data?.status || "pending";
-  const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const formattedRoomsData = formatRooms(rooms);
 
-  function showToast(msg, type = "success") {
-    setToast({ msg, type });
+  // SEO computed values
+  const avgRating = computeAvgRating(data?.ratings);
+  const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
+  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${serverCity} | AddressGuru`;
+  const pageDesc = (
+    data?.seo?.description ||
+    data?.description ||
+    data?.ad_description ||
+    ""
+  ).substring(0, 160);
+  const ogImage = `${IMG_URL}/${data?.images?.[0]}` ?? "";
+  const openingHoursSchema = buildOpeningHours(data?.workingHours);
+
+  // ── Toast helper ─────────────────────────────────────────
+  function showToast(msg, toastType = "success") {
+    setToast({ msg, type: toastType });
     setTimeout(() => setToast(null), 3000);
   }
 
+  // ── Responsive ──────────────────────────────────────────
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ── Client-side re-fetch ONLY on slug navigation change ──
+  // (when Next.js shallow-routes without a full SSR round-trip)
+  useEffect(() => {
+    if (!slug) return;
+    // If SSR already gave us the correct data, skip
+    if (slug === data?.slug) return;
+
+    setLoading(true);
+    Promise.allSettled([get_listing_data(slug), get_rooms_by_listing(slug)])
+      .then(([listingRes, roomsRes]) => {
+        if (listingRes.status === "fulfilled" && listingRes.value?.data?.data) {
+          setData(listingRes.value.data.data);
+        } else {
+          router.push("/404");
+          return;
+        }
+        if (roomsRes.status === "fulfilled" && roomsRes.value?.data) {
+          setRooms(roomsRes.value.data);
+        } else {
+          setRooms(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Client-side listing fetch error:", err);
+        router.push("/404");
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  // ── View tracking (once per mount) ──────────────────────
+  const viewTracked = useRef(false);
+  useEffect(() => {
+    if (!data?.slug || viewTracked.current) return;
+    viewTracked.current = true;
+    track_event("business", data.slug, "view").catch(() => {});
+  }, [data?.slug]);
+
+  // ── Event handlers ───────────────────────────────────────
+  const handleWebsiteClick = (listingSlug) =>
+    track_event("business", listingSlug, "website_visit").catch(() => {});
+
+  const handleClick = (listingSlug) =>
+    track_event("business", listingSlug, "call").catch(() => {});
+
+  const handlePop = (name) => setActivePop(name);
+  const closePopup = () => setActivePop(null);
+
+  // ── Admin actions ────────────────────────────────────────
   const handleApprove = async () => {
     try {
       setLoadingAction(true);
@@ -104,7 +277,7 @@ const SeeDetails = ({ initialData }) => {
       setData((prev) => ({ ...prev, status: "approved" }));
       setConfirmAction(null);
       showToast("Listing approved successfully", "success");
-    } catch (err) {
+    } catch {
       showToast("Failed to approve listing", "error");
     } finally {
       setLoadingAction(false);
@@ -121,165 +294,110 @@ const SeeDetails = ({ initialData }) => {
       setData((prev) => ({ ...prev, status: "rejected" }));
       setRejectModalData(null);
       showToast("Listing rejected successfully", "success");
-    } catch (err) {
+    } catch {
       showToast("Failed to reject listing", "error");
     } finally {
       setLoadingAction(false);
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    handleResize(); // initial check
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  const fetch_rooms = async (id) => {
-    try {
-      const result = await get_rooms_by_listing(id);
-      console.log("rooms", result);
-
-      const roomData = result?.data;
-
-      console.log("rooms", roomData);
-
-      setRooms(roomData); // ✅ THIS IS IMPORTANT
-    } catch (err) {
-      console.error("Rooms fetch error:", err);
-    }
-  };
-
-  const formattedRoomsData = rooms
-    ? {
-        startingFrom: rooms.startingFrom,
-        checkIn: rooms.checkIn,
-        checkOut: rooms.checkOut,
-        availableDates: [],
-        rooms: rooms.rooms?.map((room) => ({
-          name: room.roomType,
-          price: room.price,
-          roomType: room.roomType,
-          capacity: room.capacity,
-          images: room.images ?? [], // ← pass images through
-        })),
-      }
-    : null;
-
-  useEffect(() => {
-    if (!slug) return;
-
-    const fetchListing = async () => {
-      setLoading(true);
-      try {
-        const result = await get_listing_data(slug);
-
-        if (result?.data?.data) {
-          const listing = result.data.data;
-          setData(listing);
-          fetch_rooms(listing._id);
-        } else {
-          router.push("/404");
-        }
-      } catch (err) {
-        console.error("Listing fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchListing();
-  }, [slug]);
-
-  const viewTracked = useRef(false);
-  useEffect(() => {
-    if (!data?.slug || viewTracked.current) return;
-    viewTracked.current = true;
-    track_event("business", data?.slug, "view").catch(console.log("view"));
-  }, [data?.slug]);
-
-  const handleWebsiteClick = async (slug) => {
-    track_event("business", slug, "website_visit").catch(
-      console.log("website_visit"),
-    );
-  };
-  const handleClick = async (slug) => {
-    track_event("business", slug, "call").catch(console.log("call"));
-  };
-  const handlePop = (name) => setActivePop(name);
-  const closePopup = () => setActivePop(null);
-
+  // ── Guard ────────────────────────────────────────────────
   if (loading || !data) return <LandingPageSkeleton />;
-  const isSliderFull =
-    (data?.category?.name === "Hotel" ||
-      data?.category?.name === "Yoga Studio") &&
-    data?.images?.length >= 5;
 
+  // ─────────────────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────────────────
   return (
     <>
+      {/* ── SEO HEAD ───────────────────────────────────────── */}
       <Head>
-        <title>
-          {data?.seo?.title} | {serverCity} | AddressGuru
-        </title>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+
+        {/* Robots — noindex unapproved listings */}
         <meta
-          name="description"
-          content={data?.seo?.description?.substring(0, 160)}
+          name="robots"
+          content={
+            data.status === "approved" ? "index, follow" : "noindex, nofollow"
+          }
         />
-        <meta property="og:title" content={data?.business_name} />
-        <meta
-          property="og:description"
-          content={data?.ad_description?.substring(0, 160)}
-        />
-        <meta property="og:image" content={data?.images?.[0]} />
-        <meta property="og:url" content={`${API_URL}/${data?.slug}`} />
+
+        {/* Open Graph */}
         <meta property="og:type" content="business.business" />
-        <meta name="twitter:title" content={data?.business_name} />
-        <meta
-          name="twitter:description"
-          content={data?.ad_description?.substring(0, 160)}
-        />
-        <meta name="twitter:image" content={data?.images?.[0]} />
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta property="og:locale" content="en_AE" />
+        <meta property="og:title" content={data.businessName ?? ""} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:alt" content={data.businessName ?? ""} />
+        <meta property="og:url" content={pageUrl} />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={data.businessName ?? ""} />
+        <meta name="twitter:description" content={pageDesc} />
+        <meta name="twitter:image" content={ogImage} />
+        <meta name="twitter:image:alt" content={data.businessName ?? ""} />
 
-        {/* Canonical — full absolute URL required by Google */}
-        <link rel="canonical" href={`https://addressguru.ae/${data?.slug}`} />
+        {/* Canonical */}
+        <link rel="canonical" href={pageUrl} />
 
-        {/* Schema JSON-LD */}
+        {/* JSON-LD — LocalBusiness */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
-              name: data?.business_name || data?.businessName,
-              description: data?.ad_description || data?.description,
-              image: data?.images,
+              name: data.businessName,
+              description: data.description || data.ad_description,
+              image: data.images,
+              url: pageUrl,
+              telephone: data.mobileNumber
+                ? `${data.countryCode ?? ""}${data.mobileNumber}`.trim()
+                : undefined,
+              email: data.email || undefined,
               address: {
                 "@type": "PostalAddress",
-                streetAddress: data?.business_address || data?.businessAddress,
-                addressLocality: data?.city || "Dubai",
+                streetAddress: data.businessAddress,
+                addressLocality: serverCity || "Dubai",
                 addressCountry: "AE",
               },
-              url: `https://addressguru.ae/${data?.slug}`,
-              aggregateRating:
-                data?.ratings?.length > 0
+              geo:
+                data.location?.lat && data.location?.lng
                   ? {
-                      "@type": "AggregateRating",
-                      ratingValue: data?.ratings[0]?.rating ?? 4,
-                      reviewCount: data?.ratings?.length,
+                      "@type": "GeoCoordinates",
+                      latitude: data.location.lat,
+                      longitude: data.location.lng,
                     }
                   : undefined,
-              openingHours: data?.workingHours,
-              telephone: data?.phone,
+              openingHours: openingHoursSchema,
+              aggregateRating: avgRating
+                ? {
+                    "@type": "AggregateRating",
+                    ratingValue: avgRating,
+                    reviewCount: data.ratings.length,
+                    bestRating: "5",
+                    worstRating: "1",
+                  }
+                : undefined,
+              review: data.ratings?.slice(0, 5).map((r) => ({
+                "@type": "Review",
+                author: { "@type": "Person", name: r.name || "Anonymous" },
+                reviewRating: {
+                  "@type": "Rating",
+                  ratingValue: r.rating,
+                  bestRating: "5",
+                },
+                reviewBody: r.comment || undefined,
+              })),
               priceRange: "$$",
             }),
           }}
         />
       </Head>
 
+      {/* ── MOBILE HEADER ──────────────────────────────────── */}
       <div className="md:hidden">
         <LandingPage />
       </div>
@@ -292,7 +410,7 @@ const SeeDetails = ({ initialData }) => {
         />
       </div>
 
-      {/* POPUPS */}
+      {/* ── POPUPS ─────────────────────────────────────────── */}
       {activePop && (
         <div
           className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0"
@@ -334,17 +452,16 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* FIXED RIGHT ADMIN PANEL  (always visible for admin / preview)*/}
+      {/* ── FIXED ADMIN PANEL (right edge, desktop only) ───── */}
       {(isAdmin || preview === "true") && (
         <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9999] flex flex-col items-end gap-2 pr-0 max-md:hidden">
-          {/* ── Action icon strip ── */}
+          {/* Action icon strip */}
           <div className="flex flex-col items-center gap-1 mr-1">
             {/* Edit */}
             <Link
-              href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(data?.businessName)}&name=${encodeURIComponent(data?.slug)}`}
+              href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(data?.businessName ?? "")}&name=${encodeURIComponent(data?.slug ?? "")}`}
               className="w-9 h-9 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center text-gray-500 hover:text-orange-500 hover:border-orange-300 transition"
               title="Edit"
-              style={{ pointerEvents: "auto" }}
             >
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                 <path
@@ -361,7 +478,6 @@ const SeeDetails = ({ initialData }) => {
               onClick={() => router.back()}
               className="w-9 h-9 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 transition"
               title="Back"
-              style={{ pointerEvents: "auto" }}
             >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path
@@ -374,13 +490,12 @@ const SeeDetails = ({ initialData }) => {
               </svg>
             </button>
 
-            {/* Approve — only if not already approved */}
+            {/* Approve */}
             {isAdmin && status !== "approved" && (
               <button
                 onClick={() => setConfirmAction("approve")}
                 className="w-9 h-9 rounded-full bg-white border border-green-200 shadow flex items-center justify-center text-green-600 hover:bg-green-50 transition"
                 title="Approve"
-                style={{ pointerEvents: "auto" }}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path
@@ -394,13 +509,12 @@ const SeeDetails = ({ initialData }) => {
               </button>
             )}
 
-            {/* Reject — only if not already rejected */}
+            {/* Reject */}
             {isAdmin && status !== "rejected" && (
               <button
                 onClick={() => setRejectModalData(data)}
                 className="w-9 h-9 rounded-full bg-white border border-red-200 shadow flex items-center justify-center text-red-500 hover:bg-red-50 transition"
                 title="Reject"
-                style={{ pointerEvents: "auto" }}
               >
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                   <path
@@ -414,7 +528,7 @@ const SeeDetails = ({ initialData }) => {
             )}
           </div>
 
-          {/* ── Info card ── */}
+          {/* Info card */}
           <div className="bg-[#f0f0f0] border border-gray-200 shadow-lg rounded-l-xl w-56 overflow-hidden">
             {/* Status bar */}
             <div
@@ -514,7 +628,7 @@ const SeeDetails = ({ initialData }) => {
                   <a
                     href={data?.websiteLink}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noreferrer noopener"
                     className="truncate hover:underline"
                   >
                     Visit Website
@@ -568,7 +682,7 @@ const SeeDetails = ({ initialData }) => {
               )}
             </div>
 
-            {/* Views */}
+            {/* Views badge */}
             <div className="px-3 pb-3">
               <div className="inline-flex items-center gap-1.5 bg-[#e8a020] text-white text-xs font-semibold px-2.5 py-1 rounded-md">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -579,14 +693,14 @@ const SeeDetails = ({ initialData }) => {
                   />
                   <circle cx="8" cy="8" r="2" fill="white" />
                 </svg>
-                Views &nbsp;
+                Views&nbsp;
                 <span className="bg-white text-[#e8a020] rounded px-1 font-bold text-[11px]">
                   {data?.views ?? 0}
                 </span>
               </div>
             </div>
 
-            {/* Transfer Ownership */}
+            {/* Transfer Ownership (admin only) */}
             {isAdmin && (
               <div className="px-3 pb-3">
                 <button className="w-full bg-[#e8363a] hover:bg-red-600 text-white text-xs font-semibold py-2 rounded-md transition">
@@ -598,11 +712,14 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* MAIN CONTENT */}
+      {/* ── MAIN CONTENT ───────────────────────────────────── */}
       <div
-        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? " opacity-100" : ""}`}
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
+          preview === "true" ? "opacity-100" : ""
+        }`}
       >
         <div className="flex flex-col md:w-[80%] max-w-[98%] relative bg-white md:px-5 px-2 md:pb-7">
+          {/* Breadcrumbs (desktop) */}
           <div className="max-md:hidden my-3">
             <BreadCrumbs
               slug={data?.category?.slug}
@@ -612,6 +729,7 @@ const SeeDetails = ({ initialData }) => {
             />
           </div>
 
+          {/* Title + Logo (desktop) */}
           <div className="max-md:hidden md:w-[64.5%]">
             <TitleAndLogo
               handlePop={handlePop}
@@ -627,28 +745,25 @@ const SeeDetails = ({ initialData }) => {
             />
           </div>
 
-          {/* FULL WIDTH HERO (Desktop + Special Category) */}
+          {/* Full-width hero gallery (Hotel / Yoga Studio with 5+ images, desktop) */}
           {isSliderFull && !isMobile && (
             <div className="w-full mt-1 px-2 md:px-0 mb-4">
               <FullWidthGallery images={data?.images} />
             </div>
           )}
 
-          {/* SLIDER (Mobile OR Normal Categories) */}
+          {/* Standard slider (mobile OR normal categories) */}
           {(isMobile || !isSliderFull) && (
-            <div className={`${!isMobile ? "md:w-[64.5%]" : "w-full"}`}>
+            <div className={!isMobile ? "md:w-[64.5%]" : "w-full"}>
               <SliderCard slider={false} images={data?.images} />
             </div>
           )}
-          {/* <SliderCard slider={false} images={data?.images} /> */}
 
           <div className="flex w-full justify-between max-md:flex-col md:mt-4">
-            {/* LEFT */}
-
+            {/* ── LEFT COLUMN ────────────────────────────────── */}
             <div className="md:w-[64.5%]">
-              {/* <SliderCard slider={false} images={data?.images} /> */}
-
-              <div className="md:hidden mx-auto  w-full">
+              {/* Title + Logo (mobile) */}
+              <div className="md:hidden mx-auto w-full">
                 <TitleAndLogoMobile
                   data={data}
                   openingHours={data?.workingHours}
@@ -659,13 +774,14 @@ const SeeDetails = ({ initialData }) => {
                   handleClick={handleClick}
                 />
               </div>
+
               {/* ABOUT */}
               <div className="mt-5 md:pl-2 px-1">
                 <span className="flex gap-3 items-center">
                   <h3 className="font-semibold whitespace-nowrap uppercase md:text-xl">
                     About Us
                   </h3>
-                  <span className="h-[1px] w-full bg-gray-200"></span>
+                  <span className="h-[1px] w-full bg-gray-200" />
                 </span>
                 <p className="md:text-[16px] text-[16px] mt-2 md:font-normal">
                   {data?.description}
@@ -673,40 +789,27 @@ const SeeDetails = ({ initialData }) => {
               </div>
 
               {/* COURSES */}
-              {data?.courses && data.courses.length > 0 && (
+              {data?.courses?.length > 0 && (
                 <div className="max-w-4xl mt-5 md:pl-2 px-1">
                   <span className="flex gap-3 items-center">
                     <h2 className="font-semibold uppercase md:text-xl">
                       COURSES
                     </h2>
-                    <span className="h-[1px] w-full bg-gray-200"></span>
+                    <span className="h-[1px] w-full bg-gray-200" />
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessAddress} provides the following courses:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data?.courses?.map((course, index) => (
+                    {data.courses.map((course, index) => (
                       <div key={index} className="flex items-end space-x-2">
                         {course?.iconSvg ? (
                           <div
                             className="icon-wrapper"
-                            dangerouslySetInnerHTML={{
-                              __html: course?.iconSvg,
-                            }}
+                            dangerouslySetInnerHTML={{ __html: course.iconSvg }}
                           />
                         ) : (
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            aria-hidden="true"
-                          >
-                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                            <path
-                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                              fill="#FF6E04"
-                            />
-                          </svg>
+                          <CheckIcon />
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {course.name}
@@ -718,40 +821,29 @@ const SeeDetails = ({ initialData }) => {
               )}
 
               {/* FACILITIES */}
-              {data?.facilities && data.facilities.length > 0 && (
+              {data?.facilities?.length > 0 && (
                 <div className="max-w-4xl mt-5 md:pl-2 px-1">
                   <span className="flex gap-3 items-center">
                     <h2 className="font-semibold uppercase md:text-xl">
                       FACILITIES
                     </h2>
-                    <span className="h-[1px] w-full bg-gray-200"></span>
+                    <span className="h-[1px] w-full bg-gray-200" />
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessName} provides the following facilities:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data?.facilities?.map((facility, index) => (
+                    {data.facilities.map((facility, index) => (
                       <div key={index} className="flex items-end space-x-2">
                         {facility?.iconSvg ? (
                           <div
                             className="icon-wrapper"
                             dangerouslySetInnerHTML={{
-                              __html: facility?.iconSvg,
+                              __html: facility.iconSvg,
                             }}
                           />
                         ) : (
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            aria-hidden="true"
-                          >
-                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                            <path
-                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                              fill="#FF6E04"
-                            />
-                          </svg>
+                          <CheckIcon />
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {facility?.name}
@@ -763,32 +855,21 @@ const SeeDetails = ({ initialData }) => {
               )}
 
               {/* SERVICES */}
-              {data?.services && data.services.length > 0 && (
+              {data?.services?.length > 0 && (
                 <div className="max-w-4xl mt-5 md:pl-2 px-1">
                   <span className="flex gap-3 items-center">
                     <h2 className="font-semibold uppercase md:text-xl">
                       SERVICES
                     </h2>
-                    <span className="h-[1px] w-full bg-gray-200"></span>
+                    <span className="h-[1px] w-full bg-gray-200" />
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessName} provides the following services:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data?.services?.map((service, index) => (
+                    {data.services.map((service, index) => (
                       <div key={index} className="flex items-center space-x-2">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                          <path
-                            d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                            fill="#FF6E04"
-                          />
-                        </svg>
+                        <CheckIcon />
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {service.name}
                         </span>
@@ -799,40 +880,29 @@ const SeeDetails = ({ initialData }) => {
               )}
 
               {/* PAYMENT METHODS */}
-              {data?.paymentModes && data.paymentModes.length > 0 && (
+              {data?.paymentModes?.length > 0 && (
                 <div className="max-w-5xl mt-5 md:pl-2 px-1">
                   <span className="flex gap-3 items-center">
                     <h2 className="font-semibold uppercase whitespace-nowrap md:text-xl">
                       Payment Modes
                     </h2>
-                    <span className="h-[1px] w-full bg-gray-200"></span>
+                    <span className="h-[1px] w-full bg-gray-200" />
                   </span>
                   <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
                     {data?.businessName} accepts the following payment methods:
                   </p>
                   <div className="flex flex-col gap-4">
-                    {data?.paymentModes?.map((payment, index) => (
+                    {data.paymentModes.map((payment, index) => (
                       <div key={index} className="flex items-center space-x-2">
                         {payment?.iconSvg ? (
                           <div
                             className="icon-wrapper"
                             dangerouslySetInnerHTML={{
-                              __html: payment?.iconSvg,
+                              __html: payment.iconSvg,
                             }}
                           />
                         ) : (
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            aria-hidden="true"
-                          >
-                            <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-                            <path
-                              d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-                              fill="#FF6E04"
-                            />
-                          </svg>
+                          <CheckIcon />
                         )}
                         <span className="md:text-[13.5px] text-[15px] font-semibold">
                           {payment?.name}
@@ -849,15 +919,15 @@ const SeeDetails = ({ initialData }) => {
                   <h3 className="font-semibold uppercase md:text-xl">
                     Overview
                   </h3>
-                  <span className="h-[1px] w-full bg-gray-200"></span>
+                  <span className="h-[1px] w-full bg-gray-200" />
                 </span>
                 <div className="md:text-[13.5px] text-[15px] md:font-[500] flex flex-col gap-5 mt-2 max-w-4xl">
                   <p>
                     {`${data?.businessName} is located at ${data?.businessAddress}, ${serverCity}.`}
-                    {data?.facilities && data.facilities.length > 0 && (
+                    {data?.facilities?.length > 0 && (
                       <span>
                         {" Their facilities include: "}
-                        {data?.facilities?.name?.join(", ")}.
+                        {data.facilities.map((f) => f.name).join(", ")}.
                       </span>
                     )}
                   </p>
@@ -874,10 +944,11 @@ const SeeDetails = ({ initialData }) => {
               </div>
             </div>
 
-            {/* RIGHT */}
-
+            {/* ── RIGHT COLUMN ───────────────────────────────── */}
             <div
-              className={`md:w-[34%] ${isSliderFull ? "" : "md:absolute md:top-49 md:right-0"} max-md:hidden h-auto mb-10 flex flex-col gap-5`}
+              className={`md:w-[34%] ${
+                isSliderFull ? "" : "md:absolute md:top-49 md:right-0"
+              } max-md:hidden h-auto mb-10 flex flex-col gap-5`}
             >
               <QuickInformation
                 id={data?.id}
@@ -910,13 +981,13 @@ const SeeDetails = ({ initialData }) => {
             </div>
           </div>
 
-          {/* MOBILE USER INFO */}
+          {/* Mobile UserInformation */}
           <div className="md:hidden mt-10">
             <UserInformation />
           </div>
 
           {/* REVIEWS */}
-          {data?.ratings && data.ratings.length > 0 && (
+          {data?.ratings?.length > 0 && (
             <div className="h-70 w-full space-y-2 my-5">
               <div className="flex w-full items-center justify-between">
                 <h2 className="text-xl font-semibold">
@@ -924,7 +995,7 @@ const SeeDetails = ({ initialData }) => {
                 </h2>
               </div>
               <div className="py-2 md:pl-4 flex md:justify-between overflow-x-scroll hide-scroll w-full gap-5">
-                {data?.ratings?.map((item, index) => (
+                {data.ratings.map((item, index) => (
                   <RecentCustomerReviewCard key={index} data={item} />
                 ))}
               </div>
@@ -933,7 +1004,7 @@ const SeeDetails = ({ initialData }) => {
         </div>
       </div>
 
-      {/* ENQUIRE POPUP */}
+      {/* ── ENQUIRE POPUP ──────────────────────────────────── */}
       {enquirePop && (
         <div
           className="inset-0 flex items-center fixed justify-center backdrop-blur-xs z-50 py-20 px-5"
@@ -952,7 +1023,7 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* CONFIRM APPROVE MODAL */}
+      {/* ── CONFIRM APPROVE MODAL ──────────────────────────── */}
       {confirmAction === "approve" && (
         <div
           className="fixed inset-0 z-[10001] flex items-center justify-center"
@@ -992,24 +1063,7 @@ const SeeDetails = ({ initialData }) => {
                 disabled={loadingAction}
                 className="px-4 py-1.5 text-sm rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition flex items-center gap-1.5"
               >
-                {loadingAction && (
-                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      className="opacity-25"
-                    />
-                    <path
-                      d="M22 12a10 10 0 00-10-10"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      className="opacity-75"
-                    />
-                  </svg>
-                )}
+                {loadingAction && <SpinnerIcon />}
                 Yes, approve
               </button>
             </div>
@@ -1017,7 +1071,7 @@ const SeeDetails = ({ initialData }) => {
         </div>
       )}
 
-      {/* REJECT REASON MODAL */}
+      {/* ── REJECT MODAL ───────────────────────────────────── */}
       {rejectModalData && (
         <RejectReasonModal
           listing={rejectModalData}
@@ -1026,11 +1080,14 @@ const SeeDetails = ({ initialData }) => {
         />
       )}
 
-      {/* TOAST */}
+      {/* ── TOAST ─────────────────────────────────────────── */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-[10002] flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border
-            ${toast.type === "error" ? "bg-red-50 border-red-200 text-red-600" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}
+          className={`fixed bottom-6 right-6 z-[10002] flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border ${
+            toast.type === "error"
+              ? "bg-red-50 border-red-200 text-red-600"
+              : "bg-emerald-50 border-emerald-200 text-emerald-700"
+          }`}
           style={{ animation: "slideUp 0.2s ease" }}
         >
           <span>{toast.type === "error" ? "✕" : "✓"}</span>
@@ -1045,6 +1102,7 @@ const SeeDetails = ({ initialData }) => {
         }
       `}</style>
 
+      {/* ── THANKS POPUP ───────────────────────────────────── */}
       {thanksPop && (
         <ThanksPop onClose={() => setThanksPop(false)} type={type} />
       )}
@@ -1053,3 +1111,40 @@ const SeeDetails = ({ initialData }) => {
 };
 
 export default SeeDetails;
+
+// Tiny shared sub-components (keeps JSX clean above)
+
+/** Standard orange check icon used for lists */
+function CheckIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
+      <path
+        d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
+        fill="#FF6E04"
+      />
+    </svg>
+  );
+}
+
+/** Animated loading spinner for buttons */
+function SpinnerIcon() {
+  return (
+    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="3"
+        className="opacity-25"
+      />
+      <path
+        d="M22 12a10 10 0 00-10-10"
+        stroke="currentColor"
+        strokeWidth="3"
+        className="opacity-75"
+      />
+    </svg>
+  );
+}

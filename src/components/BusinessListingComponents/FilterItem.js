@@ -48,7 +48,6 @@ const FilterItem = ({
   };
 
   const handleApply = () => {
-    console.log("handleApply multiOptions selected:", tempSelectedMultiIds);
     if (isRadio && tempSelectedId !== null) {
       const selectedOption = radioOptions.find(
         (opt) => opt.id === tempSelectedId,
@@ -120,7 +119,7 @@ const FilterItem = ({
   const showChevron = hasDropdown || isRadio || isMultiple;
 
   return (
-    <div className="relative z-50">
+    <div className="relative  z-50">
       <div
         onClick={handleClick}
         className={`flex items-center whitespace-nowrap gap-1.5 px-2.5 py-1.5 cursor-pointer rounded-md text-sm font-semibold transition-all duration-200 select-none
@@ -205,7 +204,7 @@ const FilterItem = ({
 
       {/* Checkbox Dropdown (Multiple Select) */}
       {isMultiple && isOpen && multiOptions.length > 0 && (
-        <div className="animate-drop absolute top-full left-1/2 -translate-x-1/2 z-50 mt-3 w-[880px] max-w-[calc(100vw-2rem)] bg-white shadow-xl rounded-lg border border-gray-100 text-sm">
+        <div className="animate-drop absolute top-full left-1/2  -translate-x-1/2 z-50 mt-3 w-[880px] max-w-[calc(100vw-2rem)] bg-white shadow-xl rounded-lg border border-gray-100 text-sm">
           {/* Header */}
           <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-gray-100">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

@@ -233,7 +233,7 @@ const FilterBar = ({
       {/* ── Backdrop blur overlay when any dropdown is open ── */}
       {openIndex !== null && (
         <div
-          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px]"
+          className="fixed inset-0 z-30 bg-black/20  mx-auto backdrop-blur-[2px]"
           onClick={() => setOpenIndex(null)}
         />
       )}
@@ -346,6 +346,8 @@ const FilterBar = ({
               }
             />
           ))}
+  
+
 
           {/* "Clear all" in the filter bar → calls handleReset → hits API */}
           {hasActiveFilters && (
@@ -376,6 +378,7 @@ const FilterBar = ({
           )}
         </div>
       </div>
+      
 
       {/* ── Active filter chips (horizontal) ── */}
       {activeChips.length > 0 && (

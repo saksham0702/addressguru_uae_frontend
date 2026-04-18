@@ -15,7 +15,7 @@ import { FaBlog, FaCity } from "react-icons/fa";
 
 // ─── Site URLs ─────────────────────────────────────────────────────────────────
 // NOTE: APP_URL was previously "https:/addressguru.ae/api" — wrong domain + broken.
-export const APP_URL = "https://addressguru.ae";
+export const APP_URL = "https://addressguru.ae/api";
 export const IMG_URL = "https://addressguru.ae/api";
 
 export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;

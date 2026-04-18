@@ -112,22 +112,22 @@ button{
   line-height: 1.7;
 }
 .seo-content {
-  font-size: 16px !important; /* base text */
+  font-size: 13px !important; /* base text */
 }
 
 .seo-content h1,
 .seo-content h2,
 .seo-content h3 {
-  font-size: 20px !important; /* 16 + 4 */
+  font-size: 16px !important; /* 16 + 4 */
   font-weight: 600;
   color: #111827;
-  margin-top: 22px;
+  margin-top: 18px;
   margin-bottom: 8px;
 }
 
 /* Paragraphs */
 .seo-content p {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #4b5563; /* gray-600 */
 }
 
