@@ -1,4 +1,3 @@
-"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -14,6 +13,7 @@ import SideNav from "@/components/admin/sidebar/sidebar";
 import AdminHeader from "@/components/admin/header";
 import { ErrorProvider } from "@/context/ErrorContext";
 import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
+import Head from "next/head";
 
 // ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
 // TODO: Replace with your real GA4 Measurement ID
@@ -101,6 +101,9 @@ export default function App({ Component, pageProps }) {
     <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
         <ErrorProvider>
+          <Head>
+            <title>addressguru.ae | Find the best businesses in UAE</title>
+          </Head>
           <div className="flex justify-center">
             <div
               className={`w-full ${isAdmin ? "" : "max-w-[1750px]"} relative`}

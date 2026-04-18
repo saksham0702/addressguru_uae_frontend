@@ -184,12 +184,9 @@ export default function Home() {
               Popular Categories
             </h3>
             {/* popular categories with icons  */}
-            {/* {!categories?.result && <Loader />} */}
+       
             <PopularCategory data={categories} />
-            {/* <div className="relative bottom-2 max-md:hidden px-2">
-            <PopularCategory />
-          </div> */}
-
+  
             {/* ads section for mobile */}
             <div className="w-full max-h-55 md:hidden p-2">
               <div className="border border-gray-100 w-full h-full flex items-center justify-center">
@@ -211,16 +208,7 @@ export default function Home() {
               <PopularServices />
             </div>
 
-            {/* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
-
-          <div className="flex gap-3 px-4 pr-5 max-md:overflow-x-scroll max-md:pb-5 hide-scroll  ">
-            <RecentJobCard img={1} />
-            <RecentJobCard img={2} />
-            <RecentJobCard img={1} />
-            <RecentJobCard img={2} />
-            <RecentJobCard img={1} />
-            <RecentJobCard img={2} />
-          </div> */}
+   
           </div>
           {/* customer section */}
 
@@ -232,3 +220,22 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
+         {/* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
+
+          <div className="flex gap-3 px-4 pr-5 max-md:overflow-x-scroll max-md:pb-5 hide-scroll  ">
+            <RecentJobCard img={1} />
+            <RecentJobCard img={2} />
+            <RecentJobCard img={1} />
+            <RecentJobCard img={2} />
+            <RecentJobCard img={1} />
+            <RecentJobCard img={2} />
+          </div> */}
+
+                    {/* <div className="relative bottom-2 max-md:hidden px-2">
+            <PopularCategory />
+          </div> */}
