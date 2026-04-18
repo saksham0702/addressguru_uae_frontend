@@ -513,6 +513,7 @@ const SearchResults = ({
             </div>
           </div>
 
+          <section className="max-md:hidden max-w-full overflow-hidden"> 
           <hr className="border-gray-200 " />
           <InfoListSection
             title={`Top ${canonicalSlug} in ${canonicalCity}`}
@@ -529,6 +530,8 @@ const SearchResults = ({
             city={canonicalCity}
             seoContent={seoContent}
           />
+          </section>
+
         </div>
       </div>
 
