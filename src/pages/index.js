@@ -184,7 +184,7 @@ export default function Home() {
               Popular Categories
             </h3>
             {/* popular categories with icons  */}
-       
+            {/* {!categories?.result && <Loader />} */}
             <PopularCategory data={categories} />
   
             {/* ads section for mobile */}
@@ -223,8 +223,6 @@ export default function Home() {
 
 
 
-
-
          {/* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
 
           <div className="flex gap-3 px-4 pr-5 max-md:overflow-x-scroll max-md:pb-5 hide-scroll  ">
@@ -236,6 +234,4 @@ export default function Home() {
             <RecentJobCard img={2} />
           </div> */}
 
-                    {/* <div className="relative bottom-2 max-md:hidden px-2">
-            <PopularCategory />
-          </div> */}
+          

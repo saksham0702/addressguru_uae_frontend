@@ -11,7 +11,13 @@ const PrevArrow = ({ onClick }) => (
     className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
   >
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <path d="M15 18l-6-6 6-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M15 18l-6-6 6-6"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </button>
 );
@@ -22,12 +28,18 @@ const NextArrow = ({ onClick }) => (
     className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
   >
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <path d="M9 18l6-6-6-6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 18l6-6-6-6"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </button>
 );
 
-const SliderCard = ({ images,slider }) => {
+const SliderCard = ({ images, slider }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
@@ -61,7 +73,7 @@ const SliderCard = ({ images,slider }) => {
 
       <style jsx global>{`
         .custom-dots {
-          bottom: 20px;
+          bottom: 16px;
           display: flex !important;
           justify-content: center;
           align-items: center;
@@ -78,8 +90,8 @@ const SliderCard = ({ images,slider }) => {
           width: 20px;
           height: 3px;
           border-radius: 999px;
-          background: #FF6E04;
-          opacity: 0.75;
+          background: #ff7a00;
+          opacity: 1;
           transition: all 0.3s ease;
           cursor: pointer;
         }

@@ -42,7 +42,7 @@ const SeoContent = ({ seoContent, city }) => {
   const parsedContent = processContent(seoContent.content);
 
   return (
-    <section className="w-full mt-3 bg-white rounded-lg p-4 md:p-6">
+    <section className="w-full  bg-white rounded-lg p-4 md:p-6">
       <div
         className="seo-content"
         dangerouslySetInnerHTML={{ __html: parsedContent }}

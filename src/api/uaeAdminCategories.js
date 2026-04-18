@@ -54,7 +54,7 @@ export const createOrUpdateCategory = async (payload) => {
 
 export const getAllCategories = async () => {
   try {
-    const response = await axios.get(`${API_URL}/categories/get-categories`, {
+    const response = await axios.get(`${API_URL}/categories/get-categories-by-type/business`, {
       headers: {
         "Content-Type": "application/json",
       },
