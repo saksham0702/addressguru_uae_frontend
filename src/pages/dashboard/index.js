@@ -36,8 +36,6 @@ const Dashboard = () => {
   const [myMarketplace, setMyMarketplace] = useState(null);
   const [postAdd, setPostAdd] = useState(false);
 
-  const token = localStorage.getItem("authToken");
-
   const getListingStats = async () => {
     const res = await get_listing_stats();
     if (res?.status) {
@@ -46,11 +44,16 @@ const Dashboard = () => {
   };
   useEffect(() => {
     if (loading) return;
+
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
     if (!user && !token) {
       router.replace("/");
     }
+
     getListingStats();
-  }, [user, loading, router, token]);
+  }, [user, loading, router]);
 
   const getUserListings = async (type) => {
     const listres = await get_user_listings();
