@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -15,86 +15,12 @@ import Image from "next/image";
 import Head from "next/head";
 import {
   getBlogs,
-  getBlogsByCategory,
   getCategories,
   getMostViewedBlogs,
   getRecentBlogs,
 } from "@/api/uae-blogs";
 
-const Blogs = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [blogCategories, setBlogCategories] = useState([]);
-  const [recentBlogs, setRecentBlogs] = useState([]);
-  const [mostViewedBlogs, setMostViewedBlogs] = useState([]);
-  const [blogsByCategory, setBlogsByCategory] = useState([]);
-  const APP_URL = "https://addressguru.ae";
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await getBlogs();
-        console.log("blog response:", response);
-
-        setBlogs(response);
-      } catch (error) {
-        console.log("Error fetching blogs:", error);
-      }
-    };
-    fetchBlogs();
-
-    const fetchCategories = async () => {
-      try {
-        const response = await getCategories();
-        console.log(response);
-
-        if (response?.status == true) {
-          setBlogCategories(response?.data);
-        }
-      } catch (error) {
-        console.log("Error fetching categories:", error);
-      }
-    };
-    fetchCategories();
-
-    const fetchRecentBlogs = async () => {
-      try {
-        const response = await getRecentBlogs();
-        console.log("recent blog response", response);
-
-        if (response) {
-          setRecentBlogs(response?.data?.blogs);
-        }
-      } catch (error) {
-        console.log("Error fetching recent blogs:", error);
-      }
-    };
-    fetchRecentBlogs();
-
-    const fetchMostViewedBlogs = async () => {
-      try {
-        const response = await getMostViewedBlogs();
-        if (response?.status == true) {
-          setMostViewedBlogs(response?.data?.blogs);
-        }
-      } catch (error) {
-        console.log("Error fetching most viewed blogs:", error);
-      }
-    };
-    fetchMostViewedBlogs();
-
-    const fetchBlogsByCategory = async () => {
-      try {
-        const response = await getBlogsByCategory();
-        if (response?.success) {
-          setBlogsByCategory(response?.result);
-        }
-      } catch (error) {
-        console.log("Error fetching blogs by category:", error);
-      }
-    };
-    fetchBlogsByCategory();
-  }, []);
-
+const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
   // Slider settings for recent blogs
   const sliderSettings = {
     dots: true,
@@ -121,6 +47,7 @@ const Blogs = () => {
       },
     ],
   };
+  const APP_URL = "https://addressguru.ae/api/";
 
   return (
     <>
@@ -206,19 +133,20 @@ const Blogs = () => {
                   url: "https://addressguru.ae/assets/logo.png",
                 },
               },
-              blogPost: blogs?.slice(0, 5).map((blog) => ({
-                "@type": "BlogPosting",
-                headline: blog?.title,
-                url: `https://addressguru.ae/blogs/${blog?.slug}`,
-                datePublished: blog?.date || blog?.createdAt,
-                image: blog?.coverImage
-                  ? `${APP_URL}/${blog.coverImage}`
-                  : `${APP_URL}/seo/default-blog-og.jpg`,
-                author: {
-                  "@type": "Organization",
-                  name: "AddressGuru UAE",
-                },
-              })) || [],
+              blogPost:
+                blogs?.slice(0, 5).map((blog) => ({
+                  "@type": "BlogPosting",
+                  headline: blog?.title,
+                  url: `https://addressguru.ae/blogs/${blog?.slug}`,
+                  datePublished: blog?.date || blog?.createdAt,
+                  image: blog?.coverImage
+                    ? `${APP_URL}/${blog.coverImage}`
+                    : `${APP_URL}/seo/default-blog-og.jpg`,
+                  author: {
+                    "@type": "Organization",
+                    name: "AddressGuru UAE",
+                  },
+                })) || [],
             }),
           }}
         />
@@ -288,21 +216,21 @@ const Blogs = () => {
                     href={`/blogs/${blog?.slug}`}
                     className="sm:w-1/3 w-full aspect-[2/1] relative overflow-hidden bg-gray-100"
                   >
-                    <img
+                    <Image
                       src={`${APP_URL}/${blog?.coverImage}`}
                       alt={blog?.title}
+                      fill
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
                   <div className="sm:w-2/3 px-6 py-4">
-
                     <Link
                       href={`/blogs/${blog?.slug}`}
                       className="text-lg font-semibold text-gray-800 mb-3 hover:text-[#FF6E04] transition-colors cursor-pointer"
                     >
                       {blog?.title}
                     </Link>
-                        <div className="flex items-center gap-3 my-2">
+                    <div className="flex items-center gap-3 my-2">
                       {/* <span className="text-[#FF6E04] text-xs font-medium  rounded-full">
                         {blog?.category_id?.name}
                       </span> */}
@@ -310,15 +238,13 @@ const Blogs = () => {
                         {blog?.date}
                       </span>
                     </div>
-                    <p
+                    <div
                       dangerouslySetInnerHTML={{ __html: blog?.content }}
                       className="text-gray-600 text-xs mb-4 line-clamp-2"
                     />
-                      <span className="text-[#FF6E04] font-medium py-1 flex items-center gap-1 rounded-full">
-                        <h3 className=" ">
-                        {blog?.category_id?.name}
-                        </h3>
-                      </span>
+                    <span className="text-[#FF6E04] font-medium py-1 flex items-center gap-1 rounded-full">
+                      <h3 className=" ">{blog?.category_id?.name}</h3>
+                    </span>
                   </div>
                 </div>
               ))}
@@ -385,21 +311,6 @@ const Blogs = () => {
                       <h4 className="text-gray-800 font-semibold text-sm mb-2 hover:text-[#FF6E04] transition-colors">
                         {blog?.title}
                       </h4>
-                      {/* <div className="flex items-center text-xs text-gray-500">
-                      <svg
-                        className="w-4 h-4 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {blog.views} views
-                    </div> */}
                     </div>
                   ))}
                 </div>
@@ -453,3 +364,33 @@ const Blogs = () => {
 };
 
 export default Blogs;
+
+export async function getServerSideProps() {
+  try {
+    const [blogsRes, categoriesRes, recentRes, mostViewedRes] =
+      await Promise.all([
+        getBlogs(),
+        getCategories(),
+        getRecentBlogs(),
+        getMostViewedBlogs(),
+      ]);
+
+    return {
+      props: {
+        blogs: blogsRes || [],
+        blogCategories: categoriesRes?.data|| [],
+        recentBlogs: recentRes?.data?.blogs || [],
+        mostViewedBlogs: mostViewedRes?.data?.blogs || [],
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        blogs: [],
+        blogCategories: [],
+        recentBlogs: [],
+        mostViewedBlogs: [],
+      },
+    };
+  }
+}
