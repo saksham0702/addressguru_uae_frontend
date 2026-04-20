@@ -101,9 +101,9 @@ export default function App({ Component, pageProps }) {
     <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
         <ErrorProvider>
-          <Head>
+          {/* <Head>
             <title>addressguru.ae | Find the best businesses in UAE</title>
-          </Head>
+          </Head> */}
           <div className="flex justify-center">
             <div
               className={`w-full ${isAdmin ? "" : "max-w-[1750px]"} relative`}
