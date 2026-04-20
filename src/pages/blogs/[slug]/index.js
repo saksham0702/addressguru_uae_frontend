@@ -393,7 +393,9 @@ const BlogDetail = () => {
 
               {/* Avatar + Name + Job Title */}
               <div className="flex items-center gap-4 mb-4">
-                <img
+                <Image
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-[#FF6E04]/20"
                   src={`${APP_URL}/${blogDetail?.author?.avatar}`}
                   alt="author-profile"

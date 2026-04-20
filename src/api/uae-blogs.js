@@ -32,7 +32,7 @@ export const getBlogs = async ({ page = 1, limit = 10, search = "" } = {}) => {
         search,
       },
     });
-    console.log("response of blogs:", res);
+    // console.log("response of blogs:", res);
 
     return res?.data?.data?.blogs; // full response (pagination + blogs)
   } catch (error) {
@@ -87,6 +87,7 @@ export const getBlogsByCategory = async (categoryId, params = {}) => {
 
 export const getCategories = async () => {
   const { data } = await API.get("/blogs/get-blog-categories");
+  console.log("response of categories:", data);
   return data;
 };
 

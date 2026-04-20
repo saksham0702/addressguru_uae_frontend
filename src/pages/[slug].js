@@ -924,10 +924,16 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                 <div className="md:text-[13.5px] text-[15px] md:font-[500] flex flex-col gap-5 mt-2 max-w-4xl">
                   <p>
                     {`${data?.businessName} is located at ${data?.businessAddress}, ${serverCity}.`}
-                    {data?.facilities?.length > 0 && (
+                    {data?.services?.length > 0 && (
                       <span>
-                        {" Their facilities include: "}
-                        {data.facilities.map((f) => f.name).join(", ")}.
+                        {" Their services include: "}
+                        {data.services?.slice(0, 5).map((f) => f.name).join(", ")}.
+                      </span>
+                    )}
+                    {data?.paymentModes?.length > 0 && (
+                      <span>
+                        {" They accept payments: "}
+                        {data.paymentModes?.slice(0, 5).map((f) => f.name).join(", ")}.
                       </span>
                     )}
                   </p>
