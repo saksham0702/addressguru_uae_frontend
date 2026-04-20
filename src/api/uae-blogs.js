@@ -6,8 +6,7 @@
 
 import axios from "axios";
 const API_URL = "https://addressguru.ae/api";
-// const API_URL = "http://192.168.31.107:5001";
-// const API_URL = "http://192.168.29.191:5001";
+// const API_URL = "http://localhost:5001";
 const API = axios.create({
   baseURL: API_URL, // e.g. http://localhost:5000/api
 });
@@ -97,9 +96,9 @@ export const adminGetAllBlogs = async (params = {}) => {
   const { data } = await API.get("/admin/blogs", { params });
   return data;
 };
-
 export const createBlog = async (formData) => {
   const { data } = await API.post("/blogs/admin/create-blog", formData, {
+    // ✅ Changed from /blogs/admin/create-blog
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -107,6 +106,7 @@ export const createBlog = async (formData) => {
 
 export const updateBlog = async (id, formData) => {
   const { data } = await API.put(`/blogs/admin/update-blog/${id}`, formData, {
+    // ✅ Changed from /blogs/admin/update-blog
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
