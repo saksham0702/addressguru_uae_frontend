@@ -9,7 +9,7 @@ export const get_user_listings = async (type) => {
   //   const userId = localStorage.getItem("userId");
   try {
     const response = await axios.get(
-      `${API_URL}/business-listing/get-listing-by-user`,
+      `${API_URL}/business-listing/get-listing-by-user?page=1&limit=50`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

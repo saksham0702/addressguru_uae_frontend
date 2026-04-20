@@ -204,3 +204,10 @@ button{
 .seo-content table.table-full {
   width: 100%;
 }
+
+.description-blog * {
+  font-size: 0.75rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;   /* 🔥 key fix */
+}

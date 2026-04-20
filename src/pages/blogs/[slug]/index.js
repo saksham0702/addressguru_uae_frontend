@@ -25,6 +25,32 @@ const BlogDetail = () => {
         return <FaGlobe />;
     }
   };
+
+  const cleanHtml = (html) => {
+    if (!html) return "";
+
+    return (
+      html
+        // ❌ remove wrapper tags (div, section, article)
+        .replace(/<\/?(div|section|article)[^>]*>/gi, "")
+
+        // ❌ remove all class attributes
+        .replace(/class="[^"]*"/gi, "")
+
+        // ❌ remove inline styles
+        .replace(/style="[^"]*"/gi, "")
+
+        // ❌ remove base64 images (very important)
+        .replace(/<img[^>]*src="data:image[^"\]*"[^>]*>/gi, "")
+
+        // ❌ fix images inside headings (bad HTML)
+        .replace(/<h[1-6][^>]*>\s*<img[^>]*>\s*<\/h[1-6]>/gi, "")
+
+        // ✅ optional: remove empty tags
+        .replace(/<p>\s*<\/p>/gi, "")
+    );
+  };
+
   const router = useRouter();
   const { slug } = router.query;
   const [blogDetail, setBlogDetail] = useState(null);
@@ -339,7 +365,7 @@ const BlogDetail = () => {
             {/* Blog Content */}
             <div
               className="blog-content mb-12"
-              dangerouslySetInnerHTML={{ __html: blogDetail?.content }}
+              dangerouslySetInnerHTML={{ __html: cleanHtml(blogDetail?.content) }}
             />
 
             {/* FAQ Section */}

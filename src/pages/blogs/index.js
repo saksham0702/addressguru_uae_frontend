@@ -210,7 +210,7 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
               {blogs?.map((blog) => (
                 <div
                   key={blog?._id}
-                  className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col sm:flex-row"
+                  className="bg-white rounded-lg overflow-hidden max-h-48 shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col sm:flex-row"
                 >
                   <Link
                     href={`/blogs/${blog?.slug}`}
@@ -240,7 +240,7 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
                     </div>
                     <div
                       dangerouslySetInnerHTML={{ __html: blog?.content }}
-                      className="text-gray-600 text-xs mb-4 line-clamp-2"
+                      className="description-blog text-gray-600 text-xs mb-4 line-clamp-2 overflow-hidden"
                     />
                     <span className="text-[#FF6E04] font-medium py-1 flex items-center gap-1 rounded-full">
                       <h3 className=" ">{blog?.category_id?.name}</h3>
@@ -378,7 +378,7 @@ export async function getServerSideProps() {
     return {
       props: {
         blogs: blogsRes || [],
-        blogCategories: categoriesRes?.data|| [],
+        blogCategories: categoriesRes?.data || [],
         recentBlogs: recentRes?.data?.blogs || [],
         mostViewedBlogs: mostViewedRes?.data?.blogs || [],
       },
