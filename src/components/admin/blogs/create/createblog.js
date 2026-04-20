@@ -14,8 +14,11 @@ import {
 } from "@/api/uae-blogs";
 
 import { API_URL } from "@/services/constants";
-import TinyEditor from "../../editor/editor";
+import dynamic from "next/dynamic";
 
+const TinyEditor = dynamic(() => import("../../editor/editor"), {
+  ssr: false,
+});
 // ── Image Preview component ───────────────────────────────────────────────────
 const ImagePicker = ({ label, name, preview, onChange }) => (
   <div>
@@ -119,7 +122,7 @@ export default function CreateBlog() {
     content: "",
     category_id: "",
     tags: "", // comma-separated string → JSON array on submit
-    status: "draft",
+    // status: "draft",
     featured: false,
     // author
     authorName: "",
@@ -162,8 +165,8 @@ export default function CreateBlog() {
             content: blog.content || "",
             category_id: blog.category_id?._id || "",
             tags: blog.tags?.join(", ") || "",
-            status: blog.status || "draft",
-            featured: blog.featured || false,
+            status: blog.status || "published",
+            featured: blog.featured || true,
             blogid: blog._id || "",
             authorName: blog.author?.name || "",
             authorBio: blog.author?.bio || "",
@@ -244,7 +247,7 @@ export default function CreateBlog() {
   };
 
   // ── Submit ────────────────────────────────────────────────────────────────────
-  const handleSubmit = async (e, saveStatus) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validateForm();
@@ -255,7 +258,14 @@ export default function CreateBlog() {
     }
 
     const fd = new FormData();
-    const payload = { ...form, status: saveStatus || form.status };
+
+    const payload = {
+      ...form,
+      status: "published",
+    };
+
+    // ✅ Remove blogid from payload before sending
+    delete payload.blogid;
 
     Object.entries(payload).forEach(([k, v]) => {
       if (k === "tags") {
@@ -278,13 +288,20 @@ export default function CreateBlog() {
               .filter(Boolean),
           ),
         );
+      } else if (k === "featured") {
+        fd.append("featured", v ? "true" : "false");
       } else {
-        fd.append(k, String(v));
+        fd.append(k, v ?? "");
       }
     });
 
-    if (coverFile) fd.append("coverImage", coverFile);
-    if (avatarFile) fd.append("authorAvatar", avatarFile);
+    if (coverFile instanceof File) {
+      fd.append("coverImage", coverFile);
+    }
+
+    if (avatarFile instanceof File) {
+      fd.append("authorAvatar", avatarFile);
+    }
 
     setSubmitting(true);
 
@@ -293,9 +310,9 @@ export default function CreateBlog() {
         ? await updateBlog(form?.blogid, fd)
         : await createBlog(fd);
 
-      if (res?.success) {
+      if (res?.success || res?.status) {
         showToast("success", id ? "Blog updated!" : "Blog created!");
-        setTimeout(() => router.push("/admin/blogs"), 1200);
+        setTimeout(() => router.push("/admin/blogs/list"), 1200);
       } else {
         showToast("error", res?.message || "Something went wrong");
       }
@@ -353,15 +370,6 @@ export default function CreateBlog() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={(e) => handleSubmit(e, "draft")}
-              className="px-4 py-2 text-sm border border-gray-200 text-gray-600 font-semibold
-                rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Save Draft
-            </button>
             <button
               type="button"
               disabled={submitting}
@@ -479,34 +487,6 @@ export default function CreateBlog() {
             <div className="space-y-6">
               {/* Publish settings */}
               <Section title="Publish">
-                <Field label="Status">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 font-medium">
-                      {form.status === "published" ? "Published" : "Draft"}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((p) => ({
-                          ...p,
-                          status:
-                            p.status === "published" ? "draft" : "published",
-                        }))
-                      }
-                      className={`relative w-11 h-6 rounded-full transition-colors ${
-                        form.status === "published"
-                          ? "bg-green-500"
-                          : "bg-gray-300"
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-5 left-0 h-5 bg-white rounded-full shadow transition-transform
-        ${form.status === "published" ? "translate-x-5" : "translate-x-0.5"}`}
-                      />
-                    </button>
-                  </div>
-                </Field>
                 <Field label="Category">
                   <select
                     value={form.category_id}
@@ -656,9 +636,9 @@ export default function CreateBlog() {
                         label: "LinkedIn",
                       },
                       {
-                        key: "authorGithub",
-                        placeholder: "https://github.com/username",
-                        label: "GitHub",
+                        key: "authorInstagram",
+                        placeholder: "https://instagram.com/username",
+                        label: "Instagram",
                       },
                       {
                         key: "authorWebsite",
