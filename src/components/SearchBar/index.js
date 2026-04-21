@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Typewriter from "typewriter-effect";
 import CityDropdown from "../CityDropdown";
+import { Search } from "lucide-react";
 
 const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
   const placeholders = [
@@ -65,14 +66,9 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
           onClick={onSearch}
           className="w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#FF6E04] hover:bg-[#ff5a00] transition"
         >
-          <svg width="20" height="20" viewBox="0 0 38 38" fill="none">
-            <path
-              d="M28 28L23.75 23.7425M26.105 18.0526C26.105 20.1883 25.2566 22.2365 23.7465 23.7467C22.2363 25.2569 20.1881 26.1053 18.0524 26.1053C15.9167 26.1053 13.8685 25.2569 12.3583 23.7467C10.8482 22.2365 10 20.1883 10 18.0526C10 15.9169 10.8482 13.8687 12.3583 12.3586C13.8685 10.8484 15.9167 10 18.0524 10C20.1881 10 22.2363 10.8484 23.7465 12.3586C25.2566 13.8687 26.105 15.9169 26.105 18.0526Z"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
+        <Search className="text-white" size={24
+          
+        } />
         </button>
       </div>
     </div>
