@@ -5,7 +5,7 @@ const InfoListSection = ({ title = "Top Listings", items = [] }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="w-full mt-3 bg-white rounded-lg p-4 md:p-6">
+    <section className="w-full bg-white rounded-lg p-4 md:p-6">
       {/* Section Title */}
       <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
         {title}

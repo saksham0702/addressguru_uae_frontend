@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
-const Slash = () => <span className="text-gray-400 font-normal">/</span>;
+const Slash = () => <span className="text-gray-400">/</span>;
 
 const BreadCrumbs = ({ slug, name, length, type }) => {
   const { city } = useAuth();
@@ -11,7 +11,7 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
 
   return (
     <div>
-      <span className="text-xs flex items-center flex-wrap max-md:text-[11px] font-medium gap-1">
+      <span className="text-xs flex items-center flex-wrap max-md:text-[11px] font-light gap-1">
         {/* Home */}
         <Link
           href="/"

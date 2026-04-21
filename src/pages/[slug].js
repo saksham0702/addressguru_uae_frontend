@@ -28,8 +28,7 @@ import LandingPage from "@/components/HeadersMobile/LandingPage";
 import FullWidthGallery from "@/components/SeeDetails/FullWidthGallery";
 import RoomsSection from "@/components/SeeDetails/RoomsSection";
 import { get_rooms_by_listing } from "@/api/rooms";
-
-
+import { APP_URL } from "@/services/constants";
 
 // ─────────────────────────────────────────────────────────────
 // SSR — fetch listing + rooms in parallel, never double-fetch
@@ -38,32 +37,28 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
 
   try {
-    // Parallel fetch: listing + rooms
-    const [listingResult, roomsResult] = await Promise.allSettled([
-      get_listing_data(slug),
-      get_rooms_by_listing(slug),
-    ]);
+    // 1️⃣ First get listing
+    const listingRes = await get_listing_data(slug);
 
-    // If listing failed or returned nothing → 404
-    if (
-      listingResult.status === "rejected" ||
-      !listingResult.value?.data?.data
-    ) {
+    if (!listingRes?.data?.data) {
       return { notFound: true };
     }
 
-    const listing = listingResult.value.data.data;
+    const listing = listingRes.data.data;
 
-    // Tell crawlers not to index unapproved listings
+    // 2️⃣ Now use listing.id to fetch rooms
+    let rooms = null;
+    try {
+      const roomsRes = await get_rooms_by_listing(listing._id); // ✅ use ID here
+      rooms = roomsRes?.data ?? null;
+    } catch (err) {
+      console.log("Rooms fetch failed (non-blocking):", err);
+    }
+
+    // 3️⃣ SEO rule
     if (listing.status !== "approved") {
       context.res.setHeader("X-Robots-Tag", "noindex, nofollow");
     }
-
-    // Rooms may not exist — that's fine
-    const rooms =
-      roomsResult.status === "fulfilled"
-        ? (roomsResult.value?.data ?? null)
-        : null;
 
     return {
       props: {
@@ -225,20 +220,26 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   // (when Next.js shallow-routes without a full SSR round-trip)
   useEffect(() => {
     if (!slug) return;
-    // If SSR already gave us the correct data, skip
     if (slug === data?.slug) return;
 
     setLoading(true);
-    Promise.allSettled([get_listing_data(slug), get_rooms_by_listing(slug)])
-      .then(([listingRes, roomsRes]) => {
-        if (listingRes.status === "fulfilled" && listingRes.value?.data?.data) {
-          setData(listingRes.value.data.data);
-        } else {
+
+    get_listing_data(slug)
+      .then((listingRes) => {
+        if (!listingRes?.data?.data) {
           router.push("/404");
           return;
         }
-        if (roomsRes.status === "fulfilled" && roomsRes.value?.data) {
-          setRooms(roomsRes.value.data);
+
+        const listing = listingRes.data.data;
+        setData(listing);
+
+        // fetch rooms AFTER listing
+        return get_rooms_by_listing(listing?._id);
+      })
+      .then((roomsRes) => {
+        if (roomsRes?.data) {
+          setRooms(roomsRes.data);
         } else {
           setRooms(null);
         }
@@ -248,7 +249,6 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         router.push("/404");
       })
       .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   // ── View tracking (once per mount) ──────────────────────
@@ -811,8 +811,33 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                         ) : (
                           <CheckIcon />
                         )}
-                        <span className="md:text-[13.5px] text-[15px] font-semibold">
+                        <span className="text-[16px] font-medium">
                           {course.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SERVICES */}
+              {data?.services?.length > 0 && (
+                <div className="max-w-4xl mt-5 md:pl-2 px-1">
+                  <span className="flex gap-3 items-center">
+                    <h2 className="font-semibold uppercase md:text-xl">
+                      SERVICES
+                    </h2>
+                    <span className="h-[1px] w-full bg-gray-200" />
+                  </span>
+                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
+                    {data?.businessName} provides the following services:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {data.services.map((service, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <CheckIcon />
+                        <span className="text-[16px] font-medium">
+                          {service.name}
                         </span>
                       </div>
                     ))}
@@ -845,33 +870,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                         ) : (
                           <CheckIcon />
                         )}
-                        <span className="md:text-[13.5px] text-[15px] font-semibold">
+                        <span className="text-[16px] font-medium">
                           {facility?.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* SERVICES */}
-              {data?.services?.length > 0 && (
-                <div className="max-w-4xl mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center">
-                    <h2 className="font-semibold uppercase md:text-xl">
-                      SERVICES
-                    </h2>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
-                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessName} provides the following services:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.services.map((service, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <CheckIcon />
-                        <span className="md:text-[13.5px] text-[15px] font-semibold">
-                          {service.name}
                         </span>
                       </div>
                     ))}
@@ -904,7 +904,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                         ) : (
                           <CheckIcon />
                         )}
-                        <span className="md:text-[13.5px] text-[15px] font-semibold">
+                        <span className="text-[16px] font-medium">
                           {payment?.name}
                         </span>
                       </div>
@@ -927,13 +927,21 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                     {data?.services?.length > 0 && (
                       <span>
                         {" Their services include: "}
-                        {data.services?.slice(0, 5).map((f) => f.name).join(", ")}.
+                        {data.services
+                          ?.slice(0, 5)
+                          .map((f) => f.name)
+                          .join(", ")}
+                        .
                       </span>
                     )}
                     {data?.paymentModes?.length > 0 && (
                       <span>
                         {" They accept payments: "}
-                        {data.paymentModes?.slice(0, 5).map((f) => f.name).join(", ")}.
+                        {data.paymentModes
+                          ?.slice(0, 5)
+                          .map((f) => f.name)
+                          .join(", ")}
+                        .
                       </span>
                     )}
                   </p>
@@ -976,6 +984,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               ) : (
                 <GetMoreInfo
                   isPop={false}
+                  logo={`${APP_URL}/${data?.logo}`}
+                  image={`${APP_URL}/${data?.images[0]}`}
                   type="listing"
                   name={data?.businessName}
                   id={data?._id}
@@ -1013,12 +1023,15 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       {/* ── ENQUIRE POPUP ──────────────────────────────────── */}
       {enquirePop && (
         <div
-          className="inset-0 flex items-center fixed justify-center backdrop-blur-xs z-50 py-20 px-5"
+          className="inset-0 flex items-center fixed justify-center backdrop-blur-xs bg-black/60 z-50 py-20 px-5"
           onClick={() => setEnquirePop(false)}
         >
           <div onClick={(e) => e.stopPropagation()}>
             <GetMoreInfo
               isPop={true}
+              logo={`${APP_URL}/${data?.logo}`}
+              address={data?.businessAddress}
+              image={`${APP_URL}/${data?.images[0]}`}
               type="listing"
               name={data?.businessName}
               id={data?._id}

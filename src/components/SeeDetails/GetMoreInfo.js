@@ -4,9 +4,23 @@ import InputWithSvg from "../InputWithSvg";
 import { query } from "@/api/queries";
 import ResponseAlert from "@/components/ResponseAlert";
 import ReCAPTCHA from "react-google-recaptcha";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
-const GetMoreInfo = ({ setEnquirePop, name, type, id, slug, isPop }) => {
+const GetMoreInfo = ({
+  setEnquirePop,
+  name,
+  type,
+  id,
+  slug,
+  isPop,
+  address,
+  image, // Can be a single image URL or array of URLs
+  logo,
+}) => {
   const recaptchaRef = useRef(null);
+
+  // Handle both single image and array of images
+  const images = Array.isArray(image) ? image : image ? [image] : [];
 
   const [res, setRes] = useState(null);
   const [errors, setErrors] = useState({});
@@ -129,6 +143,7 @@ const GetMoreInfo = ({ setEnquirePop, name, type, id, slug, isPop }) => {
         phone: "",
         message: "",
       });
+      setFormData((prev) => ({ ...prev, captchaVerified: false }));
       // Reset reCAPTCHA
       if (recaptchaRef.current) {
         recaptchaRef.current.reset();
@@ -140,140 +155,302 @@ const GetMoreInfo = ({ setEnquirePop, name, type, id, slug, isPop }) => {
   };
 
   return (
-    <div className="bg-white w-full pt-4 pb-6 md:min-w-[400px] min-w-[340px] border border-gray-100 border-b-4 border-b-orange-500 relative rounded-xl shadow-md">
-      {/* Close Button */}
-      {isPop && (
-        <button
-          onClick={() => setEnquirePop(false)}
-          className="absolute right-3 top-3 cursor-pointer z-10 w-7 h-7 flex items-center justify-center rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50"
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path
-              d="M1 1l10 10M11 1L1 11"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-      )}
+    <div
+      className={`bg-white w-full pb-6 md:min-w-[400px] min-w-[340px] border border-gray-100 border-b-4 border-b-orange-500 relative rounded-xl shadow-md overflow-hidden ${isPop ? "pt-0" : "pt-4"}`}
+    >
+      {isPop ? (
+        <div className="flex flex-col md:flex-row w-full">
+          {/* Close Button - Enhanced */}
+          <button
+            onClick={() => setEnquirePop(false)}
+            className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 active:scale-95 group"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-gray-600 group-hover:text-gray-900" />
+          </button>
 
-      {/* Title */}
-      <h3 className="font-semibold text-[15px] mt-5 max-md:text-[13px] text-center mb-3 px-3">
-        Get More Information From{" "}
-        <strong className="text-[#FF6E04]">{name}</strong>
-      </h3>
+          {/* LEFT SIDE (Info Panel) */}
+          <div className="md:w-[40%] w-full border-b md:border-b-0 md:border-r border-gray-100 flex flex-col">
+            {/* Top Info */}
+            <div className="p-4 pb-3 flex flex-col items-center md:items-start text-center md:text-left bg-gradient-to-b from-gray-50 to-white">
+              {/* Logo */}
+              {logo && (
+                <div className="w-26 h-26 rounded-xl overflow-hidden border-2 border-orange-100 bg-white mb-3 shadow-sm">
+                  <Image
+                    src={logo}
+                    alt={name}
+                    width={500}
+                    height={500}
+                    className="object-contain w-full h-full"
+                  />
+                </div>
+              )}
 
-      {/* Form */}
-      <div className="px-4 flex flex-col gap-3 text-[#323232]">
-        {/* Name */}
-        <div>
-          <input
-            value={infoQuery.name}
-            onChange={(e) => handleFieldChange("name", e.target.value)}
-            placeholder="Full Name"
-            className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
-              errors.name
-                ? "border-red-500"
-                : "border-gray-200 focus:border-orange-500"
-            }`}
-          />
-          {errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-          )}
+              {/* Name */}
+              <h2 className="font-semibold text-[16px] md:text-[17px] leading-tight text-gray-900">
+                {name}
+              </h2>
+
+              {/* Address */}
+              {address && (
+                <p className="text-xs text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">
+                  {address}
+                </p>
+              )}
+            </div>
+
+            {/* Image */}
+            {images.length > 0 && (
+              <div className="relative w-full h-[220px] md:h-full bg-gray-100">
+                <Image
+                  src={images[0]}
+                  alt={name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT SIDE (FORM AREA) */}
+          <div className="md:w-[60%] w-full flex flex-col">
+            <div className="p-4 pb-3 bg-gradient-to-b from-orange-50 to-white border-b border-orange-100">
+              <h3 className="font-semibold text-[16px] text-gray-900 flex items-center justify-center gap-2">
+                <span className="text-orange-500">✉️</span> Send an Enquiry
+              </h3>
+            </div>
+
+            {/* Form - Scrollable */}
+            <div className="px-4 md:px-5 py-4 overflow-y-auto max-h-[500px] md:max-h-none">
+              <div className="flex flex-col gap-3 text-[#323232]">
+                {/* Name */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={infoQuery.name}
+                    onChange={(e) => handleFieldChange("name", e.target.value)}
+                    placeholder="Enter your full name"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                      errors.name
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                    }`}
+                  />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span>⚠️</span> {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={infoQuery.email}
+                    onChange={(e) => handleFieldChange("email", e.target.value)}
+                    placeholder="your.email@example.com"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                      errors.email
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                    }`}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span>⚠️</span> {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={infoQuery.phone}
+                    onChange={(e) => handleFieldChange("phone", e.target.value)}
+                    placeholder="10-15 digit mobile number"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                      errors.phone
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                    }`}
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span>⚠️</span> {errors.phone}
+                    </p>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Your Message <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={infoQuery.message}
+                    onChange={(e) =>
+                      handleFieldChange("message", e.target.value)
+                    }
+                    placeholder="Tell us what you're looking for..."
+                    className={`w-full px-3 py-2 border rounded-lg text-sm h-24 resize-none transition-all ${
+                      errors.message
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                    }`}
+                  />
+                  {errors.message && (
+                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                      <span>⚠️</span> {errors.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* CAPTCHA */}
+                <div className="flex justify-center md:justify-start">
+                  <div className="scale-[0.85] origin-left md:scale-100">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
+                      onChange={handleCaptchaChange}
+                      onExpired={handleCaptchaExpired}
+                    />
+                  </div>
+                </div>
+                {errors?.captcha && (
+                  <p className="text-red-500 text-xs -mt-2 flex items-center gap-1">
+                    <span>⚠️</span> {errors?.captcha}
+                  </p>
+                )}
+
+                {/* Submit */}
+                <button
+                  onClick={sendEnquiry}
+                  className="w-full bg-gradient-to-r from-[#FF6E04] to-[#FF5504] rounded-lg text-white font-semibold py-3.5 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Send Enquiry</span>
+                  <span>→</span>
+                </button>
+
+                {/* Success Message */}
+                {res && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    <p className="text-green-700 text-sm">{res}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
+      ) : (
+        <>
+          {/* NORMAL CARD VIEW (non-popup) - Keep as is */}
+          <h3 className="font-semibold text-[15px] max-md:text-[13px] text-center mb-3 px-3 mt-4">
+            Get More Information From{" "}
+            <strong className="text-[#FF6E04]">{name}</strong>
+          </h3>
 
-        {/* Email */}
-        <div>
-          <input
-            value={infoQuery.email}
-            onChange={(e) => handleFieldChange("email", e.target.value)}
-            placeholder="Email"
-            className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
-              errors.email
-                ? "border-red-500"
-                : "border-gray-200 focus:border-orange-500"
-            }`}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-          )}
-        </div>
+          <div className="px-4 md:px-5">
+            <div className="px-4 md:px-5 flex flex-col gap-3 mt-2 text-[#323232]">
+              {/* Name */}
+              <div>
+                <input
+                  value={infoQuery.name}
+                  onChange={(e) => handleFieldChange("name", e.target.value)}
+                  placeholder="Full Name"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
+                    errors.name
+                      ? "border-red-500"
+                      : "border-gray-200 focus:border-orange-500"
+                  }`}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                )}
+              </div>
 
-        {/* Phone */}
-        <div>
-          <input
-            value={infoQuery.phone}
-            onChange={(e) => handleFieldChange("phone", e.target.value)}
-            placeholder="Mobile Number"
-            className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
-              errors.phone
-                ? "border-red-500"
-                : "border-gray-200 focus:border-orange-500"
-            }`}
-          />
-          {errors.phone && (
-            <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-          )}
-        </div>
+              {/* Email */}
+              <div>
+                <input
+                  value={infoQuery.email}
+                  onChange={(e) => handleFieldChange("email", e.target.value)}
+                  placeholder="Email"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
+                    errors.email
+                      ? "border-red-500"
+                      : "border-gray-200 focus:border-orange-500"
+                  }`}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
 
-        {/* Message */}
-        <div>
-          <textarea
-            value={infoQuery.message}
-            onChange={(e) => handleFieldChange("message", e.target.value)}
-            placeholder="Type Your Message..."
-            className={`w-full px-3 py-2 border rounded-lg text-sm h-20 resize-none ${
-              errors.message
-                ? "border-red-500"
-                : "border-[#E0E3E5] focus:border-orange-500"
-            }`}
-          />
-          {errors.message && (
-            <p className="text-red-500 text-xs mt-1">{errors.message}</p>
-          )}
-        </div>
+              {/* Phone */}
+              <div>
+                <input
+                  value={infoQuery.phone}
+                  onChange={(e) => handleFieldChange("phone", e.target.value)}
+                  placeholder="Mobile Number"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
+                    errors.phone
+                      ? "border-red-500"
+                      : "border-gray-200 focus:border-orange-500"
+                  }`}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
+              </div>
 
-        {/* CAPTCHA */}
-        <div className="scale-[0.85] origin-left md:scale-100">
-          {" "}
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
-            onChange={handleCaptchaChange}
-            onExpired={handleCaptchaExpired}
-          />
-          {errors?.captcha && (
-            <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
-          )}
-        </div>
+              {/* Message */}
+              <div>
+                <textarea
+                  value={infoQuery.message}
+                  onChange={(e) => handleFieldChange("message", e.target.value)}
+                  placeholder="Type Your Message..."
+                  className={`w-full px-3 py-2 border rounded-lg text-sm h-20 resize-none ${
+                    errors.message
+                      ? "border-red-500"
+                      : "border-[#E0E3E5] focus:border-orange-500"
+                  }`}
+                />
+                {errors.message && (
+                  <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+                )}
+              </div>
 
-        {/* Submit */}
-        <button
-          onClick={sendEnquiry}
-          className="w-full bg-[#FF6E04] rounded-md text-white font-semibold py-3 hover:bg-[#FF5504] active:scale-[0.98] transition-all"
-        >
-          Send Enquiry
-        </button>
-      </div>
+              {/* CAPTCHA */}
+              <div className="scale-[0.85] origin-left md:scale-100">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
+                  onChange={handleCaptchaChange}
+                  onExpired={handleCaptchaExpired}
+                />
+                {errors?.captcha && (
+                  <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
+                )}
+              </div>
 
-      {/* Bottom Image (FIXED CLICK ISSUE) */}
-      {/* <div className="absolute left-0 right-0 -bottom-14 pointer-events-none">
-        <Image
-          src="/assets/getBottom.png"
-          alt="border"
-          height={500}
-          width={500}
-          className="w-full h-28 object-cover"
-        />
-      </div> */}
-
-      {/* Response */}
-      {res && (
-        <div className="mx-4 mt-2 bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm text-center">
-          {" "}
-          {res}
-        </div>
+              {/* Submit */}
+              <button
+                onClick={sendEnquiry}
+                className="w-full bg-[#FF6E04] rounded-md text-white font-semibold py-3.5 md:py-3 hover:bg-[#FF5504] active:scale-[0.98] transition-all"
+              >
+                Send Enquiry
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
