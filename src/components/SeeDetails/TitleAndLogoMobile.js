@@ -16,8 +16,10 @@ const TitleAndLogoMobile = ({
   handleClick,
   openingHours,
 }) => {
-  console.log(data);
-
+  const message = `Hi,
+${data?.businessName}, i am looking for ${data?.category?.name}
+I found your business on AddressGuru UAE
+https://addressguru.ae/${data?.slug}`;
   const [reviewPop, setReviewPop] = useState(false);
   return (
     <section className=" mt-2 h-full space-y-1 ">
@@ -307,15 +309,14 @@ const TitleAndLogoMobile = ({
           }}
         />
         <a
-          onClick={() => handleClick(data?.id, "whatsapp")}
-          href={`https://wa.me/${data?.countryCode}${data?.mobileNumber}`}
+          href={`https://wa.me/${data?.countryCode + data?.mobileNumber}?text=${encodeURIComponent(message)}`}
           target="_blank"
           rel="noopener noreferrer"
         >
           <svg
             className="cursor-pointer"
             width="35"
-            height="35"
+            height="30"
             viewBox="0 0 40 40"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -335,7 +336,8 @@ const TitleAndLogoMobile = ({
             />
           </svg>
         </a>
-         {data?.websiteLink && (
+
+        {data?.websiteLink && (
           <a
             href={data?.websiteLink || "#"}
             target="_blank"
@@ -380,7 +382,6 @@ const TitleAndLogoMobile = ({
         >
           Claim this Business
         </button>
-       
       </div>
       {reviewPop && (
         <div className=" inset-0 min-h-screen flex items-center z-50 fixed  bg-black/30 ">

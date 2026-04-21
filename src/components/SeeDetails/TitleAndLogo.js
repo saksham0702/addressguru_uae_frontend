@@ -19,7 +19,10 @@ const TitleAndLogo = ({
   enquirePop,
   setEnquirePop,
 }) => {
-  console.log(name);
+  const message = `Hi,
+${data?.businessName}, i am looking for ${data?.category?.name}
+I found your business on AddressGuru UAE
+https://addressguru.ae/${data?.slug}`;
 
   return (
     <div className="flex gap-3 items-start md:items-center">
@@ -37,7 +40,7 @@ const TitleAndLogo = ({
       {/* CONTENT */}
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 items-center">
-          <h1 title={name} className="text-lg md:text-xl font-semibold truncate">{name}</h1>
+          <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
         </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
@@ -99,7 +102,6 @@ const TitleAndLogo = ({
             <p className="text-black">Verified</p>
           </span>
           <StarRatingBadge value={getStarRating(data?.additionalFields)} />
-
         </div>
 
         {/* address section */}
@@ -223,15 +225,13 @@ const TitleAndLogo = ({
             textColor="#fff"
             width="140px"
             onClick={() => {
-              setEnquirePop(true)
+              setEnquirePop(true);
             }}
           />
 
           {/* whatsap button */}
           <a
-            className="hover:scale-105 transition-all duration-100 hover:opacity-80"
-            onClick={() => handleClick(data?.id, "whatsapp")}
-            href={`https://wa.me/${data?.mobileNumber}`}
+            href={`https://wa.me/${data?.countryCode + data?.mobileNumber}?text=${encodeURIComponent(message)}`}
             target="_blank"
             rel="noopener noreferrer"
           >

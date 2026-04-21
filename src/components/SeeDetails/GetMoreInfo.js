@@ -160,7 +160,7 @@ const GetMoreInfo = ({
     >
       {isPop ? (
         <div className="flex flex-col md:flex-row w-full">
-          {/* Close Button - Enhanced */}
+          {/* Close Button */}
           <button
             onClick={() => setEnquirePop(false)}
             className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 active:scale-95 group"
@@ -169,58 +169,57 @@ const GetMoreInfo = ({
             <X className="w-5 h-5 text-gray-600 group-hover:text-gray-900" />
           </button>
 
-          {/* LEFT SIDE (Info Panel) */}
-          <div className="md:w-[40%] w-full border-b md:border-b-0 md:border-r border-gray-100 flex flex-col">
-            {/* Top Info */}
-            <div className="p-4 pb-3 flex flex-col items-center md:items-start text-center md:text-left bg-gradient-to-b from-gray-50 to-white">
+          {/* LEFT SIDE */}
+          <div className="md:w-[40%] w-full border-b md:border-b-0 md:border-r border-gray-100 flex flex-col justify-between bg-gradient-to-b from-gray-50 to-white">
+            <div className="p-5 flex flex-col items-center md:items-start text-center md:text-left">
               {/* Logo */}
               {logo && (
-                <div className="w-26 h-26 rounded-xl overflow-hidden border-2 border-orange-100 bg-white mb-3 shadow-sm">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-orange-100 bg-white mb-4 shadow-sm">
                   <Image
                     src={logo}
                     alt={name}
-                    width={500}
-                    height={500}
+                    width={200}
+                    height={200}
                     className="object-contain w-full h-full"
                   />
                 </div>
               )}
 
               {/* Name */}
-              <h2 className="font-semibold text-[16px] md:text-[17px] leading-tight text-gray-900">
+              <h2 className="font-semibold text-[18px] text-gray-900 leading-tight">
                 {name}
               </h2>
 
               {/* Address */}
               {address && (
-                <p className="text-xs text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed">
                   {address}
                 </p>
               )}
-            </div>
 
-            {/* Image */}
-            {images.length > 0 && (
-              <div className="relative w-full h-[220px] md:h-full bg-gray-100">
-                <Image
-                  src={images[0]}
-                  alt={name}
-                  fill
-                  className="object-cover"
-                />
+              {/* Enquiry Info */}
+              <div className="mt-5 w-full bg-orange-50 border border-orange-100 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  You are enquiring about{" "}
+                  <span className="font-semibold text-orange-600">{name}</span>.
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Fill the form and we will connect you shortly.
+                </p>
               </div>
-            )}
+            </div>
           </div>
 
-          {/* RIGHT SIDE (FORM AREA) */}
+          {/* RIGHT SIDE (FORM) */}
           <div className="md:w-[60%] w-full flex flex-col">
+            {/* Header */}
             <div className="p-4 pb-3 bg-gradient-to-b from-orange-50 to-white border-b border-orange-100">
               <h3 className="font-semibold text-[16px] text-gray-900 flex items-center justify-center gap-2">
                 <span className="text-orange-500">✉️</span> Send an Enquiry
               </h3>
             </div>
 
-            {/* Form - Scrollable */}
+            {/* Form */}
             <div className="px-4 md:px-5 py-4 overflow-y-auto max-h-[500px] md:max-h-none">
               <div className="flex flex-col gap-3 text-[#323232]">
                 {/* Name */}
@@ -239,8 +238,8 @@ const GetMoreInfo = ({
                     }`}
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-                      <span>⚠️</span> {errors.name}
+                    <p className="text-red-500 text-xs mt-1.5">
+                      ⚠️ {errors.name}
                     </p>
                   )}
                 </div>
@@ -261,8 +260,8 @@ const GetMoreInfo = ({
                     }`}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-                      <span>⚠️</span> {errors.email}
+                    <p className="text-red-500 text-xs mt-1.5">
+                      ⚠️ {errors.email}
                     </p>
                   )}
                 </div>
@@ -283,23 +282,25 @@ const GetMoreInfo = ({
                     }`}
                   />
                   {errors.phone && (
-                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-                      <span>⚠️</span> {errors.phone}
+                    <p className="text-red-500 text-xs mt-1.5">
+                      ⚠️ {errors.phone}
                     </p>
                   )}
                 </div>
 
-                {/* Message */}
+                {/* Message (AUTO-FILLED) */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Your Message <span className="text-red-500">*</span>
                   </label>
                   <textarea
-                    value={infoQuery.message}
+                    value={
+                      infoQuery.message ||
+                      `I want to enquire about ${name}. Please share more details.`
+                    }
                     onChange={(e) =>
                       handleFieldChange("message", e.target.value)
                     }
-                    placeholder="Tell us what you're looking for..."
                     className={`w-full px-3 py-2 border rounded-lg text-sm h-24 resize-none transition-all ${
                       errors.message
                         ? "border-red-500 bg-red-50"
@@ -307,8 +308,8 @@ const GetMoreInfo = ({
                     }`}
                   />
                   {errors.message && (
-                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-                      <span>⚠️</span> {errors.message}
+                    <p className="text-red-500 text-xs mt-1.5">
+                      ⚠️ {errors.message}
                     </p>
                   )}
                 </div>
@@ -325,25 +326,23 @@ const GetMoreInfo = ({
                   </div>
                 </div>
                 {errors?.captcha && (
-                  <p className="text-red-500 text-xs -mt-2 flex items-center gap-1">
-                    <span>⚠️</span> {errors?.captcha}
+                  <p className="text-red-500 text-xs -mt-2">
+                    ⚠️ {errors?.captcha}
                   </p>
                 )}
 
                 {/* Submit */}
                 <button
                   onClick={sendEnquiry}
-                  className="w-full bg-gradient-to-r from-[#FF6E04] to-[#FF5504] rounded-lg text-white font-semibold py-3.5 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-[#FF6E04] to-[#FF5504] rounded-lg text-white font-semibold py-3.5 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98] transition-all"
                 >
-                  <span>Send Enquiry</span>
-                  <span>→</span>
+                  Send Enquiry →
                 </button>
 
-                {/* Success Message */}
+                {/* Success */}
                 {res && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    <p className="text-green-700 text-sm">{res}</p>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-green-700 text-sm">✓ {res}</p>
                   </div>
                 )}
               </div>

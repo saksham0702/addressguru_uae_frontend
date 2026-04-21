@@ -13,6 +13,10 @@ const BusinessCard = ({ data }) => {
   const API_URL = "https://addressguru.ae/api";
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const message = `Hi,
+${data?.businessName}, i am looking for ${data?.category?.name}
+I found your business on AddressGuru UAE
+https://addressguru.ae/${data?.slug}`;
 
   const handleShowNumber = async (type) => {
     // If already loaded → don’t call API again
@@ -53,7 +57,9 @@ const BusinessCard = ({ data }) => {
                 href={`/${data?.slug}`}
                 className=" md:whitespace-nowrap text-xl max-md:text-sm capitalize leading-5 max-md:mt-2 max-[320px]:!text-xs font-medium"
               >
-                <h2 title={data?.businessName} className="">{data?.businessName}</h2>
+                <h2 title={data?.businessName} className="">
+                  {data?.businessName}
+                </h2>
               </Link>
               {/* <div className="text-xs text-gray-500  whitespace-nowrap max-md:hidden absolute right-7 ">
                 <div className="flex items-center gap-1">
@@ -62,7 +68,7 @@ const BusinessCard = ({ data }) => {
               </div> */}
             </div>
             {/* Address */}
-            <address className="not-italic text-xs 2xl:text-[14px] text-gray-700 flex items-center gap-1">
+            <address className="not-italic text-xs 2xl:text-[12px] text-gray-700 flex items-center gap-1">
               <MapPin
                 size={16}
                 className="text-gray-700 shrink-0"
@@ -154,7 +160,10 @@ const BusinessCard = ({ data }) => {
                     )}
 
                     {/* NAME */}
-                    <span title={facility?.name} className="truncate max-w-[100px] text-gray-700 font-medium">
+                    <span
+                      title={facility?.name}
+                      className="truncate max-w-[100px] text-gray-700 font-medium"
+                    >
                       {facility?.name}
                     </span>
                   </div>
@@ -163,7 +172,7 @@ const BusinessCard = ({ data }) => {
             </div>
 
             {/* Description */}
-            <p className="text-[14px] font-[400] truncate text-gray-900 w-md max-md:hidden 2xl:text-[15px] 2xl:w-lg ">
+            <p className="text-[12px] font-[400] truncate text-gray-900 w-md max-md:hidden 2xl:text-[12px] 2xl:w-lg ">
               {data?.description}
             </p>
 
@@ -260,8 +269,7 @@ const BusinessCard = ({ data }) => {
 
               {/* whatsap button */}
               <a
-                onClick={() => handleShowNumber("whatsapp")}
-                href={`https://wa.me/${data?.countryCode + data?.mobileNumber}`}
+                href={`https://wa.me/${data?.countryCode + data?.mobileNumber}?text=${encodeURIComponent(message)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
