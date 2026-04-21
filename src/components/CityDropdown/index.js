@@ -1,14 +1,38 @@
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 
 export default function CityDropdown({ data, isOpen, setIsOpen }) {
   const { city, setCity } = useAuth();
+  const dropdownRef = useRef(null);
+  const router = useRouter();
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setIsOpen]);
+
+  useEffect(() => {
+    const handleRouteChange = () => setIsOpen(false);
+
+    router.events.on("routeChangeStart", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, []);
 
   return (
-    <div className="inline-block relative text-left z-[9999999]">
+    <div ref={dropdownRef} className=" w-full z-[9999999]">
+      {" "}
       <span
-        className="text-[#FF6E04] font-bold flex gap-2 items-center cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
+        className="text-[#FF6E04] font-semibold text-[15px] md:text-[16px] flex gap-2 items-center cursor-pointer justify-center text-center w-full  py-1 rounded-md transition"
       >
         <p> {city} </p>
         <svg
@@ -29,9 +53,8 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
           />
         </svg>
       </span>
-
       {isOpen && (
-        <div className="absolute mt-3.5 bg-white shadow-md max-md:right-[2px] border rounded text-black w-[200px] border-gray-200 hide-scroll max-h-[300px] overflow-y-auto z-50">
+        <div className="absolute mt-3.5 bg-white shadow-md border rounded text-black w-[200px] border-gray-200 hide-scroll max-h-[300px] overflow-y-auto z-50">
           {/* Header with Close Button */}
           <div className="px-4 py-2 text-xs text-gray-400 my-3 uppercase border-b border-gray-100 flex items-center justify-between">
             <span>Popular Locations</span>
@@ -65,7 +88,7 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
               }}
               className={`px-4 py-3 cursor-pointer font-normal hover:bg-gray-50 flex items-center gap-2 ${
                 city === item.name
-                  ? "bg-orange-50 text-[#FF6E04]"
+                  ? " text-[#FF6E04]"
                   : "text-gray-700"
               }`}
             >
@@ -83,7 +106,7 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
                 />
               </svg>
 
-              {item.name}
+              <p className="text-[14px]">{item.name}</p>
             </div>
           ))}
         </div>

@@ -6,6 +6,7 @@ import CustomButton from "../Buttons/CustomButton";
 import { APP_URL } from "@/services/constants";
 import { useRouter } from "next/router";
 import { get_view } from "@/api/queries";
+import { MapPin } from "lucide-react";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data }) => {
@@ -30,15 +31,15 @@ const BusinessCard = ({ data }) => {
   return (
     <div className="max-md:max-w-full max-md:border-b-1 pb-2 max-md:border-gray-200 my-1  ">
       <div className="md:w-[98%] max-md:p-[1px] ">
-        <div className=" rounded-xl md:p-3 py-1.5 md:border relative border-gray-100  flex max-md:gap-2 md:gap-4 gap-3  max-[340px]:!gap-2 md:shadow-lg ">
+        <div className=" py-1.5 relative flex max-md:gap-2 md:gap-4 gap-3  max-[340px]:!gap-2 ">
           {/* Left Image */}
           <Link
             href={`/${data?.slug}`}
             className="md:w-[160px] md:max-h-[195px] max-md:max-w-[32%] max-md:h-[120px] border border-gray-200 rounded-sm max-[340]:w-[140px]  2xl:w-[190px] 2xl:h-[220px]  overflow-hidden "
           >
-            <img
+            <Image
               src={`${API_URL}/${data?.logo}`}
-              alt="course poster"
+              alt={`${data?.businessName} logo`}
               width={500}
               height={500}
               className="max-md:h-[100%] md:h-[190px] object-contain rounded-xl"
@@ -50,9 +51,9 @@ const BusinessCard = ({ data }) => {
             <div className="flex justify-between items-center ">
               <Link
                 href={`/${data?.slug}`}
-                className=" md:whitespace-nowrap 2xl:text-lg max-md:text-sm capitalize leading-5 max-md:mt-2 max-[320px]:!text-xs max-md:font-bold font-bold "
+                className=" md:whitespace-nowrap text-xl max-md:text-sm capitalize leading-5 max-md:mt-2 max-[320px]:!text-xs font-medium"
               >
-                {data?.businessName}
+                <h2 title={data?.businessName} className="">{data?.businessName}</h2>
               </Link>
               {/* <div className="text-xs text-gray-500  whitespace-nowrap max-md:hidden absolute right-7 ">
                 <div className="flex items-center gap-1">
@@ -61,11 +62,19 @@ const BusinessCard = ({ data }) => {
               </div> */}
             </div>
             {/* Address */}
-            <div className="text-xs 2xl:text-[13.5px] text-gray-700 font-medium flex items-center gap-1">
-              <h4 title={data?.businessAddress} className="truncate max-md:w-50  md:max-w-120 max-[340px]:!text-xs max-[340px]:!w-20  max-md:text-[11px]">
+            <address className="not-italic text-xs 2xl:text-[14px] text-gray-700 flex items-center gap-1">
+              <MapPin
+                size={16}
+                className="text-gray-700 shrink-0"
+                aria-hidden="true"
+              />
+              <span
+                title={data?.businessAddress}
+                className="truncate max-md:w-50 md:max-w-120 max-[340px]:!text-xs max-[340px]:!w-20 max-md:text-[11px]"
+              >
                 {data?.businessAddress}
-              </h4>
-            </div>
+              </span>
+            </address>
 
             {/* Ratings & Badges */}
             <div className="flex items-center md:gap-4 my-[3px] max-[340px]:!scale-90 w-20">
@@ -131,14 +140,10 @@ const BusinessCard = ({ data }) => {
             {/* Tags bring tag randomly from anywhere */}
             <div className="max-md:flex max-md:flex-col md:flex md:gap-3 gap-1 text-[12px] 2xl:text-[13px] font-medium">
               <div className="flex flex-wrap gap-2">
-                {data?.facilities?.slice(0, 3).map((facility, index) => (
+                {data?.facilities?.slice(0, 4).map((facility, index) => (
                   <div
                     key={index}
-                    className={`
-        flex items-center gap-2 px-2 py-1 border border-gray-200 rounded-md bg-gray-50
-        text-[11px] md:text-[12px]
-        ${index > 0 ? "hidden md:flex" : ""}
-      `}
+                    className={`flex items-center gap-2 px-2 py-1 border border-gray-200 rounded-md text-[11px] md:text-[12px] ${index > 0 ? "hidden md:flex" : ""}`}
                   >
                     {/* ICON */}
                     {facility?.iconSvg && (
@@ -149,7 +154,7 @@ const BusinessCard = ({ data }) => {
                     )}
 
                     {/* NAME */}
-                    <span className="truncate max-w-[120px] text-gray-700 font-medium">
+                    <span title={facility?.name} className="truncate max-w-[100px] text-gray-700 font-medium">
                       {facility?.name}
                     </span>
                   </div>
@@ -158,7 +163,7 @@ const BusinessCard = ({ data }) => {
             </div>
 
             {/* Description */}
-            <p className="text-[11px] font-[500] truncate  w-md max-md:hidden 2xl:text-[13px] 2xl:w-lg ">
+            <p className="text-[14px] font-[400] truncate text-gray-900 w-md max-md:hidden 2xl:text-[15px] 2xl:w-lg ">
               {data?.description}
             </p>
 

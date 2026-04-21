@@ -217,7 +217,6 @@ const SearchResults = ({
     }
   }, [cityName, router.isReady]);
 
-
   // ── Load more ──
   const handleLoadMore = async () => {
     if (!pageData?.hasMore || isLoadingMore) return;
@@ -358,7 +357,7 @@ const SearchResults = ({
             </div>
           </section>
 
-          <div className="mt-5 max-md:ml-2.5 md:mb-2">
+          <div className="mt-3 max-md:ml-2.5 ">
             <BreadCrumbs
               slug={canonicalSlug}
               city={canonicalCity}
@@ -367,7 +366,7 @@ const SearchResults = ({
             />
           </div>
 
-          <h1 className="font-bold text-xl mt-2 capitalize max-md:hidden mb-3">
+          <h1 className="font-semibold text-xl 2xl:text-2xl mt-2 capitalize max-md:hidden mb-3">
             Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
           </h1>
@@ -482,7 +481,12 @@ const SearchResults = ({
                 ) : (
                   <>
                     {listings.map((item, index) => (
-                      <BusinessCard key={item._id || index} data={item} />
+                      <>
+                        <BusinessCard key={item._id || index} data={item} />
+                        {index !== listings.length - 1 && (
+                          <hr className="border-gray-200 max-md:hidden " />
+                        )}
+                      </>
                     ))}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (
@@ -513,25 +517,25 @@ const SearchResults = ({
             </div>
           </div>
 
-          <section className="max-md:hidden max-w-full overflow-hidden"> 
-          <hr className="border-gray-200 " />
-          <InfoListSection
-            title={`Top ${canonicalSlug} in ${canonicalCity}`}
-            items={listings?.map((item) => ({
-              title: item?.businessName || item?.name,
-              description:
-                item?.description || item?.about || "No description available.",
-              address: item?.address || item?.location || canonicalCity,
-            }))}
-          />
-          <hr className="border-gray-200 " />
-          <SeoContent
-            categorySlug={slug}
-            city={canonicalCity}
-            seoContent={seoContent}
-          />
+          <section className="max-md:hidden max-w-full overflow-hidden">
+            <hr className="border-gray-200 " />
+            <SeoContent
+              categorySlug={slug}
+              city={canonicalCity}
+              seoContent={seoContent}
+            />
+            <InfoListSection
+              title={`Top ${canonicalSlug} in ${canonicalCity}`}
+              items={listings?.map((item) => ({
+                title: item?.businessName || item?.name,
+                description:
+                  item?.description ||
+                  item?.about ||
+                  "No description available.",
+                address: item?.address || item?.location || canonicalCity,
+              }))}
+            />
           </section>
-
         </div>
       </div>
 
