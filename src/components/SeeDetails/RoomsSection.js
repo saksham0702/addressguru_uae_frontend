@@ -103,24 +103,25 @@ const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
           {/* Hotel / Hostel meta */}
           {(category?.toLowerCase() === "hotel" ||
             category?.toLowerCase() === "hostel") && (
-            <>
+            <div className="flex gap-2 items-center">
               {data?.checkIn && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm font-semibold text-gray-900">
                   Check-in —{" "}
-                  <span className="text-gray-800 font-semibold">
+                  <span className="text-gray-600 font-normal">
                     {data.checkIn}
                   </span>
                 </p>
               )}
+              {" | "}
               {data?.checkOut && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm font-semibold text-gray-900">
                   Check-out —{" "}
-                  <span className="text-gray-800 font-semibold">
+                  <span className="text-gray-600 font-normal">
                     {data.checkOut}
                   </span>
                 </p>
               )}
-            </>
+            </div>
           )}
 
           {/* Yoga Studio meta */}

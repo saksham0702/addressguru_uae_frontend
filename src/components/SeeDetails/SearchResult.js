@@ -382,7 +382,7 @@ const SearchResults = ({
             onFilterRemove={handleFilterRemove}
           />
 
-          <div className="flex w-full gap-4">
+          <div className="flex w-full gap-4 items-start">
             <div className="flex flex-col my-2 md:my-4 gap-2 w-full max-md:mb-32">
               <div className="bg-white w-full rounded-lg pl-2">
                 {isLoading ? (
@@ -481,12 +481,9 @@ const SearchResults = ({
                 ) : (
                   <>
                     {listings.map((item, index) => (
-                      <>
-                        <BusinessCard key={item._id || index} data={item} />
-                        {index !== listings.length - 1 && (
-                          <hr className="border-gray-200 max-md:hidden " />
-                        )}
-                      </>
+                      <div key={item._id || index} className="w-full md:mb-4 mb-1">
+                        <BusinessCard data={item} />
+                      </div>
                     ))}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (
@@ -512,7 +509,7 @@ const SearchResults = ({
               )}
             </div>
 
-            <div className="mt-4 max-md:hidden">
+            <div className="mt-4 max-md:hidden sticky  top-[200px]">
               <RightBusinessCard name={canonicalSlug} />
             </div>
           </div>

@@ -55,7 +55,7 @@ export async function getServerSideProps(context) {
       ssrListings,
       ssrPageData,
       ssrSeoContent,
-      ssrFilters, // ✅ ADD THIS
+      ssrFilters,
       ssrSlug: slug,
       ssrCity: city,
     },
