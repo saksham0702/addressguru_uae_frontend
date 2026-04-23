@@ -64,7 +64,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
         return (
           <div
             key={day}
-            className={`flex items-center justify-between py-1 max-md:text-sm max-md:space-y-2 text-xs ${isToday ? "font-semibold" : "font-normal"}`}
+            className={`flex items-center justify-between py-1 max-md:text-sm max-md:space-y-2.5 text-xs ${isToday ? "font-semibold" : "font-normal"}`}
           >
             <span className="flex items-center gap-1.5 min-w-[95px]">
               {isToday ? (
@@ -125,7 +125,7 @@ const BusinessHours = ({ openingHours, mobile }) => {
 
         {/* BOTTOM SHEET */}
         <div
-          className={`fixed left-0 bottom-0 z-50 w-full h-[60vh] bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ${
+          className={`fixed left-0 bottom-0 z-50 w-full h-[45vh] bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ${
             isOpen ? "translate-y-0" : "translate-y-full"
           }`}
         >
