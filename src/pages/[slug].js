@@ -156,7 +156,6 @@ function formatRooms(rooms) {
 // Component
 // ─────────────────────────────────────────────────────────────
 const SeeDetails = ({ initialData, initialRooms }) => {
-  console.log(initialData, 'initialData')
   const router = useRouter();
   const { slug, preview } = router.query;
   const { city, user } = useAuth();
