@@ -846,6 +846,11 @@ export const NAV_ROUTES = [
     icon: TableConfigIcon,
     href: "/admin/business-configs",
   },
+  {
+    name: "My Profile",
+    icon: User,
+    href: "/admin/my-profile",
+  }
   // {
   //   name: "Jobs Listings",
   //   icon: WorkflowIcon,

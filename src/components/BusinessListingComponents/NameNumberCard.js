@@ -36,14 +36,14 @@ const inputs = [
     ),
   },
 ];
-const NameNumberCard = ({ layout, formData, setFormData }) => {
+const NameNumberCard = ({ layout, formData, setFormData, errors = {} }) => {
   return (
     <div
       className={`${layout === "row" ? "flex gap-3 w-sm" : "flex flex-col"}`}
     >
       {/* NAME INPUT */}
-      <div className="mb-3 flex items-center border border-gray-300 rounded-lg bg-white">
-        <div className="border-r border-gray-300 h-full p-2">
+      <div className={`mb-3 flex items-center border rounded-lg bg-white ${errors?.name ? "border-red-500" : "border-gray-300"}`}>
+        <div className={`border-r h-full p-2 ${errors?.name ? "border-red-500" : "border-gray-300"}`}>
           <svg
             width="18"
             height="18"
@@ -67,8 +67,8 @@ const NameNumberCard = ({ layout, formData, setFormData }) => {
       </div>
 
       {/* EMAIL INPUT */}
-      <div className="mb-3 flex items-center border border-gray-300 rounded-lg bg-white">
-        <div className="border-r border-gray-300 h-full p-2">
+      <div className={`mb-3 flex items-center border rounded-lg bg-white ${errors?.email ? "border-red-500" : "border-gray-300"}`}>
+        <div className={`border-r h-full p-2 ${errors?.email ? "border-red-500" : "border-gray-300"}`}>
           <svg
             width="15"
             height="10"

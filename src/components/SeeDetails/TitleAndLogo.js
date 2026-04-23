@@ -40,7 +40,7 @@ https://addressguru.ae/${data?.slug}`;
       {/* CONTENT */}
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 items-center">
-          <h1 className="text-lg md:text-xl font-bold truncate">{name}</h1>
+          <h1 className="text-lg md:text-xl  2xl:text-2xl font-medium truncate">{name}</h1>
         </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">

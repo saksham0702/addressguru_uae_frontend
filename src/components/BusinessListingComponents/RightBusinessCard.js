@@ -4,9 +4,22 @@ import { useState } from "react";
 
 export default function RightBusinessCard({ name }) {
   const [formData, setFormData] = useState({ name: "", email: "" });
+  const [errors, setErrors] = useState({ name: false, email: false });
   const [status, setStatus] = useState("idle"); // "idle" | "loading" | "sent"
 
   const sendListing = async () => {
+    const newErrors = {
+      name: !formData.name.trim(),
+      email: !formData.email.trim(),
+    };
+
+    if (newErrors.name || newErrors.email) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({ name: false, email: false });
+
     if (status === "sent" || status === "loading") return;
 
     setStatus("loading");
@@ -74,7 +87,7 @@ export default function RightBusinessCard({ name }) {
   };
 
   return (
-    <div className="w-70 2xl:w-xs bg-[#FFF8F3] px-3 py-4 rounded-xl shadow-lg">
+    <div className="w-70 2xl:w-xs bg-[#FFF8F3] px-3 py-4 rounded-xl ">
       <h2 className="text-md font-semibold text-gray-800 mb-1">
         Explore the Top{" "}
         <span className="text-[#FF6E04] capitalize">{name}</span>
@@ -86,7 +99,11 @@ export default function RightBusinessCard({ name }) {
       <NameNumberCard
         layout="col"
         formData={formData}
-        setFormData={setFormData}
+        setFormData={(data) => {
+          setFormData(data);
+          setErrors({ name: false, email: false });
+        }}
+        errors={errors}
       />
 
       <button

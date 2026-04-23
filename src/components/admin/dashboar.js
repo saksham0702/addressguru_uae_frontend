@@ -162,7 +162,6 @@ export default function AdminDashboard() {
   const API_URL = "https://addressguru.ae/api";
   const { user } = useAuth();
   const router = useRouter();
-
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -333,9 +332,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* ══════════════════════════════════════════
-          SECTION 2 · Listings
-      ══════════════════════════════════════════ */}
+      {/*  SECTION 2 · Listings  */}
       <SectionHeader
         title="Listings"
         subtitle="All listing types across the platform"

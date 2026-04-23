@@ -33,13 +33,13 @@ https://addressguru.ae/${data?.slug}`;
   const router = useRouter();
 
   return (
-    <div className="max-md:max-w-full max-md:border-b-1 pb-2 max-md:border-gray-200 my-1  ">
+    <div className="max-md:max-w-full border p-2 border-gray-100 rounded-lg my-1  ">
       <div className="md:w-[98%] max-md:p-[1px] ">
         <div className=" py-1.5 relative flex max-md:gap-2 md:gap-4 gap-3  max-[340px]:!gap-2 ">
           {/* Left Image */}
           <Link
             href={`/${data?.slug}`}
-            className="md:w-[160px] md:max-h-[195px] max-md:max-w-[32%] max-md:h-[120px] border border-gray-200 rounded-sm max-[340]:w-[140px]  2xl:w-[190px] 2xl:h-[220px]  overflow-hidden "
+            className="md:w-[160px] md:max-h-[195px] max-md:max-w-[32%] max-md:h-[120px] border-1 border-gray-200 rounded-sm max-[340]:w-[140px]  2xl:w-[190px] 2xl:h-[220px]  overflow-hidden "
           >
             <Image
               src={`${API_URL}/${data?.logo}`}
