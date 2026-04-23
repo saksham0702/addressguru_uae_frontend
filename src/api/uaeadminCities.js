@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_URL = "https://addressguru.ae/api";
+import { API_URL } from "@/services/constants"
 
 export const getCities = async () => {
   const res = await axios.get(`${API_URL}/cities/get-cities`);

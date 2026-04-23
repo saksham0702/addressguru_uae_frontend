@@ -1,7 +1,6 @@
 import axios from "axios";
-
+import { API_URL } from "@/services/constants"
 // const API_URL = "http://192.168.31.104:5001";
-const API_URL = "https://addressguru.ae/api";
 // const API_URL = "http://localhost:5001";
 
 // const API_URL = "http://192.168.31.107:5001";

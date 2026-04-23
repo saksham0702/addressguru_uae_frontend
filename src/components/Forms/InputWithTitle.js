@@ -47,7 +47,9 @@ const InputWithTitle = ({
         />
       ) : (
         <input
-          type={type}
+          type={type === "number" ? "text" : type} // 👈 override only for number
+          inputMode={type === "number" ? "numeric" : undefined}
+          pattern={type === "number" ? "[0-9]*" : undefined}
           placeholder={placeholder}
           className={`border border-gray-200 ${
             width ? "w-[50%]" : "w-full"
@@ -55,7 +57,34 @@ const InputWithTitle = ({
           minLength={minLength}
           maxLength={maxLength}
           value={value}
-          onChange={onChange}
+          onChange={(e) => {
+            if (type === "number") {
+              let val = e.target.value;
+              val = val.replace(/[^0-9]/g, "");
+              onChange({
+                target: { value: val },
+              });
+            } else {
+              onChange(e);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (type === "number") {
+              // ✅ allow only digits + control keys
+              if (
+                !/[0-9]/.test(e.key) &&
+                ![
+                  "Backspace",
+                  "ArrowLeft",
+                  "ArrowRight",
+                  "Tab",
+                  "Delete",
+                ].includes(e.key)
+              ) {
+                e.preventDefault();
+              }
+            }
+          }}
         />
       )}
       {/* CHARACTER COUNTER */}

@@ -1,6 +1,6 @@
 import axios from "axios";
-// const API_URL = "http://192.168.29.191:5001";
-const API_URL = "https://addressguru.ae/api";
+import { API_URL } from "@/services/constants"
+// const API_URL = "http://localhost:5001";
 // const API_URL = "http://192.168.31.108:5001";
 
 export const get_marketplace_category = async () => {

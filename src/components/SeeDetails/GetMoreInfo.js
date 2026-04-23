@@ -14,13 +14,14 @@ const GetMoreInfo = ({
   slug,
   isPop,
   address,
-  image, // Can be a single image URL or array of URLs
+  image,
   logo,
 }) => {
   const recaptchaRef = useRef(null);
 
   // Handle both single image and array of images
   const images = Array.isArray(image) ? image : image ? [image] : [];
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   const [res, setRes] = useState(null);
   const [errors, setErrors] = useState({});
@@ -158,7 +159,168 @@ const GetMoreInfo = ({
     <div
       className={`bg-white w-full pb-6 md:min-w-[400px] min-w-[340px] border border-gray-100 border-b-4 border-b-orange-500 relative rounded-xl shadow-md overflow-hidden ${isPop ? "pt-0" : "pt-4"}`}
     >
-      {isPop ? (
+      {isPop && isMobile ? (
+        // MOBILE POPUP VIEW - Compact design
+        <div className="flex flex-col w-full">
+          {/* Close Button */}
+          <button
+            onClick={() => setEnquirePop(false)}
+            className="absolute top-3 right-3 z-20 bg-white rounded-full p-1.5 shadow"
+          >
+            <X className="w-5 h-5 text-gray-700" />
+          </button>
+
+          {/* COMPACT HEADER */}
+          <div className="flex items-center gap-3 px-4 py-3 border-b bg-white">
+            {logo && (
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
+                <Image
+                  src={logo}
+                  alt={name}
+                  width={100}
+                  height={100}
+                  className="object-contain w-full h-full"
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col">
+              <h2 className="text-[15px] font-semibold text-gray-900 leading-tight">
+                {name}
+              </h2>
+              <span className="text-xs text-gray-500">Send enquiry</span>
+            </div>
+          </div>
+
+          {/* FORM */}
+          <div className="px-4 py-3 overflow-y-auto max-h-[70vh]">
+            <div className="flex flex-col gap-3 text-[#323232]">
+              {/* Name */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={infoQuery.name}
+                  onChange={(e) => handleFieldChange("name", e.target.value)}
+                  placeholder="Enter your full name"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                    errors.name
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  }`}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1.5">
+                    ⚠️ {errors.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={infoQuery.email}
+                  onChange={(e) => handleFieldChange("email", e.target.value)}
+                  placeholder="your.email@example.com"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                    errors.email
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  }`}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1.5">
+                    ⚠️ {errors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Mobile Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={infoQuery.phone}
+                  onChange={(e) => handleFieldChange("phone", e.target.value)}
+                  placeholder="10-15 digit mobile number"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
+                    errors.phone
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  }`}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1.5">
+                    ⚠️ {errors.phone}
+                  </p>
+                )}
+              </div>
+
+              {/* Message */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Your Message <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={
+                    infoQuery.message ||
+                    `I want to enquire about ${name}. Please share more details.`
+                  }
+                  onChange={(e) => handleFieldChange("message", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg text-sm h-24 resize-none transition-all ${
+                    errors.message
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  }`}
+                />
+                {errors.message && (
+                  <p className="text-red-500 text-xs mt-1.5">
+                    ⚠️ {errors.message}
+                  </p>
+                )}
+              </div>
+
+              {/* CAPTCHA */}
+              <div className="flex justify-center md:justify-start">
+                <div className="scale-[0.85] origin-left md:scale-100">
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
+                    onChange={handleCaptchaChange}
+                    onExpired={handleCaptchaExpired}
+                  />
+                </div>
+              </div>
+              {errors?.captcha && (
+                <p className="text-red-500 text-xs -mt-2">
+                  ⚠️ {errors?.captcha}
+                </p>
+              )}
+
+              {/* Submit */}
+              <button
+                onClick={sendEnquiry}
+                className="w-full bg-gradient-to-r from-[#FF6E04] to-[#FF5504] rounded-lg text-white font-semibold py-3.5 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98] transition-all"
+              >
+                Send Enquiry →
+              </button>
+
+              {/* Success */}
+              {res && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-green-700 text-sm">✓ {res}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : isPop ? (
+        // DESKTOP POPUP VIEW - Original design with sidebar
         <div className="flex flex-col md:flex-row w-full">
           {/* Close Button */}
           <button
@@ -288,7 +450,7 @@ const GetMoreInfo = ({
                   )}
                 </div>
 
-                {/* Message (AUTO-FILLED) */}
+                {/* Message */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Your Message <span className="text-red-500">*</span>
@@ -350,8 +512,8 @@ const GetMoreInfo = ({
           </div>
         </div>
       ) : (
+        // NON-POPUP VIEW (Card view)
         <>
-          {/* NORMAL CARD VIEW (non-popup) - Keep as is */}
           <h3 className="font-semibold text-[15px] max-md:text-[13px] text-center mb-3 px-3 mt-4">
             Get More Information From{" "}
             <strong className="text-[#FF6E04]">{name}</strong>

@@ -6,7 +6,7 @@ import PriceInput from "../PriceInput";
 import AdditionalDropDown from "@/components/BusinessListingComponents/additional-field/dropdown";
 
 const AdditionalFieldRenderer = ({ field, value, onChange }) => {
-  console.log("additional ", field);
+  
 
   const handleChange = (e) => {
     onChange(field._id, e.target.value);

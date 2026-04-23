@@ -413,6 +413,9 @@ const ListingForms = () => {
         youtube: existingData?.socialLinks?.youtube || "",
       });
 
+      setAdditionalFields(existingData?.additionalFields || []);
+
+
       // ✅ SEO (if exists)
       setSeo({
         title: existingData?.seo?.title || "",
@@ -914,15 +917,6 @@ const ListingForms = () => {
                 coursesRef,
               }}
             />
-
-            {/* <AdditionalInfo
-              additionalFields={additionalFields}
-              category={categoryId}
-              setAdditionalFields={setAdditionalFields}
-              errors={errors}
-              clearError={clearError}
-            // refs={{ additionalFieldsRef }}
-            /> */}
             {additional_fields.length > 0 ? (
               <AdditionalInfo
                 additionalFields={additional_fields}

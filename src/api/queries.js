@@ -1,6 +1,6 @@
 import axios from "axios";
 // import { API_URL } from "@/services/constants";
-const API_URL = "https://addressguru.ae/api";
+import { API_URL } from "@/services/constants"
 
 // 🔹 Query API (Enquiry)
 export const query = async (type, slug, payload) => {

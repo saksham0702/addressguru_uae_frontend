@@ -1,5 +1,6 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants";
+import { API_URL } from "@/services/constants"
+// const API_URL = "http://localhost:5001";
 
 // get multiple listings based on category and city with pagination
 

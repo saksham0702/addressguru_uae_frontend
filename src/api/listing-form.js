@@ -1,7 +1,6 @@
 import axios from "axios";
-
+import { API_URL } from "@/services/constants"
 // const API_URL = "http://localhost:5001";
-const API_URL = "https://addressguru.ae/api";
 
 
 export const add_listings = async (payload, step, slug, listingId) => {

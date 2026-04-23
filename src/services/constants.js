@@ -15,10 +15,11 @@ import { FaBlog, FaCity } from "react-icons/fa";
 
 // ─── Site URLs ─────────────────────────────────────────────────────────────────
 // NOTE: APP_URL was previously "https:/addressguru.ae/api" — wrong domain + broken.
-export const APP_URL = "https://addressguru.ae/api";
-export const IMG_URL = "https://addressguru.ae/api";
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+export const IMG_URL = process.env.NEXT_PUBLIC_APP_URL;
 
-export const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+// export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = "http://localhost:5001"
 
 // GOOGLE GEMINI KEY
 export const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY

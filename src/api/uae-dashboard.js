@@ -1,7 +1,5 @@
 import axios from "axios";
-
-const API_URL = "https://addressguru.ae/api";
-
+import { API_URL } from "@/services/constants"
 // const API_URL = "http://192.168.31.107:5001";
 
 export const get_user_listings = async (type) => {
