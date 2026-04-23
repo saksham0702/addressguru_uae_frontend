@@ -1,9 +1,30 @@
 import AdditionalFieldRenderer from "./additionfield-render";
-
+import { useEffect } from "react";
 const AdditionalInfo = ({ additionalFields, values, setValues }) => {
   const handleChange = (id, value) => {
-    setValues((prev) => ({ ...prev, [id]: value }));
+    setValues((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
+
+  useEffect(() => {
+    if (Array.isArray(values)) {
+      const mappedValues = {};
+
+      values.forEach((item) => {
+        const fieldId = item.field_id?._id;
+        if (fieldId) {
+          mappedValues[fieldId] = item.value;
+        }
+      });
+
+      setValues(mappedValues);
+    }
+  }, [values]);
+
+  console.log("additionalFields ", additionalFields);
+  console.log("values ", values);
 
   // Returns the correct empty default per field type
   // This avoids passing a plain " " string into a price field

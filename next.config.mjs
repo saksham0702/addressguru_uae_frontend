@@ -10,10 +10,6 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.addressguru.ae",
-      },
-      {
-        protocol: "https",
         hostname: "images.unsplash.com",
       },
     ],

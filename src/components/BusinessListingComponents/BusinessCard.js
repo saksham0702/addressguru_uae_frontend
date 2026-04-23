@@ -33,7 +33,7 @@ https://addressguru.ae/${data?.slug}`;
   const router = useRouter();
 
   return (
-    <div className="max-md:max-w-full border p-2 border-gray-100 rounded-lg my-1  ">
+    <div className="max-md:max-w-full border p-3 border-gray-100 rounded-lg my-1  ">
       <div className="md:w-[98%] max-md:p-[1px] ">
         <div className=" py-1.5 relative flex max-md:gap-2 md:gap-4 gap-3  max-[340px]:!gap-2 ">
           {/* Left Image */}
@@ -46,7 +46,7 @@ https://addressguru.ae/${data?.slug}`;
               alt={`${data?.businessName} logo`}
               width={500}
               height={500}
-              className="max-md:h-[100%] md:h-[190px] object-contain rounded-xl"
+              className="max-md:h-[100%] md:h-[190px] object-contain"
             />
           </Link>
           {/* Center Content */}
@@ -68,7 +68,7 @@ https://addressguru.ae/${data?.slug}`;
               </div> */}
             </div>
             {/* Address */}
-            <address className="not-italic text-xs 2xl:text-[12px] text-gray-700 flex items-center gap-1">
+            <address className="not-italic text-xs truncate max-md:w-44 2xl:text-[12px] text-gray-700 flex items-center gap-1">
               <MapPin
                 size={16}
                 className="text-gray-700 shrink-0"
@@ -76,7 +76,7 @@ https://addressguru.ae/${data?.slug}`;
               />
               <span
                 title={data?.businessAddress}
-                className="truncate max-md:w-50 md:max-w-120 max-[340px]:!text-xs max-[340px]:!w-20 max-md:text-[11px]"
+                className=" md:max-w-120 max-[340px]:!text-xs max-[340px]:!w-20 max-md:text-[11px]"
               >
                 {data?.businessAddress}
               </span>
@@ -402,7 +402,7 @@ https://addressguru.ae/${data?.slug}`;
 
           {/* whatsap button */}
           <a
-            href={`https://wa.me/${data?.mobile_number}`}
+            href={`https://wa.me/${data?.countryCode + data?.mobileNumber}?text=${encodeURIComponent(message)}`}
             target="_blank"
             rel="noopener noreferrer"
           >
