@@ -28,7 +28,9 @@ import LandingPage from "@/components/HeadersMobile/LandingPage";
 import FullWidthGallery from "@/components/SeeDetails/FullWidthGallery";
 import RoomsSection from "@/components/SeeDetails/RoomsSection";
 import { get_rooms_by_listing } from "@/api/rooms";
+import InfoSection from "@/components/SeeDetails/Popups/InfoSection";
 import { APP_URL } from "@/services/constants";
+import ConfirmModal from "@/components/SeeDetails/Popups/ConfirmModal";
 
 // ─────────────────────────────────────────────────────────────
 // SSR — fetch listing + rooms in parallel, never double-fetch
@@ -156,6 +158,7 @@ function formatRooms(rooms) {
 // Component
 // ─────────────────────────────────────────────────────────────
 const SeeDetails = ({ initialData, initialRooms }) => {
+  console.log(initialData, "initialData");
   const router = useRouter();
   const { slug, preview } = router.query;
   const { city, user } = useAuth();
@@ -187,8 +190,28 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       data?.category?.name === "Yoga Studio") &&
     data?.images?.length >= 5;
 
-  const formattedRoomsData = formatRooms(rooms);
+  const formattedRoomsData = rooms ? formatRooms(rooms) : null;
+  const formatAdditionalFields = (fields = []) => {
+    const result = {};
 
+    fields.forEach((item) => {
+      const key = item.field_label.toLowerCase().replace(/\s+/g, "_");
+
+      result[key] = {
+        label: item.field_label,
+        type: item.field_type,
+        value: item.value,
+      };
+    });
+
+    return result;
+  };
+
+  const formattedFields = formatAdditionalFields(data?.additionalFields);
+
+  const getField = (fields = {}, key) => {
+    return fields[key]?.value ?? null;
+  };
   // SEO computed values
   const avgRating = computeAvgRating(data?.ratings);
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
@@ -219,8 +242,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   // ── Client-side re-fetch ONLY on slug navigation change ──
   // (when Next.js shallow-routes without a full SSR round-trip)
   useEffect(() => {
-    if (!slug) return;
-    if (slug === data?.slug) return;
+    if (!slug || !data) return;
 
     setLoading(true);
 
@@ -787,131 +809,34 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                   {data?.description}
                 </p>
               </div>
-
               {/* COURSES */}
-              {data?.courses?.length > 0 && (
-                <div className="max-w-4xl mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center">
-                    <h2 className="font-semibold uppercase md:text-xl">
-                      COURSES
-                    </h2>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
-                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessAddress} provides the following courses:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.courses.map((course, index) => (
-                      <div key={index} className="flex items-end space-x-2">
-                        {course?.iconSvg ? (
-                          <div
-                            className="icon-wrapper"
-                            dangerouslySetInnerHTML={{ __html: course.iconSvg }}
-                          />
-                        ) : (
-                          <CheckIcon />
-                        )}
-                        <span className="text-[16px] font-medium">
-                          {course.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <InfoSection
+                title="COURSES"
+                description={`${data?.businessAddress} provides the following courses:`}
+                items={data?.courses}
+              />
 
               {/* SERVICES */}
-              {data?.services?.length > 0 && (
-                <div className="max-w-4xl mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center">
-                    <h2 className="font-semibold uppercase md:text-xl">
-                      SERVICES
-                    </h2>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
-                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessName} provides the following services:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.services.map((service, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <CheckIcon />
-                        <span className="text-[16px] font-medium">
-                          {service.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <InfoSection
+                title="SERVICES"
+                description={`${data?.businessName} provides the following services:`}
+                items={data?.services}
+              />
 
               {/* FACILITIES */}
-              {data?.facilities?.length > 0 && (
-                <div className="max-w-4xl mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center">
-                    <h2 className="font-semibold uppercase md:text-xl">
-                      FACILITIES
-                    </h2>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
-                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessName} provides the following facilities:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.facilities.map((facility, index) => (
-                      <div key={index} className="flex items-end space-x-2">
-                        {facility?.iconSvg ? (
-                          <div
-                            className="icon-wrapper"
-                            dangerouslySetInnerHTML={{
-                              __html: facility.iconSvg,
-                            }}
-                          />
-                        ) : (
-                          <CheckIcon />
-                        )}
-                        <span className="text-[16px] font-medium">
-                          {facility?.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <InfoSection
+                title="FACILITIES"
+                description={`${data?.businessName} provides the following facilities:`}
+                items={data?.facilities}
+              />
 
               {/* PAYMENT METHODS */}
-              {data?.paymentModes?.length > 0 && (
-                <div className="max-w-5xl mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center">
-                    <h2 className="font-semibold uppercase whitespace-nowrap md:text-xl">
-                      Payment Modes
-                    </h2>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
-                  <p className="md:text-[13.5px] text-[15px] mt-2 mb-4 md:font-[500]">
-                    {data?.businessName} accepts the following payment methods:
-                  </p>
-                  <div className="flex flex-col gap-4">
-                    {data.paymentModes.map((payment, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        {payment?.iconSvg ? (
-                          <div
-                            className="icon-wrapper"
-                            dangerouslySetInnerHTML={{
-                              __html: payment.iconSvg,
-                            }}
-                          />
-                        ) : (
-                          <CheckIcon />
-                        )}
-                        <span className="text-[16px] font-medium">
-                          {payment?.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <InfoSection
+                title="Payment Modes"
+                description={`${data?.businessName} accepts the following payment methods:`}
+                items={data?.paymentModes}
+                useGrid={false} // because this was vertical
+              />
 
               {/* OVERVIEW */}
               <div className="max-w-5xl mt-5 md:pl-2 px-1">
@@ -1044,58 +969,15 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
       {/* ── CONFIRM APPROVE MODAL ──────────────────────────── */}
       {confirmAction === "approve" && (
-        <div
-          className="fixed inset-0 z-[10001] flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.45)" }}
-          onClick={() => setConfirmAction(null)}
-        >
-          <div
-            className="bg-white rounded-xl border border-gray-200 p-6 w-80"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M2 8L6 12L14 4"
-                  stroke="#16a34a"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h3 className="text-[15px] font-semibold text-gray-900 mb-1">
-              Approve this listing?
-            </h3>
-            <p className="text-[13px] text-gray-500 mb-5">
-              This will make the listing live and visible to the public.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setConfirmAction(null)}
-                className="px-4 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleApprove}
-                disabled={loadingAction}
-                className="px-4 py-1.5 text-sm rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition flex items-center gap-1.5"
-              >
-                {loadingAction && <SpinnerIcon />}
-                Yes, approve
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── REJECT MODAL ───────────────────────────────────── */}
-      {rejectModalData && (
-        <RejectReasonModal
-          listing={rejectModalData}
-          onClose={() => setRejectModalData(null)}
-          onSubmit={handleRejectSubmit}
+        <ConfirmModal
+          open={confirmAction === "approve"}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={handleApprove}
+          loading={loadingAction}
+          type="approve"
+          title="Approve this listing?"
+          description="This will make the listing live and visible to the public."
+          confirmText="Yes, approve"
         />
       )}
 
@@ -1114,6 +996,15 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         </div>
       )}
 
+      {/* ── REJECT MODAL ───────────────────────────────────── */}
+      {rejectModalData && (
+        <RejectReasonModal
+          listing={rejectModalData}
+          onClose={() => setRejectModalData(null)}
+          onSubmit={handleRejectSubmit}
+        />
+      )}
+
       <style>{`
         @keyframes slideUp {
           from { transform: translateY(8px); opacity: 0; }
@@ -1130,40 +1021,3 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 };
 
 export default SeeDetails;
-
-// Tiny shared sub-components (keeps JSX clean above)
-
-/** Standard orange check icon used for lists */
-function CheckIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-      <circle cx="10" cy="10" r="10" fill="#FFE9D9" />
-      <path
-        d="M17.15 5.32c-.46-.43-1.21-.43-1.68 0L7.9 12.34 4.53 9.22c-.47-.43-1.22-.43-1.69 0-.46.43-.46 1.13 0 1.56L7.06 14.7c.23.21.53.33.84.33s.61-.12.84-.33l8.42-7.8c.47-.43.47-1.13 0-1.56z"
-        fill="#FF6E04"
-      />
-    </svg>
-  );
-}
-
-/** Animated loading spinner for buttons */
-function SpinnerIcon() {
-  return (
-    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="3"
-        className="opacity-25"
-      />
-      <path
-        d="M22 12a10 10 0 00-10-10"
-        stroke="currentColor"
-        strokeWidth="3"
-        className="opacity-75"
-      />
-    </svg>
-  );
-}

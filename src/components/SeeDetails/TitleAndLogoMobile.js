@@ -99,8 +99,9 @@ https://addressguru.ae/${data?.slug}`;
       <div className="flex  justify-between mt-1">
         <span className="flex gap-2 items-center">
           {" "}
+          {data?.statistics?.averageRating > 0 && (
           <div className="flex items-center gap-1 bg-[#3D8727] text-white px-1.5  rounded text-sm min-[1600]:text-xl">
-            <span>{data?.rating}</span>
+            <span>{data?.statistics?.averageRating}</span>
             <svg
               className=""
               width="17"
@@ -131,8 +132,13 @@ https://addressguru.ae/${data?.slug}`;
               </g> */}
             </svg>
           </div>
-          <p className="text-sm 2xl:text-xl ">{"0 Reviews"}</p>
+          )}
+
+           {data?.statistics?.totalReviews > 0 && (
+          <p className="text-sm 2xl:text-xl ">{data?.statistics?.totalReviews + " Ratings"}</p>
+           )}
         </span>
+        
         <span className="flex items-center bg-[#FFF8F3] text-[#FF6E04] gap-1 py-1.5 px-2 rounded-xs text-xs  font-semibold">
           <svg
             width="15"
@@ -167,6 +173,7 @@ https://addressguru.ae/${data?.slug}`;
             />
           </svg>
 
+         
           <p onClick={() => setReviewPop(true)} className="">
             View Reviews
           </p>

@@ -1,4 +1,3 @@
-import CategoryRow from "@/components/admin/categorypopup/categoryrow";
 import axios from "axios";
 
 // const API_URL = "http://192.168.29.191:5001/api";
@@ -493,6 +492,8 @@ export const deleteAdditionalField = async (id) => {
     };
   }
 };
+
+
 
 export const createFeatureApi = async (payload) => {
   const res = await fetch(`${API_URL}/features/create-feature`, {

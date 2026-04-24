@@ -10,6 +10,7 @@ import {
   Linkedin,
   Facebook,
 } from "lucide-react";
+import Image from "next/image";
 
 const Index = () => {
   const { user } = useAuth();
@@ -119,9 +120,11 @@ const Index = () => {
               {/* Avatar Section */}
               <div className="text-center mb-6">
                 <div className="relative inline-block">
-                  <img
+                  <Image
                     src={imagePreview || profile.avatar}
                     alt="avatar"
+                    width={500}
+                    height={500}
                     className="w-32 h-32 rounded-full mx-auto border-4 border-orange-100 object-cover"
                   />
                   {isEditing && (
@@ -379,7 +382,7 @@ const Index = () => {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700  mb-2 flex items-center gap-2">
                       <Linkedin size={16} className="text-blue-600" />
                       LinkedIn
                     </label>
@@ -394,7 +397,7 @@ const Index = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Instagram size={16} className="text-pink-600" />
                       Instagram
                     </label>
@@ -409,7 +412,7 @@ const Index = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Facebook size={16} className="text-blue-700" />
                       Facebook
                     </label>

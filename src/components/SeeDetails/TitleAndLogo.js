@@ -25,7 +25,7 @@ I found your business on AddressGuru UAE
 https://addressguru.ae/${data?.slug}`;
 
   return (
-    <div className="flex gap-3 items-start md:items-center">
+    <div className="flex gap-3 items-start md:mb-3 md:items-center">
       {/* IMAGE */}
       <div className="w-[90px] h-[90px] md:w-[160px] md:h-[145px] border-2 border-gray-200 flex-shrink-0 rounded-md overflow-hidden ">
         <Image
@@ -38,15 +38,15 @@ https://addressguru.ae/${data?.slug}`;
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 md:min-w-[900px] w-full min-w-0">
         <div className="flex gap-2 items-center">
           <h1 className="text-lg md:text-xl  2xl:text-2xl font-medium truncate">{name}</h1>
         </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
-          {data?.star && (
+          {data?.statistics?.averageRating > 0 && (
             <div className="flex items-center gap-1 bg-[#3D8727] text-white px-1.5  rounded text-sm md:text-md">
-              <span className="text-base">{data?.star}</span>
+              <span className="text-base">{data?.statistics?.averageRating}</span>
               <svg
                 width="17"
                 height="16"
@@ -81,9 +81,9 @@ https://addressguru.ae/${data?.slug}`;
             </div>
           )}
 
-          {/* <p className="text-sm 2xl:text-[15px] text-gray-500">
-            {data?.rating}
-          </p> */}
+          {data?.statistics?.totalReviews > 0 && <p className="text-sm 2xl:text-[15px] text-gray-500">
+            ({data?.statistics?.totalReviews} Ratings)
+          </p>}
           <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-0.5 py-1.5 px-2 rounded-full text-xs 2xl:text-md font-bold">
             <svg
               width="14"
