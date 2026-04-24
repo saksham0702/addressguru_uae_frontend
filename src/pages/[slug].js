@@ -74,7 +74,7 @@ export async function getServerSideProps(context) {
   }
 }
 
-// ── Status badge config ──────────────────────────────────────
+// Status badge config
 const STATUS_CONFIG = {
   approved: {
     label: "Approved",
@@ -100,11 +100,11 @@ const STATUS_CONFIG = {
 };
 
 const IMG_URL = "https://addressguru.ae/api";
-// ─────────────────────────────────────────────────────────────
+
 // Helpers
-// ─────────────────────────────────────────────────────────────
 
 /** Compute average rating from ratings array */
+
 function computeAvgRating(ratings) {
   if (!Array.isArray(ratings) || ratings.length === 0) return null;
   const sum = ratings.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
@@ -154,21 +154,18 @@ function formatRooms(rooms) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────
 // Component
-// ─────────────────────────────────────────────────────────────
 const SeeDetails = ({ initialData, initialRooms }) => {
-  console.log(initialData, "initialData");
+  console.log("initial data", initialData);
   const router = useRouter();
   const { slug, preview } = router.query;
   const { city, user } = useAuth();
   const serverCity = city;
-
-  // ── State ────────────────────────────────────────────────
-  // SSR already hydrated data → no loading flash
+  // State
   const [data, setData] = useState(initialData ?? null);
   const [rooms, setRooms] = useState(initialRooms ?? null);
   // Only show skeleton if SSR gave us nothing (shouldn't happen, but safe)
+
   const [loading, setLoading] = useState(!initialData);
 
   const [activePop, setActivePop] = useState(null);
@@ -181,7 +178,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // ── Derived values ────────────────────────────────────────
+  //  Derived values
   const isAdmin = user?.data?.roles?.[0] === 1;
   const status = data?.status ?? "pending";
   const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
@@ -192,16 +189,29 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
   const formattedRoomsData = rooms ? formatRooms(rooms) : null;
   const formatAdditionalFields = (fields = []) => {
-    const result = {};
+    const result = {
+      logo: [],
+      quickinfo: [],
+      description: [],
+      additional: [],
+    };
 
     fields.forEach((item) => {
-      const key = item.field_label.toLowerCase().replace(/\s+/g, "_");
-
-      result[key] = {
+      const field = {
         label: item.field_label,
-        type: item.field_type,
         value: item.value,
+        type: item.field_type,
       };
+
+      if (item?.field_id?.is_logo) {
+        result.logo.push(field);
+      } else if (item?.field_id?.is_quickinfo) {
+        result.quickinfo.push(field);
+      } else if (item?.field_id?.is_description) {
+        result.description.push(field);
+      } else {
+        result.additional.push(field);
+      }
     });
 
     return result;
@@ -209,9 +219,6 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
   const formattedFields = formatAdditionalFields(data?.additionalFields);
 
-  const getField = (fields = {}, key) => {
-    return fields[key]?.value ?? null;
-  };
   // SEO computed values
   const avgRating = computeAvgRating(data?.ratings);
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
@@ -225,13 +232,14 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const ogImage = `${IMG_URL}/${data?.images?.[0]}` ?? "";
   const openingHoursSchema = buildOpeningHours(data?.workingHours);
 
-  // ── Toast helper ─────────────────────────────────────────
+  //  Toast helper
   function showToast(msg, toastType = "success") {
     setToast({ msg, type: toastType });
     setTimeout(() => setToast(null), 3000);
   }
 
-  // ── Responsive ──────────────────────────────────────────
+  //  Responsive
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
@@ -239,23 +247,19 @@ const SeeDetails = ({ initialData, initialRooms }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ── Client-side re-fetch ONLY on slug navigation change ──
+  //  Client-side re-fetch ONLY on slug navigation change
   // (when Next.js shallow-routes without a full SSR round-trip)
   useEffect(() => {
     if (!slug || !data) return;
-
     setLoading(true);
-
     get_listing_data(slug)
       .then((listingRes) => {
         if (!listingRes?.data?.data) {
           router.push("/404");
           return;
         }
-
         const listing = listingRes.data.data;
         setData(listing);
-
         // fetch rooms AFTER listing
         return get_rooms_by_listing(listing?._id);
       })
@@ -273,7 +277,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  // ── View tracking (once per mount) ──────────────────────
+  //  View tracking (once per mount)
   const viewTracked = useRef(false);
   useEffect(() => {
     if (!data?.slug || viewTracked.current) return;
@@ -281,17 +285,15 @@ const SeeDetails = ({ initialData, initialRooms }) => {
     track_event("business", data.slug, "view").catch(() => {});
   }, [data?.slug]);
 
-  // ── Event handlers ───────────────────────────────────────
+  //  Event handlers
   const handleWebsiteClick = (listingSlug) =>
     track_event("business", listingSlug, "website_visit").catch(() => {});
-
   const handleClick = (listingSlug) =>
     track_event("business", listingSlug, "call").catch(() => {});
-
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
 
-  // ── Admin actions ────────────────────────────────────────
+  //  Admin actions
   const handleApprove = async () => {
     try {
       setLoadingAction(true);
@@ -323,15 +325,13 @@ const SeeDetails = ({ initialData, initialRooms }) => {
     }
   };
 
-  // ── Guard ────────────────────────────────────────────────
+  //  Guard
   if (loading || !data) return <LandingPageSkeleton />;
 
-  // ─────────────────────────────────────────────────────────
-  // Render
-  // ─────────────────────────────────────────────────────────
+  //  Render
   return (
     <>
-      {/* ── SEO HEAD ───────────────────────────────────────── */}
+      {/*  SEO HEAD  */}
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -757,6 +757,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               handlePop={handlePop}
               name={data?.businessName}
               address={data?.businessAddress}
+              extraFields={formattedFields?.logo}
               data={data}
               logo={data?.logo}
               ratings={data?.ratings}
@@ -892,7 +893,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               <QuickInformation
                 id={data?.id}
                 businesshours={data?.workingHours}
-                price={data?.additionalFields?.[2]}
+                extraFields={formattedFields.quickinfo}
                 category={data?.category}
                 link={data?.websiteLink}
                 handlePop={handlePop}
