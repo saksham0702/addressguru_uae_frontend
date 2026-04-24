@@ -1,21 +1,98 @@
 import React from "react";
 import BusinessHours from "./BusinessHours";
+import { Check, CircleCheck } from "lucide-react";
 
 const CategoryIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
-    <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
-    <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
-    <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="#333" strokeWidth="2" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      x="3"
+      y="3"
+      width="8"
+      height="8"
+      rx="1.5"
+      stroke="#333"
+      strokeWidth="2"
+    />
+    <rect
+      x="13"
+      y="3"
+      width="8"
+      height="8"
+      rx="1.5"
+      stroke="#333"
+      strokeWidth="2"
+    />
+    <rect
+      x="3"
+      y="13"
+      width="8"
+      height="8"
+      rx="1.5"
+      stroke="#333"
+      strokeWidth="2"
+    />
+    <rect
+      x="13"
+      y="13"
+      width="8"
+      height="8"
+      rx="1.5"
+      stroke="#333"
+      strokeWidth="2"
+    />
   </svg>
 );
 
 const PriceIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="4" width="20" height="14" rx="3" stroke="#333" strokeWidth="2" />
-    <rect x="6" y="8" width="12" height="8" rx="1.5" stroke="#333" strokeWidth="1.2" />
-    <line x1="9" y1="11" x2="15" y2="11" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-    <line x1="9" y1="13.5" x2="13" y2="13.5" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      x="2"
+      y="4"
+      width="20"
+      height="14"
+      rx="3"
+      stroke="#333"
+      strokeWidth="2"
+    />
+    <rect
+      x="6"
+      y="8"
+      width="12"
+      height="8"
+      rx="1.5"
+      stroke="#333"
+      strokeWidth="1.2"
+    />
+    <line
+      x1="9"
+      y1="11"
+      x2="15"
+      y2="11"
+      stroke="#333"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <line
+      x1="9"
+      y1="13.5"
+      x2="13"
+      y2="13.5"
+      stroke="#333"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -25,7 +102,7 @@ const QuickInformation = ({
   businesshours,
   job,
   link,
-  price,
+  extraFields,
   handleWebsiteClick,
   id,
 }) => {
@@ -33,7 +110,6 @@ const QuickInformation = ({
 
   return (
     <div className="w-full max-md:hidden rounded-t-lg">
-
       {/* Header */}
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
         Quick Information
@@ -41,23 +117,15 @@ const QuickInformation = ({
 
       {/* Info Body */}
       <div className="bg-[#EEEEEE] p-4 text-sm space-y-1 border-b">
-
         {/* Category */}
         {categoryName && (
           <p className="flex items-center gap-2">
             <CategoryIcon />
-            <span className="font-semibold text-[16px] text-black">Category:</span>
-            <span className="font-semibold text-[16px] text-orange-600">{categoryName}</span>
-          </p>
-        )}
-
-        {/* Starting Price */}
-        {price?.value?.amount && (
-          <p className="flex items-center gap-2">
-            <PriceIcon />
-            <span className="font-semibold text-[16px] text-black">Starting Price:</span>
-            <span className="font-semibold text-[16px]">
-              {price.value.currency} {price.value.amount}
+            <span className="font-medium text-[16px] text-black">
+              Category:
+            </span>
+            <span className="font-medium text-[16px] text-orange-600">
+              {categoryName}
             </span>
           </p>
         )}
@@ -67,13 +135,25 @@ const QuickInformation = ({
           <BusinessHours openingHours={businesshours} mobile="" />
         )}
 
+        {extraFields?.map((field, index) => (
+          <p key={index} className="flex items-center gap-1">
+            <CircleCheck className="" size={18} />
+            <span className="font-medium text-[16px] text-black">
+              {field?.label}:
+            </span>
+            <span className="font-medium text-[16px] text-orange-600">
+              {field?.type === "price"
+                ? `${field?.value?.currency} ${field?.value?.amount}`
+                : field?.value}
+            </span>
+          </p>
+        ))}
       </div>
 
       {/* Footer Actions */}
       <div className="flex justify-between items-center bg-white p-1 max-md:p-3 border border-t-0 border-gray-200 rounded-b-lg">
-
         {link && (
-            <a
+          <a
             href={link}
             target="_blank"
             rel="noreferrer"
@@ -97,7 +177,6 @@ const QuickInformation = ({
         >
           Claim this Business
         </span>
-
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { FaEye, FaUser } from "react-icons/fa";
 import StarRatingBadge, {
   getStarRating,
 } from "../BusinessListingComponents/additional-field/hotel";
+import { Check, CircleCheck } from "lucide-react";
 
 // import { APP_URL } from "@/services/constants";
 const APP_URL = "https://addressguru.ae/api";
@@ -16,9 +17,11 @@ const TitleAndLogo = ({
   data,
   rating,
   handleClick,
+  extraFields,
   enquirePop,
   setEnquirePop,
 }) => {
+  console.log("extra fields", extraFields);
   const message = `Hi,
 ${data?.businessName}, i am looking for ${data?.category?.name}
 I found your business on AddressGuru UAE
@@ -40,13 +43,17 @@ https://addressguru.ae/${data?.slug}`;
       {/* CONTENT */}
       <div className="flex-1 md:min-w-[900px] w-full min-w-0">
         <div className="flex gap-2 items-center">
-          <h1 className="text-lg md:text-xl  2xl:text-2xl font-medium truncate">{name}</h1>
+          <h1 className="text-lg md:text-xl  2xl:text-2xl font-medium truncate">
+            {name}
+          </h1>
         </div>
         {/* Ratings & Badges */}
         <div className="flex items-center gap-2 2xl:gap-3 my-1.5">
           {data?.statistics?.averageRating > 0 && (
             <div className="flex items-center gap-1 bg-[#3D8727] text-white px-1.5  rounded text-sm md:text-md">
-              <span className="text-base">{data?.statistics?.averageRating}</span>
+              <span className="text-base">
+                {data?.statistics?.averageRating}
+              </span>
               <svg
                 width="17"
                 height="16"
@@ -81,9 +88,11 @@ https://addressguru.ae/${data?.slug}`;
             </div>
           )}
 
-          {data?.statistics?.totalReviews > 0 && <p className="text-sm 2xl:text-[15px] text-gray-500">
-            ({data?.statistics?.totalReviews} Ratings)
-          </p>}
+          {data?.statistics?.totalReviews > 0 && (
+            <p className="text-sm 2xl:text-[14px] whitespace-nowrap text-gray-500">
+              ({data?.statistics?.totalReviews} Ratings)
+            </p>
+          )}
           <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-0.5 py-1.5 px-2 rounded-full text-xs 2xl:text-md font-bold">
             <svg
               width="14"
@@ -101,12 +110,47 @@ https://addressguru.ae/${data?.slug}`;
             <p className="2xl:text-md">AG</p>
             <p className="text-black">Verified</p>
           </span>
-          <StarRatingBadge value={getStarRating(data?.additionalFields)} />
+          <section className="flex flex-wrap justify-start gap-2 w-full">
+            {extraFields?.map((field, index) => {
+              const label = field?.label?.toLowerCase();
+
+              const isHotelType = label === "hotel type";
+              const isExperience = label === "experience";
+
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 text-[13px]"
+                >
+                  {/* ✅ Tick logic */}
+                  {!isHotelType && (
+                    <Check className="text-green-600 mr-0.5" size={14} />
+                  )}
+
+                  {/* ✅ Label (skip for hotel type) */}
+                  {!isHotelType && (
+                    <span className="font-medium text-gray-500">
+                      {field?.label}:
+                    </span>
+                  )}
+
+                  {/* ✅ Value handling */}
+                  <span className="font-medium text-orange-500">
+                    {isHotelType
+                      ? `(${field?.value})`
+                      : isExperience
+                        ? `${field?.value} years`
+                        : field?.value}
+                  </span>
+                </div>
+              );
+            })}
+          </section>
         </div>
 
         {/* address section */}
 
-        <div className="text-sm text-gray-500 font-[500] flex  pb-1.5 gap-1">
+        <address className="text-sm not-italic text-gray-500 font-[500] flex  pb-1.5 gap-1">
           <svg
             width="13"
             height="18"
@@ -138,7 +182,7 @@ https://addressguru.ae/${data?.slug}`;
               (View Map)
             </a>
           </div>
-        </div>
+        </address>
 
         {/* buttons section */}
         {/* Action Buttons */}
