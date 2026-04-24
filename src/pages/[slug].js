@@ -31,6 +31,8 @@ import { get_rooms_by_listing } from "@/api/rooms";
 import InfoSection from "@/components/SeeDetails/Popups/InfoSection";
 import { APP_URL } from "@/services/constants";
 import ConfirmModal from "@/components/SeeDetails/Popups/ConfirmModal";
+import { generateFAQs } from "@/utils/generateFAQs";
+import FAQSection from "@/components/SeeDetails/FAQSection";
 
 // ─────────────────────────────────────────────────────────────
 // SSR — fetch listing + rooms in parallel, never double-fetch
@@ -222,6 +224,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   // SEO computed values
   const avgRating = computeAvgRating(data?.ratings);
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
+  // Generate FAQs
+  const faqs = generateFAQs(data, serverCity);
   const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${serverCity} | AddressGuru`;
   const pageDesc = (
     data?.seo?.description ||
@@ -417,6 +421,26 @@ const SeeDetails = ({ initialData, initialRooms }) => {
             }),
           }}
         />
+        {/* JSON-LD — FAQPage */}
+        {faqs.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: faqs.map((faq) => ({
+                  "@type": "Question",
+                  name: faq.question,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: faq.answer,
+                  },
+                })),
+              }),
+            }}
+          />
+        )}
       </Head>
 
       {/* ── MOBILE HEADER ──────────────────────────────────── */}
@@ -810,6 +834,84 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                   {data?.description}
                 </p>
               </div>
+
+              {/* BUSINESS INFORMATION - All Additional Fields */}
+              {(formattedFields?.logo?.length > 0 ||
+                formattedFields?.quickinfo?.length > 0 ||
+                formattedFields?.additional?.length > 0) && (
+                <div className="mt-5 md:pl-2 px-1">
+                  <span className="flex gap-3 items-center mb-4">
+                    <h3 className="font-semibold whitespace-nowrap uppercase md:text-xl">
+                      Business Information
+                    </h3>
+                    <span className="h-[1px] w-full bg-gray-200" />
+                  </span>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                    {/* Combine all fields arrays */}
+                    {[
+                      ...(formattedFields?.logo || []),
+                      ...(formattedFields?.quickinfo || []),
+                      ...(formattedFields?.additional || []),
+                    ].map((field, index) => {
+                      const label = field?.label?.toLowerCase();
+                      const isExperience = label === "experience";
+
+                      // Handle value - check if it's an object
+                      let displayValue = field?.value;
+                      if (
+                        typeof displayValue === "object" &&
+                        displayValue !== null
+                      ) {
+                        // If it's an object like {amount, currency}, format it
+                        if (displayValue.amount && displayValue.currency) {
+                          displayValue = `${displayValue.currency} ${displayValue.amount}`;
+                        } else {
+                          // Convert other objects to JSON string as fallback
+                          displayValue = JSON.stringify(displayValue);
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={index}
+                          className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow duration-200 hover:border-orange-300"
+                        >
+                          {/* Icon */}
+                          <div className="flex items-center justify-center w-8 h-8 bg-orange-50 rounded-full mb-2">
+                            <svg
+                              className="w-4 h-4 text-orange-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* Label */}
+                          <div className="text-xs md:text-sm font-medium text-gray-500 mb-1">
+                            {field?.label}
+                          </div>
+
+                          {/* Value */}
+                          <div className="text-base md:text-lg font-bold text-gray-800">
+                            {isExperience
+                              ? `${displayValue} Years`
+                              : displayValue}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* COURSES */}
               <InfoSection
                 title="COURSES"
@@ -838,6 +940,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                 items={data?.paymentModes}
                 useGrid={false} // because this was vertical
               />
+              {/* FAQ SECTION */}
+              <FAQSection faqs={faqs} />
 
               {/* OVERVIEW */}
               <div className="max-w-5xl mt-5 md:pl-2 px-1">
@@ -910,8 +1014,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               ) : (
                 <GetMoreInfo
                   isPop={false}
-                  logo={`${APP_URL}/${data?.logo}`}
-                  image={`${APP_URL}/${data?.images[0]}`}
+                  logo={`${APP_URL}${data?.logo}`}
+                  image={`${APP_URL}${data?.images[0]}`}
                   type="listing"
                   name={data?.businessName}
                   id={data?._id}
