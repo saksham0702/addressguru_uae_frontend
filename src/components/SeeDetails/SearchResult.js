@@ -19,13 +19,16 @@ import { get_seo_data } from "@/api/seoApi";
 import SeoContent from "@/components/BusinessListingComponents/SeoContent";
 
 const SearchResults = ({
-  ssrListings = [],
-  ssrPageData = null,
-  ssrSeoContent = null,
-  ssrFilters = null,
-  ssrSlug = "",
-  ssrCity = "",
+  ssrListings,
+  ssrPageData,
+  ssrSeoContent,
+  ssrFilters,
+  ssrSlug,
+  ssrCity,
 }) => {
+
+  console.log(ssrListings, "ssrListings")
+
   const APP_URL = "https://addressguru.ae";
   const router = useRouter();
   const { city: globalCity, setCity } = useAuth();

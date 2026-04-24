@@ -83,10 +83,11 @@ https://addressguru.ae/${data?.slug}`;
             </address>
 
             {/* Ratings & Badges */}
+
             <div className="flex items-center md:gap-4 my-[3px] max-[340px]:!scale-90 w-20">
-              {data?.star && (
+              {data?.statistics?.averageRating > 0 && (
                 <div className="flex  gap-1 bg-[#3D8727] text-white md:px-1.5 px-1 py-[1px] text-xs  max-md:mr-2 rounded md:text-sm">
-                  <span>{data?.star}</span>
+                  <span>{data?.statistics?.averageRating}</span>
                   <svg
                     width="17"
                     height="16"
@@ -120,11 +121,12 @@ https://addressguru.ae/${data?.slug}`;
                   </svg>
                 </div>
               )}
-
-              <p className="text-xs 2xl:text-[13px] whitespace-nowrap text-gray-500">
-                {data?.rating}
-              </p>
-              {/* <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-bold">
+              {data?.statistics?.totalReviews > 0 && (
+                <p className="text-xs 2xl:text-[13px] whitespace-nowrap text-gray-500">
+                  {data?.statistics?.totalReviews} Ratings
+                </p>
+              )}
+              {/* <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-semibold">
                 <svg
                   width="14"
                   height="14"
