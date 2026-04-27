@@ -11,8 +11,9 @@ import Head from "next/head";
 import { get_job_filter } from "@/api/filter";
 import MobileJobFilter from "@/components/Jobs/MobileJobFilter";
 
-const JobsListings = ({ initialJobs, filters }) => {
-  const { city } = useAuth();
+const JobsListings = ({ initialJobs, filters, initialCity }) => {
+  const { city: contextCity } = useAuth();
+  const city = initialCity || contextCity || "UAE";
   const [allJobs, setAllJobs] = useState(initialJobs);
   const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
@@ -232,8 +233,9 @@ export async function getServerSideProps() {
     const filters = await get_job_filter();
     return {
       props: {
-        initialJobs: res.result,
-        filters: filters.filter,
+        initialJobs: res.result || [],
+        filters: filters.filter || null,
+        initialCity: "UAE",
       },
     };
   } catch (error) {

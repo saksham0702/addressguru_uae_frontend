@@ -14,20 +14,17 @@ export async function getServerSideProps({ res }) {
     // Generate XML entries for each marketplace item
     const marketplaceEntries = marketplaceData
       .map((item) => {
-        return `  <url>
-    <loc>${SITE_URL}/properties/${item}</loc>
-    <lastmod>${item.updatedAt || new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
+        return `  <sitemap>
+    <loc>${SITE_URL}/sitemap/properties/${item.slug}-sitemap.xml</loc>
+    <lastmod>${item.last_updated || new Date().toISOString()}</lastmod>
+  </sitemap>`;
       })
       .join("\n");
 
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${SITE_URL}/sitemap.xsl"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${marketplaceEntries}
-</urlset>`;
+</sitemapindex>`;
 
     res.setHeader("Content-Type", "text/xml");
     res.setHeader(

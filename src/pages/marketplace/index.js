@@ -21,7 +21,7 @@ const MarketplaceCardSkeleton = () => (
   </div>
 );
 
-const Marketplace = () => {
+const Marketplace = ({ initialCity }) => {
   const router = useRouter();
   const slug = router?.query?.slug;
 
@@ -31,7 +31,8 @@ const Marketplace = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(false);
-  const { city } = useAuth();
+  const { city: contextCity } = useAuth();
+  const city = initialCity || contextCity || "UAE";
 
   // ── Filter state ────────────────────────────────────────────────────────────
   const [marketplaceFilter, setMarketplaceFilter] = useState(null);
@@ -333,17 +334,11 @@ const Marketplace = () => {
 
 export default Marketplace;
 
-{
-  /* {slug === "to-let" && (
-                <div className="md:h-[275px] md:w-[23.7%] w-[240px] max-md:w-auto p-2 max-md:min-w-[175px] max-[350px]:w-[90%] max-md:h-[247px] rounded-lg 2xl:h-[350px] bg-[#DAECFD] flex items-center justify-center">
-                  <div className=" mx-auto  ">
-                    <p className="text-md max-md:text-sm font-[500]">
-                      Looking For <strong>Buyer</strong>
-                    </p>
-                    <button className="bg-[#FF6E04] rounded-sm text-white font-semibold text-sm max-md:text-xs px-2 py-1">
-                      Post Your Ads Today
-                    </button>
-                  </div>
-                </div>
-              )} */
+export async function getServerSideProps(context) {
+  // You could optionally fetch categories/brands here as well for better indexability
+  return {
+    props: {
+      initialCity: "UAE", // Default for marketplace index if no specific city in query
+    },
+  };
 }
