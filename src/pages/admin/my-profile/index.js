@@ -22,7 +22,7 @@ const Index = () => {
     name: user?.name || "",
     email: user?.email || "",
     bio: "",
-    avatar: "https://via.placeholder.com/150",
+    avatar: "",
     designation: "",
     location: "",
     social: {
@@ -429,59 +429,7 @@ const Index = () => {
               )}
             </div>
 
-            {/* Activity Stats */}
-            {user && !isEditing && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Activity Overview
-                </h3>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Jobs</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_JobsListings || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Properties</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_PropertiesListings || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total Views</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_totalViews || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total Calls</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_totalCalls || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total Leads</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_totalLeads || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-500 mb-1">Rating</p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {user.statistics_rating || 0}
-                      <span className="text-sm text-gray-500">/5</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+         
           </div>
         </div>
       </div>
@@ -490,3 +438,85 @@ const Index = () => {
 };
 
 export default Index;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   {/* Activity Stats */}
+            // {user && !isEditing && (
+            //   <div className="bg-white rounded-xl shadow-sm p-6">
+            //     <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            //       Activity Overview
+            //     </h3>
+
+            //     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Jobs</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_JobsListings || 0}
+            //         </p>
+            //       </div>
+
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Properties</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_PropertiesListings || 0}
+            //         </p>
+            //       </div>
+
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Total Views</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_totalViews || 0}
+            //         </p>
+            //       </div>
+
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Total Calls</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_totalCalls || 0}
+            //         </p>
+            //       </div>
+
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Total Leads</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_totalLeads || 0}
+            //         </p>
+            //       </div>
+
+            //       <div className="bg-gray-50 rounded-lg p-4">
+            //         <p className="text-xs text-gray-500 mb-1">Rating</p>
+            //         <p className="text-xl font-bold text-gray-800">
+            //           {user.statistics_rating || 0}
+            //           <span className="text-sm text-gray-500">/5</span>
+            //         </p>
+            //       </div>
+            //     </div>
+            //   </div>
+            // )}
