@@ -54,7 +54,7 @@ const viewMore = {
 };
 
 const PopularCategory = ({ data }) => {
-  console.log(data);
+  console.log("PopularCategory",data);
 
   // console.log("data", data);
   const { city } = useAuth();
