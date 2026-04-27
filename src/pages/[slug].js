@@ -286,14 +286,14 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   useEffect(() => {
     if (!data?.slug || viewTracked.current) return;
     viewTracked.current = true;
-    track_event("business", data.slug, "view").catch(() => {});
+    track_event("business", data.slug, "view").catch(() => { });
   }, [data?.slug]);
 
   //  Event handlers
   const handleWebsiteClick = (listingSlug) =>
-    track_event("business", listingSlug, "website_visit").catch(() => {});
+    track_event("business", listingSlug, "website_visit").catch(() => { });
   const handleClick = (listingSlug) =>
-    track_event("business", listingSlug, "call").catch(() => {});
+    track_event("business", listingSlug, "call").catch(() => { });
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
 
@@ -392,20 +392,20 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               geo:
                 data.location?.lat && data.location?.lng
                   ? {
-                      "@type": "GeoCoordinates",
-                      latitude: data.location.lat,
-                      longitude: data.location.lng,
-                    }
+                    "@type": "GeoCoordinates",
+                    latitude: data.location.lat,
+                    longitude: data.location.lng,
+                  }
                   : undefined,
               openingHours: openingHoursSchema,
               aggregateRating: avgRating
                 ? {
-                    "@type": "AggregateRating",
-                    ratingValue: avgRating,
-                    reviewCount: data.ratings.length,
-                    bestRating: "5",
-                    worstRating: "1",
-                  }
+                  "@type": "AggregateRating",
+                  ratingValue: avgRating,
+                  reviewCount: data.ratings.length,
+                  bestRating: "5",
+                  worstRating: "1",
+                }
                 : undefined,
               review: data.ratings?.slice(0, 5).map((r) => ({
                 "@type": "Review",
@@ -760,9 +760,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
       {/* ── MAIN CONTENT ───────────────────────────────────── */}
       <div
-        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
-          preview === "true" ? "opacity-100" : ""
-        }`}
+        className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${preview === "true" ? "opacity-100" : ""
+          }`}
       >
         <div className="flex flex-col md:w-[80%] max-w-[98%] relative bg-white md:px-5 px-2 md:pb-7">
           {/* Breadcrumbs (desktop) */}
@@ -839,78 +838,78 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               {(formattedFields?.logo?.length > 0 ||
                 formattedFields?.quickinfo?.length > 0 ||
                 formattedFields?.additional?.length > 0) && (
-                <div className="mt-5 md:pl-2 px-1">
-                  <span className="flex gap-3 items-center mb-4">
-                    <h3 className="font-semibold whitespace-nowrap uppercase md:text-xl">
-                      Business Information
-                    </h3>
-                    <span className="h-[1px] w-full bg-gray-200" />
-                  </span>
+                  <div className="mt-5 md:pl-2 px-1">
+                    <span className="flex gap-3 items-center mb-4">
+                      <h3 className="font-semibold whitespace-nowrap uppercase md:text-xl">
+                        Business Information
+                      </h3>
+                      <span className="h-[1px] w-full bg-gray-200" />
+                    </span>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                    {/* Combine all fields arrays */}
-                    {[
-                      ...(formattedFields?.logo || []),
-                      ...(formattedFields?.quickinfo || []),
-                      ...(formattedFields?.additional || []),
-                    ].map((field, index) => {
-                      const label = field?.label?.toLowerCase();
-                      const isExperience = label === "experience";
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                      {/* Combine all fields arrays */}
+                      {[
+                        ...(formattedFields?.logo || []),
+                        ...(formattedFields?.quickinfo || []),
+                        ...(formattedFields?.additional || []),
+                      ].map((field, index) => {
+                        const label = field?.label?.toLowerCase();
+                        const isExperience = label === "experience";
 
-                      // Handle value - check if it's an object
-                      let displayValue = field?.value;
-                      if (
-                        typeof displayValue === "object" &&
-                        displayValue !== null
-                      ) {
-                        // If it's an object like {amount, currency}, format it
-                        if (displayValue.amount && displayValue.currency) {
-                          displayValue = `${displayValue.currency} ${displayValue.amount}`;
-                        } else {
-                          // Convert other objects to JSON string as fallback
-                          displayValue = JSON.stringify(displayValue);
+                        // Handle value - check if it's an object
+                        let displayValue = field?.value;
+                        if (
+                          typeof displayValue === "object" &&
+                          displayValue !== null
+                        ) {
+                          // If it's an object like {amount, currency}, format it
+                          if (displayValue.amount && displayValue.currency) {
+                            displayValue = `${displayValue.currency} ${displayValue.amount}`;
+                          } else {
+                            // Convert other objects to JSON string as fallback
+                            displayValue = JSON.stringify(displayValue);
+                          }
                         }
-                      }
 
-                      return (
-                        <div
-                          key={index}
-                          className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow duration-200 hover:border-orange-300"
-                        >
-                          {/* Icon */}
-                          <div className="flex items-center justify-center w-8 h-8 bg-orange-50 rounded-full mb-2">
-                            <svg
-                              className="w-4 h-4 text-orange-600"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2.5}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </div>
+                        return (
+                          <div
+                            key={index}
+                            className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow duration-200 hover:border-orange-300"
+                          >
+                            {/* Icon */}
+                            <div className="flex items-center justify-center w-8 h-8 bg-orange-50 rounded-full mb-2">
+                              <svg
+                                className="w-4 h-4 text-orange-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </div>
 
-                          {/* Label */}
-                          <div className="text-xs md:text-sm font-medium text-gray-500 mb-1">
-                            {field?.label}
-                          </div>
+                            {/* Label */}
+                            <div className="text-xs md:text-sm font-medium text-gray-500 mb-1">
+                              {field?.label}
+                            </div>
 
-                          {/* Value */}
-                          <div className="text-base md:text-lg font-bold text-gray-800">
-                            {isExperience
-                              ? `${displayValue} Years`
-                              : displayValue}
+                            {/* Value */}
+                            <div className="text-base md:text-lg font-bold text-gray-800">
+                              {isExperience
+                                ? `${displayValue} Years`
+                                : displayValue}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* COURSES */}
               <InfoSection
@@ -990,9 +989,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
             {/* ── RIGHT COLUMN ───────────────────────────────── */}
             <div
-              className={`md:w-[34%] ${
-                isSliderFull ? "" : "md:absolute md:top-49 md:right-0"
-              } max-md:hidden h-auto mb-10 flex flex-col gap-5`}
+              className={`md:w-[34%] ${isSliderFull ? "" : "md:absolute md:top-49 md:right-0"
+                } max-md:hidden h-auto mb-10 flex flex-col gap-5`}
             >
               <QuickInformation
                 id={data?.id}
@@ -1089,11 +1087,10 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       {/* ── TOAST ─────────────────────────────────────────── */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-[10002] flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border ${
-            toast.type === "error"
-              ? "bg-red-50 border-red-200 text-red-600"
-              : "bg-emerald-50 border-emerald-200 text-emerald-700"
-          }`}
+          className={`fixed bottom-6 right-6 z-[10002] flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border ${toast.type === "error"
+            ? "bg-red-50 border-red-200 text-red-600"
+            : "bg-emerald-50 border-emerald-200 text-emerald-700"
+            }`}
           style={{ animation: "slideUp 0.2s ease" }}
         >
           <span>{toast.type === "error" ? "✕" : "✓"}</span>
@@ -1122,7 +1119,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         <ThanksPop onClose={() => setThanksPop(false)} type={type} />
       )}
     </>
-  );
-};
+  )
+}
 
 export default SeeDetails;

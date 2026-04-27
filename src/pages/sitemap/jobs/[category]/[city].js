@@ -1,29 +1,30 @@
 import { SITE_URL } from "@/services/constants";
-import { getSectionTypeSitemap } from "@/api/sitemap";
+import { getCityListings } from "@/api/sitemap";
 
 export default function CategorySitemap() {
   return null;
 }
 
 export async function getServerSideProps({ res, params }) {
-  const { category } = params;
-  const cities = await getSectionTypeSitemap("jobs", category);
+  const { category, city } = params;
+  const citySlug = city.replace('.xml', '');
+  
+  const listings = await getCityListings("jobs", category, citySlug);
 
-  const items = cities
+  const items = listings
     .map(
-      (city) => `
-  <sitemap>
-    <loc>${SITE_URL}/sitemap/jobs/${category}/${city.slug}.xml</loc>
-    <lastmod>${city.last_updated}</lastmod>
-  </sitemap>`,
+      (listing) => `
+  <url>
+    <loc>${SITE_URL}/jobs/${listing.slug}</loc>
+    <lastmod>${listing.last_updated}</lastmod>
+  </url>`,
     )
     .join("");
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${items}
-</sitemapindex>`;
+</urlset>`;
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=86400");

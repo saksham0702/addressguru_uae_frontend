@@ -8,7 +8,7 @@
  *   trackEvent("listing", "enquiry_open", "Business Name");
  */
 
-import { GOOGLE_MEASUREMENT_ID } from "../services/constants";
+import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
 
 export function useGTAG() {
   /**

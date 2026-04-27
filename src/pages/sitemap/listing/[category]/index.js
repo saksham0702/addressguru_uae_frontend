@@ -23,13 +23,11 @@ export async function getServerSideProps({ res, params }) {
   <sitemap>
     <loc>${SITE_URL}/sitemap/listing/${category}/${city.slug}.xml</loc>
     <lastmod>${city.last_updated}</lastmod>
-    <urlCount>${city.url_count}</urlCount>
   </sitemap>`,
     )
     .join("");
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${items}
 </sitemapindex>`;
