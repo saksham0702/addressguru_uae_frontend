@@ -13,7 +13,7 @@ export const getSitemap = async () => {
 
 export const getSectionSitemap = async (section) => {
   try {
-    const response = await axios.get(`${API_URL}/sitemap/${section}`);
+    const response = await axios.get(`${API_URL}/sitemap/${section}?flat=true`);
     return response.data.result;
   } catch (error) {
     console.log("error fetching sections sitemap:", error);
