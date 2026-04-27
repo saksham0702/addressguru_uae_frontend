@@ -13,7 +13,6 @@ export async function getServerSideProps({ res }) {
       <sitemap>
         <loc><![CDATA[${SITE_URL}/sitemap/${item.section}-sitemap.xml]]></loc>
         <lastmod>${item.last_updated}</lastmod>
-        <urlCount>${item.url_count}</urlCount>
       </sitemap>
     `,
     )

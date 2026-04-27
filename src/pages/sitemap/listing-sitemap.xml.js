@@ -19,23 +19,23 @@ export async function getServerSideProps({ res }) {
     if (Array.isArray(listingsData)) {
       listingEntries = listingsData
         .map((listing) => {
-          return `  <sitemap>
-    <loc><![CDATA[${SITE_URL}/sitemap/listing/${listing.slug}.xml]]></loc>
+          return `  <url>
+    <loc><![CDATA[${SITE_URL}/${listing.slug}]]></loc>
     <lastmod>${listing.last_updated}</lastmod>
-  </sitemap>`;
+  </url>`;
         })
         .join("\n");
-    } else if (listingsData && listingsData.section) {
-      listingEntries = `  <sitemap>
-    <loc><![CDATA[${SITE_URL}/listing/${listingsData.section}]]></loc>
+    } else if (listingsData && listingsData.slug) {
+      listingEntries = `  <url>
+    <loc><![CDATA[${SITE_URL}/${listingsData.slug}]]></loc>
     <lastmod>${listingsData.last_updated}</lastmod>
-  </sitemap>`;
+  </url>`;
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${listingEntries}
-</sitemapindex>`;
+</urlset>`;
 
     res.setHeader("Content-Type", "text/xml");
     res.setHeader(

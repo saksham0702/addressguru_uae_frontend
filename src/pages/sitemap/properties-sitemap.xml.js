@@ -22,9 +22,9 @@ export async function getServerSideProps({ res }) {
       .join("\n");
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${marketplaceEntries}
-</sitemapindex>`;
+</urlset>`;
 
     res.setHeader("Content-Type", "text/xml");
     res.setHeader(
