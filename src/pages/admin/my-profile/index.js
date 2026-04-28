@@ -11,6 +11,7 @@ import {
   Facebook,
 } from "lucide-react";
 import Image from "next/image";
+import { updateProfile } from "@/api/userAuth";
 
 const Index = () => {
   const { user } = useAuth();
@@ -19,16 +20,17 @@ const Index = () => {
   const [imagePreview, setImagePreview] = useState(null);
 
   const [profile, setProfile] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    bio: "",
-    avatar: "",
-    designation: "",
-    location: "",
-    social: {
-      linkedin: "",
-      instagram: "",
-      facebook: "",
+    name: user?.data?.name || "",
+    email: user?.data?.email || "",
+    bio: user?.data?.profile_bio || "",
+    avatar: user?.data?.avatar || "",
+    designation: user?.data?.designation || "",
+    location: user?.data?.location || "",
+    socialLinks: {
+      linkedin: user?.data?.socialLinks?.linkedin || "",
+      instagram: user?.data?.socialLinks?.instagram || "",
+      facebook: user?.data?.socialLinks?.facebook || "",
+      telegram: user?.data?.socialLinks?.telegram || "",
     },
   });
 
@@ -37,13 +39,16 @@ const Index = () => {
 
     if (name.includes("social.")) {
       const key = name.split(".")[1];
-      setProfile({
-        ...profile,
-        social: {
-          ...profile.social,
-          [key]: value,
-        },
-      });
+      if (name.includes("social.")) {
+        const key = name.split(".")[1];
+        setProfile({
+          ...profile,
+          socialLinks: {
+            ...profile.socialLinks,
+            [key]: value,
+          },
+        });
+      }
     } else {
       setProfile({ ...profile, [name]: value });
     }
@@ -329,9 +334,9 @@ const Index = () => {
 
               {!isEditing ? (
                 <div className="space-y-3">
-                  {profile.social.linkedin && (
+                  {profile?.socialLinks?.linkedin && (
                     <a
-                      href={profile.social.linkedin}
+                      href={profile?.socialLinks.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 text-gray-700 hover:text-orange-500 transition-colors"
@@ -343,9 +348,9 @@ const Index = () => {
                     </a>
                   )}
 
-                  {profile.social.instagram && (
+                  {profile?.socialLinks.instagram && (
                     <a
-                      href={profile.social.instagram}
+                      href={profile?.socialLinks.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 text-gray-700 hover:text-orange-500 transition-colors"
@@ -357,9 +362,9 @@ const Index = () => {
                     </a>
                   )}
 
-                  {profile.social.facebook && (
+                  {profile?.socialLinks?.facebook && (
                     <a
-                      href={profile.social.facebook}
+                      href={profile?.socialLinks?.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 text-gray-700 hover:text-orange-500 transition-colors"
@@ -371,9 +376,9 @@ const Index = () => {
                     </a>
                   )}
 
-                  {!profile.social.linkedin &&
-                    !profile.social.instagram &&
-                    !profile.social.facebook && (
+                  {!profile?.socialLinks?.linkedin &&
+                    !profile?.socialLinks?.instagram &&
+                    !profile?.socialLinks?.facebook && (
                       <p className="text-gray-500 text-sm">
                         No social links added yet.
                       </p>
@@ -389,7 +394,7 @@ const Index = () => {
                     <input
                       type="url"
                       name="social.linkedin"
-                      value={profile.social.linkedin}
+                      value={profile?.socialLinks.linkedin}
                       onChange={handleChange}
                       placeholder="https://linkedin.com/in/username"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
@@ -404,7 +409,7 @@ const Index = () => {
                     <input
                       type="url"
                       name="social.instagram"
-                      value={profile.social.instagram}
+                      value={profile?.socialLinks.instagram}
                       onChange={handleChange}
                       placeholder="https://instagram.com/username"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
@@ -419,7 +424,7 @@ const Index = () => {
                     <input
                       type="url"
                       name="social.facebook"
-                      value={profile.social.facebook}
+                      value={profile?.socialLinks.facebook}
                       onChange={handleChange}
                       placeholder="https://facebook.com/username"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
@@ -428,8 +433,6 @@ const Index = () => {
                 </div>
               )}
             </div>
-
-         
           </div>
         </div>
       </div>
@@ -439,84 +442,58 @@ const Index = () => {
 
 export default Index;
 
+{
+  /* Activity Stats */
+}
+// {user && !isEditing && (
+//   <div className="bg-white rounded-xl shadow-sm p-6">
+//     <h3 className="text-lg font-semibold text-gray-800 mb-4">
+//       Activity Overview
+//     </h3>
 
+//     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Jobs</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_JobsListings || 0}
+//         </p>
+//       </div>
 
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Properties</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_PropertiesListings || 0}
+//         </p>
+//       </div>
 
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Total Views</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_totalViews || 0}
+//         </p>
+//       </div>
 
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Total Calls</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_totalCalls || 0}
+//         </p>
+//       </div>
 
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Total Leads</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_totalLeads || 0}
+//         </p>
+//       </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   {/* Activity Stats */}
-            // {user && !isEditing && (
-            //   <div className="bg-white rounded-xl shadow-sm p-6">
-            //     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            //       Activity Overview
-            //     </h3>
-
-            //     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Jobs</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_JobsListings || 0}
-            //         </p>
-            //       </div>
-
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Properties</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_PropertiesListings || 0}
-            //         </p>
-            //       </div>
-
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Total Views</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_totalViews || 0}
-            //         </p>
-            //       </div>
-
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Total Calls</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_totalCalls || 0}
-            //         </p>
-            //       </div>
-
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Total Leads</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_totalLeads || 0}
-            //         </p>
-            //       </div>
-
-            //       <div className="bg-gray-50 rounded-lg p-4">
-            //         <p className="text-xs text-gray-500 mb-1">Rating</p>
-            //         <p className="text-xl font-bold text-gray-800">
-            //           {user.statistics_rating || 0}
-            //           <span className="text-sm text-gray-500">/5</span>
-            //         </p>
-            //       </div>
-            //     </div>
-            //   </div>
-            // )}
+//       <div className="bg-gray-50 rounded-lg p-4">
+//         <p className="text-xs text-gray-500 mb-1">Rating</p>
+//         <p className="text-xl font-bold text-gray-800">
+//           {user.statistics_rating || 0}
+//           <span className="text-sm text-gray-500">/5</span>
+//         </p>
+//       </div>
+//     </div>
+//   </div>
+// )}

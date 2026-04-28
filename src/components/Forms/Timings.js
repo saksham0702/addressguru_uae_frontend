@@ -94,7 +94,7 @@ const Timings = ({ schedule, setSchedule }) => {
   return (
     <div className="">
       <span className="flex mb-2">
-        <h3 className="2xl:text-lg font-semibold text-[#696969]">
+        <h3 className="2xl:text-[16px] text-sm font-medium text-black">
           Opening and Closing Hours
         </h3>
         <span className="text-red-600 ml-1 font-semibold">&#42;</span>

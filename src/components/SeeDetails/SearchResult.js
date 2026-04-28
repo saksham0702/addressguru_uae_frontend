@@ -26,20 +26,22 @@ const SearchResults = ({
   ssrSlug,
   ssrCity,
 }) => {
-
-  console.log(ssrListings, "ssrListings")
+  console.log(ssrListings, "ssrListings");
 
   const APP_URL = "https://addressguru.ae";
   const router = useRouter();
-  const { city: globalCity, setCity } = useAuth();
+  const { city: globalCity, setCity, isLoaded } = useAuth();
+  const isFirstRender = useRef(true);
 
   // ── SSR city is used immediately; context city takes over once loaded ──
-  const cityName = globalCity || ssrCity;
 
   const { slug } = router.query;
-  const canonicalSlug = slug || ssrSlug;
-  const canonicalCity = cityName || ssrCity;
-
+  const canonicalSlug = (router.query.slug || ssrSlug)
+    ?.toString()
+    .toLowerCase();
+  const canonicalCity = (router.query.city || ssrCity)
+    ?.toString()
+    .toLowerCase();
   const [loginPop, setLoginPop] = useState(false);
   const handleClose = () => setLoginPop(false);
 
@@ -85,12 +87,17 @@ const SearchResults = ({
 
   // ── Sync URL city into context so rest of app stays in sync ──
   useEffect(() => {
-    if (!ssrCity || !setCity) return;
+    if (!router.isReady || !setCity) return;
 
-    const formatted = ssrCity.charAt(0).toUpperCase() + ssrCity.slice(1);
+    const cityFromUrl = router.query.city;
+    if (!cityFromUrl) return;
 
-    setCity(formatted); // ✅ always sync
-  }, [ssrCity]);
+    const formatted =
+      cityFromUrl.charAt(0).toUpperCase() +
+      cityFromUrl.slice(1).replace(/-/g, " ");
+
+    setCity(formatted);
+  }, [router.query.city, router.isReady]);
 
   const matchIds = (itemArray = [], selectedIds = []) =>
     itemArray.some((entry) => {
@@ -207,18 +214,22 @@ const SearchResults = ({
 
   // ── Redirect when global city changes ──
   useEffect(() => {
-    if (!router.isReady) return;
-    if (!router.query.slug || !router.query.city) return;
-    if (!cityName) return;
+    if (!router.isReady || !isLoaded) return;
 
-    const newCitySlug = cityName.toLowerCase().replace(/\s+/g, "-");
     const currentCity = router.query.city;
+    const newCitySlug = globalCity?.toLowerCase().replace(/\s+/g, "-");
 
-    // ✅ Only push if actually different
-    if (currentCity !== newCitySlug) {
+    // 🚫 Skip first render (prevents Dubai override on refresh)
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // ✅ Only redirect when user actually changed city
+    if (currentCity && newCitySlug && currentCity !== newCitySlug) {
       router.push(`/${router.query.slug}/${newCitySlug}`);
     }
-  }, [cityName, router.isReady]);
+  }, [globalCity, isLoaded]);
 
   // ── Load more ──
   const handleLoadMore = async () => {
@@ -278,9 +289,7 @@ const SearchResults = ({
 
   const pageKeywords = `${canonicalSlug}, best ${canonicalSlug} in ${canonicalCity}, top ${canonicalSlug}, ${canonicalCity} business listings`;
 
-  const canonicalUrl = `${APP_URL}/${canonicalSlug
-    .toLowerCase()
-    .replace(/\s+/g, "-")}/${canonicalCity.toLowerCase().replace(/\s+/g, "-")}`;
+  const canonicalUrl = `${APP_URL}/${canonicalSlug}/${canonicalCity}`;
 
   const rawOgImage = seoOgImage ?? "/home-og-image.jpg";
   const absoluteOgImage = rawOgImage.startsWith("http")
@@ -484,7 +493,10 @@ const SearchResults = ({
                 ) : (
                   <>
                     {listings.map((item, index) => (
-                      <div key={item._id || index} className="w-full md:mb-4 mb-1">
+                      <div
+                        key={item._id || index}
+                        className="w-full md:mb-4 mb-1"
+                      >
                         <BusinessCard data={item} />
                       </div>
                     ))}

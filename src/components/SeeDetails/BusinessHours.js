@@ -24,28 +24,35 @@ const BusinessHours = ({ openingHours, mobile }) => {
   const [isOpen, setIsOpen] = useState(false);
   const timeoutRef = useRef(null);
 
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
-
+  const today = new Date()
+    .toLocaleDateString("en-US", { weekday: "long" })
+    .toLowerCase();
   const normalizeHours = () => {
     if (!openingHours) return {};
+
     if (Array.isArray(openingHours)) {
       return openingHours.reduce((acc, entry) => {
-        if (entry?.day) acc[entry.day] = entry;
+        if (entry?.day) {
+          acc[entry.day.toLowerCase()] = entry;
+        }
         return acc;
       }, {});
     }
-    return openingHours;
-  };
 
+    return Object.keys(openingHours).reduce((acc, key) => {
+      acc[key.toLowerCase()] = openingHours[key];
+      return acc;
+    }, {});
+  };
   const hoursMap = normalizeHours();
   const todayData = hoursMap[today];
   const isOpenToday = todayData?.is_open;
 
   const formattedHours = ORDERED_DAYS?.map((day) => ({
     day,
-    is_open: hoursMap[day]?.is_open ?? false,
-    open_time: hoursMap[day]?.open_time ?? null,
-    close_time: hoursMap[day]?.close_time ?? null,
+    is_open: hoursMap[day.toLowerCase()]?.is_open ?? false,
+    open_time: hoursMap[day.toLowerCase()]?.open_time ?? null,
+    close_time: hoursMap[day.toLowerCase()]?.close_time ?? null,
   }));
 
   const handleMouseEnter = () => {
@@ -60,11 +67,13 @@ const BusinessHours = ({ openingHours, mobile }) => {
   const HoursList = () => (
     <div className="px-3 pb-3 shadow-lg border-b border-orange-400 rounded-b-lg pt-1">
       {formattedHours.map(({ day, is_open, open_time, close_time }) => {
-        const isToday = day === today;
+        const isToday = day.toLowerCase() === today;
         return (
           <div
             key={day}
-            className={`flex items-center justify-between py-1 max-md:text-sm max-md:space-y-2.5 text-xs ${isToday ? "font-semibold" : "font-normal"}`}
+            className={`flex items-center justify-between py-1 max-md:text-sm max-md:space-y-2.5 text-xs cursor-pointer  duration-150 hover:bg-gray-100 hover:scale-102 transition-all  ${
+              isToday ? "font-semibold" : "font-normal"
+            }`}
           >
             <span className="flex items-center gap-1.5 min-w-[95px]">
               {isToday ? (
@@ -72,7 +81,15 @@ const BusinessHours = ({ openingHours, mobile }) => {
               ) : (
                 <span className="inline-block w-1.5 h-1.5 flex-shrink-0" />
               )}
-              <span className={isToday ? "text-green-700" : "text-gray-800"}>
+              <span
+                className={
+                  isToday
+                    ? is_open
+                      ? "text-green-700"
+                      : "text-red-500"
+                    : "text-gray-800"
+                }
+              >
                 {day}
               </span>
             </span>
