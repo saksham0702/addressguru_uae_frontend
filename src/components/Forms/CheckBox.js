@@ -45,7 +45,7 @@ const CheckBox = ({
   return (
     <section ref={errorRef}>
       <span className="flex overflow-visible items-center">
-        <h3 className="2xl:text-lg font-semibold text-[#696969]">{heading}</h3>
+        <h3 className="2xl:text-[16px] text-sm font-medium text-black">{heading}</h3>
         <span className="text-red-600 ml-1 font-semibold">&#42;</span>
         {error && (
           <p className="text-red-500 ml-2 text-sm mt-1 mb-1">{error}</p>

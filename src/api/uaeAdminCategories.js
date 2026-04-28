@@ -3,7 +3,7 @@ import axios from "axios";
 // const API_URL = "http://192.168.29.191:5001/api";
 
 // const API_URL = "https://addressguru.ae/api";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 
 // const API_URL = "http://localhost:5001";
 
@@ -35,7 +35,7 @@ export const createOrUpdateCategory = async (payload) => {
 
     console.log(
       `category ${isEdit ? "update" : "create"} response:`,
-      response.data
+      response.data,
     );
 
     return response.data;
@@ -54,17 +54,19 @@ export const createOrUpdateCategory = async (payload) => {
 
 export const getAllCategories = async () => {
   try {
-    const response = await axios.get(`${API_URL}/categories/get-categories-by-type/business`, {
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.get(
+      `${API_URL}/categories/get-categories-by-type/business`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-      withCredentials: true,
-    });
+    );
 
-    console.table("get all categories response:", response?.data);
     return response.data;
   } catch (err) {
-    console.log("get all categories error", err?.response?.data || err.message);
+    console.log("API ERROR", err?.response?.data || err.message);
+    return null;
   }
 };
 
@@ -492,8 +494,6 @@ export const deleteAdditionalField = async (id) => {
     };
   }
 };
-
-
 
 export const createFeatureApi = async (payload) => {
   const res = await fetch(`${API_URL}/features/create-feature`, {

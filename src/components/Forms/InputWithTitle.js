@@ -17,14 +17,14 @@ const InputWithTitle = ({
 }) => {
   return (
     <div className="flex flex-col w-full whitespace-nowrap gap-1">
-      <label className="text-[#696969] 2xl:text-lg flex relative capitalize font-semibold">
+      <label className="text-black 2xl:text-[16px]  font-medium text-sm flex relative capitalize">
         <span className="flex items-center gap-2">
           <p>{title}</p>
           {header ? (
-            <span className=" text-[13px] font-semibold">({header})</span>
+            <span className=" text-[13px] font-normal">({header})</span>
           ) : (
             (minLength || maxLength) && (
-              <span className="ml-2 text-[13px] font-light">
+              <span className="ml-2 text-[13px] font-normal">
                 ({minLength && `Min: ${minLength} chars`}
                 {minLength && maxLength && " | "}
                 {maxLength && `Max: ${maxLength} chars`})
@@ -37,7 +37,7 @@ const InputWithTitle = ({
 
       {isTextarea ? (
         <textarea
-          className="border border-gray-200  w-full font-[500] rounded-lg p-2"
+          className="border border-gray-200 w-full font-medium rounded-lg p-2 text-sm placeholder:text-sm placeholder:font-normal"
           rows={rows || 4}
           minLength={minLength}
           maxLength={maxLength}
@@ -53,7 +53,7 @@ const InputWithTitle = ({
           placeholder={placeholder}
           className={`border border-gray-200 ${
             width ? "w-[50%]" : "w-full"
-          } font-[500] rounded-lg p-2`}
+          } font-medium rounded-lg p-2 text-sm placeholder:text-sm placeholder:font-normal`}
           minLength={minLength}
           maxLength={maxLength}
           value={value}
