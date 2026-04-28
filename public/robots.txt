@@ -7,7 +7,6 @@ Disallow: /dashboard/
 Disallow: /login/
 Disallow: /register/
 Disallow: /agent-register/
-Disallow: /api/
 
 # Sitemap
 Sitemap: https://addressguru.ae/sitemap.xml
