@@ -18,10 +18,7 @@ import Head from "next/head";
 import { getAllCategories } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
 
-export default function Home() {
-  // api calls
-  const [categories, setCategories] = useState([]);
-  const [cities, setCities] = useState([]);
+export default function Home({ categories, cities }) {
   const [recentListing, setRecentListing] = useState(null);
   const [recentJobs, setRecentJobs] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -49,37 +46,13 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getAllCategories();
-
-      // console.log("response of category",data?.result)
-      if (data.data) setCategories(data.data);
-    };
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const res = await getCities();
-        console.log("city res", res.data);
-
-        setCities(res.data);
-      } catch (err) {
-        console.error("Client-side error:", err);
-        setError(err);
-      }
-    };
-
-    fetchCities();
-  }, []);
-
   return (
     <>
       <Head>
         {/* ======= BASIC SEO ======= */}
-        <title>Find Local Businesses, Services & Jobs in UAE | AddressGuru UAE</title>
+        <title>
+          Find Local Businesses, Services & Jobs in UAE | AddressGuru UAE
+        </title>
 
         <meta
           name="description"
@@ -105,10 +78,7 @@ export default function Home() {
           content="Discover the best businesses, jobs, and services near you. Browse verified listings and explore categories with ease."
         />
         <meta property="og:url" content={APP_URL} />
-        <meta
-          property="og:image"
-          content={`${APP_URL}/home-og.jpg`}
-        />
+        <meta property="og:image" content={`${APP_URL}/home-og.jpg`} />
         <meta property="og:site_name" content="AddressGuru UAE" />
         <meta property="og:locale" content="en_AE" />
 
@@ -122,10 +92,7 @@ export default function Home() {
           name="twitter:description"
           content="Browse categories, services, businesses, and job listings near you."
         />
-        <meta
-          name="twitter:image"
-          content={`${APP_URL}/home-og.jpg`}
-        />
+        <meta name="twitter:image" content={`${APP_URL}/home-og.jpg`} />
 
         {/* ======= JSON-LD SCHEMA (SEO BOOST) ======= */}
         <script
@@ -186,11 +153,11 @@ export default function Home() {
             {/* popular categories with icons  */}
             {/* {!categories?.result && <Loader />} */}
             <PopularCategory data={categories} />
-  
+
             {/* ads section for mobile */}
             <div className="w-full max-h-55 md:hidden p-2">
               <div className="border border-gray-100 w-full h-full flex items-center justify-center">
-                <l
+                <Image
                   src="/assets/ads-img-small.png"
                   alt="adds"
                   height={500}
@@ -207,8 +174,6 @@ export default function Home() {
             <div className="">
               <PopularServices />
             </div>
-
-   
           </div>
           {/* customer section */}
 
@@ -221,9 +186,33 @@ export default function Home() {
   );
 }
 
+export async function getServerSideProps() {
+  try {
+    const [categoriesRes, citiesRes] = await Promise.all([
+      getAllCategories(),
+      getCities(),
+    ]);
 
+    return {
+      props: {
+        categories: categoriesRes?.data || [], // ✅ FIXED
+        cities: citiesRes?.data || [], // ✅ FIXED
+      },
+    };
+  } catch (err) {
+    console.log("SSR ERROR:", err);
 
-         {/* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
+    return {
+      props: {
+        categories: [],
+        cities: [],
+      },
+    };
+  }
+}
+
+{
+  /* <HomeHeadingView title={"Recent Jobs"} view={"view more"} />
 
           <div className="flex gap-3 px-4 pr-5 max-md:overflow-x-scroll max-md:pb-5 hide-scroll  ">
             <RecentJobCard img={1} />
@@ -232,6 +221,5 @@ export default function Home() {
             <RecentJobCard img={2} />
             <RecentJobCard img={1} />
             <RecentJobCard img={2} />
-          </div> */}
-
-          
+          </div> */
+}

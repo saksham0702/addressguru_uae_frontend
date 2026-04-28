@@ -287,7 +287,7 @@ const BusinessInfo = ({
       <div ref={refs?.businessDescriptionRef}>
         <div className="flex items-center justify-between mb-2">
           <span className="flex gap-1 items-center">
-            <h3 className="text-[#696969] 2xl:text-lg relative capitalize font-semibold">
+            <h3 className="text-black 2xl:text-[16px] text-sm relative capitalize font-semibold">
               Ad Description
               <span className="text-red-600 ml-1">&#42;</span>
             </h3>

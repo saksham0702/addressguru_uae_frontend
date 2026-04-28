@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 
 export const user_login = async (postdata) => {
   try {
@@ -67,13 +67,40 @@ export const user_google_login = async (postdata) => {
 
 export const social_login = async (postdata) => {
   try {
-    const res = await axios.post(`${API_URL}/social-login/auth/exchange`, postdata, {
-      withCredentials: true,
-    });
+    const res = await axios.post(
+      `${API_URL}/social-login/auth/exchange`,
+      postdata,
+      {
+        withCredentials: true,
+      },
+    );
     // console.log("social response",res);
     return res?.data;
   } catch (error) {
     console.log("error of social", error);
+    return error?.response?.data || { status: 500, error: "Server error" };
+  }
+};
+
+export const updateProfile = async (postdata) => {
+  try {
+    // const formData = new FormData();
+
+    // // Append all fields dynamically
+    // for (const key in postdata) {
+    //   formData.append(key, postdata[key]);
+    // }
+
+    const response = await axios.put(`${API_URL}/update-profile`, postdata, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response?.data;
+  } catch (error) {
+    console.log("update profile error", error);
     return error?.response?.data || { status: 500, error: "Server error" };
   }
 };

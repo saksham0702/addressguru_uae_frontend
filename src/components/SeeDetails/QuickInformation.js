@@ -107,6 +107,13 @@ const QuickInformation = ({
   id,
 }) => {
   const categoryName = job ? category?.category_name : category?.name;
+  console.log("extra fields", extraFields);
+  const allFields = [
+    ...(extraFields?.quickinfo || []),
+    ...(extraFields?.logo || []),
+    ...(extraFields?.description || []),
+    ...(extraFields?.additional || []),
+  ];
 
   return (
     <div className="w-full max-md:hidden rounded-t-lg">
@@ -135,9 +142,9 @@ const QuickInformation = ({
           <BusinessHours openingHours={businesshours} mobile="" />
         )}
 
-        {extraFields?.map((field, index) => (
+        {allFields.map((field, index) => (
           <p key={index} className="flex items-center gap-1">
-            <CircleCheck className="" size={18} />
+            <CircleCheck size={18} />
             <span className="font-medium text-[16px] text-black">
               {field?.label}:
             </span>
