@@ -1,30 +1,29 @@
-import { SITE_URL } from "@/services/constants";
-// pages/sitemap/marketplace-sitemap.xml.js
+import { API_URL, SITE_URL } from "@/services/constants";
+// pages/sitemap/properties-sitemap.xml.js
 import { getSectionSitemap } from "@/api/sitemap";
 
-export default function MarketplaceSitemap() {
+export default function PropertiesSitemap() {
   return null;
 }
 
 export async function getServerSideProps({ res }) {
   try {
-    // Fetch marketplace data from your API
     const marketplaceData = await getSectionSitemap("properties");
 
-    // Generate XML entries for each marketplace item
     const marketplaceEntries = marketplaceData
       .map((item) => {
         return `  <sitemap>
-    <loc>${SITE_URL}/sitemap/properties/${item.slug}-sitemap.xml</loc>
+    <loc>${SITE_URL}/sitemap/properties/${item.slug}.xml</loc>
     <lastmod>${item.last_updated || new Date().toISOString()}</lastmod>
+    <adx:urlCount>${item.url_count || 0}</adx:urlCount>
   </sitemap>`;
       })
       .join("\n");
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:adx="https://www.addressguru.ae/schemas/sitemap/1.0">
 ${marketplaceEntries}
-</urlset>`;
+</sitemapindex>`;
 
     res.setHeader("Content-Type", "text/xml");
     res.setHeader(

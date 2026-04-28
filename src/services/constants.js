@@ -21,6 +21,8 @@ export const IMG_URL = process.env.NEXT_PUBLIC_APP_URL;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 // export const API_URL = "http://localhost:5001"
 
+export const SITE_URL = "http://localhost:3000"
+
 // GOOGLE GEMINI KEY
 export const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY
 
@@ -405,7 +407,6 @@ export const AGE_OPTIONS = [
   { name: "50+", value: "50-100" },
 ];
 
-export const SITE_URL = "https://addressguru.ae";
 
 export const menuItems = [
   {
@@ -826,16 +827,16 @@ export const NAV_ROUTES = [
     icon: User,
     href: "/admin/users",
   },
- {
-  name: "listings",
-  icon: ShoppingBag,
-  children: [
-    { name: "Business Listings", href: "/admin/business-listings" },
-    { name: "Jobs Listings", href: "/admin/jobs-listings" },
-    { name: "Marketplace Listings", href: "/admin/marketplace-listings" },
-    { name: "Property Listings", href: "/admin/property-listings" },
-  ],
- },
+  {
+    name: "listings",
+    icon: ShoppingBag,
+    children: [
+      { name: "Business Listings", href: "/admin/business-listings" },
+      { name: "Jobs Listings", href: "/admin/jobs-listings" },
+      { name: "Marketplace Listings", href: "/admin/marketplace-listings" },
+      { name: "Property Listings", href: "/admin/property-listings" },
+    ],
+  },
 
   // {
   //   name: "Business Listings",

@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/services/constants";
+import { API_URL, SITE_URL } from "@/services/constants";
 // pages/sitemap/jobs-sitemap.xml.js
 import { getSectionSitemap } from "@/api/sitemap";
 export default function JobsSitemap() {
@@ -17,8 +17,9 @@ export async function getServerSideProps({ res }) {
       jobEntries = jobsData
         .map((job) => {
           return `  <sitemap>
-    <loc><![CDATA[${SITE_URL}/sitemap/jobs/${job.slug}-sitemap.xml]]></loc>
+    <loc>${SITE_URL}/sitemap/jobs/${job.slug}.xml</loc>
     <lastmod>${job.last_updated}</lastmod>
+    <adx:urlCount>${job.url_count}</adx:urlCount>
   </sitemap>`;
         })
         .join("\n");
@@ -31,9 +32,9 @@ export async function getServerSideProps({ res }) {
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:adx="https://www.addressguru.ae/schemas/sitemap/1.0">
 ${jobEntries}
-</urlset>`;
+</sitemapindex>`;
 
     res.setHeader("Content-Type", "text/xml");
     res.setHeader(
