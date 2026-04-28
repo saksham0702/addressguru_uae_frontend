@@ -42,8 +42,5 @@ ${listingEntries}
   }
 
   return { props: {} };
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> 0b4111f (New SiteMap)
