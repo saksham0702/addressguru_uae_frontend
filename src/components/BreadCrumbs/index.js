@@ -45,7 +45,6 @@ const BreadCrumbs = ({ slug, name, length, type }) => {
           </>
         )}
         {/* Type */}
-        {/* Type */}
         {type && type !== true && (
           <>
             <Slash />

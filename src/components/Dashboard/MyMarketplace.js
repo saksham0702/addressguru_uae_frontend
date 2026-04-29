@@ -13,6 +13,8 @@ const MyMarketplaceListings = ({ data }) => {
     return `₹${Number(price).toLocaleString()}`;
   };
 
+
+
   // Helper to get condition label
   const getConditionLabel = (condition) => {
     const conditions = {
@@ -69,7 +71,7 @@ const MyMarketplaceListings = ({ data }) => {
 
       {/* Product Cards */}
       <div className="md:p-4 p-2 space-y-4">
-        {data?.map((product) => {
+        {data?.listings?.map((product) => {
           const statusInfo = getStatusBadge(product?.status);
 
           return (

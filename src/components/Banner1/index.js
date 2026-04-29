@@ -32,14 +32,8 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
     }
   };
   return (
-    <div className="w-full 2xl:w-[80%] max-md:hidden flex items-center  relative ">
-      <Image
-        src="/assets/bannerImg.png"
-        alt="banner background"
-        height={100}
-        width={100}
-        className="w-full h-[290px] "
-      />
+    <div className="w-full 2xl:w-[80%] h-[290px] bg-blue-700 max-md:hidden flex items-center  relative ">
+
       <div className="h-full w-full absolute top-[0px]  px-5 z-10">
         <Image
           src="/assets/Group 7305.svg"

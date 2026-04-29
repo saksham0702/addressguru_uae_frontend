@@ -1,6 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import { Code, Globe, TrendingUp, Check, ArrowRight, Star } from "lucide-react";
+import Link from "next/link";
 
 const ServicesPage = () => {
   const services = [
@@ -21,6 +22,7 @@ const ServicesPage = () => {
         "Performance Optimization",
       ],
       popular: false,
+      slug: "app-development",
     },
     {
       id: 2,
@@ -39,6 +41,7 @@ const ServicesPage = () => {
         "Security Features",
       ],
       popular: true,
+      slug: "web-development",
     },
     {
       id: 3,
@@ -57,6 +60,7 @@ const ServicesPage = () => {
         "Conversion Optimization",
       ],
       popular: false,
+      slug: "digital-marketing",
     },
   ];
 
@@ -167,21 +171,21 @@ const ServicesPage = () => {
 
       <div className="min-h-screen bg-gradient-to-b bg-white max-w-[2000px] mx-auto 2xl:max-w-[80%]">
         {/* Hero Section */}
-        <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+        <section className="pt-10 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
               <span>Professional Digital Services in UAE</span>
             </div>
 
-            <h1 className="text-2xl sm:text-xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mb-6 leading-tight">
               Transform Your Business with
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400 mt-2">
                 Expert Digital Solutions
               </span>
             </h1>
 
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-base font-light text-gray-600 max-w-3xl mx-auto">
               From innovative mobile apps to powerful websites and
               results-driven marketing campaigns, we deliver excellence across
               all digital channels.
@@ -196,7 +200,7 @@ const ServicesPage = () => {
               {services.map((service) => (
                 <div
                   key={service.id}
-                  className={`relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group ${
+                  className={`relative bg-white rounded-2xl border border-orange-200 hover:border-orange-300 transition-all duration-300 overflow-hidden group ${
                     service.popular ? "ring-2 ring-orange-500" : ""
                   }`}
                 >
@@ -250,10 +254,10 @@ const ServicesPage = () => {
                     </ul>
 
                     {/* CTA Button */}
-                    <button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2 group/btn">
-                      <span>Get Started</span>
+                    <Link href={`/our-services/${service.slug}`} className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2 group/btn">
+                      <span>See Details</span>
                       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -262,7 +266,7 @@ const ServicesPage = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -309,10 +313,10 @@ const ServicesPage = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        {/* <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
               Ready to Elevate Your Digital Presence?
@@ -325,7 +329,7 @@ const ServicesPage = () => {
               Contact Us Today
             </button>
           </div>
-        </section>
+        </section> */}
       </div>
     </>
   );

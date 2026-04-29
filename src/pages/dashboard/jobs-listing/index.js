@@ -1,5 +1,4 @@
 import { get_company_data } from "@/api/forms";
-import CheckBox from "@/components/Forms/CheckBox";
 import InputWithTitle from "@/components/Forms/InputWithTitle";
 import Navbar from "@/components/Forms/Navbar";
 import { SearchableMultiSelect } from "@/components/Forms/SearchableMultiSelect";
@@ -8,90 +7,40 @@ import DynamicArrayInput from "@/components/Forms/DynamicArrayInput";
 import DropDown from "@/components/Forms/DropDown";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef } from "react";
-import { useAuth } from "@/context/AuthContext";
 import ResponseAlert from "@/components/ResponseAlert";
-import SuccessModal from "@/components/Forms/sucesspopup";
 import {
   saveToSession,
   getFromSession,
   clearSession,
 } from "@/utils/sessionStorage";
 import { get_job_edulvl, get_job_type } from "@/api/postAds";
-import { get_job_details } from "@/api/listings";
-import axios from "axios";
-import { AGE_OPTIONS, API_URL, COUNTRY_CODES } from "@/services/constants";
-import Image from "next/image";
+import { AGE_OPTIONS } from "@/services/constants";
 import {
-  add_job_listing,
+  get_job_benefits,
+  get_job_by_slug,
   get_job_categories,
   get_languages,
+  get_last_company_details,
   get_monthly_salary,
   get_nationalities,
-  save_job_company,
+  save_job,
 } from "@/api/uae-job-listing";
+import {
+  workModeOptions,
+  experienceLevelOptions,
+  genderOptions,
+  sectorOptions,
+  jobTypeOptions,
+} from "./jobConstants";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
-
-// Import your API functions here
-// import { get_categories, get_job_types, get_education_levels } from "@/api/listings";
+import { getCities } from "@/api/uaeadminCities";
+import MultiSelectDropDown from "@/components/Forms/MultiSelect";
 
 const JobListing = () => {
   const router = useRouter();
   const { jobId } = router.query;
   const { edit } = router.query;
   const [subCategories, setSubCategories] = useState([]);
-
-  const workModeOptions = [
-    { value: "on-site", label: "On Site" },
-    { value: "remote", label: "Remote" },
-    { value: "hybrid", label: "Hybrid" },
-  ];
-
-  const experienceLevelOptions = [
-    { value: "entry", label: "Entry Level" },
-    { value: "junior", label: "Junior" },
-    { value: "mid", label: "Mid Level" },
-    { value: "senior", label: "Senior" },
-    { value: "lead", label: "Lead" },
-    { value: "executive", label: "Executive" },
-  ];
-
-  const genderOptions = [
-    { value: "any", label: "Any" },
-    { value: "male", label: "Male" },
-    { value: "female", label: "Female" },
-  ];
-
-  const getCompanyData = async () => {
-    try {
-      const res = await get_company_data();
-      if (!res) return;
-
-      if (res?.success) {
-        setPostJobData((prev) => ({
-          ...prev,
-          category_id: "",
-          companyLogo: res.company?.logo || null,
-          companyName: res.company?.name || "",
-          companyDescription: res.company?.description || "",
-          companyWebsite: res.company?.website || "",
-          name: res.company?.contact_person || "",
-          email: res.company?.email || "",
-          phone: res.company?.phone || "",
-
-          city: res.company?.city || "",
-          address: res.company?.address || "",
-          zipCode: res.company?.zip_code || "",
-        }));
-      }
-      console.log("response of company", res);
-    } catch (error) {
-      console.log("error of company", error);
-    }
-  };
-
-  useEffect(() => {
-    getCompanyData();
-  }, []);
 
   // Refs for error scrolling
   const categoryRef = useRef(null);
@@ -114,7 +63,6 @@ const JobListing = () => {
   const phoneRef = useRef(null);
   const cityRef = useRef(null);
   const addressRef = useRef(null);
-  const zipCodeRef = useRef(null);
   const subCategoryRef = useRef(null);
   const [errors, setErrors] = useState({});
   const [response, setResponse] = useState("");
@@ -123,31 +71,19 @@ const JobListing = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [cities, setCities] = useState([]);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   // Dropdown data states
   const [categories, setCategories] = useState([]);
   const [slug, setSlug] = useState("");
-  const [jobTypes, setJobTypes] = useState([]);
   const [educationLevels, setEducationLevels] = useState([]);
 
   const [salaryOptions, setSalaryOptions] = useState([]);
   const [nationalityOptions, setNationalityOptions] = useState([]);
   const [languageOptions, setLanguageOptions] = useState([]);
-
-  const [countryCodeOpen, setCountryCodeOpen] = useState(false);
-  const [countryCodeSearch, setCountryCodeSearch] = useState("");
-  const countryCodeRef = useRef(null);
-
-  const filteredCountryCodes = COUNTRY_CODES.filter((item) =>
-    `${item.country} ${item.code}`
-      .toLowerCase()
-      .includes(countryCodeSearch.toLowerCase()),
-  );
+  const [BenefitOptions, setBenefitOptions] = useState([]);
 
   const [postJobData, setPostJobData] = useState({
     category_id: "",
-    categorySlug: "",
     sub_category_id: "",
     slug: "",
 
@@ -164,7 +100,7 @@ const JobListing = () => {
     workMode: "",
     experienceLevel: "",
 
-    salaryCurrency: "AED",
+    salaryCurrency: "PKR",
     salaryPeriod: "monthly",
     salaryNegotiable: false,
     salaryHidden: false,
@@ -184,10 +120,8 @@ const JobListing = () => {
     name: "",
     email: "",
     phone: "",
-    countryCode: "+971",
     city: "",
     address: "",
-    zipCode: "",
   });
 
   const [steps, setSteps] = useState([
@@ -207,31 +141,7 @@ const JobListing = () => {
     },
   ]);
 
-  const sectorOptions = [
-    { value: "it", label: "IT" },
-    { value: "commerce", label: "Commerce" },
-    { value: "finance", label: "Finance" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "education", label: "Education" },
-    { value: "engineering", label: "Engineering" },
-    { value: "marketing", label: "Marketing" },
-    { value: "legal", label: "Legal" },
-    { value: "hospitality", label: "Hospitality" },
-    { value: "construction", label: "Construction" },
-    { value: "media", label: "Media" },
-    { value: "ngo", label: "NGO" },
-    { value: "government", label: "Government" },
-    { value: "other", label: "Other" },
-  ];
-
-  const jobTypeOptions = [
-    { value: "full-time", label: "Full Time" },
-    { value: "part-time", label: "Part Time" },
-    { value: "contract", label: "Contract" },
-    { value: "freelance", label: "Freelance" },
-    { value: "internship", label: "Internship" },
-    { value: "temporary", label: "Temporary" },
-  ];
+  const API_URL = "https://addressguru.ae/api";
 
   // Fetch dropdown data on mount
   useEffect(() => {
@@ -239,12 +149,10 @@ const JobListing = () => {
       try {
         // Replace these with your actual API calls
         const categoriesData = await get_job_categories();
-        // const jobTypesData = await get_job_type();
-        // const educationData = await get_job_edulvl();
+        const educationData = await get_job_edulvl();
+        console.log("categoriesData", categoriesData);
         setCategories(categoriesData);
-        // setJobTypes(jobTypesData?.data?.types);
-        // setEducationLevels(educationData?.data?.education_level);
-        console.log("job category response", categoriesData);
+        setEducationLevels(educationData?.data?.data);
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -254,6 +162,16 @@ const JobListing = () => {
       const salary = await get_monthly_salary();
       const nationality = await get_nationalities();
       const languages = await get_languages();
+
+      const benefits = await get_job_benefits();
+
+      setBenefitOptions(
+        benefits.map((item) => ({
+          value: item.value,
+          label: item.name,
+        })),
+      );
+      console.log("languages data", languages);
 
       setSalaryOptions(
         salary.map((item) => ({
@@ -284,15 +202,14 @@ const JobListing = () => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get(
-          `https://addressguru.ae/api/cities/get-cities`,
-        );
-        console.log("cities response", res);
-        setCities(res?.data?.data);
+        const res = await getCities();
+        setCities(res.data);
       } catch (err) {
         console.error("Client-side error:", err);
+        setErrors(err);
       }
     };
+
     fetchCities();
   }, []);
 
@@ -304,15 +221,13 @@ const JobListing = () => {
 
   useEffect(() => {
     const fetchSubCategories = async () => {
-      console.log("postJobData", postJobData);
-      if (!postJobData.categorySlug) return;
+      if (!postJobData.category_slug) return; // ✅ change condition
 
       try {
-        const res = await getSubCategoriesByCategory(postJobData.categorySlug);
+        const res = await getSubCategoriesByCategory(postJobData.category_slug); // ✅ slug here
 
-        // adjust depending on API response structure
         const formatted = (res?.data || []).map((sub) => ({
-          value: sub._id,
+          value: sub._id, // ✅ KEEP ID (no change)
           label: sub.name,
         }));
 
@@ -323,57 +238,132 @@ const JobListing = () => {
     };
 
     fetchSubCategories();
-  }, [postJobData.categorySlug]);
+  }, [postJobData.category_slug]);
 
   const getJobDetails = async (jobId) => {
-    const res = await get_job_details(jobId);
+    const res = await get_job_by_slug(jobId);
+    setSlug(res.slug); // ✅ IMPORTANT
     console.log("response of edit job", res);
-    if (res.category_id) {
-      // Find the category slug from categories array, or use category_slug from response
-      const catSlug = res.category_slug || categories?.find(c => c._id === res.category_id)?.slug || res.category_id;
-      const subRes = await getSubCategoriesByCategory(catSlug);
+    let subRes = null;
 
-      const formatted = (subRes?.data || []).map((sub) => ({
-        value: sub._id,
-        label: sub.name,
-      }));
-
-      setSubCategories(formatted);
+    if (res.category?.slug) {
+      subRes = await getSubCategoriesByCategory(res.category.slug);
     }
+
+    const formatted = (subRes?.data || []).map((sub) => ({
+      value: sub._id,
+      label: sub.name,
+    }));
+
+    setSubCategories(formatted);
 
     if (!res) return;
 
+    if (res.company?.logo) {
+      setLogoPreview(`${API_URL}/${res.company.logo}`);
+    }
+
     setPostJobData((prev) => ({
       ...prev,
-      jobType: res.job_type_id || "",
-      category_id: res.category_id || "",
-      categorySlug: res.category_slug || categories?.find(c => c._id === res.category_id)?.slug || "",
-      sub_category_id: res.sub_category_id || "",
-      qualification: res.qualifications || [],
+
+      // ✅ CATEGORY
+      category_slug: res.category?.slug || "",
+
+      // ❌ subCategory may be null
+      sub_category_id: res.subCategory?._id || "",
+
+      // ✅ BASIC
       title: res.title || "",
       description: res.description || "",
-      salaryRange: res.salary_range || "",
-      minExperience: res.min_experience || "",
-      nationality: res.nationality || [],
-      languages: res.languages || [],
 
-      experience: res.experience || "",
-      openings: res.openings || "",
+      // ✅ ARRAYS
+      requirements: res.requirements || [],
+      responsibilities: res.responsibilities || [],
+      benefits: res.benefits || [],
       skills: res.skills || [],
-      roles: res.roles || [],
-      keySkills: res.key_skills || [],
+
+      // ✅ JOB INFO
+      sector: res.sector || "",
+      jobType: res.jobType || "",
+      experienceLevel: res.experienceLevel || "",
+
+      education: res.education || "",
+      openings: res.totalPositions || "",
+
+      ageRange: res.ageRange ? `${res.ageRange.from}-${res.ageRange.to}` : "",
+
+      // ✅ SALARY (IMPORTANT FIX)
+      salaryRange:
+        res.salary?.from && res.salary?.to
+          ? `${res.salary.from}-${res.salary.to}`
+          : "",
+
+      // ✅ EXPERIENCE
+      minExperience: res.noOfExperience || "",
+
+      // ✅ LOCATION (IMPORTANT FIX)
+      location: res.location?.city?._id || "",
+
+      workMode: res.location?.isRemote ? "remote" : "on-site",
+
+      // ✅ GENDER
+      gender: res.gender || "",
+
+      // ✅ MULTISELECT
+      nationality: res.nationality || [],
+      languages: res.language || [],
+
+      // ✅ COMPANY
       companyLogo: res.company?.logo || null,
       companyName: res.company?.name || "",
       companyDescription: res.company?.description || "",
       companyWebsite: res.company?.website || "",
-      name: res.company?.contact_person || "",
-      email: res.company?.email || "",
-      phone: res.company?.phone || "",
-      countryCode: res.company?.country_code || "+971",
-      city: res.company?.city || "",
+
+      name: res.contact?.name || "",
+      email: res.contact?.email || "",
+      phone: res.contact?.phone || "",
+
+      city: res.company?.city?._id || "",
       address: res.company?.address || "",
-      zipCode: res.company?.zip || "",
     }));
+  };
+
+  const handleUsePreviousCompany = async () => {
+    try {
+      setLoading(true);
+      const res = await get_last_company_details();
+      if (!res?.status || !res?.data?.length) {
+        alert("No previous company data found");
+        return;
+      }
+      const data = res.data[0];
+      // 🔥 MAP DATA INTO FORM
+      setPostJobData((prev) => ({
+        ...prev,
+        // ✅ COMPANY
+        companyName: data.company?.name || "",
+        companyDescription: data.company?.description || "",
+        companyWebsite: data.company?.website || "",
+        address: data.company?.address || "",
+        // ✅ CITY (IMPORTANT)
+        city: data.company?.city?._id || "",
+        // ✅ LOGO (STRING URL)
+        companyLogo: data.company?.logo || "",
+        // ✅ CONTACT
+        name: data.contact?.name || "",
+        email: data.contact?.email || "",
+        phone: data.contact?.phone || "",
+      }));
+
+      // ✅ SET LOGO PREVIEW
+      if (data.company?.logo) {
+        setLogoPreview(`${API_URL}/${data.company.logo}`);
+      }
+    } catch (error) {
+      console.log("Error loading previous company", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Load data from session storage on mount
@@ -416,16 +406,6 @@ const JobListing = () => {
   }, [steps]);
 
   // Clear session on page leave
-  // Close country code dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (countryCodeRef.current && !countryCodeRef.current.contains(e.target))
-        setCountryCodeOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   useEffect(() => {
     const handleBeforeUnload = () => {
       clearSession();
@@ -456,6 +436,7 @@ const JobListing = () => {
   };
 
   // Clear specific error
+
   const clearError = (errorKey) => {
     if (errors[errorKey]) {
       setErrors((prev) => {
@@ -467,6 +448,7 @@ const JobListing = () => {
   };
 
   // Scroll to error field
+
   const scrollToError = (errorKey) => {
     const errorRefMap = {
       category_id: categoryRef,
@@ -504,14 +486,12 @@ const JobListing = () => {
     (Array.isArray(v) && v.length === 0);
 
   // Validate step 1
+
   const validateStep = (step) => {
     let newErrors = {};
     if (step === 1) {
       if (!postJobData.category_id) {
         newErrors.category_id = "Job category is required";
-      }
-      if (subCategories.length > 0 && !postJobData.sub_category_id) {
-        newErrors.sub_category_id = "Sub category is required";
       }
       if (!postJobData.jobType) {
         newErrors.jobType = "Job type is required";
@@ -552,14 +532,8 @@ const JobListing = () => {
       }
       if (!postJobData.phone) {
         newErrors.phone = "Phone number is required";
-      } 
-      // else if (!/^\d{10}$/.test(postJobData.phone)) {
-      //   newErrors.phone = "Phone number must be 10 digits";
-      // }
-      if (postJobData.zipCode && postJobData.zipCode !== "") {
-        if (!/^\d+$/.test(postJobData.zipCode)) {
-          newErrors.zipCode = "Zip Code must be numeric";
-        }
+      } else if (!/^\d{10}$/.test(postJobData.phone)) {
+        newErrors.phone = "Phone number must be 10 digits";
       }
     }
     setErrors(newErrors);
@@ -571,6 +545,7 @@ const JobListing = () => {
   };
 
   // Map API errors to frontend error keys
+
   const mapApiErrorsToState = (apiErrors, stepNumber) => {
     const errorMapping = {
       1: {
@@ -584,6 +559,11 @@ const JobListing = () => {
         category: "category",
         job_type: "jobType",
         qualification: "qualification",
+
+        // ✅ ADD THESE
+        experienceLevel: "experienceLevel",
+        gender: "gender",
+        sector: "sector",
       },
       2: {
         company_name: "companyName",
@@ -595,7 +575,6 @@ const JobListing = () => {
         phone: "phone",
         city: "city",
         address: "address",
-        zip_code: "zipCode",
       },
     };
 
@@ -623,6 +602,9 @@ const JobListing = () => {
 
     if (jobListingId) {
       formData.append("job_id", jobListingId);
+      formData.append("slug", slug);
+    } else if (slug) {
+      formData.append("slug", slug); // ✅ IMPORTANT
     }
 
     switch (stepNumber) {
@@ -632,6 +614,7 @@ const JobListing = () => {
 
         formData.append("title", postJobData.title);
         formData.append("description", postJobData.description);
+        formData.append("education", postJobData.education);
 
         // arrays → JSON string
         formData.append(
@@ -653,15 +636,45 @@ const JobListing = () => {
         formData.append("total_positions", postJobData.openings);
 
         // salary JSON
-        formData.append("salary_range", postJobData.salaryRange);
+        let salaryObj = {
+          from: null,
+          to: null,
+          currency: postJobData.salaryCurrency || "PKR",
+          period: postJobData.salaryPeriod || "monthly",
+          isNegotiable: postJobData.salaryNegotiable || false,
+          isHidden: postJobData.salaryHidden || false,
+        };
+
+        if (postJobData.salaryRange) {
+          const [from, to] = postJobData.salaryRange.split("-");
+
+          salaryObj.from = Number(from);
+          salaryObj.to = Number(to);
+        }
+
+        formData.append("salary", JSON.stringify(salaryObj));
+
+        formData.append(
+          "language",
+          JSON.stringify(postJobData.languages || []),
+        );
+
+        formData.append(
+          "nationality",
+          JSON.stringify(postJobData.nationality || []),
+        );
 
         // location JSON
+        const selectedCity = cityOptions.find(
+          (c) => c.value === postJobData.location,
+        );
+
         const locationObj = {
-          city: postJobData.location
+          city: selectedCity
             ? {
-                _id: postJobData.location._id,
-                name: postJobData.location.name,
-                slug: postJobData.location.slug,
+                _id: selectedCity.value,
+                name: selectedCity.label,
+                slug: selectedCity.slug, // ✅ ADD THIS
               }
             : null,
           isRemote: postJobData.workMode === "remote",
@@ -669,55 +682,58 @@ const JobListing = () => {
 
         formData.append("location", JSON.stringify(locationObj));
 
-        formData.append("min_experience", postJobData.minExperience);
-        let ageFrom = null,
-          ageTo = null;
-        if (postJobData.ageRange) {
-          if (
-            typeof postJobData.ageRange === "object" &&
-            postJobData.ageRange.from !== undefined
-          ) {
-            ageFrom = postJobData.ageRange.from;
-            ageTo = postJobData.ageRange.to;
-          } else if (
-            typeof postJobData.ageRange === "string" &&
-            postJobData.ageRange.includes("-")
-          ) {
-            const parts = postJobData.ageRange
-              .split("-")
-              .map((s) => s.trim().replace(/[^0-9]/g, ""));
-            ageFrom = parts[0] ? Number(parts[0]) : null;
-            ageTo = parts[1] ? Number(parts[1]) : null;
-          }
-        }
+        formData.append("noOfExperience", postJobData.minExperience);
 
-        formData.append(
-          "ageRange",
-          JSON.stringify({ from: ageFrom, to: ageTo }),
-        );
         formData.append("gender", postJobData.gender);
 
+        const selectedAge = AGE_OPTIONS.find(
+          (a) => a.value === postJobData.ageRange,
+        );
+
+        let ageObj = {};
+
+        if (selectedAge?.value) {
+          const [from, to] = selectedAge.value.split("-");
+
+          ageObj = {
+            from: Number(from),
+            to: Number(to),
+          };
+        }
+
+        formData.append("ageRange", JSON.stringify(ageObj));
         break;
       case 2:
-        formData.append("slug", slug);
         formData.append("folder", "Jobs");
+        // formData.append("slug", String(slug));
 
         const contactObj = {
           name: postJobData.name,
           email: postJobData.email,
           phone: String(postJobData.phone),
-          country_code: postJobData.countryCode,
         };
 
         formData.append("contact", JSON.stringify(contactObj));
+
+        const selectedCompanyCity = cityOptions.find(
+          (c) => c.value === postJobData.city,
+        );
 
         const companyObj = {
           name: postJobData.companyName,
           description: postJobData.companyDescription,
           website: postJobData.companyWebsite,
           address: postJobData.address,
-          city: postJobData.city || postJobData.city || "",
-          zip_code: postJobData.zipCode,
+
+          city: selectedCompanyCity
+            ? {
+                _id: selectedCompanyCity.value,
+                name: selectedCompanyCity.label,
+                slug:
+                  selectedCompanyCity.slug ||
+                  selectedCompanyCity.label.toLowerCase().replace(/\s+/g, "-"),
+              }
+            : null,
         };
 
         formData.append("company", JSON.stringify(companyObj));
@@ -733,38 +749,67 @@ const JobListing = () => {
       let res;
 
       if (stepNumber === 1) {
-        console.log("formData", formData);
-        res = await add_job_listing(formData);
+        res = await save_job({
+          step: 1,
+          formData,
+          isEdit: !!edit, // ✅ FIXED
+        });
       }
 
       if (stepNumber === 2) {
-        res = await save_job_company(formData);
+        res = await save_job({
+          step: 2,
+          formData,
+          isEdit: true, // always update
+        });
       }
 
       console.log(`Step ${stepNumber} submitted:`, res);
+      const apiErrors = res?.errors || res?.error?.errors || {};
 
-      if (res?.errors && Object.keys(res.errors).length > 0) {
-        const mappedErrors = mapApiErrorsToState(res.errors, stepNumber);
+      if (apiErrors && Object.keys(apiErrors).length > 0) {
+        const mappedErrors = mapApiErrorsToState(apiErrors, stepNumber);
         setErrors(mappedErrors);
+
         const firstErrorKey = Object.keys(mappedErrors)[0];
         setTimeout(() => scrollToError(firstErrorKey), 100);
+
         setLoading(false);
         return false;
       }
-      if (!res?.success && res?.message) {
-        setResponse(res.message);
+
+      if (!res?.success) {
+        setResponse(res?.message || res?.error.error || "Something went wrong");
+        setLoading(false);
+        return false;
       }
 
       if (stepNumber == 1) {
-        setJobListingId(res?.data?.id);
+        setJobListingId(res?.data?.data?.id);
+        console.log("res of step 1 :", res);
+        const newSlug = res?.data?.data?.slug;
+        localStorage.setItem("slug", res?.data?.slug);
 
-        setSlug(res?.data?.slug);
+        setSlug(newSlug);
+
+        saveToSession("slug", newSlug);
       }
 
       if (stepNumber === 2) {
+        if (!res?.success) {
+          setResponse(res?.message || "Failed to submit job");
+          setLoading(false);
+          return false;
+        }
+
         clearSession();
-        setResponse("");
-        setShowSuccessPopup(true);
+        setResponse("Job listing posted successfully!");
+
+        if (res?.job_id) {
+          setTimeout(() => {
+            router.push(`/dashboard`);
+          }, 2000);
+        }
       } else {
         setActiveStep(stepNumber + 1);
       }
@@ -796,25 +841,13 @@ const JobListing = () => {
   const categoryOptions = (categories || []).map((cat) => ({
     value: cat._id,
     label: cat.name,
-    slug: cat.slug,
+    slug: cat.slug, // ✅ IMPORTANT
   }));
 
-  const educationOptions = [
-    { value: "none", label: "None" },
-    { value: "matric", label: "Matriculation" },
-    { value: "intermediate", label: "Intermediate" },
-    { value: "bachelor", label: "Bachelor's Degree" },
-    { value: "master", label: "Master's Degree" },
-    { value: "phd", label: "PhD" },
-    { value: "any", label: "Any" },
-  ];
-
   const cityOptions = cities?.map((city) => ({
-    value: city?.slug,
-    label: city?.name,
-    _id: city?._id, // add this
-    slug: city?.slug, // add this
-    name: city?.name, // add this
+    value: city._id, // important → ID
+    label: city.name, // display name
+    slug: city.slug,
   }));
 
   const getSelectedOption = (options = [], value) => {
@@ -833,20 +866,15 @@ const JobListing = () => {
       ref: categoryRef,
       options: categoryOptions,
     },
-    ...(subCategories.length > 0
-      ? [
-          {
-            id: 2,
-            name: "Sub Category",
-            key: "sub_category_id",
-            type: "dropdown",
-            placeholder: "Select sub category",
-            required: true,
-            ref: subCategoryRef,
-            options: subCategories,
-          },
-        ]
-      : []),
+    {
+      id: 2,
+      name: "Sub Category",
+      key: "sub_category_id",
+      type: "dropdown",
+      placeholder: "Select sub category",
+      ref: subCategoryRef,
+      options: subCategories,
+    },
     {
       id: 3,
       name: "Job Title",
@@ -883,13 +911,7 @@ const JobListing = () => {
       type: "array",
       placeholder: "Enter responsibility",
     },
-    {
-      id: 7,
-      name: "Benefits",
-      key: "benefits",
-      type: "array",
-      placeholder: "Enter benefit",
-    },
+
     {
       id: 8,
       name: "Skills",
@@ -948,13 +970,31 @@ const JobListing = () => {
       options: salaryOptions,
       required: true,
     },
-
+    {
+      id: 7,
+      width: true,
+      name: "Benefits",
+      key: "benefits",
+      type: "multiselect",
+      options: BenefitOptions,
+      placeholder: "Enter benefit",
+    },
     {
       id: 14,
       width: true,
       name: "Minimum Work Experience",
       key: "minExperience",
       type: "text",
+    },
+    {
+      id: 18,
+      width: true,
+      name: "Total Positions",
+      key: "openings",
+      type: "text",
+      placeholder: "Enter number of positions",
+      ref: openingsRef,
+      required: true,
     },
     {
       id: 15,
@@ -971,7 +1011,10 @@ const JobListing = () => {
       key: "education",
       type: "dropdown",
       ref: educationLevelRef,
-      options: educationOptions,
+      options: (educationLevels || []).map((item) => ({
+        value: item.value,
+        label: item.name,
+      })),
     },
 
     {
@@ -985,16 +1028,7 @@ const JobListing = () => {
         label: a.name,
       })),
     },
-    {
-      id: 18,
-      width: true,
-      name: "Total Positions",
-      key: "openings",
-      type: "text",
-      placeholder: "Enter number of positions",
-      ref: openingsRef,
-      required: true,
-    },
+
     {
       id: 19,
       width: true,
@@ -1010,7 +1044,7 @@ const JobListing = () => {
       width: true,
       name: "Nationality",
       key: "nationality",
-      type: "search", // multi-select
+      type: "multiselect", // multi-select
     },
 
     {
@@ -1018,7 +1052,7 @@ const JobListing = () => {
       width: true,
       name: "Languages",
       key: "languages",
-      type: "search",
+      type: "multiselect",
     },
   ];
 
@@ -1079,7 +1113,7 @@ const JobListing = () => {
       width: true,
       name: "Phone",
       key: "phone",
-      type: "phone",
+      type: "text",
       placeholder: "Enter phone number",
       required: true,
       ref: phoneRef,
@@ -1102,15 +1136,6 @@ const JobListing = () => {
       placeholder: "Enter address",
       ref: addressRef,
     },
-    {
-      id: 10,
-      width: true,
-      name: "Zip Code",
-      key: "zipCode",
-      type: "text",
-      placeholder: "Enter zip code",
-      ref: zipCodeRef,
-    },
   ];
 
   const activeStep = steps.find((s) => s.active)?.step;
@@ -1118,27 +1143,19 @@ const JobListing = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full">
+      <div className="min-h-screen w-full relative">
         <div className="bg-white w-[95%] mx-auto flex flex-col items-center relative max-w-[2000px]">
           {/* navbar */}
           <div className="fixed top-0 w-[90%] max-w-[1400px] bg-white z-40">
             <Navbar />
           </div>
-
-          {/* Auto-save indicator */}
-          {/* {lastSaved && (
-              <div className="fixed top-20 right-8 bg-green-100 text-green-700 px-4 py-2 rounded-lg shadow-md z-50">
-                Auto-saved at {lastSaved}
-              </div>
-            )} */}
-
           {/* steps */}
           <section className="mt-26 w-[80%] flex justify-center">
             <Steps steps={steps} setActiveStep={setActiveStep} />
           </section>
 
           {/* inputs */}
-          <div className="flex gap-2 w-[80%] mt-14 items-center">
+          <div className="flex gap-2 w-[80%] mt-14 items-center relative">
             <section className="w-[85%] h-full space-y-7 p-4 mb-12 rounded-xl">
               <div className="grid grid-cols-2 gap-6">
                 {currentForms.map((item, index) => {
@@ -1164,7 +1181,7 @@ const JobListing = () => {
                     >
                       {item.type === "dropdown" && (
                         <>
-                          <label className="text-gray-500 font-semibold">
+                          <label className="text-black font-medium">
                             {item.name}
                             {item.required && (
                               <span className="text-red-600 font-semibold ml-1">
@@ -1175,28 +1192,18 @@ const JobListing = () => {
                           <DropDown
                             options={item.options || []}
                             placeholder={item.placeholder}
-                            value={
-                              item.key === "location" || item.key === "city"
-                                ? postJobData[item.key] || null
-                                : getSelectedOption(
-                                    item.options || [],
-                                    postJobData[item.key],
-                                  )
-                            }
+                            value={getSelectedOption(
+                              item.options || [],
+                              postJobData[item.key],
+                            )}
                             onChange={(option) => {
                               if (!option) return;
-
                               if (item.key === "category_id") {
                                 setPostJobData({
                                   ...postJobData,
                                   category_id: option.value,
-                                  categorySlug: option.slug || "",
+                                  category_slug: option.slug,
                                   sub_category_id: "",
-                                });
-                              } else if (item.key === "location" || item.key === "city") {
-                                setPostJobData({
-                                  ...postJobData,
-                                  [item.key]: option,
                                 });
                               } else {
                                 setPostJobData({
@@ -1226,95 +1233,6 @@ const JobListing = () => {
                             required={item.required}
                             {...commonProps}
                           />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "phone" && (
-                        <>
-                          <label className="text-gray-500 font-semibold">
-                            {item.name}
-                            {item.required && (
-                              <span className="text-red-600 font-semibold ml-1">
-                                &#42;
-                              </span>
-                            )}
-                          </label>
-                          <div className="flex">
-                            <div
-                              ref={countryCodeRef}
-                              className="relative w-16 border border-gray-300 rounded-l-lg bg-gray-50"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => setCountryCodeOpen(!countryCodeOpen)}
-                                className="w-full py-2 text-sm font-medium text-gray-700"
-                              >
-                                {postJobData.countryCode || "+971"}
-                              </button>
-
-                              {countryCodeOpen && (
-                                <div className="absolute z-50 bg-white border outline-none border-gray-200 rounded-lg shadow-md w-64">
-                                  <div className="p-2 border-b outline-none border-gray-200">
-                                    <input
-                                      type="text"
-                                      placeholder="Search country..."
-                                      value={countryCodeSearch}
-                                      onChange={(e) => setCountryCodeSearch(e.target.value)}
-                                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-orange-500"
-                                    />
-                                  </div>
-                                  <div className="max-h-52 overflow-y-auto">
-                                    {filteredCountryCodes.length > 0 ? (
-                                      filteredCountryCodes.map((cc, idx) => (
-                                        <div
-                                          key={idx}
-                                          onClick={() => {
-                                            setPostJobData({
-                                              ...postJobData,
-                                              countryCode: cc.code,
-                                            });
-                                            setCountryCodeOpen(false);
-                                            setCountryCodeSearch("");
-                                          }}
-                                          className="px-4 py-2 cursor-pointer hover:bg-orange-50 flex gap-2"
-                                        >
-                                          <span>{cc.flag}</span>
-                                          <span>{cc.country}</span>
-                                          <span className="ml-auto">{cc.code}</span>
-                                        </div>
-                                      ))
-                                    ) : (
-                                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                        No country found
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            <input
-                              type="tel"
-                              placeholder={item.placeholder}
-                              value={postJobData[item.key] || ""}
-                              onChange={(e) => {
-                                const digits = e.target.value.replace(/\D/g, "");
-                                setPostJobData({
-                                  ...postJobData,
-                                  [item.key]: digits,
-                                });
-                                clearError(item.key);
-                              }}
-                              className={`flex-1 border border-l-0 border-gray-300 rounded-r-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none ${
-                                errors[item.key] ? "border-red-500" : ""
-                              }`}
-                            />
-                          </div>
                           {errors[item.key] && (
                             <p className="text-red-500 text-sm mt-1">
                               {errors[item.key]}
@@ -1365,7 +1283,7 @@ const JobListing = () => {
 
                       {item.type === "search" && (
                         <>
-                          <label className="text-gray-500 font-semibold">
+                          <label className="text-black font-medium">
                             {item.name}
                             {item.required && (
                               <span className="text-red-600 font-semibold ml-1">
@@ -1398,9 +1316,46 @@ const JobListing = () => {
                         </>
                       )}
 
+                      {item.type === "multiselect" && (
+                        <>
+                          <label className="text-black font-medium">
+                            {item.name}
+                            {item.required && (
+                              <span className="text-red-600 font-semibold ml-1">
+                                *
+                              </span>
+                            )}
+                          </label>
+
+                          <MultiSelectDropDown
+                            options={
+                              item.key === "nationality"
+                                ? nationalityOptions
+                                : item.key === "languages"
+                                  ? languageOptions
+                                  : item.key === "benefits"
+                                    ? BenefitOptions
+                                    : []
+                            }
+                            value={postJobData[item.key] || []}
+                            onChange={(selectedValues) => {
+                              setPostJobData({
+                                ...postJobData,
+                                [item.key]: selectedValues,
+                              });
+                            }}
+                          />
+                          {errors[item.key] && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors[item.key]}
+                            </p>
+                          )}
+                        </>
+                      )}
+
                       {item.type === "file" && (
                         <>
-                          <label className="text-gray-500 font-semibold">
+                          <label className="text-black font-medium">
                             {item.name}
                             {item.required && (
                               <span className="text-red-600 font-semibold ml-1">
@@ -1409,9 +1364,10 @@ const JobListing = () => {
                             )}
                           </label>
                           <div className="flex items-center gap-6">
-                            {/* Upload input */}
+                            {/* Upload Input */}
                             <div className="flex-1">
                               <input
+                                id="logoInput"
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => {
@@ -1420,36 +1376,53 @@ const JobListing = () => {
 
                                   setPostJobData({
                                     ...postJobData,
-                                    [item.key]: file,
+                                    companyLogo: file,
                                   });
 
                                   setLogoPreview(URL.createObjectURL(file));
-                                  clearError(item.key);
+                                  clearError("companyLogo");
                                 }}
-                                className="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-gray-100 file:text-gray-700
-                  hover:file:bg-gray-200
-                  focus:outline-none focus:ring-2 focus:ring-[#FF6E04]"
+                                className="block w-full px-4 py-3 text-sm border border-gray-300 rounded-lg
+      file:mr-4 file:py-2 file:px-4
+      file:rounded-md file:border-0
+      file:text-sm file:font-semibold
+      file:bg-gray-100 file:text-gray-700
+      hover:file:bg-gray-200
+      focus:outline-none focus:ring-2 focus:ring-[#FF6E04]"
                               />
                             </div>
 
-                            {/* Preview */}
-                            <div className="w-28 h-28 flex items-center justify-center border rounded-lg bg-gray-50">
-                              {logoPreview ? (
-                                <Image
-                                  width={500}
-                                  height={500}
-                                  src={logoPreview}
-                                  alt="Company Logo Preview"
-                                  className="max-h-24 max-w-24 object-contain"
-                                />
+                            {/* BIG Preview */}
+                            <div className="relative w-50 h-30 rounded-xl border border-gray-200 bg-white shadow-md flex items-center justify-center overflow-hidden group">
+                              {logoPreview || postJobData.companyLogo ? (
+                                <>
+                                  <img
+                                    src={
+                                      logoPreview
+                                        ? logoPreview
+                                        : typeof postJobData.companyLogo ===
+                                            "string"
+                                          ? `${API_URL}/${postJobData.companyLogo}`
+                                          : "/placeholder.png"
+                                    }
+                                    alt="Company Logo"
+                                    className="w-full h-full object-cover p-3"
+                                  />
+
+                                  {/* Hover overlay */}
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                    <span className="text-sm text-white font-medium">
+                                      Change Logo
+                                    </span>
+                                  </div>
+                                </>
                               ) : (
-                                <span className="text-xs text-gray-400 text-center px-2">
-                                  Logo Preview
-                                </span>
+                                <div className="flex flex-col items-center text-gray-400">
+                                  <span className="text-3xl">🏢</span>
+                                  <span className="text-sm mt-2">
+                                    Upload Logo
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -1492,7 +1465,18 @@ const JobListing = () => {
                   </button>
                 )}
 
-                <div className="ml-auto">
+                <div className="ml-auto flex gap-2 ">
+                  {activeStep === 2 && (
+                    <button
+                      type="button"
+                      onClick={handleUsePreviousCompany}
+                      className="absolute top-[-70px] right-6 flex items-center gap-2 px-3 py-1.5 text-xs font-medium 
+  bg-white border border-gray-200 rounded-md shadow-sm hover:shadow 
+  hover:bg-gray-50 transition-all"
+                    >
+                      Use previous company details
+                    </button>
+                  )}
                   <button
                     onClick={async () => {
                       if (validateStep(activeStep)) {
@@ -1554,27 +1538,8 @@ const JobListing = () => {
         </div>
       </div>
 
-      <SuccessModal
-        open={showSuccessPopup}
-        onClose={() => setShowSuccessPopup(false)}
-        title="Thank You!"
-        message={
-          <>
-            Your job listing has been successfully submitted on{" "}
-            <span className="font-semibold text-gray-800">
-              AddressGuru.ae
-            </span>
-            .
-            <br />
-            Our team will review it shortly. Once approved, your job post will
-            be visible to all users.
-          </>
-        }
-        redirectTo="/dashboard"
-      />
-        <ResponseAlert text={response} onClose={() => setResponse("")} />
+      <ResponseAlert text={response} onClose={() => setResponse("")} />
     </>
   );
 };
-
 export default JobListing;

@@ -24,7 +24,7 @@ export const get_job_type = async () => {
 
 export const get_job_edulvl = async () => {
   try {
-    const response = await axios.get(`${API_URL}/jobs/education-level`);
+    const response = await axios.get(`${API_URL}/jobs-listing/education-level`);
     return response;
   } catch (error) {
     console.log("error getting job categories", error);

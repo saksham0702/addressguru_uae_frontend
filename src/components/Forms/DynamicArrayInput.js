@@ -28,7 +28,7 @@ const DynamicArrayInput = ({ title, value = [], onChange, placeholder }) => {
 
   return (
     <div className="space-y-2">
-      <label className="text-gray-500 font-semibold">
+      <label className="text-black font-medium">
         {title}
         {/* <span className="text-red-600 font-semibold ml-1">&#42;</span> */}
       </label>
