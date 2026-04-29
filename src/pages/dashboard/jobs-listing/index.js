@@ -25,18 +25,14 @@ import {
   get_nationalities,
   save_job,
 } from "@/api/uae-job-listing";
-import {
-  workModeOptions,
-  experienceLevelOptions,
-  genderOptions,
-  sectorOptions,
-  jobTypeOptions,
-} from "@/helpers/JobConstants";
+import { workModeOptions, experienceLevelOptions, genderOptions, sectorOptions, jobTypeOptions } from "@/services/constants";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
 import MultiSelectDropDown from "@/components/Forms/MultiSelect";
 
+
 const JobListing = () => {
+  
   const router = useRouter();
   const { jobId } = router.query;
   const { edit } = router.query;
