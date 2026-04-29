@@ -285,7 +285,7 @@ const Header = () => {
         </div>
 
         {showSearchBar && (
-          <div className="absolute left-[220px] max-xl:mr-5 2xl:left-[240px] top-[9px] max-md:hidden min-[1600px]:scale-75 z-50 border-2 border-gray-200 rounded-r-full scale-70">
+          <div className="absolute left-[220px] max-xl:mr-5 2xl:left-[240px] top-[9px] max-md:hidden min-[1600px]:scale-75 z-50  rounded-r-full scale-70">
             <SearchBar
               value={slug}
               setValue={setSlug}

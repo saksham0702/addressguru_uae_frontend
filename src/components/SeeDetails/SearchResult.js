@@ -17,6 +17,8 @@ import Login from "@/components/UserLogin/Login";
 import InfoListSection from "@/components/BusinessListingComponents/InfoListSection";
 import { get_seo_data } from "@/api/seoApi";
 import SeoContent from "@/components/BusinessListingComponents/SeoContent";
+import Image from "next/image";
+import InlineLeadCard from "../BusinessListingComponents/InlineLeadCard";
 
 const SearchResults = ({
   ssrListings,
@@ -26,7 +28,7 @@ const SearchResults = ({
   ssrSlug,
   ssrCity,
 }) => {
-  console.log(ssrListings, "ssrListings");
+  // console.log(ssrListings, "ssrListings");
 
   const APP_URL = "https://addressguru.ae";
   const router = useRouter();
@@ -42,6 +44,22 @@ const SearchResults = ({
   const canonicalCity = (router.query.city || ssrCity)
     ?.toString()
     .toLowerCase();
+
+  const formatCityName = (citySlug) => {
+    if (!citySlug) return "";
+    return citySlug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const replaceCityPlaceholder = (text, citySlug) => {
+    if (!text) return text;
+
+    const formattedCity = formatCityName(citySlug);
+
+    return text.replace(/\[city\]/gi, formattedCity);
+  };
   const [loginPop, setLoginPop] = useState(false);
   const handleClose = () => setLoginPop(false);
 
@@ -97,7 +115,7 @@ const SearchResults = ({
       cityFromUrl.slice(1).replace(/-/g, " ");
 
     setCity(formatted);
-  }, [router.query.city, router.isReady]);
+  }, [router.query.city, router.isReady,setCity]);
 
   const matchIds = (itemArray = [], selectedIds = []) =>
     itemArray.some((entry) => {
@@ -275,8 +293,14 @@ const SearchResults = ({
   }
 
   // ── SEO values — built from SSR data so they are ALWAYS available on first render ──
-  const seoTitle = ssrListings[0]?.category?.seo?.title || null;
-  const seoDescription = ssrListings[0]?.category?.seo?.description || null;
+  const rawSeoTitle = ssrListings[0]?.category?.seo?.title || null;
+  const rawSeoDescription = ssrListings[0]?.category?.seo?.description || null;
+
+  const seoTitle = replaceCityPlaceholder(rawSeoTitle, canonicalCity);
+  const seoDescription = replaceCityPlaceholder(
+    rawSeoDescription,
+    canonicalCity,
+  );
   const seoOgImage = ssrListings[0]?.category?.seo?.ogImage || null;
 
   const pageTitle =
@@ -361,9 +385,11 @@ const SearchResults = ({
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
           <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg">
             <div className="h-full w-full text-lg tect-center flex justify-center items-center">
-              <img
+              <Image
                 src="/assets/ads-city-slug.jpeg"
                 alt="ad1"
+                width={500}
+                height={500}
                 className="h-full w-full"
               />
             </div>
@@ -493,12 +519,21 @@ const SearchResults = ({
                 ) : (
                   <>
                     {listings.map((item, index) => (
-                      <div
-                        key={item._id || index}
-                        className="w-full md:mb-4 mb-1"
-                      >
-                        <BusinessCard data={item} />
-                      </div>
+                      <React.Fragment key={item._id || index}>
+                        <div className="w-full md:mb-4 mb-1">
+                          <BusinessCard data={item} />
+                        </div>
+
+                        {/* 👉 Insert after every 5 items */}
+                        {listings.length > 5 && (index + 1) % 5 === 0 && (
+                          <div className="my-3 ">
+                            <InlineLeadCard
+                              category={canonicalSlug}
+                              iconSvg={apiListings?.[0]?.category}
+                            />{" "}
+                          </div>
+                        )}
+                      </React.Fragment>
                     ))}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (

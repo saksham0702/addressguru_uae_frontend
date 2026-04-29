@@ -15,7 +15,7 @@ export async function getServerSideProps(context) {
 
   try {
     const res = await axios.get(
-      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=5`,
+      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
     );
 
     const data = res?.data?.data;
