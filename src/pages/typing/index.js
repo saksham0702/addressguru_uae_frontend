@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { RotateCcw, Award, Target, Clock, Zap } from "lucide-react";
-import { get_all_jobs_listings } from "@/api/listings";
-import {
-  getSectionSitemap,
-  getSectionTypeSitemap,
-  getSitemap,
-} from "@/api/sitemap";
-import { get_job_categories } from "@/api/postAds";
-import { get_job_filter } from "@/api/filter";
+
+import {get_job_details} from "@/api/listings"
 import {
   get_marketplace_by_id,
   get_marketplace_listing,
@@ -63,22 +57,14 @@ const TypingTester = () => {
     //   console.log("response section type sitemap", res);
     // };
 
-    const fetchMarketplaceListings = async () => {
-      const res = await get_marketplace_listing();
-      console.log("response marketplace listings", res);
+
+    const fetchJobDetails = async () => {
+      const res = await get_job_details("marketing-executive");
+      console.log("response job details", res);
     };
 
-    const fetchMarketplaceById = async () => {
-      const res = await get_marketplace_by_id(13);
-      console.log("response marketplace by id", res);
-    };
-    // fetchJobsCategories();
-    // fetchSitemap();
-    // fetchSectionSitemap();
-    // fetchSectionTypeSitemap();
-    // fetchJobFilter();
-    fetchMarketplaceListings();
-    fetchMarketplaceById(13);
+
+   fetchJobDetails();
   }, []);
 
   useEffect(() => {

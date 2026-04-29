@@ -211,7 +211,7 @@ const ListingDetails = () => {
 
               <div className=" max-h-45 md:p-3 w-[40%]  max-md:min-w-[40%] relative ">
                 <Image
-                  src="/assets/dashboard/slider-img/illustrator1.png"
+                  src="/assets/dashboard/illustrator1.png"
                   alt="illustrator"
                   height={500}
                   width={500}
@@ -226,7 +226,7 @@ const ListingDetails = () => {
               <h1 className=" font-bold max-md:text-base text-gray-900">
                 OVERVIEW
               </h1>
-              {/* <div className="flex items-center space-x-2 bg-orange-100 px-2 py-3 rounded-lg">
+              <div className="flex items-center space-x-2 bg-orange-100 px-2 py-3 rounded-lg">
                 <span className="  max-md:scale-90 rounded-sm">
                   <svg
                     width="16"
@@ -258,7 +258,7 @@ const ListingDetails = () => {
                     />
                   </svg>
                 </span>
-              </div> */}
+              </div>
             </div>
 
             {/* small cards */}
@@ -304,15 +304,15 @@ const ListingDetails = () => {
             <div className="">
               <div className=" rounded-lg border border-gray-200 shadow-lg px-2 h-full flex flex-col justify-between">
                 <div>
-                  {/* <div className="flex items-center  px-3 mt-2 justify-between mb-1">
+                  <div className="flex items-center  px-3 mt-2 justify-between mb-1">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Leads Analytics
                     </h2>
                     <span className="w-4 h-4 bg-red-500 rounded-sm"></span>
-                  </div> */}
+                  </div>
 
                   {/* Stats */}
-                  {/* <div className=" flex gap-4 px-3">
+                  <div className=" flex gap-4 px-3">
                     {leadsData.map((item, index) => (
                       <div
                         key={index}
@@ -326,10 +326,10 @@ const ListingDetails = () => {
                         </span>
                       </div>
                     ))}
-                  </div> */}
-                  {/* <div className="w-full h-47">
+                  </div> 
+                  <div className="w-full h-47">
                     <Graph />
-                  </div> */}
+                  </div>
                 </div>
               </div>
             </div>

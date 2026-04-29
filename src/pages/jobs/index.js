@@ -11,16 +11,46 @@ import Head from "next/head";
 import { get_job_filter } from "@/api/filter";
 import MobileJobFilter from "@/components/Jobs/MobileJobFilter";
 
-const JobsListings = ({ initialJobs, filters, initialCity }) => {
+const JobsListings = () => {
   const { city: contextCity } = useAuth();
-  const city = initialCity || contextCity || "UAE";
-  const [allJobs, setAllJobs] = useState(initialJobs);
-  const [loading, setLoading] = useState(false);
+  const city = contextCity || "UAE";
+  const [allJobs, setAllJobs] = useState([]);
+  const [filters, setFilters] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState({});
 
   const canonicalUrl = `${APP_URL}/jobs/${city
     ?.toLowerCase()
     .replace(/\s+/g, "-")}`;
+
+  // Fetch initial data on mount
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        const [jobsRes, filtersRes] = await Promise.all([
+          get_all_jobs_listings(),
+          get_job_filter().catch((err) => {
+            console.error("Filter fetch failed:", err);
+            return { filter: null };
+          }),
+        ]);
+
+        console.log("Jobs Response:", jobsRes);
+        // console.log("Filters Response:", filtersRes);
+
+        setAllJobs(jobsRes?.data?.jobs || []);
+        setFilters(filtersRes?.filter || null);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+        setAllJobs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
 
   // Function to fetch jobs with filters
   const fetchJobsWithFilters = async (filters) => {
@@ -45,7 +75,7 @@ const JobsListings = ({ initialJobs, filters, initialCity }) => {
 
       const res = await get_all_jobs_listings(params);
       console.log("res", res);
-      setAllJobs(res.result || []);
+      setAllJobs(res?.data?.jobs || []);
       setActiveFilters(filters);
     } catch (error) {
       console.error("Error fetching filtered jobs:", error);
@@ -132,8 +162,8 @@ const JobsListings = ({ initialJobs, filters, initialCity }) => {
             <BreadCrumbs slug={"jobs"} name={"jobs"} length={allJobs?.length} />
           </div>
 
-          <div className="flex  items-center  max-md:my-4 px-1 justify-between">
-            <h1 className="capitalize font-semibold  max-md:text-lg text-2xl">
+          <div className="flex items-center max-md:my-4 px-1 justify-between">
+            <h1 className="capitalize font-semibold max-md:text-lg text-2xl">
               top jobs in {city}
             </h1>
 
@@ -164,7 +194,7 @@ const JobsListings = ({ initialJobs, filters, initialCity }) => {
               ) : allJobs && allJobs.length > 0 ? (
                 <>
                   {allJobs.map((item, index) => (
-                    <JobCard key={index} data={item} />
+                    <JobCard key={item.id || item.slug || index} data={item} />
                   ))}
                   <HelpFull layout={"col"} />
                 </>
@@ -225,26 +255,3 @@ const JobsListings = ({ initialJobs, filters, initialCity }) => {
 };
 
 export default JobsListings;
-
-// ✅ Server-side rendering
-export async function getServerSideProps() {
-  try {
-    const res = await get_all_jobs_listings();
-    const filters = await get_job_filter();
-    return {
-      props: {
-        initialJobs: res.result || [],
-        filters: filters.filter || null,
-        initialCity: "UAE",
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching jobs:", error);
-    return {
-      props: {
-        initialJobs: [],
-        filters: null,
-      },
-    };
-  }
-}

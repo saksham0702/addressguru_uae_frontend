@@ -105,8 +105,9 @@ const QuickInformation = ({
   extraFields,
   handleWebsiteClick,
   id,
+  positions
 }) => {
-  const categoryName = job ? category?.category_name : category?.name;
+  const categoryName = job ? category?.name : category?.name;
   console.log("extra fields", extraFields);
   const allFields = [
     ...(extraFields?.quickinfo || []),
@@ -133,6 +134,7 @@ const QuickInformation = ({
             </span>
             <span className="font-medium text-[16px] text-orange-600">
               {categoryName}
+
             </span>
           </p>
         )}
@@ -140,6 +142,18 @@ const QuickInformation = ({
         {/* Business Hours */}
         {!job && businesshours && (
           <BusinessHours openingHours={businesshours} mobile="" />
+        )}
+
+        {job && (
+          <p className="flex items-center gap-2">
+            <CategoryIcon />
+            <span className="font-medium text-[16px] text-black">
+              Total Positions:
+            </span>
+            <span className="font-medium text-[16px] text-orange-600">
+              {positions}
+            </span>
+          </p>
         )}
 
         {allFields.map((field, index) => (

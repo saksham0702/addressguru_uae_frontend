@@ -10,19 +10,18 @@ import Description from "@/components/Jobs/JdCardComponents/Description";
 import { get_job_details } from "@/api/listings";
 import { useRouter } from "next/router";
 import ApplyForJob from "@/components/Jobs/JdCardComponents/ApplyForJob";
-import { APP_URL } from "@/services/constants";
+import { API_URL, APP_URL } from "@/services/constants";
 import BreadCrumbs from "@/components/BreadCrumbs";
 import Head from "next/head";
 import MobileJobCard from "@/components/Jobs/MobileJobCard";
 
 const JobDetails = ({ jobData }) => {
   const [apply, setApply] = useState(false);
-  // console.log("response", jobData);
+  console.log("response", jobData);
 
   return (
     <>
-      <Head>
-        {/* ===== META BASIC ===== */}
+      {/* <Head>
         <title>
           {`${jobData?.title} at ${jobData?.company?.name} in ${jobData?.company?.city} | Job Details`}
         </title>
@@ -35,10 +34,8 @@ const JobDetails = ({ jobData }) => {
           content={`${jobData?.title} jobs, ${jobData?.company?.city} jobs, ${jobData?.company?.name} hiring, ${jobData?.title} opening, job vacancy`}
         />
 
-        {/* ===== CANONICAL ===== */}
         <link rel="canonical" href={`${APP_URL}/jobs/${jobData?.id}`} />
 
-        {/* ===== OPEN GRAPH (FACEBOOK / WHATSApp) ===== */}
         <meta property="og:type" content="article" />
         <meta
           property="og:title"
@@ -55,7 +52,6 @@ const JobDetails = ({ jobData }) => {
           content={`${APP_URL}/${jobData?.company?.image}`}
         />
 
-        {/* ===== TWITTER CARDS ===== */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
@@ -70,7 +66,6 @@ const JobDetails = ({ jobData }) => {
           content={`${APP_URL}/${jobData?.company?.image}`}
         />
 
-        {/* ===== STRUCTURED DATA: JOB POSTING ===== */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -113,7 +108,7 @@ const JobDetails = ({ jobData }) => {
             }),
           }}
         />
-      </Head>
+      </Head> */}
 
       <div className="w-full h-full flex justify-center">
         <section className=" flex md:w-[80%] pb-10  w-full flex-col ">
@@ -159,13 +154,7 @@ const JobDetails = ({ jobData }) => {
                     <div className="flex gap-2  mt-1">
                       <IconKeyValue
                         label={"Experience"}
-                        value={
-                          jobData?.qualifications?.length
-                            ? jobData.qualifications
-                                .map((q) => q.level)
-                                .join(", ")
-                            : "Not specified"
-                        }
+                        value={`${jobData?.noOfExperience} Years`}
                         icon={
                           <svg
                             width="20"
@@ -188,7 +177,7 @@ const JobDetails = ({ jobData }) => {
                       |
                       <IconKeyValue
                         label={"Location"}
-                        value={jobData?.company?.city}
+                        value={jobData?.location?.city?.name}
                         icon={
                           <svg
                             width="13"
@@ -207,7 +196,7 @@ const JobDetails = ({ jobData }) => {
                       |
                       <IconKeyValue
                         label={"Salary"}
-                        value={`${jobData?.salary_from}-${jobData?.salary_to}/monthly`}
+                        value={`AED ${jobData?.salary?.from}-${jobData?.salary?.to}/monthly`}
                         icon={
                           <svg
                             width="22"
@@ -240,7 +229,7 @@ const JobDetails = ({ jobData }) => {
                     <div className="flex gap-2 items-center">
                       <IconKeyValue
                         label={"Job-Type"}
-                        value={jobData?.job_type_name}
+                        value={jobData?.workMode}
                       />{" "}
                       |
                       <IconKeyValue
@@ -250,14 +239,18 @@ const JobDetails = ({ jobData }) => {
                       |
                       <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5">
                         Openings :{" "}
-                        <p className="text-black">{jobData?.openings}</p>
+                        <p className="text-black">{jobData?.totalPositions}</p>
                       </span>
                     </div>
                     {/* skills */}
                     <div className="mt-1">
                       <IconKeyValue
                         label={"Skills"}
-                        value={jobData?.skills}
+                        value={
+                          Array.isArray(jobData?.skills)
+                            ? jobData.skills.join(", ")
+                            : "Not specified"
+                        }
                         bg={true}
                         icon={
                           <svg
@@ -439,11 +432,11 @@ const JobDetails = ({ jobData }) => {
 
                 <section className=" w-[25%] flex flex-col max-md:hidden justify-between items-end ">
                   <Image
-                    src={`${APP_URL}/${jobData?.company?.image}`}
+                    src={`${API_URL}/${jobData?.company?.logo}`}
                     alt="company logo"
                     height={500}
                     width={500}
-                    className="md:w-[60%] 2xl:w-[50%] h-24 border-1 border-gray-200 rounded-lg "
+                    className="md:w-[60%] 2xl:w-[50%] h-24 border-1 object-contain border-gray-200 rounded-lg "
                   />
                   <button
                     onClick={() => setApply(true)}
@@ -467,20 +460,20 @@ const JobDetails = ({ jobData }) => {
               </div>
 
               {/* mobile card section */}
-              <div className="md:hidden">
+              {/* <div className="md:hidden">
                 <MobileJobCard data={jobData} />
-              </div>
+              </div> */}
 
               {/* description section */}
               <Description
                 desc={jobData?.description}
-                roles={jobData?.roles}
-                qualifications={jobData?.qualifications}
-                keySkills={jobData?.key_skills}
+                roles={jobData?.responsibilities}
+                qualifications={jobData?.requirements}
+                keySkills={jobData?.skills}
                 companyName={jobData?.company?.name}
                 companyDesc={jobData?.company?.description}
                 address={jobData?.company?.address}
-                city={jobData?.company?.city}
+                city={jobData?.company?.city?.name} // ✅ VERY IMPORTANT
               />
             </div>
 
@@ -488,7 +481,11 @@ const JobDetails = ({ jobData }) => {
               className="md:w-[33%] max-md:hidden h-auto mb-10 flex flex-col gap-5
          "
             >
-              <QuickInformation job={true} category={jobData} />
+              <QuickInformation
+                job={true}
+                category={jobData?.category}
+                positions={jobData?.totalPositions}
+              />{" "}
               <div className="w-full min-h-[30rem] mb-7">
                 <ApplyForJob
                   highlight={apply}
@@ -509,7 +506,8 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
   try {
     const res = await get_job_details(slug);
-    return { props: { jobData: res } };
+    console.log("res", res);
+    return { props: { jobData: res?.data } };
   } catch (error) {
     console.error("Error fetching job details:", error);
     return { notFound: true };
