@@ -138,7 +138,7 @@ const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
   return (
     <div
       ref={containerRef}
-      className="bg-[#FFF8F3] h-full pt-2 w-full max-md:pt-7 min-h-[550px] relative rounded-xl transition-all"
+      className="bg-[#FFF8F3] h-full pt-2 w-full max-md:pt-7 min-h-[550px] border border-orange-400 rounded-xl transition-all"
     >
       <span
         onClick={() => setEnquirePop(false)}
@@ -355,16 +355,6 @@ const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
         >
           Send Enquiry
         </button>
-      </div>
-
-      <div className="absolute min-w-full -bottom-14 2xl:-bottom-16 rounded-xl">
-        <Image
-          src="/assets/seeDetails/get-more-info-bottom.png"
-          href="Border"
-          height={500}
-          width={500}
-          className="w-full h-30"
-        />
       </div>
 
       {res !== null && <ResponseAlert text={res} />}

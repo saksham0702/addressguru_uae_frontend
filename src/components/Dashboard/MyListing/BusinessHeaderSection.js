@@ -2,8 +2,10 @@ import React from "react";
 import { ChevronLeft, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { APP_URL } from "@/services/constants";
+import { useRouter } from "next/router";
 
 const BusinessHeaderSection = ({ data }) => {
+  const router = useRouter();
   const profileScore = 25;
 
   // Calculate stroke-dasharray for circular progress
@@ -18,7 +20,7 @@ const BusinessHeaderSection = ({ data }) => {
         {/* Left Side - Back button and Company Info */}
         <div className="flex items-center md:gap-4 gap-2">
           {/* Back Button */}
-          <button className="md:p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <button onClick={() => router.back()} className="md:p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ChevronLeft size={24} className="text-black" />
           </button>
 
@@ -36,10 +38,10 @@ const BusinessHeaderSection = ({ data }) => {
           {/* Company Details */}
           <div className="flex flex-col ">
             <div className="">
-              <h1 className="font-semibold text-gray-900 text-sm max-md:text-xs   max-md:leading-4 max-md:font-bold 2xl:max-w-sm lg:max-w-[21rem] 2xl:leading-5 2xl:text-lg">
-                {data?.business_name} {" "}
-                <span className="text-[11px] font-semibold max-md:text-[9px] md:whitespace-nowrap text-gray-600">
-                   {" "}{data?.business_address}
+              <h1 className="font-medium text-gray-900 text-sm max-md:text-xs   max-md:leading-4 max-md:font-bold 2xl:max-w-sm lg:max-w-[21rem] 2xl:leading-5 2xl:text-lg">
+                {data?.businessName} {" "}
+                <span className="text-[11px] font-medium max-md:text-[9px] md:whitespace-nowrap text-gray-600">
+                   {" "}{data?.businessAddress}
                  </span>
               </h1>
             </div>
