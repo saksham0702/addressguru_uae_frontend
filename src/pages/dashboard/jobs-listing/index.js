@@ -31,7 +31,7 @@ import {
   genderOptions,
   sectorOptions,
   jobTypeOptions,
-} from "./jobConstants";
+} from "@/helpers/JobConstants";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
 import MultiSelectDropDown from "@/components/Forms/MultiSelect";
