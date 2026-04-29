@@ -66,7 +66,7 @@ const MyPropertyListings = ({ data }) => {
 
       {/* Property Cards */}
       <div className="md:p-4 p-2 space-y-4">
-        {data?.map((property) => {
+        {data?.listings?.map((property) => {
           const statusInfo = getStatusBadge(property?.status);
 
           return (

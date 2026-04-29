@@ -1,3 +1,4 @@
+import { get_listing_data } from "@/api/listing-form";
 import { get_listing_data_single } from "@/api/showlistings";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import Graph from "@/components/Dashboard/Graph";
@@ -31,8 +32,9 @@ const ListingDetails = () => {
   const getListings = useCallback(
     async (slug) => {
       try {
-        const res = await get_listing_data_single(slug);
-        setData(res);
+        const res = await get_listing_data(slug);
+        console.log("single listing data", res);
+        setData(res?.data?.data);
         // console.log("response of single listing", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
