@@ -25,14 +25,18 @@ import {
   get_nationalities,
   save_job,
 } from "@/api/uae-job-listing";
-import { workModeOptions, experienceLevelOptions, genderOptions, sectorOptions, jobTypeOptions } from "@/services/constants";
+import {
+  workModeOptions,
+  experienceLevelOptions,
+  genderOptions,
+  sectorOptions,
+  jobTypeOptions,
+} from "@/services/constants";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
 import MultiSelectDropDown from "@/components/Forms/MultiSelect";
 
-
 const JobListing = () => {
-  
   const router = useRouter();
   const { jobId } = router.query;
   const { edit } = router.query;
@@ -489,6 +493,9 @@ const JobListing = () => {
       if (!postJobData.category_id) {
         newErrors.category_id = "Job category is required";
       }
+      if (subCategories.length > 0 && !postJobData.sub_category_id) {
+        newErrors.sub_category_id = "Sub category is required";
+      }
       if (!postJobData.jobType) {
         newErrors.jobType = "Job type is required";
       }
@@ -606,8 +613,9 @@ const JobListing = () => {
     switch (stepNumber) {
       case 1:
         formData.append("category_id", postJobData.category_id);
-        formData.append("sub_category_id", postJobData.sub_category_id);
-
+        if (postJobData.sub_category_id) {
+          formData.append("sub_category_id", postJobData.sub_category_id);
+        }
         formData.append("title", postJobData.title);
         formData.append("description", postJobData.description);
         formData.append("education", postJobData.education);
@@ -1155,6 +1163,13 @@ const JobListing = () => {
             <section className="w-[85%] h-full space-y-7 p-4 mb-12 rounded-xl">
               <div className="grid grid-cols-2 gap-6">
                 {currentForms.map((item, index) => {
+                  // ✅ Hide Sub Category if no data
+                  if (
+                    item.key === "sub_category_id" &&
+                    subCategories.length === 0
+                  ) {
+                    return null;
+                  }
                   const commonProps = {
                     key: item.id || index,
                     title: item.name,
