@@ -1,5 +1,6 @@
 import { get_listing_data } from "@/api/listing-form";
 import { get_listing_data_single } from "@/api/showlistings";
+import { get_my_leads } from "@/api/uae-dashboard";
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import Graph from "@/components/Dashboard/Graph";
 import BusinessHeaderSection from "@/components/Dashboard/MyListing/BusinessHeaderSection";
@@ -28,13 +29,21 @@ const ListingDetails = () => {
   const { slug } = router.query;
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [leadsData, setLeadsData] = useState([]);
 
   const getListings = useCallback(
     async (slug) => {
       try {
         const res = await get_listing_data(slug);
-        console.log("single listing data", res);
+        console.log("single listing data", res?.data?.data);
         setData(res?.data?.data);
+        if (res?.data?.data?._id) {
+          const res2 = await get_my_leads(res?.data?.data?._id);
+          console.log("my leads", res2?.result);
+          if (res2?.success) {
+            setLeadsData(res2?.result);
+          }
+        }
         // console.log("response of single listing", res);
       } catch (err) {
         console.error("Error fetching listing:", err);
@@ -46,12 +55,12 @@ const ListingDetails = () => {
     if (slug) {
       getListings(slug);
     }
-  }, [slug, getListings]);
+  }, [slug]);
 
   const statsData = [
     {
       title: "TOTAL VIEWS",
-      value: data?.view_count || 0,
+      value: data?.statistics?.totalViews || 0,
       // change: "+2.1%",
       changeType: "positive",
       subtitle: "Since last week",
@@ -74,7 +83,7 @@ const ListingDetails = () => {
     },
     {
       title: "TOTAL WHATSAP",
-      value: data?.whatshapp_count || 0,
+      value: data?.statistics?.totalCalls || 0,
       // change: "+6.1%",
       changeType: "positive",
       subtitle: "Since last week",
@@ -99,7 +108,7 @@ const ListingDetails = () => {
     },
     {
       title: "TOTAL LEADS",
-      value: data?.lead_count || 0,
+      value: data?.statistics?.totalLeads || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",
@@ -128,7 +137,7 @@ const ListingDetails = () => {
     },
     {
       title: "TOTAL REVIEWS",
-      value: data?.ratings?.length || 0,
+      value: data?.statistics?.totalReviews || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",
@@ -151,7 +160,7 @@ const ListingDetails = () => {
     },
     {
       title: "WEBSITE VISIT",
-      value: data?.website_count || 0,
+      value: data?.statistics?.totalWebsiteVisits || 0,
       change: "",
       changeType: "neutral",
       subtitle: "Since last week",
@@ -312,7 +321,7 @@ const ListingDetails = () => {
                   </div>
 
                   {/* Stats */}
-                  <div className=" flex gap-4 px-3">
+                  {/* <div className=" flex gap-4 px-3">
                     {leadsData.map((item, index) => (
                       <div
                         key={index}
@@ -326,9 +335,9 @@ const ListingDetails = () => {
                         </span>
                       </div>
                     ))}
-                  </div> 
-                  <div className="w-full h-47">
-                    <Graph />
+                  </div>  */}
+                  <div className="w-full h-47 my-10">
+                    <Graph stats={data?.statistics} />
                   </div>
                 </div>
               </div>
@@ -338,7 +347,7 @@ const ListingDetails = () => {
             {/* <QuickEdit data={data} /> */}
 
             {/* leads table */}
-            <RecentLeads queries={data?.queries} />
+            <RecentLeads queries={leadsData} />
 
             {/* customer slider */}
             {/* custom slider */}

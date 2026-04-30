@@ -36,7 +36,7 @@ const JobsListings = () => {
           }),
         ]);
 
-        console.log("Jobs Response:", jobsRes);
+        // console.log("Jobs Response:", jobsRes);
         // console.log("Filters Response:", filtersRes);
 
         setAllJobs(jobsRes?.data?.jobs || []);
