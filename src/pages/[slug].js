@@ -449,9 +449,9 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       </div>
       <div className="md:hidden my-1.5 max-w-xs ml-[4%]">
         <BreadCrumbs
-          slug={data?.category?.slug}
-          city={serverCity}
-          name={data?.slug}
+          slug={data?.category?.name}
+          city={data?.city?.name}
+          name={data?.name}
           type={true}
         />
       </div>
