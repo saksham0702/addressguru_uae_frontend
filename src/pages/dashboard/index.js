@@ -143,7 +143,7 @@ const Dashboard = () => {
               </div>
               <div className="max-h-45 md:p-3 w-[40%] max-md:min-w-[40%] relative">
                 <Image
-                  src="/assets/dashboard/illustrator.png"
+                  src="/assets/illustrator.png"
                   alt="illustrator"
                   height={500}
                   width={500}
