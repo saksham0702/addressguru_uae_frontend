@@ -77,11 +77,11 @@ const JobCard = ({ data }) => {
             </p>
             {/* right company image */}
             <Image
-              src={`${APP_URL}/${data?.company?.image}`}
-              alt="company img"
+              src={`${API_URL}/${data?.company?.logo}`}
+              alt={data?.company?.name}
               height={500}
               width={500}
-              className="w-25 h-7 absolute object-cover  right-0.5  md:right-3  top-2 2xl:top-4 max-md:hidden"
+              className="w-25 h-7 absolute object-contain right-0.5  md:right-3  top-2 2xl:top-4 max-md:hidden"
             />
           </div>
           {/* icon key-pair */}
