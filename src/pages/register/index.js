@@ -29,7 +29,7 @@ const Register = () => {
               Absolutely Free!
             </strong>{" "}
             <p className="font-[500] md:text-xl max-md:text-lg ">
-              Trusted by Millions Across India
+              Trusted by Millions Across UAE
             </p>
           </span>
           <div>

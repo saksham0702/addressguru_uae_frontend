@@ -23,6 +23,7 @@ import {
   get_user_listings,
 } from "@/api/uae-dashboard";
 import { get_listing_stats } from "@/api/listingStats";
+import Graph from "@/components/Dashboard/Graph";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -161,7 +162,9 @@ const Dashboard = () => {
                 />
               ))}
             </div>
-
+            <div className="w-full h-47 bg-white mt-10 mb-30">
+              <Graph stats={data?.overview} />
+            </div>
             <div className="w-full bg-white z-30">
               <DashboardOverview data={data} />
             </div>
@@ -228,6 +231,7 @@ const Dashboard = () => {
           <Header />
         </div>
         <section className="h-full md:w-[82.5%] w-[99%] mx-auto [20000px]:w-full hide-scroll absolute flex top-21 right-0">
+      
           {renderSection()}
           <div className="flex  fixed right-0 h-full max-md:hidden pb-2 w-[12.5%] mr-2 gap-2">
             <div className=" w-full h-[90%] rounded-sm text-center">

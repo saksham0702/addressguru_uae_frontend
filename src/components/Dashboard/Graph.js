@@ -9,55 +9,86 @@ import {
   YAxis,
 } from "recharts";
 
-const Graph = () => {
+const Graph = ({ stats }) => {
+  console.log("stats", stats);
   const data = [
-    { name: "Mon", uv: 4000, pv: 2400, amt: 2400 },
-    { name: "Tue", uv: 3000, pv: 1398, amt: 2210 },
-    { name: "Wed", uv: 2000, pv: 9800, amt: 2290 },
-    { name: "Thu", uv: 2780, pv: 3908, amt: 2000 },
-    { name: "Fri", uv: 1890, pv: 4800, amt: 2181 },
-    { name: "Sat", uv: 2390, pv: 3800, amt: 2500 },
-    { name: "Sun", uv: 3490, pv: 4300, amt: 2100 },
+    { name: "Views", value: stats?.totalViews || 0 },
+    { name: "Calls", value: stats?.totalCalls || 0 },
+    { name: "Leads", value: stats?.totalLeads || 0 },
+    { name: "Visits", value: stats?.websiteVisits || 0 },
+    { name: "Reviews", value: stats?.totalReviews || 0 },
   ];
 
+  const maxValue = Math.max(...data.map((d) => d.value));
+  const yMax =
+    maxValue <= 10
+      ? 10
+      : maxValue <= 100
+        ? 100
+        : Math.ceil(maxValue / 100) * 100;
+
   return (
-    <ResponsiveContainer width="100%" height={190}>
-      <AreaChart className=""
-        data={data}
-        margin={{ top: 10, right: 10, left: -15, bottom: 0,  }}
-      >
-        <defs >
-          <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#FF6E04" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="#FF6E04" stopOpacity={0} />
-          </linearGradient>
-          <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6C60F3" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="#6C60F3" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <XAxis dataKey="name" axisLine={false}  tickLine={false}   tick={{ fontSize: 10 }} />
-        <YAxis tick={{ fontSize: 10 }} axisLine={false}   tickLine={false}  tickCount={5} />
-        <CartesianGrid strokeDasharray="3 3" vertical={false}  />
-        <Tooltip contentStyle={{ fontSize: "10px" }} />
-        <Area
-          type="monotone"
-          dataKey="uv"
-          stroke="#6C60F3"
-          strokeWidth={2}
-          fillOpacity={1}
-          fill="url(#colorUv)"
-        />
-        <Area
-          type="monotone"
-          dataKey="pv"
-          strokeWidth={2}
-          stroke="#FF6E04"
-          fillOpacity={1}
-          fill="url(#colorPv)"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      {/* Title */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-800">
+          Performance Overview
+        </h3>
+      </div>
+
+      {/* Chart */}
+      <div className="w-full h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={data}
+            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="colorMain" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6C60F3" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#6C60F3" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11 }}
+              dy={5} // 👈 spacing below labels
+            />
+
+            <YAxis
+              domain={[0, yMax]}
+              tick={{ fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              dx={-5} // 👈 spacing from chart
+            />
+
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+
+            <Tooltip
+              contentStyle={{
+                borderRadius: "8px",
+                fontSize: "12px",
+                border: "none",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            />
+
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#6C60F3"
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorMain)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 };
 

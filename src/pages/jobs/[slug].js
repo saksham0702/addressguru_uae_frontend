@@ -17,7 +17,7 @@ import MobileJobCard from "@/components/Jobs/MobileJobCard";
 
 const JobDetails = ({ jobData }) => {
   const [apply, setApply] = useState(false);
-  console.log("response", jobData);
+  // console.log("response", jobData);
 
   return (
     <>
@@ -489,7 +489,7 @@ const JobDetails = ({ jobData }) => {
               <div className="w-full min-h-[30rem] mb-7">
                 <ApplyForJob
                   highlight={apply}
-                  jobId={jobData?.id}
+                  slug={jobData?.slug}
                   setHighlight={setApply}
                 />
               </div>
@@ -506,7 +506,7 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
   try {
     const res = await get_job_details(slug);
-    console.log("res", res);
+    // console.log("res", res);
     return { props: { jobData: res?.data } };
   } catch (error) {
     console.error("Error fetching job details:", error);

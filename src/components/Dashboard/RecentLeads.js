@@ -53,7 +53,7 @@ console.log("queries",queries)
               <th className="px-4 py-3">Client Details</th>
               <th className="px-4 py-3">Query</th>
               <th className="px-4 py-3">Contact Details</th>
-              <th className="px-4 py-3">Stage</th>
+              {/* <th className="px-4 py-3">Stage</th> */}
             </tr>
           </thead>
           <tbody>
@@ -115,14 +115,14 @@ console.log("queries",queries)
                     <span>{lead.email}</span>
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                {/* <td className="px-4 py-3">
                   <select className="border px-2 py-1 rounded">
                     <option>Select the Status</option>
                     <option>New</option>
                     <option>In Progress</option>
                     <option>Completed</option>
                   </select>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

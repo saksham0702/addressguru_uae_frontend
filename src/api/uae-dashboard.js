@@ -77,3 +77,22 @@ export const get_marketplace_listings = async (type) => {
     console.log("Error fetching user listings:", error);
   }
 };
+
+
+export const get_my_leads = async (listingId) => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.get(
+      `${API_URL}/my-leads?category=business&listingId=${listingId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("i am user leads ", response?.data);
+    return response?.data;
+  } catch (error) {
+    console.log("Error fetching user leads:", error);
+  }
+}

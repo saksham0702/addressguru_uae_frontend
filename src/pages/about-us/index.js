@@ -81,7 +81,7 @@ const AboutUs = () => {
         <ul className="text-sm  font-[500] pl-5 max-w-[64rem] list-disc space-y-1">
           <li>
             <strong>International Presence</strong> - AddressGuru UAE has an
-            international presence from India to.
+            international presence from UAE to.
           </li>
           <li>
             <strong>Large Community of Users</strong> - AddressGuru UAE is having a

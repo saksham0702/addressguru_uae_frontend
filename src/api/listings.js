@@ -4,7 +4,7 @@ import { API_URL } from "@/services/constants";
 // job listings
 export const get_all_jobs_listings = async (params) => {
   try {
-    const response = await axios.get(`${API_URL}/jobs-listing/get-all-jobs`, { params });
+    const response = await axios.get(`${API_URL}/jobs-listing/get-all-jobs?status=approved`, { params });
     console.log("api response for jobs with filter", response);
     return response.data;
   } catch (error) {

@@ -4,14 +4,17 @@ import InputWithSvg from "@/components/InputWithSvg";
 import gsap from "gsap";
 import { query } from "@/api/queries";
 import ResponseAlert from "@/components/ResponseAlert";
+import { apply_for_job } from "@/api/uae-job-listing";
 
-const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
+const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, slug }) => {
   const type = "jobs";
-  const id = jobId;
+  const jobSlug = slug;
   const [res, setRes] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [jobQuery, setJobQuery] = useState({
-    job_id: jobId,
+    slug: jobSlug,
     name: "",
     email: "",
     phone: "",
@@ -98,12 +101,35 @@ const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
       return;
     }
 
+    setLoading(true);
+    setSubmitted(false);
+
     const payload = {
-      ...jobQuery,
+      fullName: jobQuery.name,
+      email: jobQuery.email,
+      phone: jobQuery.phone,
+      totalExperience: jobQuery.experience,
+      skills: jobQuery.skills,
+      message: jobQuery.message,
     };
-    const res = await query(type, id, payload);
-    console.log("response of query in frontend", res);
-    setRes(res);
+    const apiRes = await apply_for_job(jobSlug, payload);
+
+    console.log("response of query in frontend", apiRes);
+    setRes(apiRes);
+    setLoading(false);
+
+    if (apiRes?.status === true) {
+      setSubmitted(true);
+      setJobQuery({
+        slug: jobSlug,
+        name: "",
+        email: "",
+        phone: "",
+        experience: "",
+        skills: "",
+        message: "",
+      });
+    }
   };
 
   const containerRef = useRef(null);
@@ -157,11 +183,9 @@ const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
           />
         </svg>
       </span>
-
       <h1 className="font-semibold 2xl:text-xl max-md:text-md ml-4 my-4">
         Apply For This Job
       </h1>
-
       {/* input section */}
       <div className="px-4 flex flex-col gap-3 text-[#323232]">
         <div>
@@ -341,23 +365,72 @@ const ApplyForJob = ({ setEnquirePop, highlight, setHighlight, jobId }) => {
             <p className="text-red-500 text-xs mt-1 ml-1">{errors.message}</p>
           )}
         </div>
-
+{/* 
         <Image
           src="/assets/SeeDetails/recaptcha.png"
           alt="recaptcha"
           height={500}
           width={500}
           className="w-full h-auto"
-        />
+        /> */}
         <button
-          onClick={() => applyForJob(jobQuery)}
-          className="w-full bg-[#FF6E04] rounded-md cursor-pointer text-white font-semibold text-center py-2 hover:bg-[#FF5504] transition-colors"
+          onClick={() => !loading && !submitted && applyForJob(jobQuery)}
+          disabled={loading || submitted}
+          className={`w-full rounded-md cursor-pointer text-white font-semibold text-center py-2 transition-colors flex items-center justify-center gap-2 ${
+            submitted
+              ? "bg-green-500 cursor-default"
+              : loading
+              ? "bg-[#FF6E04] opacity-80 cursor-not-allowed"
+              : "bg-[#FF6E04] hover:bg-[#FF5504]"
+          }`}
         >
-          Send Enquiry
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Submitting...
+            </>
+          ) : submitted ? (
+            <>
+              <svg
+                className="h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Submitted
+            </>
+          ) : (
+            "Send Enquiry"
+          )}
         </button>
       </div>
 
-      {res !== null && <ResponseAlert text={res} />}
+      {res !== null && res?.message && <ResponseAlert text={res.message} />}
     </div>
   );
 };

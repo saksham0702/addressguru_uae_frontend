@@ -1,12 +1,10 @@
-import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
 const Slash = () => <span className="text-gray-400">/</span>;
 
-const BreadCrumbs = ({ slug, name, length, type }) => {
-  const { city } = useAuth();
+const BreadCrumbs = ({ slug, name, length, type,city }) => {
   const router = useRouter();
 
   return (

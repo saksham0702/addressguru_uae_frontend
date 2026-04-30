@@ -9,7 +9,7 @@ const features = [
   },
   {
     id: "02",
-    title: "Pan India Reach",
+    title: "Pan UAE Reach",
     description:
       "Your business can be discovered by users from all over India, not just your city.",
   },
