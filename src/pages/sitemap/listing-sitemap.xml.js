@@ -1,4 +1,5 @@
-import { API_URL, SITE_URL } from "@/services/constants";
+// pages/sitemap/listing-sitemap.xml.js
+import { SITE_URL } from "@/services/constants";
 import { getSectionSitemap } from "@/api/sitemap";
 
 export default function ListingSitemap() {
@@ -13,23 +14,24 @@ export async function getServerSideProps({ res }) {
 
     if (Array.isArray(listingsData)) {
       listingEntries = listingsData
-        .map((item) => {
-          return `  <sitemap>
+        .map(
+          (item) =>
+            `  <sitemap>
     <loc>${SITE_URL}/sitemap/listing/${item.slug}.xml</loc>
     <lastmod>${item.last_updated || new Date().toISOString()}</lastmod>
-    <adx:urlCount>${item.url_count || 1}</adx:urlCount>
-  </sitemap>`;
-        })
+    <!-- urlCount:${item.url_count || 1} -->
+  </sitemap>`,
+        )
         .join("\n");
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:adx="https://www.addressguru.ae/schemas/sitemap/1.0">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${listingEntries}
 </sitemapindex>`;
 
-    res.setHeader("Content-Type", "text/xml");
+    res.setHeader("Content-Type", "text/xml; charset=utf-8");
     res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate");
     res.write(sitemap);
     res.end();

@@ -1,4 +1,5 @@
-import { API_URL, SITE_URL } from "@/services/constants";
+// pages/sitemap/[section]/[type].xml.js
+import { SITE_URL, API_URL } from "@/services/constants";
 import { getSectionTypeSitemap } from "@/api/sitemap";
 
 export default function CategorySitemap() {
@@ -16,24 +17,25 @@ export async function getServerSideProps({ res, params }) {
 
     if (Array.isArray(citiesData)) {
       cityEntries = citiesData
-        .map((item) => {
-          return `  <sitemap>
+        .map(
+          (item) =>
+            // image and urlCount stored as comment — Google-safe, XSL-parseable
+            `  <sitemap>
     <loc>${SITE_URL}/sitemap/${section}/${categorySlug}/${item.slug}.xml</loc>
     <lastmod>${item.last_updated || new Date().toISOString()}</lastmod>
-    <adx:urlCount>${item.url_count || 1}</adx:urlCount>
-    ${item.image ? `<adx:image>${API_URL}/${item.image}</adx:image>` : ""}
-  </sitemap>`;
-        })
+    <!-- urlCount:${item.url_count || 1} image:${item.image ? `${API_URL}/${item.image}` : ""} -->
+  </sitemap>`,
+        )
         .join("\n");
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:adx="https://www.addressguru.ae/schemas/sitemap/1.0">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${cityEntries}
 </sitemapindex>`;
 
-    res.setHeader("Content-Type", "text/xml");
+    res.setHeader("Content-Type", "text/xml; charset=utf-8");
     res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate");
     res.write(sitemap);
     res.end();

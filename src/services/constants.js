@@ -21,7 +21,8 @@ export const IMG_URL = process.env.NEXT_PUBLIC_APP_URL;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 // export const API_URL = "http://localhost:5001"
 
-export const SITE_URL = "http://localhost:3000"
+export const SITE_URL = "https://addressguru.ae"
+// export const SITE_URL = "http://localhost:3000"
 
 // GOOGLE GEMINI KEY
 export const GEMINI_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY
