@@ -17,15 +17,14 @@ export async function getServerSideProps({ res, params }) {
 
     if (Array.isArray(citiesData)) {
       cityEntries = citiesData
-        .map(
-          (item) =>
-            // image and urlCount stored as comment — Google-safe, XSL-parseable
-            `  <sitemap>
+        .map((item) => {
+          return `  <sitemap>
     <loc>${SITE_URL}/sitemap/${section}/${categorySlug}/${item.slug}.xml</loc>
     <lastmod>${item.last_updated || new Date().toISOString()}</lastmod>
-    <!-- urlCount:${item.url_count || 1} image:${item.image ? `${API_URL}/${item.image}` : ""} -->
-  </sitemap>`,
-        )
+    <adx:urlCount>${item.url_count || 1}</adx:urlCount>
+    ${item.image ? `<adx:image>${API_URL}/${item.image}</adx:image>` : ""}
+  </sitemap>`;
+        })
         .join("\n");
     }
 

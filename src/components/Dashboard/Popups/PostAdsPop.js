@@ -539,7 +539,7 @@ const PostAdsPop = ({ setPostAdd }) => {
   };
 
   return (
-    <div className="h-full w-screen z-50 inset-0 fixed backdrop-blur-xs flex items-center justify-center">
+    <div className="h-full w-screen z-50 inset-0 fixed backdrop-blur-xs bg-black/40 flex items-center justify-center">
       <div className="h-[75%] w-5xl 2xl:w-7xl rounded-xl p-5 bg-white shadow-lg border-gray-50 border">
         {/* Header with breadcrumbs and close section */}
         <div className="flex justify-between items-center text-lg px-2">

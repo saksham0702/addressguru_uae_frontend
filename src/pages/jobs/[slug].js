@@ -432,7 +432,7 @@ const JobDetails = ({ jobData }) => {
 
                 <section className=" w-[25%] flex flex-col max-md:hidden justify-between items-end ">
                   <Image
-                    src={`${API_URL}/${jobData?.company?.logo}`}
+                    src={`${APP_URL}/${jobData?.company?.logo}`}
                     alt="company logo"
                     height={500}
                     width={500}
