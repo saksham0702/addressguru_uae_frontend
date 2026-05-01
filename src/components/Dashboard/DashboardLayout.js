@@ -1,61 +1,91 @@
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardNavbar from "./DashboardNavbar";
+import PostAdsPop from "./Popups/PostAdsPop";
 import Image from "next/image";
 import { useState } from "react";
 
-const SIDEBAR_W = 256;
+// Fixed dimensions
+const SIDEBAR_W = 240; // ✅ CHANGED from 160 to 240
 const NAVBAR_H = 70;
+const RIGHT_BANNER_W = 200;
 
 const DashboardLayout = ({ children }) => {
   const [postAdd, setPostAdd] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* ── SIDEBAR: fixed, exact pixel width ── */}
-      <aside
-        style={{ width: SIDEBAR_W }}
-        className="fixed left-0 top-0 h-full z-40 bg-white border-r border-gray-200 flex-shrink-0"
-      >
+      {/* FIXED SIDEBAR - Left */}
+      <aside className="fixed left-0 top-0 h-screen w-60 z-40 bg-white border-r border-gray-200">
+        {/* ✅ CHANGED w-40 to w-60 */}
         <DashboardSidebar />
       </aside>
 
-      {/* ── RIGHT COLUMN: offset by sidebar width ── */}
+      {/* MAIN CONTENT AREA - Shifted right by sidebar width */}
       <div
-        style={{ marginLeft: SIDEBAR_W }}
-        className="flex flex-col flex-1 min-w-0"
+        className="flex-1 ml-60"
+        style={{ width: `calc(100% - ${SIDEBAR_W}px)` }}
       >
-        {/* ── NAVBAR: fixed, starts after sidebar ── */}
+        {/* ✅ CHANGED ml-40 to ml-60 */}
+
+        {/* FIXED NAVBAR - Top */}
         <header
-          style={{ left: SIDEBAR_W, height: NAVBAR_H }}
-          className="fixed top-0 right-0 z-30 bg-white border-b border-gray-200"
+          className="fixed top-0 z-30 bg-white border-b border-gray-200"
+          style={{
+            left: SIDEBAR_W,
+            width: `calc(100% - ${SIDEBAR_W}px)`,
+            height: NAVBAR_H,
+          }}
         >
           <DashboardNavbar setPostAdd={setPostAdd} />
         </header>
 
-        {/* ── PAGE CONTENT + RIGHT ADS ── */}
+        {/* CONTENT WRAPPER - Below navbar */}
         <div
-          style={{ paddingTop: NAVBAR_H }}
-          className="flex flex-1 gap-4 px-5 py-5 min-h-screen"
+          className="flex gap-6 px-6"
+          style={{
+            marginTop: NAVBAR_H,
+            height: `calc(100vh - ${NAVBAR_H}px)`,
+            overflow: "hidden",
+          }}
         >
-          {/* Main scrollable content */}
-          <main className="flex-1 min-w-0">{children}</main>
+          {/* SCROLLABLE MAIN CONTENT */}
+          <main
+            className="flex-1 py-6 overflow-y-auto"
+            style={{
+              width: `calc(100% - ${RIGHT_BANNER_W}px - 24px)`,
+            }}
+          >
+            {children}
+          </main>
 
-          {/* Ads column — sticky so it follows scroll */}
-          <aside className="w-[220px] flex-shrink-0 hidden lg:block">
-            <div className="sticky top-[90px]">
+          {/* FIXED RIGHT BANNER */}
+          <aside
+            className="flex-shrink-0 pt-6 hidden xl:block"
+            style={{ width: RIGHT_BANNER_W }}
+          >
+            <div
+              className="sticky top-6"
+              style={{ height: `calc(100vh - ${NAVBAR_H}px - 48px)` }}
+            >
               <Image
                 src="/assets/ads-banner-dashboard.jpeg"
                 alt="ads"
-                width={220}
+                width={200}
                 height={600}
-                className="w-full h-auto rounded-xl"
+                className="w-full h-full object-cover rounded-xl"
+                style={{
+                  width: `${RIGHT_BANNER_W}px`,
+                  height: "100%",
+                  objectFit: "cover",
+                }}
               />
             </div>
           </aside>
         </div>
       </div>
 
-      {/* PostAdsPop goes here if needed */}
+      {/* POST ADS POPUP */}
+      {postAdd && <PostAdsPop postAdd={postAdd} setPostAdd={setPostAdd} />}
     </div>
   );
 };

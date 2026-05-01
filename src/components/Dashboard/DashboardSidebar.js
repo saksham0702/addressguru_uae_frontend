@@ -2,8 +2,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-
-// lucide icons
 import { LayoutDashboard, Briefcase, Package, Home, List } from "lucide-react";
 
 const DashboardSidebar = () => {
@@ -52,18 +50,14 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <div
-      className={`bg-white ${
-        isCollapsed ? "w-16" : "w-[16.5%]"
-      } max-md:hidden flex flex-col fixed left-0 h-full border-r border-gray-200 transition-all duration-300 z-40`}
-    >
+    <div className="w-60 h-screen flex flex-col fixed left-0 top-0 border-r border-gray-200 bg-white transition-all duration-300 z-40">
       {/* HEADER */}
-      <div className="p-2 flex justify-between items-center">
+      {/* <div className="p-2 flex justify-between items-center">
         <span className="font-bold text-lg">AG</span>
-      </div>
+      </div> */}
 
       {/* USER */}
-      <div className="p-2 text-center">
+      <div className="p-2 text-center mt-5">
         <div className="w-12 h-12 bg-orange-500 rounded-full mx-auto flex items-center justify-center text-white font-bold">
           {user?.data?.name?.[0]}
         </div>
@@ -95,16 +89,16 @@ const DashboardSidebar = () => {
                 <span className="text-sm font-medium">{item.label}</span>
               )}
 
-              {isActive && !isCollapsed && (
+              {/* {isActive && !isCollapsed && (
                 <div className="ml-auto w-1 h-5 bg-white rounded-full" />
-              )}
+              )} */}
             </div>
           );
         })}
       </div>
 
       {/* BOTTOM */}
-        <div className=" border-t p-4 border-gray-200 flex flex-col items-center gap-4 ">
+      <div className=" border-t p-4 border-gray-200 flex flex-col items-center gap-4 ">
         <div className="h-22 w-[80%] mx-auto bg-[#FFF8F3] text-center flex flex-col items-center  justify-around p-3 border-orange-500 border-dashed border rounded-xl">
           <svg
             width="20"
@@ -132,7 +126,6 @@ const DashboardSidebar = () => {
           </p>
         </div>
 
-
         <span className="bg-[#FFF8F3] flex gap-2 items-center px-3 rounded-xl text-sm 2xl:text-md py-1.5">
           <svg
             width="16"
@@ -149,21 +142,9 @@ const DashboardSidebar = () => {
 
           <p>Live Support</p>
         </span>
-
       </div>
-
-
- 
     </div>
   );
 };
 
 export default DashboardSidebar;
-
-
-
-
-
-
-
-
