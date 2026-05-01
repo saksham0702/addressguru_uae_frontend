@@ -89,11 +89,11 @@ const MyListings = ({ data, APP_URL }) => {
     setExpandedRooms((prev) => ({ ...prev, [id]: !prev[id] }));
 
   return (
-    <div className="bg-white shadow-sm border w-full max-md:w-[98%] max-md:mx-auto rounded-md border-gray-200">
+    <div className="bg-white shadow-sm border rounded-md border-gray-200">
+      {" "}
       <div className="px-6 py-4 border-b bg-[#FFF8F3] border-gray-200">
         <h2 className="font-semibold text-gray-900">MY LISTINGS</h2>
       </div>
-
       <div className="md:p-4 p-2 space-y-4">
         {data?.map((listing) => {
           const categoryName = listing?.category?.name;
@@ -203,10 +203,9 @@ const MyListings = ({ data, APP_URL }) => {
                       </Link>
 
                       <Link
-                        href={{
-                          pathname: `/${listing?.slug}`,
-                          query: { preview: true },
-                        }}
+                        href={`/${listing?.slug}?preview=true`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3 max-md:px-2 py-1.5 max-md:text-[10px] uppercase text-orange-600 border border-orange-600 text-xs font-semibold rounded-sm transition-colors hover:bg-orange-50"
                       >
                         Preview
@@ -251,7 +250,6 @@ const MyListings = ({ data, APP_URL }) => {
           );
         })}
       </div>
-
       {(!data || data.length === 0) && (
         <div className="p-12 text-center text-gray-500">
           <p>No listings found. Create your first listing to get started.</p>

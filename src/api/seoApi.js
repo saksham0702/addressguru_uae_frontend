@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://localhost:5001";
 
 // USER API
@@ -8,13 +8,13 @@ import { API_URL } from "@/services/constants"
 export const get_seo_data = async (category_slug, city_slug) => {
   try {
     const response = await axios.get(
-      `${API_URL}/seo-content?category_slug=${category_slug}&city_slug=${city_slug}`
+      `${API_URL}/seo-content?category_slug=${category_slug}&city_slug=${city_slug}`,
     );
 
-    return response?.data?.data;
+    return response?.data?.data || null;
   } catch (error) {
-    console.log("error fetching seo data", error);
-    return error;
+    console.log("error fetching seo data", error.message);
+    return null;
   }
 };
 
@@ -31,7 +31,7 @@ export const upsert_seo_content = async (payload) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
-      }
+      },
     );
 
     return response?.data;
@@ -40,7 +40,6 @@ export const upsert_seo_content = async (payload) => {
     return error;
   }
 };
-
 
 // Get All SEO Content (Admin)
 export const get_all_seo_content = async () => {
@@ -59,18 +58,14 @@ export const get_all_seo_content = async () => {
   }
 };
 
-
 // Delete SEO Content
 export const delete_seo_content = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/seo-content/delete/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      }
-    );
+    const response = await axios.delete(`${API_URL}/seo-content/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
 
     return response?.data;
   } catch (error) {

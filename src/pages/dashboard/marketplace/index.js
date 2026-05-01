@@ -1,23 +1,23 @@
+// pages/dashboard/marketplace.jsx
+
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
-import MyListings from "@/components/Dashboard/MyListings";
+import MyMarketplaceListings from "@/components/Dashboard/MyMarketplace";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
-import { get_user_listings } from "@/api/uae-dashboard";
+import { get_marketplace_listings } from "@/api/uae-dashboard";
 
-const ListingsPage = () => {
+export default function MarketplacePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [data, setData] = useState([]);
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      router.replace("/");
-      return;
-    }
-    get_user_listings().then((res) => {
-      if (res) setData(res.listings);
+    if (!user) return router.replace("/");
+
+    get_marketplace_listings().then((res) => {
+      if (res) setData(res);
     });
   }, [user, loading]);
 
@@ -25,10 +25,9 @@ const ListingsPage = () => {
 
   return (
     <DashboardLayout>
-      {/* Remove the extra bg-white wrapper */}
-      <MyListings data={data} />
+      <div className="bg-white rounded-xl p-4">
+        <MyMarketplaceListings data={data} />
+      </div>
     </DashboardLayout>
   );
-};
-
-export default ListingsPage;
+}
