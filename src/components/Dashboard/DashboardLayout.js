@@ -7,7 +7,7 @@ import { useState } from "react";
 // Fixed dimensions
 const SIDEBAR_W = 240; // ✅ CHANGED from 160 to 240
 const NAVBAR_H = 70;
-const RIGHT_BANNER_W = 200;
+const RIGHT_BANNER_W = 220;
 
 const DashboardLayout = ({ children }) => {
   const [postAdd, setPostAdd] = useState(false);
@@ -65,18 +65,18 @@ const DashboardLayout = ({ children }) => {
           >
             <div
               className="sticky top-6"
-              style={{ height: `calc(100vh - ${NAVBAR_H}px - 48px)` }}
+              style={{ height: `calc(100vh - ${NAVBAR_H}px - 120px)` }}
             >
               <Image
                 src="/assets/ads-banner-dashboard.jpeg"
                 alt="ads"
                 width={200}
-                height={600}
-                className="w-full h-full object-cover rounded-xl"
+                height={800}
+                className="w-full h-full "
                 style={{
                   width: `${RIGHT_BANNER_W}px`,
                   height: "100%",
-                  objectFit: "cover",
+                  objectFit: "contain",
                 }}
               />
             </div>

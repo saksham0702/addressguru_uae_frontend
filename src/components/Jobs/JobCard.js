@@ -38,7 +38,7 @@ const JobCard = ({ data }) => {
         {/* company image section */}
         <div className="h-15 w-15 rounded-full mt-2 border md:hidden max-[360px]:hidden  border-gray-100 relative">
           <Image
-            src={`${API_URL}/${data?.company?.logo}`}
+            src={`${APP_URL}/${data?.company?.logo}`}
             alt={data?.company?.name}
             height={500}
             width={500}
@@ -77,7 +77,7 @@ const JobCard = ({ data }) => {
             </p>
             {/* right company image */}
             <Image
-              src={`${API_URL}/${data?.company?.logo}`}
+              src={`${APP_URL}/${data?.company?.logo}`}
               alt={data?.company?.name}
               height={500}
               width={500}

@@ -10,15 +10,19 @@ const ListingsPage = () => {
   const router = useRouter();
   const [data, setData] = useState([]);
 
+  const fetchListings = () => {
+    get_user_listings().then((res) => {
+      if (res) setData(res.listings);
+    });
+  };
+
   useEffect(() => {
     if (loading) return;
     if (!user) {
       router.replace("/");
       return;
     }
-    get_user_listings().then((res) => {
-      if (res) setData(res.listings);
-    });
+    fetchListings();
   }, [user, loading]);
 
   if (loading || !user) return null;
@@ -26,7 +30,7 @@ const ListingsPage = () => {
   return (
     <DashboardLayout>
       {/* Remove the extra bg-white wrapper */}
-      <MyListings data={data} />
+      <MyListings data={data} onRefresh={fetchListings} />
     </DashboardLayout>
   );
 };

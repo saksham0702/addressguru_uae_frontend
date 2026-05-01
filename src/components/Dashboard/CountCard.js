@@ -13,7 +13,7 @@ const CountCard = ({ data, onClick, activeTab }) => {
       `}
     >
       <Image
-        src={`/assets/Dashboard${data.image}.png`}
+        src={`/assets/${data.image}`}
         alt={data?.title}
         width={500}
         height={500}

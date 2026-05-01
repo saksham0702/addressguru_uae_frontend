@@ -7,7 +7,7 @@ export const get_user_listings = async (type) => {
   //   const userId = localStorage.getItem("userId");
   try {
     const response = await axios.get(
-      `${API_URL}/business-listing/get-listing-by-user?page=1&limit=50`,
+      `${API_URL}/business-listing/get-listing-by-user?page=1&limit=10`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -94,5 +94,43 @@ export const get_my_leads = async (listingId) => {
     return response?.data;
   } catch (error) {
     console.log("Error fetching user leads:", error);
+  }
+}
+
+
+export const unpublish_listing = async (listingId,type) => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.patch(
+      `${API_URL}/business-listing/${listingId}/${type}`,
+      { listingId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("i am user listings ", response?.data);
+    return response?.data;
+  } catch (error) {
+    console.log("Error fetching user listings:", error);
+  }
+}
+
+export const delete_listing = async (listingId) => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.delete(
+      `${API_URL}/business-listing/delete-listing/${listingId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("i am user listings ", response?.data);
+    return response?.data;
+  } catch (error) {
+    console.log("Error fetching user listings:", error);
   }
 }

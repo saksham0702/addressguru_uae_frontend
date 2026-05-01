@@ -14,7 +14,6 @@ import { MapPin } from "lucide-react";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data }) => {
-  const API_URL = "https://addressguru.ae/api";
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const message = `Hi,
@@ -46,7 +45,7 @@ https://addressguru.ae/${data?.slug}`;
             className="md:w-[160px] md:max-h-[195px] max-md:max-w-[32%] max-md:h-[120px] border-1 border-gray-200 rounded-sm max-[340]:w-[140px]  2xl:w-[190px] 2xl:h-[220px]  overflow-hidden "
           >
             <Image
-              src={`${API_URL}/${data?.logo}`}
+              src={`${APP_URL}/${data?.logo}`}
               alt={`${data?.businessName} logo`}
               width={500}
               height={500}

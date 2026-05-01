@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Edit, Eye, Briefcase, Users, DollarSign } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { API_URL } from "@/services/constants";
+import { API_URL, APP_URL } from "@/services/constants";
 import { get_all_applications } from "@/api/uae-job-listing";
 
 const MyJobListings = ({ data }) => {
@@ -111,7 +111,7 @@ const MyJobListings = ({ data }) => {
                     {/* Job Icon */}
                     <div className="w-20 h-20 max-md:w-13 max-md:h-13 flex items-center justify-center rounded-lg">
                       <Image
-                        src={`${API_URL}/${job?.company?.logo}`}
+                        src={`${APP_URL}/${job?.company?.logo}`}
                         alt="job"
                         width={500}
                         height={500}

@@ -382,14 +382,14 @@ const SearchResults = ({
       </Head>
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
-        <div className="flex flex-col min-md:w-[80%] max-md:min-w-full bg-white md:px-3 mx-auto md:pb-20 pr-2">
-          <section className="h-[100px] md:w-[900px] border mt-2 mx-auto rounded-lg">
+        <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20 pr-2">
+          <section className="h-[220px] w-full max-w-[95%] mt-2 mx-auto  rounded-lg">
             <div className="h-full w-full text-lg tect-center flex justify-center items-center">
               <Image
                 src="/assets/ads-city-slug.jpeg"
                 alt="ad1"
-                width={500}
-                height={500}
+                width={2000}
+                height={2000}
                 className="h-full w-full"
               />
             </div>
