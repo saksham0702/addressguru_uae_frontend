@@ -201,7 +201,6 @@ export async function getServerSideProps() {
     };
   } catch (err) {
     console.log("SSR ERROR:", err);
-
     return {
       props: {
         categories: [],

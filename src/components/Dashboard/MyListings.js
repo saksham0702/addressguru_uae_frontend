@@ -16,6 +16,7 @@ import {
   toggle_room_status,
 } from "@/api/rooms";
 import RoomsPanel from "./RoomsPanel";
+import { API_URL } from "@/services/constants";
 
 const ROOM_SUPPORTED_CATEGORIES = ["Hotel", "Hostel", "Yoga Studio"];
 
@@ -116,7 +117,7 @@ const MyListings = ({ data, APP_URL }) => {
                     <Image
                       width={500}
                       height={500}
-                      src={`${APP_URL}/${listing?.logo}`}
+                      src={`${API_URL}/${listing?.logo}`}
                       alt={listing?.businessName?.slice(0, 12)}
                       className="w-full h-full rounded-lg object-cover border border-gray-100"
                     />

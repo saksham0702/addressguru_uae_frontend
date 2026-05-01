@@ -13,12 +13,13 @@ const CountCard = ({ data, onClick, activeTab }) => {
       `}
     >
       <Image
-        src={`/assets/dashboard${data.image}.png`}
+        src={`/assets${data.image}.png`}
         alt={data?.title}
         width={500}
         height={500}
         className="h-11 w-11 max-md:scale-60"
       />
+      
 
       <span>
         <p className="text-sm max-md:text-xs font-semibold whitespace-nowrap text-right">

@@ -54,9 +54,6 @@ const viewMore = {
 };
 
 const PopularCategory = ({ data }) => {
-  console.log("PopularCategory",data);
-
-  // console.log("data", data);
   const { city } = useAuth();
   const [maxItems, setMaxItems] = useState(17);
   const [showAllCategory, setShowAllCategory] = useState(false);
