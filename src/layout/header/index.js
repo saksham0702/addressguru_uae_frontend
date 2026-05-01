@@ -109,7 +109,7 @@ const Header = () => {
 
   const logos = [
     { title: "to let", img: "/assets/toLet.png", link: "/properties" },
-    { title: "jobs", img: "/assets/jobs.png", link: "/jobs" },
+    { title: "jobs", img: "/assets/Dashboard/jobs.png", link: "/jobs" },
     {
       title: "marketplace",
       img: "/assets/marketPlace.png",
