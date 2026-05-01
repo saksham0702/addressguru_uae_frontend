@@ -41,11 +41,15 @@ const Dashboard = () => {
   }, []);
 
   // Listings (only what dashboard overview needs)
-  useEffect(() => {
-    if (!user) return;
+  const fetchListings = () => {
     get_user_listings().then((res) => {
       if (res) setMyListings(res?.listings);
     });
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchListings();
   }, [user]);
 
   if (loading || !user) return null;
@@ -54,31 +58,31 @@ const Dashboard = () => {
   const countData = [
     {
       route: "/dashboard/listings",
-      image: "/listing",
+      image: "count-listings.png",
       title: "YOUR LISTING",
       count: data?.listingCounts?.business,
     },
     {
       route: "/dashboard/marketplace",
-      image: "/products",
+      image: "count-products.png",
       title: "PRODUCTS",
       count: data?.listingCounts?.products,
     },
     {
       route: "/dashboard/jobs",
-      image: "/jobs",
+      image: "count-jobs.png",
       title: "JOBS",
       count: data?.listingCounts?.jobs,
     },
     {
       route: "/dashboard/properties",
-      image: "/properties",
+      image: "count-properties.png",
       title: "PROPERTIES",
       count: data?.listingCounts?.properties,
     },
     {
       route: null, // reviews stay on dashboard
-      image: "/reviews",
+      image: "count-reviews.png",
       title: "REVIEWS",
       count: data?.overview?.totalReviews,
     },
@@ -135,7 +139,7 @@ const Dashboard = () => {
 
       {/* RECENT LISTINGS PREVIEW */}
       <div className="bg-white rounded-xl p-4 mb-6">
-        <MyListings data={myListings} APP_URL={API_URL} />
+        <MyListings data={myListings} onRefresh={fetchListings} />
       </div>
     </DashboardLayout>
   );
