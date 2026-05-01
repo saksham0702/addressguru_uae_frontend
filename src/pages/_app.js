@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Footer from "@/layout/footer";
@@ -106,7 +105,7 @@ export default function App({ Component, pageProps }) {
           </Head> */}
           <div className="flex justify-center">
             <div
-              className={`w-full ${isAdmin ? "" : "max-w-[1750px]"} relative`}
+              className={`w-full ${isAdmin || isDashboard ? "" : "max-w-[1750px]"} relative`}
             >
               {/* ---------------- HEADER ---------------- */}
               {shouldShowHeader && (

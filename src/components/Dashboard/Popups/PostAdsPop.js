@@ -508,7 +508,7 @@ const PostAdsPop = ({ setPostAdd }) => {
       case "sale":
         return (
           <>
-            <h5 className="px-5 font-semibold text-[#323232]">
+            <h5 className="px-5 font-semibold z-50 text-[#323232]">
               Choose Your Category
             </h5>
             <section className="p-5">

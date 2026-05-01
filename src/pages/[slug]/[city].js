@@ -14,12 +14,11 @@ export async function getServerSideProps(context) {
   let ssrFilters = null;
 
   try {
-    const res = await axios.get(
-      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
-    );
-
+    // const res = await axios.get(
+    //   `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
+    // );
+    const res = [];
     const data = res?.data?.data;
-    console.log(data);
     ssrListings = data?.listings || [];
     ssrPageData = data?.pagination || null;
   } catch (err) {
@@ -27,7 +26,7 @@ export async function getServerSideProps(context) {
   }
 
   try {
-    ssrSeoContent = await get_seo_data(slug, city);
+    // ssrSeoContent = await get_seo_data(slug, city);
   } catch (err) {
     console.error("SSR seo fetch failed:", err.message);
   }

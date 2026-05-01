@@ -231,7 +231,6 @@ const Dashboard = () => {
           <Header />
         </div>
         <section className="h-full md:w-[82.5%] w-[99%] mx-auto [20000px]:w-full hide-scroll absolute flex top-21 right-0">
-      
           {renderSection()}
           <div className="flex  fixed right-0 h-full max-md:hidden pb-2 w-[12.5%] mr-2 gap-2">
             <div className=" w-full h-[90%] rounded-sm text-center">
