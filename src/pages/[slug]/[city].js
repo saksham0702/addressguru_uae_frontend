@@ -1,5 +1,4 @@
 // pages/[slug]/[city].jsx
-// NO "use client" here — that's App Router only. Pages Router doesn't use it.
 
 import axios from "axios";
 import { get_seo_data } from "@/api/seoApi";

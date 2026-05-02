@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function RightBusinessCard({ name }) {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [errors, setErrors] = useState({ name: false, email: false });
-  const [status, setStatus] = useState("idle"); // "idle" | "loading" | "sent"
+  const [status, setStatus] = useState("idle");
 
   const sendListing = async () => {
     const newErrors = {
@@ -23,13 +23,16 @@ export default function RightBusinessCard({ name }) {
     if (status === "sent" || status === "loading") return;
 
     setStatus("loading");
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      category_slug: name,
-    };
+
     try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        category_slug: name,
+      };
+
       const res = await send_listings_in_mail(payload);
+
       if (res?.data?.status === true) {
         setStatus("sent");
       } else {
@@ -42,83 +45,84 @@ export default function RightBusinessCard({ name }) {
   };
 
   const buttonContent = () => {
-    if (status === "loading") {
-      return (
-        <span className="flex items-center justify-center gap-2">
-          <svg
-            className="animate-spin h-4 w-4 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12" cy="12" r="10"
-              stroke="currentColor" strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          Sending...
-        </span>
-      );
-    }
-
-    if (status === "sent") {
-      return (
-        <span className="flex items-center justify-center gap-2">
-          <svg
-            className="h-4 w-4 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none" viewBox="0 0 24 24"
-            stroke="currentColor" strokeWidth={2.5}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-          Sent to your mail!
-        </span>
-      );
-    }
-
-    return "UNLOCK TOP DEALS";
+    if (status === "loading") return "Sending...";
+    if (status === "sent") return "Check your email ✓";
+    return "Get Top Listings";
   };
 
   return (
-    <div className="w-70 2xl:w-xs bg-[#FFF8F3] px-3 py-4 rounded-xl ">
-      <h2 className="text-md font-semibold text-gray-800 mb-1">
-        Explore the Top{" "}
-        <span className="text-[#FF6E04] capitalize">{name}</span>
-      </h2>
-      <p className="text-[13px] font-[500] tracking-tight mb-4">
-        You will receive the best listings details instantly, at no cost
-      </p>
+    <div className="w-80 2xl:w-96 bg-blue-50 border border-gray-100  px-5 py-6 rounded-md">
+      {/* HEADER */}
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-900 leading-snug">
+          Get Top <span className="text-[#FF6E04] capitalize">{name}</span>
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Receive the most relevant listings directly in your inbox
+        </p>
+      </div>
 
-      <NameNumberCard
-        layout="col"
-        formData={formData}
-        setFormData={(data) => {
-          setFormData(data);
-          setErrors({ name: false, email: false });
-        }}
-        errors={errors}
-      />
+      {/* FORM */}
+      <div className="mb-3">
+        <NameNumberCard
+          layout="col"
+          formData={formData}
+          setFormData={(data) => {
+            setFormData(data);
+            setErrors({ name: false, email: false });
+          }}
+          errors={errors}
+        />
+      </div>
 
+      {/* VALUE DETAILS */}
+      <div className="bg-white  mt-4 rounded-xs p-3 mb-4">
+        <ul className="text-xs text-gray-700 space-y-1.5">
+          <li>✔ Verified & trusted businesses</li>
+          <li>✔ Best pricing & offers available</li>
+          <li>✔ Quick comparison of top options</li>
+        </ul>
+      </div>
+
+      {/* CTA */}
       <button
         onClick={sendListing}
         disabled={status === "loading" || status === "sent"}
-        className={`w-full text-[13px] text-white font-semibold py-2 rounded-lg transition
-          ${status === "sent"
-            ? "bg-green-500 cursor-default"
-            : status === "loading"
-            ? "bg-[#FF6E04] opacity-80 cursor-not-allowed"
-            : "bg-[#FF6E04] hover:bg-orange-600 cursor-pointer"
+        className={`w-full text-sm text-white font-semibold py-2.5 rounded-lg transition
+          ${
+            status === "sent"
+              ? "bg-green-500 cursor-default"
+              : status === "loading"
+                ? "bg-[#FF6E04] opacity-80 cursor-not-allowed"
+                : "bg-[#FF6E04] hover:bg-orange-600"
           }`}
       >
         {buttonContent()}
       </button>
+
+      <div className="flex items-start gap-2 mt-3">
+        <input
+          type="checkbox"
+          checked
+          readOnly
+          className="mt-0.5 h-3.5 w-3.5 accent-[#FF6E04] cursor-default"
+        />
+        <p className="text-[11px] text-gray-500 leading-tight">
+          I agree to the{" "}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            className="text-[#FF6E04] hover:underline"
+          >
+            Privacy Policy
+          </a>
+        </p>
+      </div>
+
+      {/* TRUST NOTE */}
+      <p className="text-xs text-gray-500 text-center mt-3">
+        No spam. Only relevant listings.
+      </p>
     </div>
   );
 }
