@@ -86,6 +86,7 @@ const SearchResults = ({
   });
   const [filters, setFilters] = useState({
     sort_by: null,
+    rating: null,
     ag_verified: false,
     facilities_id: [],
     services_id: [],
@@ -103,6 +104,46 @@ const SearchResults = ({
   // ── Skip the very first client fetch since SSR already fetched page 1 ──
   const isFirstMount = useRef(true);
 
+  // ── Fetch filtered data when filters change ──
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
+    const fetchFilteredData = async () => {
+      try {
+        setIsLoading(true);
+        const currentSlug = router.query.slug || ssrSlug;
+        const currentCity = router.query.city || ssrCity;
+
+        const res = await axios.get(
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${currentSlug}/${currentCity}?${buildQueryParams(1)}`
+        );
+
+        const data = res?.data?.data;
+        if (data?.listings) {
+          setApiListings(data.listings);
+          setPageData(data.pagination);
+        } else {
+          setApiListings([]);
+          setPageData(null);
+        }
+      } catch (err) {
+        console.error("Filter fetch failed:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Debounce the API call slightly to avoid rapid calls
+    const timeoutId = setTimeout(() => {
+      fetchFilteredData();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [filters, router.query.slug, router.query.city, ssrSlug, ssrCity]);
+
   // ── Sync URL city into context so rest of app stays in sync ──
   useEffect(() => {
     if (!router.isReady || !setCity) return;
@@ -115,7 +156,7 @@ const SearchResults = ({
       cityFromUrl.slice(1).replace(/-/g, " ");
 
     setCity(formatted);
-  }, [router.query.city, router.isReady,setCity]);
+  }, [router.query.city, router.isReady, setCity]);
 
   const matchIds = (itemArray = [], selectedIds = []) =>
     itemArray.some((entry) => {
@@ -127,6 +168,7 @@ const SearchResults = ({
 
   const hasActiveFilters =
     activeFilters.sort_by !== null ||
+    activeFilters.rating !== null ||
     activeFilters.ag_verified !== false ||
     activeFilters.facilities_id.length > 0 ||
     activeFilters.services_id.length > 0 ||
@@ -146,6 +188,9 @@ const SearchResults = ({
     }
     if (f.ag_verified)
       result = result.filter((item) => item.isVerified === true);
+    if (f.rating) {
+      result = result.filter((item) => (item.statistics?.averageRating || 0) >= f.rating);
+    }
     if (f.facilities_id?.length > 0)
       result = result.filter((item) =>
         matchIds(item.facilities, f.facilities_id),
@@ -165,9 +210,7 @@ const SearchResults = ({
     return result;
   };
 
-  const listings = localFilters
-    ? applyLocalFilters(apiListings, localFilters)
-    : apiListings;
+  const listings = applyLocalFilters(apiListings, activeFilters);
 
   const handleFilterChange = (updatedFilters) => {
     setLocalFilters(null);
@@ -176,6 +219,7 @@ const SearchResults = ({
 
   const isFiltersEmpty = (f) =>
     f.sort_by === null &&
+    f.rating === null &&
     f.ag_verified === false &&
     f.facilities_id.length === 0 &&
     f.services_id.length === 0 &&
@@ -194,6 +238,7 @@ const SearchResults = ({
     setSearchInput("");
     setFilters({
       sort_by: null,
+      rating: null,
       ag_verified: false,
       facilities_id: [],
       services_id: [],
@@ -381,9 +426,9 @@ const SearchResults = ({
         />
       </Head>
 
-      <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-hidden justify-center bg-[#F8F7F7]">
+      <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-x-clip justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20 pr-2">
-          <section className="h-[220px] w-full max-w-[95%] mt-2 mx-auto  rounded-lg">
+          <section className="h-[113px] w-full max-w-[1000%] mt-1 mx-auto  rounded-lg">
             <div className="h-full w-full text-lg tect-center flex justify-center items-center">
               <Image
                 src="/assets/ads-city-slug.jpeg"
@@ -559,8 +604,8 @@ const SearchResults = ({
               )}
             </div>
 
-            <div className="mt-4 max-md:hidden sticky  top-[200px]">
-              <RightBusinessCard name={canonicalSlug} />
+            <div className="mt-4 max-md:hidden sticky  top-[80px]">
+              <RightBusinessCard name={apiListings?.[0]?.category?.name} />
             </div>
           </div>
 

@@ -48,6 +48,7 @@ const MobileFilterDrawer = ({
   const activeCount = [
     filters?.ag_verified,
     Boolean(filters?.sort_by),
+    Boolean(filters?.rating),
     filters?.facilities_id?.length > 0,
     filters?.services_id?.length > 0,
     filters?.payment_mode_id?.length > 0,

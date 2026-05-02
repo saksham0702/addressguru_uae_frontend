@@ -55,8 +55,6 @@ const stepLabel = (step) => {
   return map[step] ?? "Incomplete";
 };
 
-
-
 // ─── Enhanced Circular Progress ──────────────────────────────────────────────
 const CircularProgress = ({ percentage }) => {
   const radius = 28;
@@ -105,8 +103,6 @@ const CircularProgress = ({ percentage }) => {
   );
 };
 
-
-
 // ─── Toast Notification ────────────────────────────────────────────────────────
 const Toast = ({ toast }) => {
   if (!toast) return null;
@@ -129,9 +125,13 @@ const Toast = ({ toast }) => {
 
 // ─── Main MyListings ──────────────────────────────────────────────────────────
 const MyListings = ({ data, onRefresh }) => {
-  const [expandedRooms, setExpandedRooms] = useState({});
   const [selectedListing, setSelectedListing] = useState(null);
-  const [confirmModal, setConfirmModal] = useState({ open: false, action: null, listing: null });
+  const [roomsModalListing, setRoomsModalListing] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    action: null,
+    listing: null,
+  });
   const [actionLoading, setActionLoading] = useState(false);
   const [publishLoading, setPublishLoading] = useState({});
   const [toast, setToast] = useState(null);
@@ -185,9 +185,11 @@ const MyListings = ({ data, onRefresh }) => {
       } else {
         res = await unpublish_listing(listingId, "unpublish");
       }
-      
+
       if (res) {
-        showToast(`Listing ${action === "delete" ? "deleted" : "unpublished"} successfully!`);
+        showToast(
+          `Listing ${action === "delete" ? "deleted" : "unpublished"} successfully!`,
+        );
         if (onRefresh) onRefresh();
       } else {
         showToast(`Failed to ${action} listing.`, "error");
@@ -201,8 +203,8 @@ const MyListings = ({ data, onRefresh }) => {
     }
   };
 
-  const toggleRooms = (id) =>
-    setExpandedRooms((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleRoomsModalOpen = (listing) => setRoomsModalListing(listing);
+  const handleRoomsModalClose = () => setRoomsModalListing(null);
 
   return (
     <>
@@ -221,7 +223,6 @@ const MyListings = ({ data, onRefresh }) => {
               ROOM_SUPPORTED_CATEGORIES.includes(categoryName);
             const percent = stepToPercent(listing?.stepCompleted ?? 1);
             const listingId = listing._id ?? listing.id;
-            const isRoomOpen = expandedRooms[listingId];
             const stats = listing?.statistics || {};
 
             return (
@@ -290,47 +291,53 @@ const MyListings = ({ data, onRefresh }) => {
 
                       {/* Quick Stats */}
                       <div className="grid grid-cols-3 max-w-100 gap-1 mb-3">
-                        <div className=" rounded-lg px-2 py-1  ">
+                        <div
+                          onClick={() => setSelectedListing(listing)}
+                          className=" cursor-pointer rounded-lg px-2 py-1  "
+                        >
                           <div className="flex items-center gap-1.5 ">
                             <Eye size={14} className="text-blue-600" />
                             <span className="text-xs text-gray-600">Views</span>
-                          <p className="text-base font-semibold text-blue-700">
-                            {stats.totalViews || 0}
-                          </p>
+                            <p className="text-base font-semibold text-blue-700">
+                              {stats.totalViews || 0}
+                            </p>
                           </div>
                         </div>
-                        <div className=" rounded-lg px-2 py-1  ">
+                        <div
+                          onClick={() => setSelectedListing(listing)}
+                          className=" cursor-pointer rounded-lg px-2 py-1  "
+                        >
                           <div className="flex items-center gap-1.5 ">
                             <Phone size={14} className="text-green-600" />
                             <span className="text-xs text-gray-600">Calls</span>
-                          <p className="text-base font-semibold text-green-700">
-                            {stats.totalCalls || 0}
-                          </p>
+                            <p className="text-base font-semibold text-green-700">
+                              {stats.totalCalls || 0}
+                            </p>
                           </div>
                         </div>
-                        <div className=" rounded-lg px-2 py-1  ">
+                        <div
+                          onClick={() => setSelectedListing(listing)}
+                          className=" cursor-pointer rounded-lg px-2 py-1  "
+                        >
                           <div className="flex items-center gap-1.5 ">
                             <MessageSquare
                               size={14}
                               className="text-orange-600"
                             />
                             <span className="text-xs text-gray-600">Leads</span>
-                          <p className="text-base font-semibold text-orange-700">
-                            {stats.totalLeads || 0}
-                          </p>
+                            <p className="text-base font-semibold text-orange-700">
+                              {stats.totalLeads || 0}
+                            </p>
                           </div>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
                       <div className="flex gap-2 flex-wrap">
-                        <button
-                          onClick={() => setSelectedListing(listing)}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
-                        >
+                        <Link href={`/dashboard/listings/listing-details/${listing?.slug}`} className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all">
                           <Eye size={16} />
                           View Details
-                        </button>
+                        </Link>
 
                         <Link
                           href={`/dashboard/listing-forms?category=${listing?.category?._id}&categoryName=${encodeURIComponent(categoryName ?? "")}&name=${encodeURIComponent(listing?.slug)}`}
@@ -397,7 +404,9 @@ const MyListings = ({ data, onRefresh }) => {
                             ) : (
                               <ToggleLeft size={16} />
                             )}
-                            {publishLoading[listingId] ? "Publishing..." : "Publish"}
+                            {publishLoading[listingId]
+                              ? "Publishing..."
+                              : "Publish"}
                           </button>
                         )}
 
@@ -412,14 +421,10 @@ const MyListings = ({ data, onRefresh }) => {
 
                         {supportsRooms && (
                           <button
-                            onClick={() => toggleRooms(listingId)}
+                            onClick={() => handleRoomsModalOpen(listing)}
                             className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg transition-all"
                           >
                             Rooms
-                            <ChevronDown
-                              size={16}
-                              className={`transition-transform duration-200 ${isRoomOpen ? "rotate-180" : ""}`}
-                            />
                           </button>
                         )}
                       </div>
@@ -439,13 +444,6 @@ const MyListings = ({ data, onRefresh }) => {
                     </div>
                   </div>
                 </div>
-
-                {/* Rooms Panel */}
-                {supportsRooms && isRoomOpen && (
-                  <div className="mt-5 pt-5 border-t border-gray-200">
-                    <RoomsPanel listing={listing} />
-                  </div>
-                )}
               </div>
             );
           })}
@@ -482,12 +480,48 @@ const MyListings = ({ data, onRefresh }) => {
       {/* Confirmation Modal for Unpublish / Delete */}
       <ConfirmationModal
         isOpen={confirmModal.open}
-        onClose={() => setConfirmModal({ open: false, action: null, listing: null })}
+        onClose={() =>
+          setConfirmModal({ open: false, action: null, listing: null })
+        }
         onConfirm={handleConfirmAction}
         action={confirmModal.action}
         listingName={confirmModal.listing?.businessName || ""}
         isLoading={actionLoading}
       />
+
+      {/* Rooms Modal */}
+      {roomsModalListing && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 bg-gray-50">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Manage Rooms</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{roomsModalListing.businessName}</p>
+              </div>
+              <button
+                onClick={handleRoomsModalClose}
+                className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="px-6 py-4 overflow-y-auto">
+              <RoomsPanel
+                listing={roomsModalListing}
+                onRoomChanged={() => {
+                  if (onRefresh) onRefresh();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       <Toast toast={toast} />

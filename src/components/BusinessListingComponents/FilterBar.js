@@ -24,6 +24,25 @@ const FilterBar = ({
       hasDropdown: true,
       dropdownOptions: ["Newest", "Oldest"],
     },
+    {
+      label: "By Ratings",
+      hasDropdown: true,
+       dropdownOptions: ["5 stars", "4+ stars", "3+ stars",],
+      icon: (
+        <svg
+          width="16"
+          height="14"
+          viewBox="0 0 19 14"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18.3796 1.15416C17.8276 0.605505 16.9313 0.605851 16.3786 1.15416L7.3727 10.0943L3.36998 6.12096C2.81727 5.57231 1.92134 5.57231 1.36863 6.12096C0.815925 6.66961 0.815925 7.55897 1.36863 8.10762L6.37182 13.0741C6.648 13.3482 7.01014 13.4857 7.37232 13.4857C7.73449 13.4857 8.09698 13.3486 8.37316 13.0741L18.3796 3.14078C18.9323 2.59251 18.9323 1.70277 18.3796 1.15416Z"
+            fill="#FF6E04"
+          />
+        </svg>
+      ),
+    },
     ...(dynamicFilters?.facilities?.length > 0
       ? [
           {
@@ -118,6 +137,13 @@ const FilterBar = ({
       case "Payment Mode":
         onFilterChange({ payment_mode_id: value?.map((p) => p?.id) || [] });
         break;
+      case "By Ratings":
+        let ratingVal = null;
+        if (value === "5 stars") ratingVal = 5;
+        else if (value === "4+ stars") ratingVal = 4;
+        else if (value === "3+ stars") ratingVal = 3;
+        onFilterChange({ rating: ratingVal });
+        break;
       case "AG Verified":
         onFilterChange({ ag_verified: !filters.ag_verified });
         break;
@@ -157,6 +183,13 @@ const FilterBar = ({
       label: `Sort: ${sorted}`,
       // Sort removal → local only
       onRemove: () => onFilterRemove({ sort_by: null }),
+    });
+  }
+  if (filters.rating) {
+    activeChips.push({
+      key: "rating",
+      label: filters.rating === 5 ? "5 Stars" : `${filters.rating}+ Stars`,
+      onRemove: () => onFilterRemove({ rating: null }),
     });
   }
   if (filters.ag_verified) {
@@ -334,7 +367,9 @@ const FilterBar = ({
                   ? filters?.ag_verified
                   : item.label === "Sort by"
                     ? Boolean(filters?.sort_by)
-                    : item.label === "Facilities"
+                    : item.label === "By Ratings"
+                      ? Boolean(filters?.rating)
+                      : item.label === "Facilities"
                       ? filters?.facilities_id?.length > 0
                       : item.label === "Services"
                         ? filters?.services_id?.length > 0
