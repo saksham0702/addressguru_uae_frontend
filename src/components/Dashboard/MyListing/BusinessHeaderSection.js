@@ -19,10 +19,6 @@ const BusinessHeaderSection = ({ data }) => {
       <div className="flex items-center justify-between h-full max-md:px-2 md:px-6">
         {/* Left Side - Back button and Company Info */}
         <div className="flex items-center md:gap-4 gap-2">
-          {/* Back Button */}
-          <button onClick={() => router.back()} className="md:p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <ChevronLeft size={24} className="text-black" />
-          </button>
 
           {/* Company Logo */}
           <div className="w-16 max-md:w-20 h-16 overflow-hidden rounded-lg">
@@ -31,7 +27,7 @@ const BusinessHeaderSection = ({ data }) => {
               alt="company-logo"
               height={500}
               width={500}
-              className="h-full w-full "
+              className="h-full w-full border border-gray-200 overflow-hidden object-contain "
             />
           </div>
 

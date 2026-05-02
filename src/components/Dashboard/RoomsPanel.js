@@ -589,7 +589,7 @@ const RoomCard = ({ room, categoryType, listingId, onUpdated, onDeleted }) => {
 };
 
 // ─── Rooms Panel ──────────────────────────────────────────────────────────────
-const RoomsPanel = ({ listing }) => {
+const RoomsPanel = ({ listing, onRoomChanged }) => {
   const categoryType = listing?.category?.name;
   const listingId = listing._id ?? listing.id;
 
@@ -612,14 +612,20 @@ const RoomsPanel = ({ listing }) => {
   const handleAdded = (room) => {
     setRooms((p) => [...p, room]);
     setShowAddForm(false); // ← close form, card view appears automatically
+    onRoomChanged?.();
   };
 
-  const handleUpdated = (updated) =>
+  const handleUpdated = (updated) => {
     setRooms((p) =>
       p.map((r) => (r._id === updated._id ? { ...r, ...updated } : r)),
     );
+    onRoomChanged?.();
+  };
 
-  const handleDeleted = (id) => setRooms((p) => p.filter((r) => r._id !== id));
+  const handleDeleted = (id) => {
+    setRooms((p) => p.filter((r) => r._id !== id));
+    onRoomChanged?.();
+  };
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-100">

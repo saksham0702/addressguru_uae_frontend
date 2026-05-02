@@ -13,7 +13,8 @@ const DashboardLayout = ({ children }) => {
   const [postAdd, setPostAdd] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-white">
+      
       {/* FIXED SIDEBAR - Left */}
       <aside className="fixed left-0 top-0 h-screen w-60 z-40 bg-white border-r border-gray-200">
         {/* ✅ CHANGED w-40 to w-60 */}
@@ -50,7 +51,7 @@ const DashboardLayout = ({ children }) => {
         >
           {/* SCROLLABLE MAIN CONTENT */}
           <main
-            className="flex-1 py-6 overflow-y-auto"
+            className="flex-1 py-6  overflow-y-auto"
             style={{
               width: `calc(100% - ${RIGHT_BANNER_W}px - 24px)`,
             }}

@@ -1,5 +1,3 @@
-
-
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import CountCard from "@/components/Dashboard/CountCard";
 import DashboardOverview from "@/components/Dashboard/DashboardOverview";
@@ -91,7 +89,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       {/* BANNER */}
-      <section className="bg-[#D1E9FD] w-full rounded-xl flex justify-between pl-8 pr-0 mb-6">
+      <section className="bg-[#D1E9FD] w-full rounded-xl flex justify-between pl-8 pr-0 mb-3">
         <div className="py-6">
           <h6 className="text-2xl font-extrabold">
             Grow Faster. Sell Smarter.
@@ -115,8 +113,18 @@ const Dashboard = () => {
         </div>
       </section>
 
+      {/* OVERVIEW */}
+      <div className="bg-white rounded-xl p-4 mb-3">
+        <DashboardOverview data={data} />
+      </div>
+
+      {/* GRAPH */}
+      <div className="bg-white rounded-xl p-4 mb-3">
+        <Graph stats={data?.overview} />
+      </div>
+
       {/* COUNT CARDS */}
-      <div className="flex gap-3 flex-wrap mb-6">
+      <div className="flex gap-3 flex-wrap mb-3">
         {countData.map((item, index) => (
           <CountCard
             key={index}
@@ -125,16 +133,6 @@ const Dashboard = () => {
             onClick={() => item.route && router.push(item.route)}
           />
         ))}
-      </div>
-
-      {/* GRAPH */}
-      <div className="bg-white rounded-xl p-4 mb-6">
-        <Graph stats={data?.overview} />
-      </div>
-
-      {/* OVERVIEW */}
-      <div className="bg-white rounded-xl p-4 mb-6">
-        <DashboardOverview data={data} />
       </div>
 
       {/* RECENT LISTINGS PREVIEW */}

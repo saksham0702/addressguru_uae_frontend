@@ -97,6 +97,25 @@ export const get_my_leads = async (listingId) => {
   }
 }
 
+export const update_leads_status = async (enquiryId,status) => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.patch(
+      `${API_URL}/enquiries/${enquiryId}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("i am user listings ", response?.data);
+    return response?.data;
+  } catch (error) {
+    console.log("Error fetching user listings:", error);
+  }
+}
+
 
 export const unpublish_listing = async (listingId,type) => {
   const token = localStorage.getItem("authToken");
