@@ -94,7 +94,7 @@ const ListingDetails = () => {
     <DashboardLayout>
       <div className="w-full min-h-screen flex flex-col">
         {/* Fixed Header Section */}
-        <section className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200 rounded-b-2xl -mt-6 pt-6 pb-3 mb-4">
+        <section className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200 rounded-b-2xl   pb-3 mb-4">
           <div className="w-full mx-auto">
             <BusinessHeaderSection data={data} />
           </div>

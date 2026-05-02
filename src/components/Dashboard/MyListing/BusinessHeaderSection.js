@@ -6,13 +6,24 @@ import { useRouter } from "next/router";
 
 const BusinessHeaderSection = ({ data }) => {
   const router = useRouter();
-  const profileScore = 25;
+  const stepToPercent = (step) => {
+    const map = { 1: 17, 2: 33, 3: 50, 4: 67, 5: 83, 6: 100 };
+    return map[step] ?? 0;
+  };
+
+  const profileScore = stepToPercent(data?.stepCompleted ?? 1);
 
   // Calculate stroke-dasharray for circular progress
   const circumference = 2 * Math.PI * 16; // radius = 16
   const strokeDasharray = `${
     (profileScore / 100) * circumference
   } ${circumference}`;
+
+  const getColor = () => {
+    if (profileScore >= 83) return "#16a34a";
+    if (profileScore >= 50) return "#ea580c";
+    return "#ef4444";
+  };
 
   return (
     <>
@@ -109,38 +120,42 @@ const BusinessHeaderSection = ({ data }) => {
         </div>
 
         {/* Circular Progress */}
-        <div className="relative max-md:scale-85 bottom-2 w-17 h-17">
-          <svg className="w-17 h-17 transform -rotate-90" viewBox="0 0 40 40">
-            {/* Background circle */}
-            <circle
-              cx="20"
-              cy="20"
-              r="16"
-              stroke="#fee2e2"
-              strokeWidth="8"
-              fill="transparent"
-            />
-            {/* Progress circle */}
-            <circle
-              cx="20"
-              cy="20"
-              r="16"
-              stroke="#ef4444"
-              strokeWidth="8"
-              fill="transparent"
-              strokeDasharray={strokeDasharray}
-              className="transition-all duration-500 ease-in-out"
-            />
-          </svg>
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+          <div className="relative w-17 h-17">
+            <svg className="w-17 h-17 transform -rotate-90" viewBox="0 0 40 40">
+              {/* Background circle */}
+              <circle
+                cx="20"
+                cy="20"
+                r="16"
+                stroke="#e5e7eb"
+                strokeWidth="4"
+                fill="transparent"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="20"
+                cy="20"
+                r="16"
+                stroke={getColor()}
+                strokeWidth="4"
+                fill="transparent"
+                strokeDasharray={circumference}
+                strokeDashoffset={circumference - (profileScore / 100) * circumference}
+                strokeLinecap="round"
+                className="transition-all duration-500 ease-in-out"
+              />
+            </svg>
 
-          {/* Center text */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-bold text-gray-900">
-              {profileScore}%
-            </span>
+            {/* Center text */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-sm font-bold text-gray-900 leading-tight">
+                {profileScore}%
+              </span>
+            </div>
           </div>
-          <p className="text-gray-500 text-[10px] ml-1 mt-1 font-medium capitalize text-cenrer md:hidden">
-            profit score
+          <p className="text-[10px] text-gray-500 font-medium">
+            Complete
           </p>
         </div>
       </div>
