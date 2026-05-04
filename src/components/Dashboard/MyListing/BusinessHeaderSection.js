@@ -27,7 +27,7 @@ const BusinessHeaderSection = ({ data }) => {
 
   return (
     <>
-      <div className="flex items-center justify-between h-full max-md:px-2 md:px-6">
+      <div className="flex items-center justify-between h-full max-md:px-2 pt-2 md:px-6">
         {/* Left Side - Back button and Company Info */}
         <div className="flex items-center md:gap-4 gap-2">
 

@@ -259,6 +259,7 @@ const ProfilePage = () => {
   };
 
   return (
+    <DashboardLayout>
       <section className="w-full">
         <div className="w-full">
           {/* Header */}
@@ -295,7 +296,7 @@ const ProfilePage = () => {
           <div className="bg-white rounded-xl overflow-hidden">
             {/* Avatar Section */}
             <div className="px-8 pb-8">
-              <div className="relative  my-4">
+              <div className="relative  mb-6">
                 <div className="relative inline-block">
                   <Image
                     src={formData?.avatar || "/assets/default-avatar.png"}
@@ -447,11 +448,7 @@ const ProfilePage = () => {
                     <input
                       type="date"
                       name="dob"
-                      value={
-                        formData?.dob
-                          ? new Date(formData.dob).toISOString().split("T")[0]
-                          : ""
-                      }
+                      value={formData?.dob ? new Date(formData.dob).toISOString().split('T')[0] : ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -788,6 +785,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </section>
+    </DashboardLayout>
   );
 };
 
