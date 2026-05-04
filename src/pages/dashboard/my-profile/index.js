@@ -336,8 +336,8 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium px-4 py-2.5">
-                      {userData?.name}
+                    <p className={`font-medium px-4 py-2.5 ${userData?.name ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {userData?.name || "Not Updated"}
                     </p>
                   )}
                 </div>
@@ -357,8 +357,8 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium px-4 py-2.5">
-                      {userData?.email}
+                    <p className={`font-medium px-4 py-2.5 ${userData?.email ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {userData?.email || "Not Updated"}
                     </p>
                   )}
                 </div>
@@ -432,8 +432,8 @@ const ProfilePage = () => {
                       />
                     </div>
                   ) : (
-                    <p className="text-gray-900 font-medium px-4 py-2.5">
-                      {userData?.country_code} {userData?.phone}
+                    <p className={`font-medium px-4 py-2.5 ${userData?.phone ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {userData?.phone ? `${userData?.country_code || '+971'} ${userData?.phone}` : "Not Updated"}
                     </p>
                   )}
                 </div>
@@ -453,7 +453,7 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : !userData?.dob ? (
-                    <p className="text-gray-900 font-medium px-4 py-2.5">
+                    <p className="text-gray-400 font-medium px-4 py-2.5">
                       Not Updated
                     </p>
                   ) : (
@@ -482,8 +482,8 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium px-4 py-2.5">
-                      {userData?.city}
+                    <p className={`font-medium px-4 py-2.5 ${userData?.city ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {userData?.city || "Not Updated"}
                     </p>
                   )}
                 </div>
@@ -504,8 +504,8 @@ const ProfilePage = () => {
                     placeholder="Tell us about yourself..."
                   />
                 ) : (
-                  <p className="text-gray-700 px-4 py-2.5 bg-gray-50 rounded-lg">
-                    {userData?.profile_bio}
+                  <p className={`px-4 py-2.5 rounded-lg ${userData?.profile_bio ? 'text-gray-700 bg-gray-50' : 'text-gray-400 bg-gray-50'}`}>
+                    {userData?.profile_bio || "Not Updated"}
                   </p>
                 )}
               </div>
