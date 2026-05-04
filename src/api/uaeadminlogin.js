@@ -14,7 +14,7 @@ export const loginUser = async (payload) => {
       withCredentials: true,
     });
 
-    console.log("login response:", response.data);
+    // console.log("login response:", response.data);
     return response;
   } catch (err) {
     console.log("login api error", err?.response?.data || err.message);

@@ -73,7 +73,8 @@ const Login = ({ setShowLogin }) => {
       //   setResError(res?.error || "Something went wrong. Please try again.");
       // }
     } catch (error) {
-      console.error("Login error:", error);
+      console.log("Login error:", error);
+      setResError(error?.response?.data?.message || "Something went wrong");
       // toast.error("Something went wrong!");
     } finally {
       setLoading(false);
