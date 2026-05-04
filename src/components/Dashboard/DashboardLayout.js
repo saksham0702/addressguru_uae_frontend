@@ -51,7 +51,7 @@ const DashboardLayout = ({ children }) => {
         >
           {/* SCROLLABLE MAIN CONTENT */}
           <main
-            className="flex-1 py-6  overflow-y-auto"
+            className="flex-1 py-6  hide-scroll overflow-y-auto"
             style={{
               width: `calc(100% - ${RIGHT_BANNER_W}px - 24px)`,
             }}

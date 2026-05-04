@@ -47,54 +47,54 @@ const ListingDetails = () => {
     }
   }, [slug]);
 
-  const statsData = [
-    {
-      title: "TOTAL VIEWS",
-      value: data?.statistics?.totalViews || 0,
-      changeType: "positive",
-      subtitle: "Since last week",
-      bgColor: "#FBF0ED",
-      icon: <Eye size={18} />,
-    },
-    {
-      title: "TOTAL WHATSAP",
-      value: data?.statistics?.totalCalls || 0,
-      changeType: "positive",
-      subtitle: "Since last week",
-      bgColor: "#E8F7F4",
-      icon: <Phone size={18} />,
-    },
-    {
-      title: "TOTAL LEADS",
-      value: data?.statistics?.totalLeads || 0,
-      changeType: "neutral",
-      subtitle: "Since last week",
-      bgColor: "#FEF7DE",
-      icon: <UserPlus size={18} />,
-    },
-    {
-      title: "TOTAL REVIEWS",
-      value: data?.statistics?.totalReviews || 0,
-      changeType: "neutral",
-      subtitle: "Since last week",
-      bgColor: "#D8E7FC",
-      icon: <Star size={18} />,
-    },
-    {
-      title: "WEBSITE VISIT",
-      value: data?.statistics?.totalWebsiteVisits || 0,
-      changeType: "neutral",
-      subtitle: "Since last week",
-      bgColor: "#FBE7F4",
-      icon: <Globe size={18} />,
-    },
-  ];
+  // const statsData = [
+  //   {
+  //     title: "TOTAL VIEWS",
+  //     value: data?.statistics?.totalViews || 0,
+  //     changeType: "positive",
+  //     subtitle: "Since last week",
+  //     bgColor: "#FBF0ED",
+  //     icon: <Eye size={18} />,
+  //   },
+  //   {
+  //     title: "TOTAL WHATSAP",
+  //     value: data?.statistics?.totalCalls || 0,
+  //     changeType: "positive",
+  //     subtitle: "Since last week",
+  //     bgColor: "#E8F7F4",
+  //     icon: <Phone size={18} />,
+  //   },
+  //   {
+  //     title: "TOTAL LEADS",
+  //     value: data?.statistics?.totalLeads || 0,
+  //     changeType: "neutral",
+  //     subtitle: "Since last week",
+  //     bgColor: "#FEF7DE",
+  //     icon: <UserPlus size={18} />,
+  //   },
+  //   {
+  //     title: "TOTAL REVIEWS",
+  //     value: data?.statistics?.totalReviews || 0,
+  //     changeType: "neutral",
+  //     subtitle: "Since last week",
+  //     bgColor: "#D8E7FC",
+  //     icon: <Star size={18} />,
+  //   },
+  //   {
+  //     title: "WEBSITE VISIT",
+  //     value: data?.statistics?.totalWebsiteVisits || 0,
+  //     changeType: "neutral",
+  //     subtitle: "Since last week",
+  //     bgColor: "#FBE7F4",
+  //     icon: <Globe size={18} />,
+  //   },
+  // ];
 
   return (
     <DashboardLayout>
       <div className="w-full min-h-screen flex flex-col">
         {/* Fixed Header Section */}
-        <section className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200 rounded-b-2xl   pb-3 mb-4">
+        <section className="sticky top-[-25px] z-50 w-full bg-white border-b border-gray-100    pb-3 mb-4">
           <div className="w-full mx-auto">
             <BusinessHeaderSection data={data} />
           </div>

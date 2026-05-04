@@ -35,6 +35,7 @@ import { API_URL, APP_URL } from "@/services/constants";
 import DetailsModal from "./MyListing/DetailsModal";
 import { unpublish_listing, delete_listing } from "@/api/uae-dashboard";
 import ConfirmationModal from "./MyListing/ConfirmationModal";
+import PostAdsPop from "./Popups/PostAdsPop";
 
 const ROOM_SUPPORTED_CATEGORIES = ["Hotel", "Hostel", "Yoga Studio"];
 
@@ -136,6 +137,7 @@ const MyListings = ({ data, onRefresh }) => {
   const [publishLoading, setPublishLoading] = useState({});
   const [toast, setToast] = useState(null);
 
+  const [postAdd,setPostAdd] = useState(false);
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -458,13 +460,13 @@ const MyListings = ({ data, onRefresh }) => {
             <p className="text-gray-600 mb-6">
               Create your first listing to get started
             </p>
-            <Link
-              href="/dashboard/create-listing"
+            <button
+            onClick={() => setPostAdd(true)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-all"
             >
               <Plus size={20} />
               Create Listing
-            </Link>
+            </button>
           </div>
         )}
       </div>
@@ -525,6 +527,7 @@ const MyListings = ({ data, onRefresh }) => {
 
       {/* Toast Notification */}
       <Toast toast={toast} />
+      {postAdd && <PostAdsPop setPostAdd={setPostAdd} />}
     </>
   );
 };

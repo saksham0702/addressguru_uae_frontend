@@ -46,7 +46,7 @@ export default function Document() {
         <meta name="ICBM" content="25.2048, 55.2708" />
 
         {/* ── Robots default (per-page can override) ── */}
-        <meta name="robots" content="index, follow" />
+        {/* <meta name="robots" content="index, follow" /> */}
 
         {/* ── Google Fonts: Poppins ── */}
         <link

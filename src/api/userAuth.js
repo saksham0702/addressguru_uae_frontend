@@ -84,14 +84,7 @@ export const social_login = async (postdata) => {
 
 export const updateProfile = async (postdata) => {
   try {
-    // const formData = new FormData();
-
-    // // Append all fields dynamically
-    // for (const key in postdata) {
-    //   formData.append(key, postdata[key]);
-    // }
-
-    const response = await axios.put(`${API_URL}/update-profile`, postdata, {
+    const response = await axios.put(`${API_URL}/user/update-profile`, postdata, {
       withCredentials: true,
       headers: {
         "Content-Type": "multipart/form-data",

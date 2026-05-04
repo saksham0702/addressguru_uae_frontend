@@ -2,7 +2,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { LayoutDashboard, Briefcase, Package, Home, List } from "lucide-react";
+import { LayoutDashboard, Briefcase, Package, Home, List, User } from "lucide-react";
 
 const DashboardSidebar = () => {
   const router = useRouter();
@@ -37,6 +37,11 @@ const DashboardSidebar = () => {
       label: "Properties",
       link: "/dashboard/properties",
       icon: <Home size={18} />,
+    },
+    {
+      label: "My Profile",
+      link: "/dashboard/my-profile",
+      icon: <User size={18} />,
     },
   ];
 

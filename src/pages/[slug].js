@@ -226,7 +226,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
   // Generate FAQs
   const faqs = generateFAQs(data, serverCity);
-  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${serverCity} | AddressGuru`;
+  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${data?.city?.name} | AddressGuru`;
   const pageDesc = (
     data?.seo?.description ||
     data?.description ||
