@@ -17,9 +17,9 @@ const Footer = () => {
       <Descriptions />
 
       <div className="h-[60px] w-full bg-[#181D2D] text-white flex items-center justify-between font-bold px-7">
-        <h3>23,759 Live Ads | 3,738+ Agents</h3>
+        <h3>150+ Live Ads</h3>
         <h3>
-          © 2025 AddressGuru | by :
+          © 2026 AddressGuru | by :
           <Link href="https://adxventure.com" target="_blank">
             {" "}
             AdxVenture

@@ -33,6 +33,7 @@ import { APP_URL } from "@/services/constants";
 import ConfirmModal from "@/components/SeeDetails/Popups/ConfirmModal";
 import { generateFAQs } from "@/utils/generateFAQs";
 import FAQSection from "@/components/SeeDetails/FAQSection";
+import ReviewSection from "@/components/SeeDetails/ReviewSection";
 
 // ─────────────────────────────────────────────────────────────
 // SSR — fetch listing + rooms in parallel, never double-fetch
@@ -861,7 +862,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                 title="Payment Modes"
                 description={`${data?.businessName} accepts the following payment methods:`}
                 items={data?.paymentModes}
-                useGrid={false} // because this was vertical
+                // useGrid={true}
               />
               {/* FAQ SECTION */}
               <FAQSection faqs={faqs} />
@@ -908,6 +909,11 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                     <strong className="text-[#FF6E04]">AddressGuru UAE</strong>.
                   </p>
                 </div>
+              </div>
+
+              {/* reviews section */}
+              <div className="mt-5 md:pl-2 px-1">
+              <ReviewSection slug={data?.slug} />
               </div>
             </div>
 

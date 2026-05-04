@@ -248,9 +248,9 @@ const MyListings = ({ data, onRefresh }) => {
                     <div className="flex-1 min-w-0">
                       {/* Business Name & Status */}
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                        <Link href={`/dashboard/listings/listing-details/${listing?.slug}`} className="font-semibold text-lg hover:scale-105  hover:text-blue-600 text-gray-900 line-clamp-1">
                           {listing?.businessName}
-                        </h3>
+                        </Link>
                         {listing?.status && (
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${

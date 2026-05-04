@@ -1,15 +1,11 @@
 import { get_listing_data } from "@/api/listing-form";
-import { get_listing_data_single } from "@/api/showlistings";
 import { get_my_leads } from "@/api/uae-dashboard";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardOverview from "@/components/Dashboard/DashboardOverview";
-import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import Graph from "@/components/Dashboard/Graph";
 import BusinessHeaderSection from "@/components/Dashboard/MyListing/BusinessHeaderSection";
 import QuickEdit from "@/components/Dashboard/MyListing/QuickEdit";
 import RecentLeads from "@/components/Dashboard/RecentLeads";
-import ReviewSlider from "@/components/Register/ReviewSlider";
-import { Eye, Globe, Phone, Star, UserPlus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";

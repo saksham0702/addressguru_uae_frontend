@@ -29,7 +29,13 @@ const BusinessHeaderSection = ({ data }) => {
     <>
       <div className="flex items-center justify-between h-full max-md:px-2 pt-2 md:px-6">
         {/* Left Side - Back button and Company Info */}
-        <div className="flex items-center md:gap-4 gap-2">
+        <div
+          onClick={() => router.push("/dashboard/listings")}
+          className="flex items-center  md:gap-4 gap-2 cursor-pointer"
+        >
+          <span className=" max-md:block hover:text-orange-500 hover:bg-gray-100 transition-all max-w-5">
+            <ChevronLeft />
+          </span>
 
           {/* Company Logo */}
           <div className="w-16 max-md:w-20 h-16 overflow-hidden rounded-lg">
@@ -46,10 +52,11 @@ const BusinessHeaderSection = ({ data }) => {
           <div className="flex flex-col ">
             <div className="">
               <h1 className="font-medium text-gray-900 text-sm max-md:text-xs   max-md:leading-4 max-md:font-bold 2xl:max-w-sm lg:max-w-[21rem] 2xl:leading-5 2xl:text-lg">
-                {data?.businessName} {" "}
+                {data?.businessName}{" "}
                 <span className="text-[11px] font-medium max-md:text-[9px] md:whitespace-nowrap text-gray-600">
-                   {" "}{data?.businessAddress}
-                 </span>
+                  {" "}
+                  {data?.businessAddress}
+                </span>
               </h1>
             </div>
 
@@ -100,7 +107,10 @@ const BusinessHeaderSection = ({ data }) => {
                   />
                 </svg>
                 <p className="text-sm max-md:text-[10px] whitespace-nowrap font-medium ">
-                  Category : <strong className="capitalize">{data?.category?.slug}</strong>{" "}
+                  Category :{" "}
+                  <strong className="capitalize">
+                    {data?.category?.slug}
+                  </strong>{" "}
                 </p>
               </span>
 
@@ -141,7 +151,9 @@ const BusinessHeaderSection = ({ data }) => {
                 strokeWidth="4"
                 fill="transparent"
                 strokeDasharray={circumference}
-                strokeDashoffset={circumference - (profileScore / 100) * circumference}
+                strokeDashoffset={
+                  circumference - (profileScore / 100) * circumference
+                }
                 strokeLinecap="round"
                 className="transition-all duration-500 ease-in-out"
               />
@@ -154,9 +166,7 @@ const BusinessHeaderSection = ({ data }) => {
               </span>
             </div>
           </div>
-          <p className="text-[10px] text-gray-500 font-medium">
-            Complete
-          </p>
+          <p className="text-[10px] text-gray-500 font-medium">Complete</p>
         </div>
       </div>
     </>
