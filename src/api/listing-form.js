@@ -165,3 +165,23 @@ export const get_all_admin_listings = async ({
     return null;
   }
 };
+
+export const update_additional_fields = async (listingId, data) => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.put(
+      `${API_URL}/business-listings/${listingId}/additional-fields`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API ERROR:", error?.response);
+    return error.response?.data;
+  }
+};

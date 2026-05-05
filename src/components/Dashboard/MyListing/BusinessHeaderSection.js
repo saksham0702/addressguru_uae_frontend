@@ -1,175 +1,343 @@
 import React from "react";
-import { ChevronLeft, ChevronDown } from "lucide-react";
+import {
+  ChevronLeft,
+  Eye,
+  Phone,
+  MessageSquare,
+  Star,
+  Globe,
+  Plus,
+  MousePointerClick,
+  Building2,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { APP_URL } from "@/services/constants";
 import { useRouter } from "next/router";
+import { X } from "lucide-react";
+import RoomsPanel from "../RoomsPanel";
+import AddInfoModal from "./AddInfoModal";
 
-const BusinessHeaderSection = ({ data }) => {
-  const router = useRouter();
-  const stepToPercent = (step) => {
-    const map = { 1: 17, 2: 33, 3: 50, 4: 67, 5: 83, 6: 100 };
-    return map[step] ?? 0;
-  };
-
-  const profileScore = stepToPercent(data?.stepCompleted ?? 1);
-
-  // Calculate stroke-dasharray for circular progress
-  const circumference = 2 * Math.PI * 16; // radius = 16
-  const strokeDasharray = `${
-    (profileScore / 100) * circumference
-  } ${circumference}`;
+// ── Circular Progress ─────────────────────────────────────────────────────────
+const CircularProgress = ({ percentage }) => {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   const getColor = () => {
-    if (profileScore >= 83) return "#16a34a";
-    if (profileScore >= 50) return "#ea580c";
+    if (percentage >= 83) return "#16a34a";
+    if (percentage >= 50) return "#ea580c";
     return "#ef4444";
   };
 
   return (
-    <>
-      <div className="flex items-center justify-between h-full max-md:px-2 pt-2 md:px-6">
-        {/* Left Side - Back button and Company Info */}
-        <div
-          onClick={() => router.push("/dashboard/listings")}
-          className="flex items-center  md:gap-4 gap-2 cursor-pointer"
-        >
-          <span className=" max-md:block hover:text-orange-500 hover:bg-gray-100 transition-all max-w-5">
-            <ChevronLeft />
-          </span>
+    <div className="relative w-20 h-20 flex-shrink-0">
+      <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 70 70">
+        <circle
+          cx="35"
+          cy="35"
+          r={radius}
+          stroke="#e5e7eb"
+          strokeWidth="7"
+          fill="none"
+        />
+        <circle
+          cx="35"
+          cy="35"
+          r={radius}
+          stroke={getColor()}
+          strokeWidth="7"
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="transition-all duration-500 ease-in-out"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-sm font-semibold text-gray-800 leading-tight">
+          {percentage}%
+        </span>
+        <span className="text-[10px] text-gray-500 leading-tight">
+          Complete
+        </span>
+      </div>
+    </div>
+  );
+};
 
-          {/* Company Logo */}
-          <div className="w-16 max-md:w-20 h-16 overflow-hidden rounded-lg">
-            <Image
-              src={`${APP_URL}/${data?.logo}`}
-              alt="company-logo"
-              height={500}
-              width={500}
-              className="h-full w-full border border-gray-200 overflow-hidden object-contain "
-            />
+const stepToPercent = (step) => {
+  const map = { 1: 17, 2: 33, 3: 50, 4: 67, 5: 83, 6: 100 };
+  return map[step] ?? 0;
+};
+
+const stepLabel = (step) => {
+  const map = {
+    1: "Business Info",
+    2: "Social Links",
+    3: "Contact Details",
+    4: "SEO",
+    5: "Media",
+    6: "Plan & Published",
+  };
+  return map[step] ?? "Incomplete";
+};
+
+const ROOM_SUPPORTED_CATEGORIES = ["Hotel", "Hostel", "Yoga Studio"];
+
+const BusinessHeaderSection = ({ data }) => {
+  const router = useRouter();
+  const [showRoomsModal, setShowRoomsModal] = React.useState(false);
+  const [showAddInfoModal, setShowAddInfoModal] = React.useState(false);
+
+  const percent = stepToPercent(data?.stepCompleted ?? 1);
+  const stats = data?.statistics || {};
+  const categoryName = data?.category?.name || data?.category?.slug || "";
+  const supportsRooms = ROOM_SUPPORTED_CATEGORIES.includes(categoryName);
+
+  return (
+    <div className="border-2 border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-orange-300 transition-all duration-200 bg-white">
+      <div className="flex gap-6">
+        {/* Left Section - Image & Main Info */}
+        <div className="flex gap-4 flex-1 min-w-0">
+          {/* Back Button + Logo */}
+          <div className="flex items-start gap-2">
+            <button
+              onClick={() => router.push("/dashboard/listings")}
+              className="mt-2 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-orange-500 transition-all flex-shrink-0"
+            >
+              <ChevronLeft size={20} />
+            </button>
+
+            <div className="relative w-28 h-28 flex-shrink-0">
+              <Image
+                width={500}
+                height={500}
+                src={`${APP_URL}/${data?.logo}`}
+                alt={data?.businessName || "Business"}
+                className="w-full h-full rounded-xl object-contain border-2 border-gray-200 shadow-sm"
+              />
+            </div>
           </div>
 
-          {/* Company Details */}
-          <div className="flex flex-col ">
-            <div className="">
-              <h1 className="font-medium text-gray-900 text-sm max-md:text-xs   max-md:leading-4 max-md:font-bold 2xl:max-w-sm lg:max-w-[21rem] 2xl:leading-5 2xl:text-lg">
-                {data?.businessName}{" "}
-                <span className="text-[11px] font-medium max-md:text-[9px] md:whitespace-nowrap text-gray-600">
-                  {" "}
-                  {data?.businessAddress}
-                </span>
+          <div className="flex-1 min-w-0">
+            {/* Business Name & Status */}
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h1 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                {data?.businessName}
               </h1>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {data?.isPublished && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                    <Eye size={12} />
+                    Published
+                  </span>
+                )}
+                {data?.status && (
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                      data.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : data.status === "rejected"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {data.status.charAt(0).toUpperCase() +
+                      data.status.slice(1)}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <section className="flex md:items-center md:gap-7 max-md:flex-col ">
-              <span className="flex gap-2 items-center mt-[2px]">
+            {/* Address */}
+            <p
+              className="text-sm text-gray-600 line-clamp-1 mb-3 leading-relaxed"
+              title={data?.businessAddress}
+            >
+              {data?.businessAddress}
+            </p>
+
+            {/* Category & Plan */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {categoryName && (
+                <span className="inline-flex items-center gap-1 text-xs font-semibold bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
+                  <Building2 size={12} />
+                  {categoryName}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                Starter Plan
+              </span>
+              <span className="text-xs bg-orange-50 text-orange-500 px-3 py-1 font-bold rounded-full cursor-pointer hover:bg-orange-100 transition-colors">
+                UPGRADE NOW
+              </span>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-5 max-w-xl gap-1 mb-3">
+              <div className="rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <Eye size={14} className="text-blue-600" />
+                  <span className="text-xs text-gray-600">Views</span>
+                  <p className="text-base font-semibold text-blue-700">
+                    {stats.totalViews || 0}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <Phone size={14} className="text-green-600" />
+                  <span className="text-xs text-gray-600">Calls</span>
+                  <p className="text-base font-semibold text-green-700">
+                    {stats.totalCalls || 0}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <MessageSquare size={14} className="text-orange-600" />
+                  <span className="text-xs text-gray-600">Leads</span>
+                  <p className="text-base font-semibold text-orange-700">
+                    {stats.totalLeads || 0}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <Star size={14} className="text-yellow-500" />
+                  <span className="text-xs text-gray-600">Reviews</span>
+                  <p className="text-base font-semibold text-yellow-600">
+                    {stats.totalReviews || 0}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <Globe size={14} className="text-purple-600" />
+                  <span className="text-xs text-gray-600">Web</span>
+                  <p className="text-base font-semibold text-purple-700">
+                    {stats.totalWebsiteVisits || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <Link
+                href={`/dashboard/listing-forms?category=${data?.category?._id}&categoryName=${encodeURIComponent(categoryName ?? "")}&name=${encodeURIComponent(data?.slug ?? "")}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all"
+              >
                 <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 11 11"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 18 18"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M0.837168 0.7177C0.771118 0.7177 0.717572 0.771255 0.717572 0.837317V3.70812C0.717572 3.77418 0.771118 3.82773 0.837168 3.82773H3.70746C3.77351 3.82773 3.82705 3.77418 3.82705 3.70812V0.837317C3.82705 0.771255 3.77351 0.7177 3.70746 0.7177H0.837168ZM0 0.837317C0 0.374879 0.374812 0 0.837168 0H3.70746C4.16981 0 4.54462 0.374879 4.54462 0.837317V3.70812C4.54462 4.17056 4.16981 4.54543 3.70746 4.54543H0.837168C0.374812 4.54543 0 4.17056 0 3.70812V0.837317Z"
-                    fill="#323232"
+                    d="M16.356 4.5739L8.75696 12.1729C8.00024 12.9297 5.75395 13.2801 5.25212 12.7783C4.7503 12.2765 5.09281 10.0302 5.84954 9.2735L13.4566 1.66647C13.6442 1.4618 13.8713 1.29728 14.1243 1.18282C14.3772 1.06835 14.6507 1.0063 14.9283 1.00045C15.2058 0.994616 15.4818 1.04507 15.7393 1.14879C15.9968 1.25251 16.2307 1.40736 16.4267 1.60394C16.6227 1.80053 16.7769 2.0348 16.8799 2.29261C16.9829 2.55043 17.0327 2.82643 17.0261 3.10399C17.0195 3.38155 16.9566 3.65492 16.8415 3.90754C16.7264 4.16017 16.5612 4.38686 16.356 4.5739Z"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M0.837168 6.45793C0.771118 6.45793 0.717572 6.51147 0.717572 6.57755V9.44835C0.717572 9.51443 0.771118 9.56797 0.837168 9.56797H3.70746C3.77351 9.56797 3.82705 9.51443 3.82705 9.44835V6.57755C3.82705 6.51147 3.77351 6.45793 3.70746 6.45793H0.837168ZM0 6.57755C0 6.11511 0.374812 5.74023 0.837168 5.74023H3.70746C4.16981 5.74023 4.54462 6.11511 4.54462 6.57755V9.44835C4.54462 9.91079 4.16981 10.2857 3.70746 10.2857H0.837168C0.374812 10.2857 0 9.91079 0 9.44835V6.57755Z"
-                    fill="#323232"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6.57936 0.7177C6.51329 0.7177 6.45976 0.771255 6.45976 0.837317V3.70812C6.45976 3.77418 6.51329 3.82773 6.57936 3.82773H9.44964C9.51571 3.82773 9.56924 3.77418 9.56924 3.70812V0.837317C9.56924 0.771255 9.51571 0.7177 9.44964 0.7177H6.57936ZM5.74219 0.837317C5.74219 0.374879 6.117 0 6.57936 0H9.44964C9.912 0 10.2868 0.374879 10.2868 0.837317V3.70812C10.2868 4.17056 9.912 4.54543 9.44964 4.54543H6.57936C6.117 4.54543 5.74219 4.17056 5.74219 3.70812V0.837317Z"
-                    fill="#323232"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M5.74219 6.09908C5.74219 5.9009 5.90283 5.74023 6.10097 5.74023H9.92803C10.1262 5.74023 10.2868 5.9009 10.2868 6.09908C10.2868 6.29727 10.1262 6.45793 9.92803 6.45793H6.10097C5.90283 6.45793 5.74219 6.29727 5.74219 6.09908Z"
-                    fill="#323232"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M7.65625 8.01315C7.65625 7.81497 7.81689 7.6543 8.01504 7.6543H9.92856C10.1267 7.6543 10.2873 7.81497 10.2873 8.01315C10.2873 8.21133 10.1267 8.372 9.92856 8.372H8.01504C7.81689 8.372 7.65625 8.21133 7.65625 8.01315Z"
-                    fill="#323232"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M5.74219 9.92721C5.74219 9.72903 5.90283 9.56836 6.10097 9.56836H9.92803C10.1262 9.56836 10.2868 9.72903 10.2868 9.92721C10.2868 10.1254 10.1262 10.2861 9.92803 10.2861H6.10097C5.90283 10.2861 5.74219 10.1254 5.74219 9.92721Z"
-                    fill="#323232"
+                    d="M8.16894 2.66211H4.1862C3.34116 2.66211 2.53079 2.99779 1.93326 3.59532C1.33574 4.19285 1 5.00327 1 5.84831V13.8138C1 14.6589 1.33574 15.4693 1.93326 16.0668C2.53079 16.6643 3.34116 17 4.1862 17H12.9482C14.7086 17 15.3379 15.5662 15.3379 13.8138V9.83105"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
-                <p className="text-sm max-md:text-[10px] whitespace-nowrap font-medium ">
-                  Category :{" "}
-                  <strong className="capitalize">
-                    {data?.category?.slug}
-                  </strong>{" "}
-                </p>
-              </span>
+                Edit
+              </Link>
 
-              <div className="flex items-center whitespace-nowrap gap-1 md:gap-4">
-                <span className="text-xs max-md:text-[8px] md:hidden text-gray-500">
-                  you have starter plan
-                </span>
-                <span className="text-xs max-md:text-[9px] bg-orange-50 text-orange-500 md:px-4 px-2 py-1 max-md:font-semibold rounded-full md:font-bold">
-                  UPGRADE NOW
-                </span>
-                <span className="text-xs max-md:hidden text-gray-500">
-                  you have starter plan
-                </span>
-              </div>
-            </section>
-          </div>
-        </div>
+              <button
+                onClick={() => setShowAddInfoModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-all"
+              >
+                <Plus size={16} />
+                Add Info
+              </button>
 
-        {/* Circular Progress */}
-        <div className="flex flex-col items-center gap-1 flex-shrink-0">
-          <div className="relative w-17 h-17">
-            <svg className="w-17 h-17 transform -rotate-90" viewBox="0 0 40 40">
-              {/* Background circle */}
-              <circle
-                cx="20"
-                cy="20"
-                r="16"
-                stroke="#e5e7eb"
-                strokeWidth="4"
-                fill="transparent"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="20"
-                cy="20"
-                r="16"
-                stroke={getColor()}
-                strokeWidth="4"
-                fill="transparent"
-                strokeDasharray={circumference}
-                strokeDashoffset={
-                  circumference - (profileScore / 100) * circumference
-                }
-                strokeLinecap="round"
-                className="transition-all duration-500 ease-in-out"
-              />
-            </svg>
+              <Link
+                href={`/${data?.slug}?preview=true`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-orange-500 text-orange-600 text-sm font-semibold rounded-lg hover:bg-orange-50 transition-all"
+              >
+                <MousePointerClick size={16} />
+                Preview
+              </Link>
 
-            {/* Center text */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-sm font-bold text-gray-900 leading-tight">
-                {profileScore}%
-              </span>
+              {supportsRooms && (
+                <button
+                  onClick={() => setShowRoomsModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg transition-all"
+                >
+                  Rooms
+                </button>
+              )}
             </div>
           </div>
-          <p className="text-[10px] text-gray-500 font-medium">Complete</p>
+        </div>
+
+        {/* Right Section - Progress */}
+        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+          <CircularProgress percentage={percent} />
+          <div className="text-center">
+            <p className="text-xs text-gray-500 font-medium">
+              Step {data?.stepCompleted ?? 1}/6
+            </p>
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              {stepLabel(data?.stepCompleted ?? 1)}
+            </p>
+          </div>
         </div>
       </div>
-    </>
+
+      {/* Rooms Modal */}
+      {showRoomsModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 bg-gray-50">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Manage Rooms</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{data?.businessName}</p>
+              </div>
+              <button
+                onClick={() => setShowRoomsModal(false)}
+                className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="px-6 py-4 overflow-y-auto">
+              <RoomsPanel
+                listing={data}
+                onRoomChanged={() => {
+                  // Option: You can trigger a refresh of the single listing data here
+                  // if needed, by passing a callback prop from the parent.
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Info Modal */}
+      <AddInfoModal
+        isOpen={showAddInfoModal}
+        onClose={() => setShowAddInfoModal(false)}
+        listingData={data}
+      />
+    </div>
   );
 };
 
