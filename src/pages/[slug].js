@@ -444,7 +444,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         )}
       </Head>
 
-      {/* ── MOBILE HEADER ──────────────────────────────────── */}
+      {/* MOBILE HEADER */}
       <div className="md:hidden">
         <LandingPage />
       </div>
@@ -457,7 +457,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         />
       </div>
 
-      {/* ── POPUPS ─────────────────────────────────────────── */}
+      {/* POPUPS */}
       {activePop && (
         <div
           className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0"
@@ -759,7 +759,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         </div>
       )}
 
-      {/* ── MAIN CONTENT ───────────────────────────────────── */}
+      {/* MAIN CONTENT */}
       <div
         className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
           preview === "true" ? "opacity-100" : ""

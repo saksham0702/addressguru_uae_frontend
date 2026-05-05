@@ -18,7 +18,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { updateProfile } from "@/api/userAuth";
 import Image from "next/image";
-import { COUNTRY_CODES } from "@/services/constants";
+import { API_URL, APP_URL, COUNTRY_CODES } from "@/services/constants";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -299,7 +299,7 @@ const ProfilePage = () => {
               <div className="relative  mb-6">
                 <div className="relative inline-block">
                   <Image
-                    src={formData?.avatar || "/assets/default-avatar.png"}
+                    src={`${APP_URL}/${formData?.avatar}` || "/assets/default-avatar.png"}
                     alt="Profile"
                     width={500}
                     height={500}
