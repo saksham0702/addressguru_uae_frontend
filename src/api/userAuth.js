@@ -83,6 +83,7 @@ export const social_login = async (postdata) => {
 };
 
 export const updateProfile = async (postdata) => {
+  console.log("postdata",postdata)
   try {
     const response = await axios.put(`${API_URL}/user/update-profile`, postdata, {
       withCredentials: true,

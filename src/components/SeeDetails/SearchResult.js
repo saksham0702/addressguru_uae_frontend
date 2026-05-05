@@ -605,7 +605,7 @@ const SearchResults = ({
             </div>
 
             <div className="mt-4 max-md:hidden sticky  top-[80px]">
-              <RightBusinessCard name={apiListings?.[0]?.category?.name} />
+              <RightBusinessCard name={apiListings?.[0]?.category?.name} city={apiListings?.[0]?.city?.name} />
             </div>
           </div>
 
