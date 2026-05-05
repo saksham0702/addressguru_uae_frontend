@@ -100,7 +100,7 @@ const JobListing = () => {
     workMode: "",
     experienceLevel: "",
 
-    salaryCurrency: "PKR",
+    salaryCurrency: "AED",
     salaryPeriod: "monthly",
     salaryNegotiable: false,
     salaryHidden: false,
@@ -643,7 +643,7 @@ const JobListing = () => {
         let salaryObj = {
           from: null,
           to: null,
-          currency: postJobData.salaryCurrency || "PKR",
+          currency: postJobData.salaryCurrency || "AED",
           period: postJobData.salaryPeriod || "monthly",
           isNegotiable: postJobData.salaryNegotiable || false,
           isHidden: postJobData.salaryHidden || false,
@@ -676,10 +676,10 @@ const JobListing = () => {
         const locationObj = {
           city: selectedCity
             ? {
-                _id: selectedCity.value,
-                name: selectedCity.label,
-                slug: selectedCity.slug, // ✅ ADD THIS
-              }
+              _id: selectedCity.value,
+              name: selectedCity.label,
+              slug: selectedCity.slug, // ✅ ADD THIS
+            }
             : null,
           isRemote: postJobData.workMode === "remote",
         };
@@ -731,12 +731,12 @@ const JobListing = () => {
 
           city: selectedCompanyCity
             ? {
-                _id: selectedCompanyCity.value,
-                name: selectedCompanyCity.label,
-                slug:
-                  selectedCompanyCity.slug ||
-                  selectedCompanyCity.label.toLowerCase().replace(/\s+/g, "-"),
-              }
+              _id: selectedCompanyCity.value,
+              name: selectedCompanyCity.label,
+              slug:
+                selectedCompanyCity.slug ||
+                selectedCompanyCity.label.toLowerCase().replace(/\s+/g, "-"),
+            }
             : null,
         };
 
@@ -833,7 +833,7 @@ const JobListing = () => {
       } else {
         setResponse(
           error?.response?.data?.message ||
-            "Something went wrong. Please try again.",
+          "Something went wrong. Please try again.",
         );
       }
       setLoading(false);
@@ -1412,7 +1412,7 @@ const JobListing = () => {
                                       logoPreview
                                         ? logoPreview
                                         : typeof postJobData.companyLogo ===
-                                            "string"
+                                          "string"
                                           ? `${API_URL}/${postJobData.companyLogo}`
                                           : "/placeholder.png"
                                     }

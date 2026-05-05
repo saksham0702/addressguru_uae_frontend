@@ -3,7 +3,7 @@ import React from "react";
 const InfringementPolicy = () => {
   return (
     <div className="mx-auto max-w-[2000px] min-h-screen bg-white 2xl:max-w-[80%]">
-      <div className="max-w-7xl px-15 py-10">
+      <div className="max-w-7xl px-4 md:px-8 lg:px-16 py-10">
         <h1 className="text-2xl font-medium text-gray-900">
           Infringement Policy
         </h1>

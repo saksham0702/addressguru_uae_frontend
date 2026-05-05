@@ -3,7 +3,7 @@ import React from "react";
 const PostingRules = () => {
   return (
     <div className="mx-auto max-w-[2000px] min-h-screen bg-white 2xl:max-w-[80%]">
-      <div className="max-w-7xl px-15 py-10">
+      <div className="max-w-7xl px-4 md:px-8 lg:px-16 py-10">
         {/* Posting Rules Section */}
         <section className="mb-10">
           <h1 className="text-2xl font-medium text-gray-900">Posting Rules</h1>
@@ -95,6 +95,33 @@ const PostingRules = () => {
                   "Never provide personal or banking information to anyone.",
                   "Be aware of common fraud and scam activities.",
                   "Report to us if you face any kind of fraudulent activity.",
+                ].map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-orange-500 font-medium text-xs min-w-[20px]">
+                      {i + 1}.
+                    </span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          {/* FAQ 3 */}
+          <div className="mb-5 border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-gray-50 px-4 py-3 text-[15px] font-medium text-gray-900">
+              What is your User-Generated Content (UGC) Policy?
+            </div>
+            <div className="px-4 py-4 text-sm text-gray-600 leading-relaxed">
+              <p className="mb-3">
+                AddressGuru UAE maintains a strict zero-tolerance policy against objectionable content and abusive users.
+              </p>
+              <ol className="space-y-2">
+                {[
+                  "You can report any inappropriate listings or abusive users directly from the app using the 'Report' button.",
+                  "Our moderation team will review reported content within 24 hours.",
+                  "Content that violates our policies (e.g., discriminatory, hateful, illegal, or adult content) will be immediately removed.",
+                  "Users posting abusive or objectionable content will be permanently banned from the platform."
                 ].map((tip, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <span className="text-orange-500 font-medium text-xs min-w-[20px]">
