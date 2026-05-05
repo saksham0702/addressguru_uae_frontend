@@ -97,17 +97,25 @@ export const adminGetAllBlogs = async (params = {}) => {
   return data;
 };
 export const createBlog = async (formData) => {
+  const token = localStorage.getItem("token");
   const { data } = await API.post("/blogs/admin/create-blog", formData, {
     // ✅ Changed from /blogs/admin/create-blog
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
   });
   return data;
 };
 
 export const updateBlog = async (id, formData) => {
+  const token = localStorage.getItem("token");
   const { data } = await API.put(`/blogs/admin/update-blog/${id}`, formData, {
     // ✅ Changed from /blogs/admin/update-blog
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
   });
   return data;
 };
