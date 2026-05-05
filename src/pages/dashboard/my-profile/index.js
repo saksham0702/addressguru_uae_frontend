@@ -299,7 +299,7 @@ const ProfilePage = () => {
               <div className="relative  mb-6">
                 <div className="relative inline-block">
                   <Image
-                    src={`${APP_URL}/${formData?.avatar}` || "/assets/default-avatar.png"}
+                    src={`${APP_URL}/${formData?.avatar}` || `${formData?.avatar}` || "/assets/default-avatar.png"}
                     alt="Profile"
                     width={500}
                     height={500}
