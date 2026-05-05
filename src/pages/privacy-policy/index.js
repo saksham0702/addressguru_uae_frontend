@@ -3,7 +3,7 @@ import React from "react";
 const PrivacyPolicy = () => {
   return (
     <div className="mx-auto max-w-[2000px] min-h-screen bg-white 2xl:max-w-[80%]">
-      <div className="max-w-7xl px-15 py-10">
+      <div className="max-w-7xl px-4 md:px-8 lg:px-16 py-10">
         <h1 className="text-2xl font-medium text-gray-900">Privacy Policy</h1>
         <div className="h-[3px] w-12 bg-orange-500 rounded mt-1 mb-1"></div>
         <p className="text-sm font-medium text-orange-500 mb-8">
@@ -220,6 +220,35 @@ const PrivacyPolicy = () => {
         <hr className="border-t border-gray-100 my-6" />
 
         {/* Section 6 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-1">
+            Account Deletion and Data Retention
+          </h2>
+          <div className="h-[2px] w-8 bg-orange-400 rounded mb-4"></div>
+          <p className="text-sm text-gray-600 leading-relaxed mb-4">
+            You have the right to request the deletion of your account and associated personal data at any time. This complies with data safety requirements for both Apple App Store and Google Play Store.
+          </p>
+          <h3 className="text-[15px] font-medium text-gray-800 mb-2">
+            How to delete your account:
+          </h3>
+          <ul className="space-y-3 mb-4">
+            <li className="flex items-center gap-3 text-sm text-gray-600 leading-relaxed">
+              <span className="min-w-[8px] h-2 w-2 rounded-full bg-orange-400 inline-block"></span>
+              <span><strong>In-App:</strong> Navigate to your Account Settings inside the AddressGuru UAE app, and select &quot;Delete Account&quot;. Confirm the prompt to initiate data deletion.</span>
+            </li>
+            <li className="flex items-center gap-3 text-sm text-gray-600 leading-relaxed">
+              <span className="min-w-[8px] h-2 w-2 rounded-full bg-orange-400 inline-block"></span>
+              <span><strong>Via Support:</strong> Contact our support team at <a href="mailto:support@addressguru.ae" className="text-orange-500 hover:underline">support@addressguru.ae</a> with the subject line &quot;Account Deletion Request&quot; from your registered email address.</span>
+            </li>
+          </ul>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Upon processing your request, we will permanently remove your account details, active listings, and associated data from our active databases, except for information we are legally required to retain for regulatory or security purposes.
+          </p>
+        </section>
+
+        <hr className="border-t border-gray-100 my-6" />
+
+        {/* Section 7 */}
         <section className="mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-1">
             Your consent

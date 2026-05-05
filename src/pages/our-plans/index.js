@@ -9,59 +9,15 @@ import NeedSupport from "@/components/Register/NeedSupport";
 import ReviewSlider from "@/components/Register/ReviewSlider";
 import React, { useEffect, useState } from "react";
 
-// const plans = [
-//   {
-//     name: "FREE",
-//     price: "₹0",
-//     duration: "",
-//     features: [
-//       { label: "No Lead Sharing", available: true },
-//       { label: "Ads Free Listing", available: false },
-//       { label: "No Other Competitor Ads", available: true },
-//       { label: "Lead Show", value: "10 Leads" },
-//       { label: "Support", value: "Email" },
-//       { label: "Photos", value: "5" },
-//     ],
-//     buttonLabel: "SELECT PLAN",
-//   },
-//   {
-//     name: "PROFESSIONAL",
-//     price: "₹1,299",
-//     duration: "/Year",
-//     features: [
-//       { label: "No Lead Sharing", available: true },
-//       { label: "Ads Free Listing", available: true },
-//       { label: "No Other Competitor Ads", available: false },
-//       { label: "Lead Show", value: "Unlimited Leads" },
-//       { label: "Support", value: "Email+Call+Whatsapp+SMS" },
-//       { label: "Photos", value: "10" },
-//     ],
-//     buttonLabel: "SELECT PLAN",
-//   },
-//   {
-//     name: "PREMIUM",
-//     price: "₹4,999",
-//     duration: "/5 Years",
-//     note: "Save 1500/-",
-//     features: [
-//       { label: "No Lead Sharing", available: false },
-//       { label: "Ads Free Listing", available: true },
-//       { label: "No Other Competitor Ads", available: false },
-//       { label: "Lead Show", value: "Unlimited Leads" },
-//       { label: "Support", value: "Email+Call+Whatsapp+SMS" },
-//       { label: "Photos", value: "15" },
-//     ],
-//     buttonLabel: "SELECT PLAN",
-//   },
-// ];
+
 const OurPlans = () => {
   const [plans, setPlans] = useState(null);
 
   const getPlans = async () => {
     try {
       const res = await get_plans();
-      console.log("response of plans", res?.data);
-      setPlans(res?.data);
+      console.log("response of plans", res?.data?.plans);
+      setPlans(res?.data?.plans || []);
     } catch (error) {
       console.log("error in frontend", error);
     }
@@ -74,8 +30,8 @@ const OurPlans = () => {
   console.log("plans", plans);
   return (
     <div className="flex items-center h-full w-full overflow-hidden justify-center">
-      <div className="w-[80%] bg-white">
-        <section className="flex flex-col gap-3 items-center mt-15">
+      <div className="w-full md:w-[80%] bg-white">
+        <section className="flex flex-col gap-3 items-center mt-15 px-4 md:px-0">
           {/* heading section  */}
           <span>
             {" "}
@@ -113,18 +69,18 @@ const OurPlans = () => {
             Explore plans tailored to your selected categories. Choose one &
             start growing your business today.
           </p>
-          <p>{plans?.length}</p>
+          {/* <p>{plans?.length}</p> */}
           {plans && <PricingTable plans={plans} />}
         </section>
 
         {/* slider section */}
-        <div className="my-32">
+        {/* <div className="my-32">
           <Slider />
-        </div>
+        </div> */}
         {/* custom slider */}
-        <div className="w-full bg-[#E8F4FF] h-auto flex justify-between py-8 px-10">
+        <div className="w-full bg-[#E8F4FF] h-auto flex flex-col lg:flex-row justify-between py-8 px-4 md:px-10 gap-8 mt-15">
           {/* left section */}
-          <div className=" w-[20rem] space-y-3">
+          <div className="w-full lg:w-[20rem] space-y-3">
             {/* qoute icon */}
             <span>
               <svg
@@ -171,9 +127,9 @@ const OurPlans = () => {
         </div>
         {/* what we offer section */}
         <WhatWeOffer />
-        <div className="flex justify-between px-3 py-10 gap-2 w-full h-full ">
-          <NeedSupport />
-          <FAQ />
+        <div className="flex flex-col md:flex-row justify-between px-4 md:px-3 py-10 gap-8 md:gap-2 w-full h-full">
+          <div className="w-full md:w-1/2"><NeedSupport /></div>
+          <div className="w-full md:w-1/2"><FAQ /></div>
         </div>
       </div>
     </div>

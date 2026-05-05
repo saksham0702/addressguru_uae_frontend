@@ -42,4 +42,5 @@ ${listingEntries}
   }
 
   return { props: {} };
+
 }
