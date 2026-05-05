@@ -2,7 +2,7 @@ import { send_listings_in_mail } from "@/api/queries";
 import NameNumberCard from "./NameNumberCard";
 import { useState } from "react";
 
-export default function RightBusinessCard({ name }) {
+export default function RightBusinessCard({ name, city }) {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [errors, setErrors] = useState({ name: false, email: false });
   const [status, setStatus] = useState("idle");
@@ -55,7 +55,9 @@ export default function RightBusinessCard({ name }) {
       {/* HEADER */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-gray-900 leading-snug">
-          Get Top <span className="text-[#FF6E04] capitalize">{name}</span>
+          Get List of
+          <span className="text-[#FF6E04] capitalize"> Top {name} </span>
+          in {city}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
           Receive the most relevant listings directly in your inbox
