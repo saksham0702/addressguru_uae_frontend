@@ -299,11 +299,17 @@ const ProfilePage = () => {
               <div className="relative  mb-6">
                 <div className="relative inline-block">
                   <Image
-                    src={`${APP_URL}/${formData?.avatar}` || `${formData?.avatar}` || "/assets/default-avatar.png"}
+                    src={
+                      formData?.avatar?.startsWith("http")
+                        ? formData.avatar // ✅ Google / external image
+                        : formData?.avatar
+                          ? `${APP_URL}/${formData.avatar}` // ✅ local uploaded image
+                          : "/assets/default-avatar.png"
+                    }
                     alt="Profile"
                     width={500}
                     height={500}
-                    className="w-32 h-32 rounded-full border-4 border-gray-200  object-contain"
+                    className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover"
                   />
                   {isEditing && (
                     <label className="absolute bottom-0 right-0 bg-blue-600 p-2.5 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg">
@@ -336,7 +342,9 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className={`font-medium px-4 py-2.5 ${userData?.name ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <p
+                      className={`font-medium px-4 py-2.5 ${userData?.name ? "text-gray-900" : "text-gray-400"}`}
+                    >
                       {userData?.name || "Not Updated"}
                     </p>
                   )}
@@ -357,7 +365,9 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className={`font-medium px-4 py-2.5 ${userData?.email ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <p
+                      className={`font-medium px-4 py-2.5 ${userData?.email ? "text-gray-900" : "text-gray-400"}`}
+                    >
                       {userData?.email || "Not Updated"}
                     </p>
                   )}
@@ -432,8 +442,12 @@ const ProfilePage = () => {
                       />
                     </div>
                   ) : (
-                    <p className={`font-medium px-4 py-2.5 ${userData?.phone ? 'text-gray-900' : 'text-gray-400'}`}>
-                      {userData?.phone ? `${userData?.country_code || '+971'} ${userData?.phone}` : "Not Updated"}
+                    <p
+                      className={`font-medium px-4 py-2.5 ${userData?.phone ? "text-gray-900" : "text-gray-400"}`}
+                    >
+                      {userData?.phone
+                        ? `${userData?.country_code || "+971"} ${userData?.phone}`
+                        : "Not Updated"}
                     </p>
                   )}
                 </div>
@@ -448,7 +462,11 @@ const ProfilePage = () => {
                     <input
                       type="date"
                       name="dob"
-                      value={formData?.dob ? new Date(formData.dob).toISOString().split('T')[0] : ""}
+                      value={
+                        formData?.dob
+                          ? new Date(formData.dob).toISOString().split("T")[0]
+                          : ""
+                      }
                       onChange={handleInputChange}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -482,7 +500,9 @@ const ProfilePage = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className={`font-medium px-4 py-2.5 ${userData?.city ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <p
+                      className={`font-medium px-4 py-2.5 ${userData?.city ? "text-gray-900" : "text-gray-400"}`}
+                    >
                       {userData?.city || "Not Updated"}
                     </p>
                   )}
@@ -504,7 +524,9 @@ const ProfilePage = () => {
                     placeholder="Tell us about yourself..."
                   />
                 ) : (
-                  <p className={`px-4 py-2.5 rounded-lg ${userData?.profile_bio ? 'text-gray-700 bg-gray-50' : 'text-gray-400 bg-gray-50'}`}>
+                  <p
+                    className={`px-4 py-2.5 rounded-lg ${userData?.profile_bio ? "text-gray-700 bg-gray-50" : "text-gray-400 bg-gray-50"}`}
+                  >
                     {userData?.profile_bio || "Not Updated"}
                   </p>
                 )}
