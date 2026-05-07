@@ -6,8 +6,9 @@ import { Search } from "lucide-react";
 const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
   const placeholders = [
     "What are you looking for?",
-    "Restaurants Near Me",
-    "Hotels in UAE",
+    "Restaurants in dubai",
+    "Hotels in sharjah",
+    "Automobiles in ajman",
   ];
 
   const [isFocused, setIsFocused] = useState(false);
@@ -46,7 +47,9 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") onSearch();
+            if (e.key === "Enter") {
+              onSearch(value);
+            }
           }}
           className="w-full bg-transparent outline-none text-gray-800 text-[14px] font-medium"
         />
@@ -63,12 +66,10 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
 
         {/* Search */}
         <button
-          onClick={onSearch}
+          onClick={() => onSearch(value)}
           className="w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#FF6E04] hover:bg-[#ff5a00] transition"
         >
-        <Search className="text-white" size={24
-          
-        } />
+          <Search className="text-white" size={24} />
         </button>
       </div>
     </div>

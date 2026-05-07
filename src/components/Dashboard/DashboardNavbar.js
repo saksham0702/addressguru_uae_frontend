@@ -18,7 +18,10 @@ const DashboardNavbar = ({ setPostAdd }) => {
     // NO fixed/absolute here — parent header in layout handles that
     <nav className="w-full h-full px-6 flex items-center justify-between bg-white">
       {/* Logo */}
-      <div onClick={() => router.push("/")} className="cursor-pointer">
+      <div
+        onClick={() => window.open("/", "_blank")}
+        className="cursor-pointer"
+      >
         <Image
           src="/assets/addressguru_logo.png"
           alt="logo"

@@ -175,7 +175,7 @@ const BusinessHeaderSection = ({ data }) => {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-5 max-w-xl gap-1 mb-3">
+            {/* <div className="grid grid-cols-5 max-w-xl gap-1 mb-3">
               <div className="rounded-lg px-2 py-1">
                 <div className="flex items-center gap-1.5">
                   <Eye size={14} className="text-blue-600" />
@@ -221,7 +221,7 @@ const BusinessHeaderSection = ({ data }) => {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex gap-2 flex-wrap">

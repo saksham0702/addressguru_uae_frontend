@@ -36,13 +36,14 @@ const AddInfoModal = ({ isOpen, onClose, listingData }) => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      // Format the values mapping into the required array format
-      const formattedFields = Object.entries(values || {}).map(([fieldId, value]) => ({
-        field_id: fieldId,
-        value: Array.isArray(value)
-          ? value.filter((v) => typeof v === "string" && v.trim() !== "")
-          : value,
-      }));
+      const formattedFields = Object.entries(values || {}).map(
+        ([fieldId, value]) => ({
+          field_id: fieldId,
+          value: Array.isArray(value)
+            ? value.filter((v) => typeof v === "string" && v.trim() !== "")
+            : value,
+        }),
+      );
 
       const payload = {
         category_id: listingData?.category?._id,
@@ -54,7 +55,6 @@ const AddInfoModal = ({ isOpen, onClose, listingData }) => {
       if (res?.success) {
         // toast.success("Additional info saved successfully! 🎉");
         onClose();
-        // Optional: Call a refresh function if passed from parent to update the UI
       } else {
         // toast.error(res?.message || "Failed to save additional info");
       }
@@ -80,171 +80,180 @@ const AddInfoModal = ({ isOpen, onClose, listingData }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[900px] max-h-[90vh] flex flex-col md:flex-row bg-white rounded-[20px] shadow-[0_32px_80px_rgba(0,0,0,0.22),0_8px_24px_rgba(0,0,0,0.12)] overflow-hidden"
+        className="w-full max-w-[920px] max-h-[90vh] flex flex-col md:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Side: Information & Gamification */}
-        <div className="w-full md:w-[350px] flex flex-col bg-white border-r border-gray-100 overflow-y-auto">
+        {/* Left Sidebar */}
+        <div className="w-full md:w-[340px] bg-gradient-to-br from-orange-50 via-white to-orange-50/30 border-r border-orange-100/50">
           {/* Header */}
-          <div className="flex justify-between items-start gap-3 px-5 py-5 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-[#FF6B2B] to-[#FF9558] flex items-center justify-center flex-shrink-0">
-                <Sparkles size={18} className="text-white" />
+          <div className="p-6 border-b border-orange-100/50">
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0">
+                <Sparkles size={20} className="text-white" strokeWidth={2.5} />
               </div>
-              <div>
-                <p className="text-[16px] font-semibold text-black leading-tight">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900 leading-tight">
                   Enhance Your Listing
-                </p>
-                <p className="text-[12px] text-gray-400 mt-0.5 line-clamp-1" title={listingData?.businessName}>
+                </h3>
+                <p
+                  className="text-xs text-gray-500 mt-1 truncate"
+                  title={listingData?.businessName}
+                >
                   {listingData?.businessName}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="p-5 flex-1 space-y-5">
-            {/* Progress */}
+          <div className="p-6 space-y-6">
+            {/* Progress Section */}
             <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
-                  Profile Completion
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Completion
                 </span>
-                <span className="text-[12px] font-semibold text-[#FF6B2B]">
+                <span className="text-sm font-bold text-orange-600">
                   {progressPct}%
                 </span>
               </div>
 
-              <div className="h-[5px] bg-gray-100 rounded-full overflow-hidden mb-3">
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-[#FF6B2B] to-[#FF9558] rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
 
-              {/* Chips */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                {[
-                  {
-                    label: "+50 pts available",
-                    style: "bg-orange-50 text-orange-700 border border-orange-200",
-                  },
-                  {
-                    label: "3x more visibility",
-                    style: "bg-blue-50 text-blue-700 border border-blue-200",
-                  },
-                  {
-                    label: `${additionalFields.length} fields`,
-                    style: "bg-gray-100 text-gray-600 border border-gray-200",
-                  },
-                ].map(({ label, style }) => (
-                  <span
-                    key={label}
-                    className={`text-[11px] font-medium px-3 py-1 rounded-full flex items-center gap-1 ${style}`}
-                  >
-                    <span className="w-[5px] h-[5px] rounded-full bg-current" />
-                    {label}
-                  </span>
-                ))}
+              {/* Stats Chips */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200">
+                  <Sparkles size={12} />
+                  +50 pts
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                  <TrendingUp size={12} />
+                  3x visibility
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                  {filledCount}/{totalCount} fields
+                </span>
               </div>
             </div>
 
-            {/* Banner */}
-            <div className="relative overflow-hidden rounded-xl border border-orange-200 bg-gradient-to-br p-4">
-              <div className="absolute -bottom-4 -right-4 opacity-10">
-                <Trophy size={120} className="text-orange-500" />
+            {/* Motivation Card */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 p-5 shadow-lg">
+              <div className="absolute top-0 right-0 opacity-10">
+                <Trophy size={100} className="text-white -rotate-12" />
               </div>
 
-              <div className="relative z-10">
-                <p className="flex items-center gap-1.5 text-md font-semibold text-orange-500 mb-2">
-                  <Award size={16} className="text-orange-600" />
-                  Get Ahead of Competitors!
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Award size={18} className="text-orange-200" />
+                  <p className="text-sm font-bold text-white">
+                    Get Ahead of Competitors!
+                  </p>
+                </div>
+
+                <p className="text-xs text-orange-50 leading-relaxed">
+                  Complete listings get{" "}
+                  <strong className="text-white">3x more views</strong> and
+                  generate more leads. Stand out from the competition.
                 </p>
 
-                <p className="text-md text-gray-500 mb-3 leading-relaxed">
-                  Listings with complete information receive up to{" "}
-                  <strong>3x more views and leads</strong>. Help customers find what they need.
-                </p>
-
-                <span className="inline-flex items-center gap-1 text-md font-semibold text-orange-700 bg-white/80 border border-orange-200/60 shadow-sm px-3 py-1.5 rounded-lg">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 bg-white px-3 py-2 rounded-lg shadow-md">
                   <TrendingUp size={14} className="text-green-600" />
-                  +50 Profile Points
-                </span>
+                  Earn +50 Profile Points
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Form Fields & Actions */}
-        <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
-          {/* Top Bar with Close Button (Mobile visible, Desktop flex-end) */}
-          <div className="flex justify-between md:justify-end items-center px-5 py-3 border-b border-gray-200/50 bg-white shadow-sm z-10">
-            <p className="text-[13px] font-semibold text-gray-800 md:hidden">Business Details</p>
+        {/* Right Content Area */}
+        <div className="flex-1 flex flex-col bg-white">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-gray-900">
+                Business Details
+              </h4>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-200 px-2.5 py-1 rounded-md">
+                {filledCount} / {totalCount}
+              </span>
+            </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors"
+              aria-label="Close modal"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
 
-          {/* Form Body */}
+          {/* Form Content */}
           <div className="flex-1 overflow-y-auto px-6 py-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-[15px] font-bold text-gray-800">Additional Fields</h4>
-              <span className="text-[11px] font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
-                {filledCount} / {totalCount} Filled
-              </span>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-              {loading ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <div className="w-8 h-8 border-2 border-gray-200 border-t-orange-500 rounded-full animate-spin" />
-                  <p className="text-xs text-gray-500">Loading fields...</p>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="w-10 h-10 border-3 border-gray-200 border-t-orange-500 rounded-full animate-spin" />
+                <p className="text-sm text-gray-500 mt-4 font-medium">
+                  Loading fields...
+                </p>
+              </div>
+            ) : additionalFields.length > 0 ? (
+              <AdditionalInfo
+                additionalFields={additionalFields}
+                values={values}
+                setValues={setValues}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <Sparkles size={28} className="text-gray-400" />
                 </div>
-              ) : additionalFields.length > 0 ? (
-                <AdditionalInfo
-                  additionalFields={additionalFields}
-                  values={values}
-                  setValues={setValues}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <Sparkles size={24} className="text-gray-300 mb-2" />
-                  <p className="text-gray-500 text-sm font-medium">No additional fields available</p>
-                  <p className="text-gray-400 text-xs mt-1">Your category does not require extra information.</p>
-                </div>
-              )}
-            </div>
+                <p className="text-sm font-semibold text-gray-700">
+                  No additional fields available
+                </p>
+                <p className="text-xs text-gray-500 mt-1 max-w-xs">
+                  Your category doesn&apos;t require extra information at this time.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Footer Actions */}
-          <div className="flex justify-end items-center px-6 py-4 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10">
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                className="px-5 py-2.5 text-[13px] font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50/50">
+            <button
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
+            >
+              Cancel
+            </button>
 
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`px-6 py-2.5 text-[13px] font-bold text-white rounded-xl flex items-center gap-2 shadow-sm transition-all ${
-                  loading
-                    ? "bg-orange-300 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#FF6B2B] to-[#FF8C50] hover:shadow-orange-200 hover:shadow-md hover:-translate-y-0.5"
-                }`}
-              >
-                <Sparkles size={14} />
-                Save & Earn Points
-              </button>
-            </div>
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className={`px-6 py-2.5 text-sm font-bold text-white rounded-lg flex items-center gap-2 transition-all ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg hover:shadow-orange-500/30"
+              }`}
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  Save & Earn Points
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

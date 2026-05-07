@@ -1,5 +1,7 @@
 import React from "react";
 import {
+  BarChart,
+  Bar,
   LineChart,
   Line,
   PieChart,
@@ -104,7 +106,7 @@ const Graph = ({ stats }) => {
 
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <BarChart
                 data={lineData}
                 margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
               >
@@ -129,13 +131,13 @@ const Graph = ({ stats }) => {
                   }
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#6C60F3"
-                  strokeWidth={2.5}
-                />
-              </LineChart>
+
+                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  {lineData.map((entry) => (
+                    <Cell key={entry.name} fill={COLORS[entry.name]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

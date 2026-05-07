@@ -11,7 +11,7 @@ import UserLogin from "@/components/UserLogin/UserLogin";
 import { useAuth } from "@/context/AuthContext";
 import MobileCities from "@/components/MobileCities";
 import Login from "@/components/UserLogin/Login";
-import { searchData } from "@/api/search";
+import { searchData, searchListings } from "@/api/search";
 import { useRouter } from "next/router";
 import { getCities } from "@/api/uaeadminCities";
 
@@ -34,23 +34,24 @@ const Header = () => {
   // const [currentCity, setCurrentCity] = useState(null);
 
   const [loginPop, setLoginPop] = useState(false);
-  const handleSearch = async () => {
-    if (!slug?.trim()) return;
-
+  const handleSearch = async (query) => {
+    if (!query) return;
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     try {
-      const res = await searchData(slug, city);
+      const res = await searchListings(query);
+      console.log("search results", res);
 
-      if (!res || res.status === false || !res.category) {
-        console.warn("Invalid search response", res);
-        return;
-      }
+      // if (!res || res.status === false || !res.category) {
+      //   console.warn("Invalid search response", res);
+      //   return;
+      // }
 
-      const categorySlug = res.category.toLowerCase().replace(/\s+/g, "-");
+      // const categorySlug = res.category.toLowerCase().replace(/\s+/g, "-");
 
-      const citySlug = city.toLowerCase().replace(/\s+/g, "-");
+      // const citySlug = city.toLowerCase().replace(/\s+/g, "-");
 
       // ✅ THIS creates /hotel/UAE
-      router.push(`/${categorySlug}/${citySlug}`);
+      // router.push(`/${categorySlug}/${citySlug}`);
     } catch (error) {
       console.error("Search API failed:", error);
     }
@@ -187,7 +188,6 @@ const Header = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [pathname]);
-
 
   return (
     <>
