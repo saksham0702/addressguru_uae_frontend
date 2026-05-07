@@ -31,23 +31,21 @@ const BlogDetail = () => {
 
     return (
       html
-        // ❌ remove wrapper tags (div, section, article)
         .replace(/<\/?(div|section|article)[^>]*>/gi, "")
-
-        // ❌ remove all class attributes
         .replace(/class="[^"]*"/gi, "")
-
-        // ❌ remove inline styles
         .replace(/style="[^"]*"/gi, "")
-
-        // ❌ remove base64 images (very important)
-        .replace(/<img[^>]*src="data:image[^"\]*"[^>]*>/gi, "")
-
-        // ❌ fix images inside headings (bad HTML)
+        .replace(/<img[^>]*src="data:image[^"]*"[^>]*>/gi, "")
         .replace(/<h[1-6][^>]*>\s*<img[^>]*>\s*<\/h[1-6]>/gi, "")
-
-        // ✅ optional: remove empty tags
         .replace(/<p>\s*<\/p>/gi, "")
+
+        // ✅ ADD THIS BLOCK
+        .replace(/<a\s+([^>]*href="[^"]+"[^>]*)>/gi, (match, p1) => {
+          let cleaned = p1
+            .replace(/\s*target="[^"]*"/gi, "")
+            .replace(/\s*rel="[^"]*"/gi, "");
+
+          return `<a ${cleaned} target="_blank" rel="noopener noreferrer nofollow">`;
+        })
     );
   };
 
@@ -365,7 +363,9 @@ const BlogDetail = () => {
             {/* Blog Content */}
             <div
               className="blog-content mb-12"
-              dangerouslySetInnerHTML={{ __html: cleanHtml(blogDetail?.content) }}
+              dangerouslySetInnerHTML={{
+                __html: cleanHtml(blogDetail?.content),
+              }}
             />
 
             {/* FAQ Section */}
@@ -431,21 +431,21 @@ const BlogDetail = () => {
                     {blogDetail?.author?.name}
                   </p>
                   <p className="text-sm text-[#FF6E04] font-medium mt-0.5">
-                    {blogDetail?.author?.JobTitle}
+                    {blogDetail?.author?.designation}
                   </p>
                 </div>
               </div>
 
               {/* Bio */}
-              {blogDetail?.author?.bio && (
+              {blogDetail?.author?.profile_bio && (
                 <p className="text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
-                  {blogDetail?.author?.bio}
+                  {blogDetail?.author?.profile_bio}
                 </p>
               )}
 
               {/* social links */}
               <div className="flex items-center gap-3 text-xl">
-                {Object.entries(blogDetail?.author?.social || {})
+                {Object.entries(blogDetail?.author?.socialLinks || {})
                   .filter(([_, url]) => url) // remove empty links
                   .map(([platform, url]) => (
                     <a
