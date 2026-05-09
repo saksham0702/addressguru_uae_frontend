@@ -45,6 +45,9 @@ const SearchResults = ({
     ?.toString()
     .toLowerCase();
 
+  const currentSlug = canonicalSlug;
+  const currentCity = canonicalCity;
+
   const formatCityName = (citySlug) => {
     if (!citySlug) return "";
     return citySlug
@@ -67,6 +70,7 @@ const SearchResults = ({
   const [apiListings, setApiListings] = useState(ssrListings);
   const [pageData, setPageData] = useState(ssrPageData);
   const [seoContent, setSeoContent] = useState(ssrSeoContent);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // ── isLoading starts false because SSR already loaded page 1 ──
   const [isLoading, setIsLoading] = useState(false);
@@ -101,26 +105,40 @@ const SearchResults = ({
   }, [ssrListings, ssrPageData, ssrSeoContent]);
 
   const hasFetchedFilters = useRef(false);
+  const isFirstFilterFetch = useRef(true); // ← add this near your other refs
   // ── Skip the very first client fetch since SSR already fetched page 1 ──
   const isFirstMount = useRef(true);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // ── Fetch filtered data when filters change ──
   useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
+    if (!isHydrated) return;
+    if (isFirstFilterFetch.current) {
+      isFirstFilterFetch.current = false;
       return;
     }
+
+    // ✅ Don't fetch if filters are still default (no user action yet)
+    const isDefault =
+      filters.sort_by === null &&
+      filters.rating === null &&
+      filters.ag_verified === false &&
+      filters.facilities_id.length === 0 &&
+      filters.services_id.length === 0 &&
+      filters.courses_id.length === 0 &&
+      filters.payment_mode_id.length === 0 &&
+      filters.search === "";
+
+    if (isDefault) return;
 
     const fetchFilteredData = async () => {
       try {
         setIsLoading(true);
-        const currentSlug = router.query.slug || ssrSlug;
-        const currentCity = router.query.city || ssrCity;
-
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${currentSlug}/${currentCity}?${buildQueryParams(1)}`
+          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${canonicalSlug}/${canonicalCity}?${buildQueryParams(1)}`,
         );
-
         const data = res?.data?.data;
         if (data?.listings) {
           setApiListings(data.listings);
@@ -136,13 +154,9 @@ const SearchResults = ({
       }
     };
 
-    // Debounce the API call slightly to avoid rapid calls
-    const timeoutId = setTimeout(() => {
-      fetchFilteredData();
-    }, 300);
-
+    const timeoutId = setTimeout(fetchFilteredData, 300);
     return () => clearTimeout(timeoutId);
-  }, [filters, router.query.slug, router.query.city, ssrSlug, ssrCity]);
+  }, [filters, isHydrated]);
 
   // ── Sync URL city into context so rest of app stays in sync ──
   useEffect(() => {
@@ -189,7 +203,9 @@ const SearchResults = ({
     if (f.ag_verified)
       result = result.filter((item) => item.isVerified === true);
     if (f.rating) {
-      result = result.filter((item) => (item.statistics?.averageRating || 0) >= f.rating);
+      result = result.filter(
+        (item) => (item.statistics?.averageRating || 0) >= f.rating,
+      );
     }
     if (f.facilities_id?.length > 0)
       result = result.filter((item) =>
@@ -268,12 +284,14 @@ const SearchResults = ({
 
   // ── Debounce search ──
   useEffect(() => {
+    if (!isHydrated) return; // ← ADD THIS LINE
+
     const timer = setTimeout(() => {
       setLocalFilters(null);
       setFilters((prev) => ({ ...prev, search: searchInput }));
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, isHydrated]); // ← also add isHydrated to deps
 
   // ── Redirect when global city changes ──
   useEffect(() => {
@@ -605,7 +623,10 @@ const SearchResults = ({
             </div>
 
             <div className="mt-4 max-md:hidden sticky  top-[80px]">
-              <RightBusinessCard name={apiListings?.[0]?.category?.name} city={apiListings?.[0]?.city?.name} />
+              <RightBusinessCard
+                name={apiListings?.[0]?.category?.name}
+                city={apiListings?.[0]?.city?.name}
+              />
             </div>
           </div>
 

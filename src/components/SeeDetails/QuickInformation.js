@@ -1,7 +1,6 @@
-import React from "react";
 import BusinessHours from "./BusinessHours";
 import { Check, CircleCheck } from "lucide-react";
-
+import { useState } from "react";
 const CategoryIcon = () => (
   <svg
     width="16"
@@ -105,10 +104,10 @@ const QuickInformation = ({
   extraFields,
   handleWebsiteClick,
   id,
-  positions
+  positions,
 }) => {
+  const [expandedIndex, setExpandedIndex] = useState(null);
   const categoryName = job ? category?.name : category?.name;
-  console.log("extra fields", extraFields);
   const allFields = [
     ...(extraFields?.quickinfo || []),
     ...(extraFields?.logo || []),
@@ -124,7 +123,7 @@ const QuickInformation = ({
       </div>
 
       {/* Info Body */}
-      <div className="bg-[#EEEEEE] p-4 text-sm space-y-1 border-b">
+      <div className="bg-[#EEEEEE] relative p-4 text-sm space-y-1 border-b">
         {/* Category */}
         {categoryName && (
           <p className="flex items-center gap-2">
@@ -134,7 +133,6 @@ const QuickInformation = ({
             </span>
             <span className="font-medium text-[16px] text-orange-600">
               {categoryName}
-
             </span>
           </p>
         )}
@@ -156,19 +154,38 @@ const QuickInformation = ({
           </p>
         )}
 
-        {allFields.map((field, index) => (
-          <p key={index} className="flex items-center gap-1">
-            <CircleCheck size={18} />
-            <span className="font-medium text-[16px] text-black">
-              {field?.label}:
-            </span>
-            <span className="font-medium text-[16px] text-orange-600">
-              {field?.type === "price"
-                ? `${field?.value?.currency} ${field?.value?.amount}`
-                : field?.value}
-            </span>
-          </p>
-        ))}
+        {allFields.map((field, index) => {
+          const value =
+            field?.type === "price"
+              ? `${field?.value?.currency} ${field?.value?.amount}`
+              : field?.value;
+          const isLong = value?.length > 20;
+
+          return (
+            <div key={index} className="flex items-center gap-2">
+              <CircleCheck size={18} />
+              <div className="flex flex-1 gap-1">
+                {/* Label */}
+                <span className="font-medium text-[16px] text-black whitespace-nowrap">
+                  {field?.label}:
+                </span>
+                {/* 🔥 IMPORTANT: group wrapper */}
+                <div className="relative group max-w-[180px]">
+                  {/* Truncated text */}
+                  <span className="block truncate font-medium text-[16px] text-orange-600">
+                    {value}
+                  </span>
+                  {/* ✅ Hover popup ONLY if long - positioned BELOW */}
+                  {isLong && (
+                    <div className="absolute left-0 top-full  hidden group-hover:block z-50 bg-white border border-gray-300 shadow-lg rounded px-3 py-2 text-[14px] text-orange-600 whitespace-normal break-words max-w-[280px]">
+                      {value}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer Actions */}
