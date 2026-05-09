@@ -1,27 +1,41 @@
 import axios from "axios";
 import { API_URL } from "@/services/constants";
-// const API_URL = "http://localhost:5001";
 
+// 🔍 Live suggestions while typing
+export const fetchSearchSuggestions = async (query) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/search/suggestions?q=${encodeURIComponent(query)}`,
+    );
+    return response?.data;
+  } catch (error) {
+    console.log("suggestions error", error);
+    return { suggestions: [] };
+  }
+};
 
+// 🔍 Resolve search intent on submit
+export const resolveSearch = async (query, page = 1, limit = 20) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/search/resolve?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+    );
+    return response?.data;
+  } catch (error) {
+    console.log("resolve search error", error);
+    return { intent: "no_results" };
+  }
+};
 
-// 🔍 Search Listings
+// Legacy — keep for backward compat if used elsewhere
 export const searchListings = async (query) => {
-  console.log("query in search listings", query);
   try {
     const response = await axios.get(
       `${API_URL}/search?q=${encodeURIComponent(query)}`,
     );
-
     return response?.data;
   } catch (error) {
-    console.log("search listings error", error);
-
-    return (
-      error?.response?.data || {
-        success: false,
-        message: "Server error",
-      }
-    );
+    return error?.response?.data || { success: false, message: "Server error" };
   }
 };
 

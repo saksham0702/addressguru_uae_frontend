@@ -13,6 +13,9 @@ import {
   AlertCircle,
   CheckCircle,
   Loader,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 import {
@@ -23,7 +26,7 @@ import {
 import { getAllCategories } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
 
-// Dynamic import for Tiptap — required for Next.js Page Router (no SSR)
+// Dynamic import for Tiptap
 const TiptapEditor = dynamic(
   () => import("@/components/admin/editor/TiptapEditor"),
   {
@@ -31,7 +34,7 @@ const TiptapEditor = dynamic(
     loading: () => (
       <div className="h-[280px] bg-gray-100 rounded-xl border-[1.5px] border-gray-200 animate-pulse" />
     ),
-  }
+  },
 );
 
 // ── Toast ──────────────────────────────────────────────────────────────────────
@@ -40,20 +43,27 @@ const Toast = ({ message, type, onClose }) => (
     className={`
       fixed top-5 right-5 z-[2000] flex items-center gap-2 px-3.5 py-2.5
       rounded-xl border shadow-lg max-w-xs
-      ${type === "success"
-        ? "bg-green-50 border-green-200"
-        : "bg-rose-50 border-rose-200"
+      ${
+        type === "success"
+          ? "bg-green-50 border-green-200"
+          : "bg-rose-50 border-rose-200"
       }
     `}
   >
-    {type === "success"
-      ? <CheckCircle size={15} className="text-green-600 flex-shrink-0" />
-      : <AlertCircle size={15} className="text-rose-600 flex-shrink-0" />
-    }
-    <span className={`text-[13px] font-medium ${type === "success" ? "text-green-800" : "text-rose-800"}`}>
+    {type === "success" ? (
+      <CheckCircle size={15} className="text-green-600 flex-shrink-0" />
+    ) : (
+      <AlertCircle size={15} className="text-rose-600 flex-shrink-0" />
+    )}
+    <span
+      className={`text-[13px] font-medium ${type === "success" ? "text-green-800" : "text-rose-800"}`}
+    >
       {message}
     </span>
-    <button onClick={onClose} className="ml-auto p-0 bg-transparent border-none cursor-pointer leading-none">
+    <button
+      onClick={onClose}
+      className="ml-auto p-0 bg-transparent border-none cursor-pointer leading-none"
+    >
       <X size={13} className="text-gray-400" />
     </button>
   </div>
@@ -65,7 +75,9 @@ const EmptyState = ({ onAdd }) => (
     <div className="w-16 h-16 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center">
       <FileText size={28} className="text-orange-500" />
     </div>
-    <p className="text-base font-semibold text-gray-900 m-0">No SEO content yet</p>
+    <p className="text-base font-semibold text-gray-900 m-0">
+      No SEO content yet
+    </p>
     <p className="text-[13px] text-gray-500 max-w-[360px] leading-relaxed m-0">
       Create city-specific content for categories to improve SEO rankings.
     </p>
@@ -81,7 +93,9 @@ const EmptyState = ({ onAdd }) => (
 
 // ── SEO Card ───────────────────────────────────────────────────────────────────
 const SeoCard = ({ item, onEdit, onDelete, deleting }) => {
-  const cities = item.city_ids || [];
+  const cityName = item.city_id?.name || "—";
+  const categoryName = item.category_id?.name || "—";
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-2.5 hover:shadow-md transition-shadow">
       {/* Header */}
@@ -89,19 +103,12 @@ const SeoCard = ({ item, onEdit, onDelete, deleting }) => {
         <div className="flex flex-col gap-1 flex-1">
           <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-orange-500 w-fit">
             <Tag size={11} />
-            <span>{item.category_id?.name || "—"}</span>
+            <span>{categoryName}</span>
           </div>
-          {cities.length > 0 && (
-            <div className="flex items-center gap-1">
-              <MapPin size={11} className="text-gray-400" />
-              <span className="text-[12px] text-gray-500">
-                {cities.slice(0, 3).map((c) => c?.name || c).join(", ")}
-                {cities.length > 3 && (
-                  <span className="text-orange-500"> +{cities.length - 3} more</span>
-                )}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            <MapPin size={11} className="text-gray-400" />
+            <span className="text-[12px] text-gray-500">{cityName}</span>
+          </div>
         </div>
         <div className="flex gap-1 flex-shrink-0">
           <button
@@ -117,27 +124,18 @@ const SeoCard = ({ item, onEdit, onDelete, deleting }) => {
             disabled={deleting === item._id}
             title="Delete"
           >
-            {deleting === item._id
-              ? <Loader size={14} className="text-red-500 animate-spin" />
-              : <Trash2 size={14} className="text-red-500" />
-            }
+            {deleting === item._id ? (
+              <Loader size={14} className="text-red-500 animate-spin" />
+            ) : (
+              <Trash2 size={14} className="text-red-500" />
+            )}
           </button>
         </div>
       </div>
 
-      <h3 className="text-[15px] font-semibold text-gray-900 m-0 leading-snug">
-        {item.title || "Untitled"}
+      <h3 className="text-[14px] font-semibold">
+        {item.category_id?.name} - {item.city_id?.name}
       </h3>
-
-      {item.content && (
-        <div
-          className="text-[13px] text-gray-500 leading-relaxed overflow-hidden line-clamp-3"
-          dangerouslySetInnerHTML={{
-            __html: item.content.substring(0, 180) + (item.content.length > 180 ? "…" : ""),
-          }}
-        />
-      )}
-
       <div className="flex justify-end border-t border-gray-100 pt-2 mt-1">
         <span className="text-[11px] text-gray-400">
           {item.updatedAt
@@ -153,14 +151,192 @@ const SeoCard = ({ item, onEdit, onDelete, deleting }) => {
   );
 };
 
+// ── FAQ Item Component ─────────────────────────────────────────────────────────
+const FaqItem = ({ faq, index, onChange, onRemove }) => {
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 flex flex-col gap-3">
+      <div className="flex justify-between items-center">
+        <span className="text-[12px] font-semibold text-gray-500 uppercase">
+          FAQ #{index + 1}
+        </span>
+        <button
+          onClick={onRemove}
+          className="text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+          title="Remove FAQ"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      <input
+        placeholder="Question"
+        value={faq.question || ""}
+        onChange={(e) => onChange({ ...faq, question: e.target.value })}
+        className="border-[1.5px] border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-900 outline-none w-full focus:border-orange-500 transition-colors"
+      />
+
+      <textarea
+        placeholder="Answer"
+        value={faq.answer || ""}
+        onChange={(e) => onChange({ ...faq, answer: e.target.value })}
+        rows={3}
+        className="border-[1.5px] border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-900 outline-none w-full resize-none focus:border-orange-500 transition-colors"
+      />
+    </div>
+  );
+};
+
+// ── Searchable Dropdown Component ─────────────────────────────────────────────
+const SearchableDropdown = ({
+  label,
+  icon: Icon,
+  required = false,
+  placeholder,
+  searchValue,
+  onSearchChange,
+  options,
+  selectedId,
+  onSelect,
+  selectedLabel,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="flex flex-col gap-1.5" ref={dropdownRef}>
+      <label className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-700 uppercase tracking-wide">
+        {Icon && <Icon size={13} className="text-orange-500" />}
+        {label}
+        {required && <span className="text-orange-500 ml-0.5">*</span>}
+      </label>
+
+      {/* Selected Display / Trigger */}
+      <div
+        className={`
+          border-[1.5px] rounded-lg px-3 py-2 text-[13px] cursor-pointer transition-colors
+          ${isOpen ? "border-orange-500 bg-orange-50" : "border-gray-200 bg-white hover:border-gray-300"}
+        `}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {selectedLabel ? (
+          <div className="flex items-center gap-2 text-gray-900 font-medium">
+            {Icon && <Icon size={13} className="text-orange-500" />}
+            {selectedLabel}
+          </div>
+        ) : (
+          <span className="text-gray-400">{placeholder}</span>
+        )}
+      </div>
+
+      {/* Dropdown Panel */}
+      {isOpen && (
+        <div className="relative">
+          <div className="absolute top-1 left-0 right-0 bg-white border-[1.5px] border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+            {/* Search Input */}
+            <div className="p-2 border-b border-gray-100">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                <Search size={13} className="text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="border-none outline-none text-[13px] text-gray-900 bg-transparent w-full"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+
+            {/* Options List */}
+            <div className="max-h-[200px] overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-3 py-3 text-[13px] text-gray-400 text-center">
+                  No results found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option._id}
+                    className={`
+                      px-3 py-2 text-[13px] cursor-pointer transition-colors
+                      ${
+                        selectedId === option._id
+                          ? "bg-orange-50 text-orange-500 font-semibold"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }
+                    `}
+                    onClick={() => {
+                      onSelect(option._id);
+                      setIsOpen(false);
+                      onSearchChange("");
+                    }}
+                  >
+                    {option.name}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Form default ───────────────────────────────────────────────────────────────
 const EMPTY_FORM = {
   _id: null,
   category_id: "",
-  city_ids: [],
-  title: "",
-  content: "",
+  city_id: "",
+  city_content: "",
+  seo_content: "",
+  pricing_content: "",
+  faq_content: [],
 };
+
+const ContentTabs = ({ activeTab, setActiveTab, tabs }) => (
+  <div className="border-b border-gray-200 mb-4">
+    <div className="flex gap-1 overflow-x-auto">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          className={`
+            px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-colors whitespace-nowrap
+            ${
+              activeTab === tab.id
+                ? "border-orange-500 text-orange-500 bg-orange-50"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }
+          `}
+        >
+          <div className="flex items-center gap-2">
+            {tab.icon && <tab.icon size={14} />}
+            {tab.label}
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 const SeoEditor = () => {
@@ -179,6 +355,7 @@ const SeoEditor = () => {
   const [categorySearch, setCategorySearch] = useState("");
   const [citySearch, setCitySearch] = useState("");
   const [toast, setToast] = useState(null);
+  const [activeTab, setActiveTab] = useState("city");
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const showToast = (message, type = "success") => {
@@ -206,19 +383,27 @@ const SeoEditor = () => {
   }, []);
 
   useEffect(() => {
-    Promise.all([fetchData(), fetchDropdowns()]).finally(() => setLoading(false));
+    Promise.all([fetchData(), fetchDropdowns()]).finally(() =>
+      setLoading(false),
+    );
   }, [fetchData, fetchDropdowns]);
 
   // ── CRUD ─────────────────────────────────────────────────────────────────
-  const openAdd = () => { setForm(EMPTY_FORM); setIsEdit(false); setOpen(true); };
+  const openAdd = () => {
+    setForm(EMPTY_FORM);
+    setIsEdit(false);
+    setOpen(true);
+  };
 
   const openEdit = (item) => {
     setForm({
       _id: item._id,
       category_id: item.category_id?._id || item.category_id || "",
-      city_ids: (item.city_ids || []).map((c) => c?._id || c),
-      title: item.title || "",
-      content: item.content || "",
+      city_id: item.city_id?._id || item.city_id || "",
+      city_content: item.city_content || "",
+      seo_content: item.seo_content || "",
+      pricing_content: item.pricing_content || "",
+      faq_content: item.faq_content || [],
     });
     setIsEdit(true);
     setOpen(true);
@@ -232,16 +417,23 @@ const SeoEditor = () => {
   };
 
   const handleSave = async () => {
-    if (!form.category_id) { showToast("Please select a category", "error"); return; }
-    if (!form.title.trim()) { showToast("Title is required", "error"); return; }
+    // Validation
+    if (!form.category_id) return showToast("Category required", "error");
+    if (!form.city_id) return showToast("City required", "error");
+    if (!form.city_content.trim())
+      return showToast("City content required", "error");
+
     setSaving(true);
     try {
       await upsert_seo_content(form);
       showToast(isEdit ? "SEO content updated!" : "SEO content created!");
       closeModal();
       await fetchData();
-    } catch {
-      showToast("Failed to save. Please try again.", "error");
+    } catch (error) {
+      showToast(
+        error?.response?.data?.message || "Failed to save. Please try again.",
+        "error",
+      );
     } finally {
       setSaving(false);
     }
@@ -261,42 +453,68 @@ const SeoEditor = () => {
     }
   };
 
-  const toggleCity = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      city_ids: prev.city_ids.includes(id)
-        ? prev.city_ids.filter((c) => c !== id)
-        : [...prev.city_ids, id],
-    }));
+  // ── FAQ Management ────────────────────────────────────────────────────────
+  const addFaq = () => {
+    setForm({
+      ...form,
+      faq_content: [...form.faq_content, { question: "", answer: "" }],
+    });
+  };
+
+  const updateFaq = (index, updatedFaq) => {
+    const newFaqs = [...form.faq_content];
+    newFaqs[index] = updatedFaq;
+    setForm({ ...form, faq_content: newFaqs });
+  };
+
+  const removeFaq = (index) => {
+    const newFaqs = form.faq_content.filter((_, i) => i !== index);
+    setForm({ ...form, faq_content: newFaqs });
   };
 
   // ── Filtered lists ────────────────────────────────────────────────────────
   const filteredData = data.filter((item) => {
     const q = searchData.toLowerCase();
-    return item.title?.toLowerCase().includes(q) || item.category_id?.name?.toLowerCase().includes(q);
+    return (
+      item.category_id?.name?.toLowerCase().includes(q) ||
+      item.city_id?.name?.toLowerCase().includes(q)
+    );
   });
 
   const filteredCategories = categories.filter((c) =>
-    c.name.toLowerCase().includes(categorySearch.toLowerCase())
+    c.name.toLowerCase().includes(categorySearch.toLowerCase()),
   );
 
   const filteredCities = cities.filter((c) =>
-    c.name.toLowerCase().includes(citySearch.toLowerCase())
+    c.name.toLowerCase().includes(citySearch.toLowerCase()),
   );
 
-  const selectedCategoryName = categories.find((c) => c._id === form.category_id)?.name || "";
+  const selectedCategoryName =
+    categories.find((c) => c._id === form.category_id)?.name || "";
+  const selectedCityName =
+    cities.find((c) => c._id === form.city_id)?.name || "";
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className=" bg-white p-5 min-h-screen  relative">
+    <div className="bg-white p-5 min-h-screen relative">
       {/* Toast */}
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-[22px] font-semibold text-gray-900 m-0 tracking-tight">SEO Content</h1>
-          <p className="text-[13px] text-gray-500 mt-1 mb-0">Manage category-specific content for cities</p>
+          <h1 className="text-[22px] font-semibold text-gray-900 m-0 tracking-tight">
+            SEO Content
+          </h1>
+          <p className="text-[13px] text-gray-500 mt-1 mb-0">
+            Manage category-specific content for cities
+          </p>
         </div>
         <button
           className="inline-flex items-center gap-1.5 bg-orange-500 text-white border-none rounded-lg px-4 py-2 text-[13px] font-semibold cursor-pointer hover:bg-orange-700 transition-colors flex-shrink-0"
@@ -311,12 +529,25 @@ const SeoEditor = () => {
       <div className="flex gap-3 mb-6 flex-wrap items-center">
         {[
           { label: "Total Entries", value: data.length },
-          { label: "Categories Covered", value: new Set(data.map((d) => d.category_id?._id)).size },
-          { label: "Cities Covered", value: new Set(data.flatMap((d) => d.city_ids || [])).size },
+          {
+            label: "Categories Covered",
+            value: new Set(data.map((d) => d.category_id?._id)).size,
+          },
+          {
+            label: "Cities Covered",
+            value: new Set(data.map((d) => d.city_id?._id)).size,
+          },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-3 flex flex-col gap-0.5">
-            <span className="text-[22px] font-semibold text-orange-500 leading-none">{s.value}</span>
-            <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{s.label}</span>
+          <div
+            key={s.label}
+            className="bg-white border border-gray-200 rounded-xl px-5 py-3 flex flex-col gap-0.5"
+          >
+            <span className="text-[22px] font-semibold text-orange-500 leading-none">
+              {s.value}
+            </span>
+            <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">
+              {s.label}
+            </span>
           </div>
         ))}
 
@@ -334,17 +565,42 @@ const SeoEditor = () => {
 
       {/* ── Content ── */}
       {loading ? (
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+        <div
+          className="grid gap-4"
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+          }}
+        >
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-[180px] bg-gray-100 rounded-xl animate-pulse" />
+            <div
+              key={i}
+              className="h-[180px] bg-gray-100 rounded-xl animate-pulse"
+            />
           ))}
         </div>
       ) : filteredData.length === 0 ? (
-        <EmptyState onAdd={openAdd} />
+        searchData ? (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-[14px]">No results found for {searchData}</p>
+          </div>
+        ) : (
+          <EmptyState onAdd={openAdd} />
+        )
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+        <div
+          className="grid gap-4"
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+          }}
+        >
           {filteredData.map((item) => (
-            <SeoCard key={item._id} item={item} onEdit={openEdit} onDelete={handleDelete} deleting={deleting} />
+            <SeoCard
+              key={item._id}
+              item={item}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+              deleting={deleting}
+            />
           ))}
         </div>
       )}
@@ -355,8 +611,7 @@ const SeoEditor = () => {
           className="fixed inset-0 bg-gray-900/45 flex items-start justify-center z-[1000] p-8 overflow-y-auto"
           onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
-          <div className="bg-white rounded-2xl w-full max-w-[860px] flex flex-col overflow-hidden my-auto">
-
+          <div className="bg-white rounded-2xl w-full max-w-[960px] flex flex-col overflow-hidden my-auto">
             {/* Modal header */}
             <div className="flex justify-between items-start px-6 py-5 border-b border-gray-100 gap-4">
               <div>
@@ -364,7 +619,8 @@ const SeoEditor = () => {
                   {isEdit ? "Edit SEO Entry" : "New SEO Entry"}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5 mb-0">
-                  Fill in the content that will appear on the category page for selected cities
+                  Fill in the content that will appear on the category page for
+                  the selected city
                 </p>
               </div>
               <button
@@ -376,131 +632,119 @@ const SeoEditor = () => {
             </div>
 
             {/* Modal body */}
-            <div className="px-6 py-5 flex flex-col gap-5 overflow-y-auto max-h-[70vh]">
-
+            <div
+              className="px-6 py-5 flex flex-col gap-5 overflow-y-auto"
+              style={{ maxHeight: "calc(100vh - 200px)" }}
+            >
               {/* Two-column top section */}
               <div className="grid grid-cols-2 gap-5">
-
                 {/* Category */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-700 uppercase tracking-wide">
-                    <Tag size={13} className="text-orange-500" />
-                    Category
-                    <span className="text-orange-500 ml-0.5">*</span>
-                  </label>
-                  <div className="flex flex-col gap-0">
-                    <input
-                      placeholder="Search category..."
-                      value={categorySearch}
-                      onChange={(e) => setCategorySearch(e.target.value)}
-                      className="border-[1.5px] border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-900 outline-none w-full box-border bg-white mb-1 focus:border-orange-500 transition-colors"
-                    />
-                    <div className="border-[1.5px] border-gray-200 rounded-lg max-h-[180px] overflow-y-auto bg-white">
-                      {filteredCategories.length === 0 ? (
-                        <div className="px-3 py-3 text-[13px] text-gray-400 text-center">No categories found</div>
-                      ) : (
-                        filteredCategories.map((cat) => (
-                          <div
-                            key={cat._id}
-                            className={`px-3 py-2 text-[13px] cursor-pointer transition-colors flex items-center gap-2
-                              ${form.category_id === cat._id
-                                ? "bg-orange-50 text-orange-500 font-semibold"
-                                : "text-gray-700 hover:bg-gray-50"
-                              }`}
-                            onClick={() => setForm({ ...form, category_id: cat._id })}
-                          >
-                            {cat.name}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    {selectedCategoryName && (
-                      <div className="mt-1.5 inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-full px-2.5 py-0.5 text-[12px] font-semibold text-orange-500 w-fit">
-                        <Tag size={11} />
-                        {selectedCategoryName}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <SearchableDropdown
+                  label="Category"
+                  icon={Tag}
+                  required={true}
+                  placeholder="Select category..."
+                  searchValue={categorySearch}
+                  onSearchChange={setCategorySearch}
+                  options={filteredCategories}
+                  selectedId={form.category_id}
+                  onSelect={(id) => setForm({ ...form, category_id: id })}
+                  selectedLabel={selectedCategoryName}
+                />
 
-                {/* Cities */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-700 uppercase tracking-wide">
-                    <MapPin size={13} className="text-orange-500" />
-                    Cities
-                    {form.city_ids.length > 0 && (
-                      <span className="ml-1.5 bg-orange-500 text-white rounded-full px-2 py-0 text-[10px] font-semibold">
-                        {form.city_ids.length} selected
-                      </span>
-                    )}
-                  </label>
-                  <div className="flex flex-col gap-0">
-                    <input
-                      placeholder="Search city..."
-                      value={citySearch}
-                      onChange={(e) => setCitySearch(e.target.value)}
-                      className="border-[1.5px] border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-900 outline-none w-full box-border bg-white mb-1 focus:border-orange-500 transition-colors"
-                    />
-                    <div className="border-[1.5px] border-gray-200 rounded-lg max-h-[180px] overflow-y-auto bg-white">
-                      {filteredCities.length === 0 ? (
-                        <div className="px-3 py-3 text-[13px] text-gray-400 text-center">No cities found</div>
-                      ) : (
-                        filteredCities.map((city) => {
-                          const checked = form.city_ids.includes(city._id);
-                          return (
-                            <div
-                              key={city._id}
-                              className={`px-3 py-2 text-[13px] cursor-pointer transition-colors flex items-center gap-2
-                                ${checked ? "bg-orange-50" : "hover:bg-gray-50"}`}
-                              onClick={() => toggleCity(city._id)}
-                            >
-                              {/* Custom checkbox */}
-                              <div
-                                className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border-[1.5px] transition-all
-                                  ${checked ? "bg-orange-500 border-orange-500" : "bg-white border-gray-300"}`}
-                              >
-                                {checked && (
-                                  <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                                    <path d="M1 3.5L3.5 6L8 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                )}
-                              </div>
-                              <span className={`text-[13px] ${checked ? "text-orange-500 font-medium" : "text-gray-700"}`}>
-                                {city.name}
-                              </span>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Title */}
-              <div className="flex flex-col gap-1.5">
-                <label className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-700 uppercase tracking-wide">
-                  Page Title
-                  <span className="text-orange-500 ml-0.5">*</span>
-                </label>
-                <input
-                  placeholder="e.g. Best Plumbers in Dubai — Verified & Affordable"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="border-[1.5px] border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-900 outline-none w-full box-border bg-white focus:border-orange-500 transition-colors"
+                {/* City */}
+                <SearchableDropdown
+                  label="City"
+                  icon={MapPin}
+                  required={true}
+                  placeholder="Select city..."
+                  searchValue={citySearch}
+                  onSearchChange={setCitySearch}
+                  options={filteredCities}
+                  selectedId={form.city_id}
+                  onSelect={(id) => setForm({ ...form, city_id: id })}
+                  selectedLabel={selectedCityName}
                 />
               </div>
+              {/* Tab Navigation */}
+              <ContentTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                tabs={[
+                  { id: "city", label: "City Content", icon: FileText },
+                  { id: "seo", label: "SEO Content", icon: FileText },
+                  { id: "pricing", label: "Pricing", icon: FileText },
+                  { id: "faq", label: "FAQs", icon: HelpCircle },
+                ]}
+              />
 
-              {/* Content editor */}
-              <div className="flex flex-col gap-1.5">
-                <label className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-700 uppercase tracking-wide">
-                  Page Content
-                </label>
-                <TiptapEditor
-                  value={form.content}
-                  onChange={(val) => setForm({ ...form, content: val })}
-                  placeholder="Write detailed, SEO-friendly content about this category in the selected cities…"
-                />
+              {/* Tab Content */}
+              <div className="min-h-[320px]">
+                {activeTab === "city" && (
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[12px] text-gray-500 mb-2">
+                      Content specific to this city{" "}
+                      <span className="text-orange-500">*</span>
+                    </p>
+                    <TiptapEditor
+                      value={form.city_content}
+                      onChange={(val) =>
+                        setForm({ ...form, city_content: val })
+                      }
+                      placeholder="Write city-specific content here..."
+                    />
+                  </div>
+                )}
+
+                {activeTab === "seo" && (
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[12px] text-gray-500 mb-2">
+                      Additional SEO-optimized content
+                    </p>
+                    <TiptapEditor
+                      value={form.seo_content}
+                      onChange={(val) => setForm({ ...form, seo_content: val })}
+                      placeholder="Write SEO content here..."
+                    />
+                  </div>
+                )}
+
+                {activeTab === "pricing" && (
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[12px] text-gray-500 mb-2">
+                      Pricing information and details
+                    </p>
+                    <TiptapEditor
+                      value={form.pricing_content}
+                      onChange={(val) =>
+                        setForm({ ...form, pricing_content: val })
+                      }
+                      placeholder="Write pricing content here..."
+                    />
+                  </div>
+                )}
+
+                {activeTab === "faq" && (
+                  <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-2">
+                    {form.faq_content.map((faq, index) => (
+                      <FaqItem
+                        key={index}
+                        faq={faq}
+                        index={index}
+                        onChange={(updated) => updateFaq(index, updated)}
+                        onRemove={() => removeFaq(index)}
+                      />
+                    ))}
+
+                    <button
+                      onClick={addFaq}
+                      className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-500 border border-orange-200 rounded-lg px-3 py-2 text-[13px] font-semibold cursor-pointer hover:bg-orange-100 transition-colors w-fit"
+                    >
+                      <Plus size={14} />
+                      Add FAQ
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
