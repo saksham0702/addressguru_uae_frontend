@@ -11,7 +11,7 @@ import UserLogin from "@/components/UserLogin/UserLogin";
 import { useAuth } from "@/context/AuthContext";
 import MobileCities from "@/components/MobileCities";
 import Login from "@/components/UserLogin/Login";
-import { searchData, searchListings } from "@/api/search";
+import { searchData, searchListings, resolveSearch } from "@/api/search";
 import { useRouter } from "next/router";
 import { getCities } from "@/api/uaeadminCities";
 
@@ -35,25 +35,45 @@ const Header = () => {
 
   const [loginPop, setLoginPop] = useState(false);
   const handleSearch = async (query) => {
-    if (!query) return;
-    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+    if (!query?.trim()) return;
+
     try {
-      const res = await searchListings(query);
-      console.log("search results", res);
+      const res = await resolveSearch(query.trim());
 
-      // if (!res || res.status === false || !res.category) {
-      //   console.warn("Invalid search response", res);
-      //   return;
-      // }
+      switch (res.intent) {
+        // ── Category + city → go to that page ───────────────────────────────
+        case "category_city":
+          router.push(res.redirectUrl); // e.g. /gym/dubai
+          break;
 
-      // const categorySlug = res.category.toLowerCase().replace(/\s+/g, "-");
+        // ── Category only → go to category page ─────────────────────────────
+        case "category":
+          router.push(res.redirectUrl); // e.g. /gym
+          break;
 
-      // const citySlug = city.toLowerCase().replace(/\s+/g, "-");
+        // ── Exact single business match → go to that listing ────────────────
+        case "exact_business":
+          router.push(res.redirectUrl); // e.g. /listing/gold-gym-dubai
+          break;
 
-      // ✅ THIS creates /hotel/UAE
-      // router.push(`/${categorySlug}/${citySlug}`);
+        // ── Multiple name matches / service / course / keyword fallback
+        // → go to search results page and let it render the listings
+        case "business_list":
+        case "service_match":
+        case "course_match":
+        case "keyword_search":
+          router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+          break;
+
+        case "no_results":
+        default:
+          router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+          break;
+      }
     } catch (error) {
-      console.error("Search API failed:", error);
+      console.error("Search resolve failed:", error);
+      // Fallback to search page
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
@@ -285,7 +305,8 @@ const Header = () => {
         </div>
 
         {showSearchBar && (
-          <div className="absolute left-[220px] max-xl:mr-5 2xl:left-[240px] top-[9px] max-md:hidden min-[1600px]:scale-75 z-50  rounded-r-full scale-70">
+          <div className="absolute left-[220px] max-xl:mr-5 2xl:left-[240px] top-[9px] max-md:hidden min-[1600px]:scale-75 z-[100] scale-70">
+            {" "}
             <SearchBar
               value={slug}
               setValue={setSlug}

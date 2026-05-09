@@ -44,6 +44,7 @@ export default function EditCategoryPage() {
   const [courses, setCourses] = useState([]);
   const isSubCategory = type === "subcategory";
   const [entity, setEntity] = useState(null);
+  const [tagInput, setTagInput] = useState("");
 
   /* ================= CATEGORY ================= */
   const [category, setCategory] = useState({
@@ -128,6 +129,7 @@ export default function EditCategoryPage() {
           metaTitle: data.category.metaTitle || "",
           metaDescription: data.category.metaDescription || "",
           ogImage: data.category.ogImage || "",
+          tags: data.category.tags || [],
         });
 
         setFacilities(data.facilities || []);
@@ -178,10 +180,10 @@ export default function EditCategoryPage() {
         iconPng: data?.category?.iconPng || "",
         type: data?.category?.type || "business",
         status: data.category.isActive ? "Active" : "Inactive",
-        // ✅ ADD THESE
         metaTitle: data?.category?.seo?.title || "",
         metaDescription: data?.category?.seo?.description || "",
         ogImage: data?.category?.seo?.ogImage || "", // existing URL
+        tags: data.category.tags || [],
       });
 
       // FACILITIES
@@ -237,6 +239,36 @@ export default function EditCategoryPage() {
     }
   };
 
+  const handleAddTag = (e) => {
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const value = tagInput.trim().toLowerCase();
+
+    if (!value) return;
+
+    // prevent duplicates
+    if (entity.tags?.includes(value)) {
+      setTagInput("");
+      return;
+    }
+
+    setEntity((prev) => ({
+      ...prev,
+      tags: [...(prev.tags || []), value],
+    }));
+
+    setTagInput("");
+  };
+
+  const removeTag = (tag) => {
+    setEntity((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
+  };
+
   /* ================= SAVE CATEGORY ================= */
 
   const saveEntity = async () => {
@@ -253,6 +285,7 @@ export default function EditCategoryPage() {
 
       formData.append("metaTitle", entity.metaTitle || "");
       formData.append("metaDescription", entity.metaDescription || "");
+      formData.append("tags", JSON.stringify(entity.tags || []));
 
       if (entity.ogImage instanceof File) {
         formData.append("ogImage", entity.ogImage);
@@ -340,6 +373,7 @@ export default function EditCategoryPage() {
       console.log(err);
     }
   };
+  console.log("entity", entity);
 
   /* ================= UI ================= */
   return (
@@ -475,6 +509,50 @@ export default function EditCategoryPage() {
               </div>
             </div>
             <div>
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-md font-semibold text-gray-800">
+                  Category Tags
+                </h3>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Add Tags
+                  </label>
+
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleAddTag}
+                    placeholder="Press Enter to add tag"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    Example: restaurant, cafe, hotel, gym
+                  </p>
+                </div>
+
+                {/* TAGS */}
+                <div className="flex flex-wrap gap-2">
+                  {entity?.tags?.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                    >
+                      <span>{tag}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-red-500"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <label className="block text-sm font-medium mb-1">OG Image</label>
 
               {/* Preview */}

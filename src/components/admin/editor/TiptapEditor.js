@@ -210,7 +210,8 @@ const TiptapEditor = ({
 
   return (
     // Fix 4: outer wrapper is a flex column with fixed height
-    <div className="border-[1.5px] border-gray-200 rounded-xl overflow-hidden bg-white flex flex-col h-[600px]">
+    <div className="border-[1.5px] border-gray-200 rounded-xl overflow-hidden bg-white flex flex-col h-[280px]">
+      {" "}
       {/* Fix 4: toolbar is flex-none (never shrinks) */}
       <div className="flex-none flex flex-wrap items-center gap-0.5 px-2.5 py-2 bg-gray-50 border-b border-gray-200 z-10">
         <ToolBtn
@@ -393,13 +394,11 @@ const TiptapEditor = ({
           <RemoveFormatting size={14} />
         </ToolBtn>
       </div>
-
       {/* Fix 4: content area is flex-1 + overflow-y-auto → scrollable */}
       <EditorContent
         editor={editor}
         className="flex-1 overflow-y-auto px-5 py-4 text-[15px] leading-relaxed text-gray-900"
       />
-
       {/* Fix 4: table bar is flex-none (sticks to bottom of the flex column) */}
       {editor.isActive("table") && (
         <div className="flex-none flex flex-wrap gap-1.5 px-3 py-2 bg-orange-50 border-t border-orange-200 z-10">
@@ -451,7 +450,6 @@ const TiptapEditor = ({
           ))}
         </div>
       )}
-
       {/* ── Editor prose styles ── */}
       <style>{`
         .ProseMirror { outline: none; }

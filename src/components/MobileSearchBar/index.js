@@ -1,47 +1,76 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
-import { searchData } from "@/api/search";
+import { fetchSearchSuggestions } from "@/api/search";
 
 const MobileSearchBar = () => {
   const [slug, setSlug] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const { city } = useAuth();
   const router = useRouter();
+  const containerRef = useRef(null);
 
-  const handleSearch = async () => {
-    if (!slug?.trim() || !city) return;
-
-    try {
-      const res = await searchData(slug, city);
-
-      if (!res || res.status === false || !res.category) {
-        console.warn("Invalid search response", res);
-        return;
-      }
-
-      const categorySlug = res.category.toLowerCase().replace(/\s+/g, "-");
-      const citySlug = city.toLowerCase().replace(/\s+/g, "-");
-
-      router.push(`/${categorySlug}/${citySlug}`);
-    } catch (error) {
-      console.error("Search API failed:", error);
+  // Debounced fetch
+  useEffect(() => {
+    if (!slug || slug.trim().length < 2) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
     }
+
+    const timer = setTimeout(() => {
+      fetchSearchSuggestions(slug)
+        .then((data) => {
+          setSuggestions(data?.suggestions || []);
+          setShowDropdown(true);
+        })
+        .catch(() => {});
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [slug]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearch = (query) => {
+    if (!query?.trim()) return;
+    setShowDropdown(false);
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setShowDropdown(false);
+    setSlug(suggestion.label);
+    router.push(suggestion.redirectUrl);
   };
 
   return (
-    <div className="bg-white md:hidden fixed z-30 w-full px-3 pb-1.5">
-      <div className="border border-gray-300 shadow-sm rounded-md h-10 w-full  flex items-center justify-between px-1.5">
-        {/* INPUT */}
+    <div
+      ref={containerRef}
+      className="bg-white md:hidden fixed z-30 w-full px-3 pb-1.5"
+    >
+      <div className="border border-gray-300 shadow-sm rounded-md h-10 w-full flex items-center justify-between px-1.5">
         <input
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch(slug);
+          }}
           placeholder="What are you looking for?"
           className="text-xs font-semibold text-gray-600 w-full outline-none px-2"
         />
-
-        {/* SEARCH BUTTON */}
-        <button onClick={handleSearch} className="ml-2">
+        <button onClick={() => handleSearch(slug)} className="ml-2">
           <svg
             width="29"
             height="29"
@@ -59,6 +88,28 @@ const MobileSearchBar = () => {
           </svg>
         </button>
       </div>
+
+      {/* Mobile Suggestions Dropdown */}
+      {showDropdown && suggestions.length > 0 && (
+        <div className="absolute left-3 right-3 top-[calc(100%+4px)] bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-[300px] overflow-y-auto">
+          {suggestions.map((s, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSuggestionClick(s)}
+              className="w-full px-3 py-2.5 text-left border-b border-gray-100 last:border-0 hover:bg-orange-50 transition-colors"
+            >
+              <p className="text-sm font-semibold text-gray-800 truncate">
+                {s.label}
+              </p>
+              {s.sublabel && (
+                <p className="text-xs text-gray-400 truncate mt-0.5">
+                  {s.sublabel}
+                </p>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

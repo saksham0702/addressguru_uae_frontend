@@ -33,7 +33,6 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
   };
   return (
     <div className="w-full 2xl:w-[80%] h-[290px] bg-blue-700 max-md:hidden flex items-center  relative ">
-
       <div className="h-full w-full absolute top-[0px]  px-5 z-10">
         <Image
           src="/assets/Group 7305.svg"
@@ -48,7 +47,7 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
           Explore over <strong className="text-[#FF6E04]">150K+ </strong>
           Products & Services with ease
         </h3>
-        <div className="relative right-10">
+        <div className="relative right-10 z-50">
           <SearchBar
             value={slug}
             setValue={setSlug}
