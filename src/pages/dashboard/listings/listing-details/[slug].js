@@ -6,6 +6,11 @@ import Graph from "@/components/Dashboard/Graph";
 import BusinessHeaderSection from "@/components/Dashboard/MyListing/BusinessHeaderSection";
 import QuickEdit from "@/components/Dashboard/MyListing/QuickEdit";
 import RecentLeads from "@/components/Dashboard/RecentLeads";
+import {
+  ClaimsModal,
+  ReportsModal,
+  ReviewsModal,
+} from "@/components/Dashboard/MyListing/ListingFeaturesModals";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -16,6 +21,9 @@ const ListingDetails = () => {
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [leadsData, setLeadsData] = useState([]);
+  const [showClaims, setShowClaims] = useState(false);
+  const [showReports, setShowReports] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
 
   const getListings = useCallback(
     async (slug) => {
@@ -90,9 +98,30 @@ const ListingDetails = () => {
     <DashboardLayout>
       <div className="w-full min-h-screen flex flex-col">
         {/* Fixed Header Section */}
-        <section className="sticky top-[-25px] z-50 w-full bg-white border-b border-gray-100    pb-3 mb-4">
+        <section className="sticky top-[-25px] z-50 w-full bg-white border-b border-gray-100 pb-3 mb-4">
           <div className="w-full mx-auto">
             <BusinessHeaderSection data={data} />
+          </div>
+          {/* Feature buttons */}
+          <div className="flex gap-2 px-4 pt-2 flex-wrap">
+            <button
+              onClick={() => setShowClaims(true)}
+              className="px-4 py-1.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+            >
+              Claims
+            </button>
+            <button
+              onClick={() => setShowReports(true)}
+              className="px-4 py-1.5 text-xs font-semibold bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+            >
+              Reports
+            </button>
+            <button
+              onClick={() => setShowReviews(true)}
+              className="px-4 py-1.5 text-xs font-semibold bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+            >
+              Reviews
+            </button>
           </div>
         </section>
 
@@ -117,6 +146,23 @@ const ListingDetails = () => {
           </div>
         </section>
       </div>
+
+      {/* Listing Feature Modals */}
+      <ClaimsModal
+        isOpen={showClaims}
+        onClose={() => setShowClaims(false)}
+        slug={slug}
+      />
+      <ReportsModal
+        isOpen={showReports}
+        onClose={() => setShowReports(false)}
+        slug={slug}
+      />
+      <ReviewsModal
+        isOpen={showReviews}
+        onClose={() => setShowReviews(false)}
+        slug={slug}
+      />
     </DashboardLayout>
   );
 };

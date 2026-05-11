@@ -470,7 +470,7 @@ const ListingForms = () => {
   // get service and facilities
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
-      const res = await getBusinessFeatures(categoryId);
+      const res = await getBusinessFeatures(categoryId,true);
       const facilities = res?.features?.facilities || [];
       const services = res?.features?.services || [];
       const courses = res?.features?.courses || [];

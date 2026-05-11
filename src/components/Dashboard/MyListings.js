@@ -36,6 +36,7 @@ import DetailsModal from "./MyListing/DetailsModal";
 import { unpublish_listing, delete_listing } from "@/api/uae-dashboard";
 import ConfirmationModal from "./MyListing/ConfirmationModal";
 import PostAdsPop from "./Popups/PostAdsPop";
+import AddInfoModal from "./MyListing/AddInfoModal";
 
 const ROOM_SUPPORTED_CATEGORIES = ["Hotel", "Hostel", "Yoga Studio"];
 
@@ -128,6 +129,8 @@ const Toast = ({ toast }) => {
 const MyListings = ({ data, onRefresh }) => {
   const [selectedListing, setSelectedListing] = useState(null);
   const [roomsModalListing, setRoomsModalListing] = useState(null);
+  const [addInfoListing, setAddInfoListing] = useState(null);
+
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     action: null,
@@ -137,7 +140,7 @@ const MyListings = ({ data, onRefresh }) => {
   const [publishLoading, setPublishLoading] = useState({});
   const [toast, setToast] = useState(null);
 
-  const [postAdd,setPostAdd] = useState(false);
+  const [postAdd, setPostAdd] = useState(false);
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -248,7 +251,10 @@ const MyListings = ({ data, onRefresh }) => {
                     <div className="flex-1 min-w-0">
                       {/* Business Name & Status */}
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <Link href={`/dashboard/listings/listing-details/${listing?.slug}`} className="font-semibold text-lg hover:scale-105  hover:text-blue-600 text-gray-900 line-clamp-1">
+                        <Link
+                          href={`/dashboard/listings/listing-details/${listing?.slug}`}
+                          className="font-semibold text-lg hover:scale-105  hover:text-blue-600 text-gray-900 line-clamp-1"
+                        >
                           {listing?.businessName}
                         </Link>
                         {listing?.status && (
@@ -336,7 +342,10 @@ const MyListings = ({ data, onRefresh }) => {
 
                       {/* Action Buttons */}
                       <div className="flex gap-2 flex-wrap">
-                        <Link href={`/dashboard/listings/listing-details/${listing?.slug}`} className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all">
+                        <Link
+                          href={`/dashboard/listings/listing-details/${listing?.slug}`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
+                        >
                           <Eye size={16} />
                           View Details
                         </Link>
@@ -368,13 +377,13 @@ const MyListings = ({ data, onRefresh }) => {
                           Edit
                         </Link>
 
-                        <Link
-                          href={`/dashboard/listing-forms?category=${listing?.category?._id}&categoryName=${encodeURIComponent(categoryName ?? "")}&name=${encodeURIComponent(listing?.slug)}&mode=additional`}
+                        <button
+                          onClick={() => setAddInfoListing(listing)}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-all"
                         >
                           <Plus size={16} />
                           Add Info
-                        </Link>
+                        </button>
 
                         <Link
                           href={`/${listing?.slug}?preview=true`}
@@ -461,7 +470,7 @@ const MyListings = ({ data, onRefresh }) => {
               Create your first listing to get started
             </p>
             <button
-            onClick={() => setPostAdd(true)}
+              onClick={() => setPostAdd(true)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-all"
             >
               <Plus size={20} />
@@ -503,8 +512,12 @@ const MyListings = ({ data, onRefresh }) => {
           >
             <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 bg-gray-50">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Manage Rooms</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{roomsModalListing.businessName}</p>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Manage Rooms
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {roomsModalListing.businessName}
+                </p>
               </div>
               <button
                 onClick={handleRoomsModalClose}
@@ -528,6 +541,11 @@ const MyListings = ({ data, onRefresh }) => {
       {/* Toast Notification */}
       <Toast toast={toast} />
       {postAdd && <PostAdsPop setPostAdd={setPostAdd} />}
+      <AddInfoModal
+        isOpen={!!addInfoListing}
+        onClose={() => setAddInfoListing(null)}
+        listingData={addInfoListing}
+      />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import MyListings from "@/components/Dashboard/MyListings";
+import ListingFeaturesPanel from "@/components/Dashboard/ListingFeaturesPanel";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
@@ -29,8 +30,10 @@ const ListingsPage = () => {
 
   return (
     <DashboardLayout>
-      {/* Remove the extra bg-white wrapper */}
-      <MyListings data={data} onRefresh={fetchListings} />
+      <div className="space-y-6">
+        <MyListings data={data} onRefresh={fetchListings} />
+        <ListingFeaturesPanel />
+      </div>
     </DashboardLayout>
   );
 };
