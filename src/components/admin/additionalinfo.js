@@ -66,6 +66,7 @@ const emptyField = {
   is_quickinfo: false,
   is_description: false,
   is_additional: true,
+  is_inside_form: false,
 };
 
 export default function AdditionalInfoBuilder() {
@@ -73,6 +74,7 @@ export default function AdditionalInfoBuilder() {
   const { id, subcategory_id } = router.query;
 
   const [fieldsList, setFieldsList] = useState([]);
+  const [showInsideForm, setShowInsideForm] = useState(true);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [field, setField] = useState(emptyField);
@@ -90,7 +92,10 @@ export default function AdditionalInfoBuilder() {
   }, [id]);
 
   const fetchFields = async () => {
-    const res = await getAdditionalFieldsByCategory(id);
+    const res = await getAdditionalFieldsByCategory(
+      id,
+      showInsideForm, // pass this
+    );
     if (res?.status) setFieldsList(res.data);
   };
 
@@ -135,6 +140,7 @@ export default function AdditionalInfoBuilder() {
       is_quickinfo: item.is_quickinfo || false,
       is_description: item.is_description || false,
       is_additional: item.is_additional ?? true,
+      is_inside_form: item.is_inside_form ?? false,
       field_type: item.field_type || "",
       placeholder: item.placeholder || "",
       options,
@@ -170,6 +176,7 @@ export default function AdditionalInfoBuilder() {
       is_quickinfo: field.is_quickinfo,
       is_description: field.is_description,
       is_additional: field.is_additional,
+      is_inside_form: field.is_inside_form,
       field_type: field.field_type,
       placeholder: field.placeholder || null,
       // Type-specific fields — backend ignores what doesn't apply
@@ -314,7 +321,6 @@ export default function AdditionalInfoBuilder() {
                   <option value="additional">Other</option>
                 </select>
               </div>
-
               <div className="space-y-1">
                 <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                   Placeholder
@@ -362,6 +368,38 @@ export default function AdditionalInfoBuilder() {
                 </button>
               </div>
             )}
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Display Type
+              </label>
+
+              <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
+                <button
+                  type="button"
+                  onClick={() => updateFieldState("is_inside_form", true)}
+                  className={`px-4 py-1.5 text-sm rounded-md transition ${
+                    field.is_inside_form
+                      ? "bg-white shadow text-orange-600"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Inside Form
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateFieldState("is_inside_form", false)}
+                  className={`px-4 py-1.5 text-sm rounded-md transition ${
+                    !field.is_inside_form
+                      ? "bg-white shadow text-orange-600"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Popup
+                </button>
+              </div>
+            </div>
 
             {/* ── ACTIONS ── */}
             <div className="flex justify-end gap-3 pt-2">

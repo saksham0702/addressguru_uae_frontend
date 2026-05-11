@@ -684,12 +684,15 @@ export const removeFeatureFromSubCategoryApi = async (
   }
 };
 
-export const getBusinessFeatures = async (id) => {
+export const getBusinessFeatures = async (id, is_inside_form) => {
   try {
+    // ✅ default to false if not provided
+    const finalValue = is_inside_form ?? false;
+
     const response = await axios.get(
-      `${API_URL}/business-listing/get-features/${id}`,
+      `${API_URL}/business-listing/get-features/${id}?is_inside_form=${finalValue}`,
     );
-    // console.log("get business features response", response);
+    console.log("get business features response", response.data.data);
     return response.data.data;
   } catch (error) {
     console.log("Error fetching business features:", error);
