@@ -116,7 +116,7 @@ const QuickInformation = ({
   ];
 
   return (
-    <div className="w-full max-md:hidden rounded-t-lg">
+    <div className="w-full max-md:hidden mb-3 rounded-t-lg">
       {/* Header */}
       <div className="bg-[#323232] text-white text-center rounded-t-lg py-2 font-semibold">
         Quick Information
