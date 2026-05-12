@@ -913,46 +913,44 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
               {/* reviews section */}
               <div className="mt-5 md:pl-2 px-1">
-              <ReviewSection slug={data?.slug} />
+                <ReviewSection slug={data?.slug} />
               </div>
             </div>
 
             {/* ── RIGHT COLUMN ───────────────────────────────── */}
-            <div
-              className={`md:w-[34%] ${
-                isSliderFull ? "" : "md:absolute md:top-49 md:right-0"
-              } max-md:hidden h-auto mb-10 flex flex-col gap-5`}
-            >
-              <QuickInformation
-                id={data?.id}
-                businesshours={data?.workingHours}
-                extraFields={formattedFields} // full object
-                category={data?.category}
-                link={data?.websiteLink}
-                handlePop={handlePop}
-                handleWebsiteClick={handleWebsiteClick}
-              />
-
-              {rooms?.rooms?.length > 0 ? (
-                <RoomsSection
-                  enquirePop={enquirePop}
-                  setEnquirePop={setEnquirePop}
-                  category={rooms?.categoryType?.toLowerCase()}
-                  data={formattedRoomsData}
+            <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
+              <div className={`sticky top-24 ${!isSliderFull ? "-mt-116" : ""}`}>
+                {" "}
+                <QuickInformation
+                  id={data?.id}
+                  businesshours={data?.workingHours}
+                  extraFields={formattedFields}
+                  category={data?.category}
+                  link={data?.websiteLink}
+                  handlePop={handlePop}
+                  handleWebsiteClick={handleWebsiteClick}
                 />
-              ) : (
-                <GetMoreInfo
-                  isPop={false}
-                  logo={`${APP_URL}${data?.logo}`}
-                  image={`${APP_URL}${data?.images[0]}`}
-                  type="listing"
-                  name={data?.businessName}
-                  id={data?._id}
-                  slug={data?.slug}
-                  setEnquirePop={setEnquirePop}
-                />
-              )}
-              <UserInformation />
+                {rooms?.rooms?.length > 0 ? (
+                  <RoomsSection
+                    enquirePop={enquirePop}
+                    setEnquirePop={setEnquirePop}
+                    category={rooms?.categoryType?.toLowerCase()}
+                    data={formattedRoomsData}
+                  />
+                ) : (
+                  <GetMoreInfo
+                    isPop={false}
+                    logo={`${APP_URL}${data?.logo}`}
+                    image={`${APP_URL}${data?.images[0]}`}
+                    type="listing"
+                    name={data?.businessName}
+                    id={data?._id}
+                    slug={data?.slug}
+                    setEnquirePop={setEnquirePop}
+                  />
+                )}
+                <UserInformation />
+              </div>
             </div>
           </div>
 

@@ -1,7 +1,14 @@
 "use client";
-import React, { useState } from "react";
-const SeoContent = ({ seoContent }) => {
+import React, { useState, useEffect } from "react";
+import InfoListSection from "./InfoListSection";
+const SeoContent = ({ seoContent, items = [] }) => {
   const [openIndex, setOpenIndex] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowInfo(true), 500); // delay
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!seoContent) return null;
 
@@ -40,6 +47,11 @@ const SeoContent = ({ seoContent }) => {
             __html: cleanHtml(seoContent.seo_content),
           }}
         />
+      )}
+
+      {/* INFO LIST */}
+      {showInfo && items.length > 0 && (
+        <InfoListSection title="Top Listings" items={items} />
       )}
 
       {/* PRICING CONTENT */}

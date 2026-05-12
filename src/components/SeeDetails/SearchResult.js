@@ -19,6 +19,7 @@ import { get_seo_data } from "@/api/seoApi";
 import SeoContent from "@/components/BusinessListingComponents/SeoContent";
 import Image from "next/image";
 import InlineLeadCard from "../BusinessListingComponents/InlineLeadCard";
+import AdsCard from "./AdsCard";
 
 const SearchResults = ({
   ssrListings,
@@ -581,23 +582,42 @@ const SearchResults = ({
                   </div>
                 ) : (
                   <>
-                    {listings.map((item, index) => (
-                      <React.Fragment key={item._id || index}>
-                        <div className="w-full md:mb-4 mb-1">
-                          <BusinessCard data={item} />
-                        </div>
+                    {listings.map((item, index) => {
+                      const position = index + 1;
 
-                        {/* 👉 Insert after every 5 items */}
-                        {listings.length > 5 && (index + 1) % 5 === 0 && (
-                          <div className="my-3 ">
-                            <InlineLeadCard
-                              category={canonicalSlug}
-                              iconSvg={apiListings?.[0]?.category}
-                            />{" "}
+                      // 👉 Inline card: 5, 15, 25, 35...
+                      const showInline =
+                        position === 5 ||
+                        (position > 5 && (position - 5) % 10 === 0);
+
+                      // 👉 Ads card: every 7
+                      const showAds = position % 7 === 0;
+
+                      return (
+                        <React.Fragment key={item._id || index}>
+                          <div className="w-full md:mb-4 mb-1">
+                            <BusinessCard data={item} />
                           </div>
-                        )}
-                      </React.Fragment>
-                    ))}
+
+                          {/* InlineLeadCard */}
+                          {showInline && (
+                            <div className="my-3">
+                              <InlineLeadCard
+                                category={canonicalSlug}
+                                iconSvg={apiListings?.[0]?.category}
+                              />
+                            </div>
+                          )}
+
+                          {/* AdsCard */}
+                          {showAds && (
+                            <div className="my-3">
+                              <AdsCard />
+                            </div>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                     {isLoadingMore &&
                       Array.from({ length: 2 }).map((_, i) => (
                         <BusinessCardSkeleton key={`more-${i}`} />
@@ -632,13 +652,11 @@ const SearchResults = ({
 
           <section className="max-md:hidden max-w-full overflow-hidden">
             <hr className="border-gray-200 " />
+
             <SeoContent
               categorySlug={slug}
               city={canonicalCity}
               seoContent={seoContent}
-            />
-            <InfoListSection
-              title={`Top ${canonicalSlug} in ${canonicalCity}`}
               items={listings?.map((item) => ({
                 title: item?.businessName || item?.name,
                 description:
@@ -646,6 +664,7 @@ const SearchResults = ({
                   item?.about ||
                   "No description available.",
                 address: item?.address || item?.location || canonicalCity,
+                slug: item?.slug,
               }))}
             />
           </section>
