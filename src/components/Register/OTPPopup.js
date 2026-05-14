@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
 import { verify_otp } from "@/api/uaeadminlogin";
 
-const OTPPopup = ({ setPop, userId }) => {
+const OTPPopup = ({ setPop, userId, onSuccess }) => {
   const otpLength = 6;
   const [otp, setOtp] = useState(Array(otpLength).fill(""));
   const inputRefs = useRef([]);
@@ -73,7 +73,11 @@ const OTPPopup = ({ setPop, userId }) => {
           // setToken(res?.access_token);
           // setUser(res?.user);
 
-          router.push("/dashboard");
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.push("/dashboard");
+          }
         } else {
           // handle error
         }

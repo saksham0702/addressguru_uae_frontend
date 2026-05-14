@@ -20,6 +20,7 @@ import SeoContent from "@/components/BusinessListingComponents/SeoContent";
 import Image from "next/image";
 import InlineLeadCard from "../BusinessListingComponents/InlineLeadCard";
 import AdsCard from "./AdsCard";
+import Link from "next/link";
 
 const SearchResults = ({
   ssrListings,
@@ -448,7 +449,7 @@ const SearchResults = ({
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-x-clip justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20 pr-2">
           <section className="h-[113px] w-full max-w-[1000%] mt-1 mx-auto  rounded-lg">
-            <div className="h-full w-full text-lg tect-center flex justify-center items-center">
+            <Link target="_blank" href="https://dubai.adxventure.com" className="h-full w-full text-lg tect-center flex justify-center items-center">
               <Image
                 src="/assets/ads-city-slug.jpeg"
                 alt="ad1"
@@ -456,7 +457,7 @@ const SearchResults = ({
                 height={2000}
                 className="h-full w-full"
               />
-            </div>
+            </Link>
           </section>
 
           <div className="mt-3 max-md:ml-2.5 ">
