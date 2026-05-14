@@ -2,6 +2,9 @@ import React, { useState, useRef } from "react";
 import { Star, X } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { rate_us } from "@/api/queries";
+import RegistrationForm from "../../Register/RegistrationForm";
+import OTPPopup from "../../Register/OTPPopup";
+
 
 const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
   const recaptchaRef = useRef(null);
@@ -15,6 +18,11 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const [showRegister, setShowRegister] = useState(false);
+  const [registerMessage, setRegisterMessage] = useState("");
+  const [pop, setPop] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const handleStarClick = (index) => {
     setRating(index);
@@ -90,7 +98,6 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
 
     try {
       const res = await rate_us(listingType, slug, payload);
-      console.log(res);
 
       // Reset form
       setType("rate");
@@ -112,8 +119,14 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
       // Close modal after successful submission
       onClose();
     } catch (error) {
-      alert(error?.message || "Failed to submit rating. Please try again.");
-      console.error("Rating submission error:", error);
+      const errMsg = error?.message?.toLowerCase() || "";
+      if (errMsg.includes("register")) {
+        setRegisterMessage("Please register first to submit a review.");
+        setShowRegister(true);
+      } else {
+        alert(error?.message || "Failed to submit rating. Please try again.");
+      }
+      console.log("Rating submission error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -141,110 +154,133 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
     <div className="max-w-140 min-w-sm  w-full bg-white rounded-xl shadow-lg p-6 relative">
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-50"
       >
         <X className="w-5 h-5" />
       </button>
 
-      <h2 className="text-xl font-bold text-orange-600 mb-1 text-center">
-        Rate Us
-      </h2>
-      <p className="text-sm text-gray-500 mb-3 text-center">
-        Share your experience with us
-      </p>
+      {showRegister ? (
+        <div className="mt-2">
+          <h2 className="text-xl font-bold text-orange-600 mb-2 text-center">
+            {registerMessage}
+          </h2>
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden p-1 custom-scrollbar">
+            <RegistrationForm setPop={setPop} setUserId={setUserId} />
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2 className="text-xl font-bold text-orange-600 mb-1 text-center">
+            Rate Us
+          </h2>
+          <p className="text-sm text-gray-500 mb-3 text-center">
+            Share your experience with us
+          </p>
 
-      <div className="flex justify-center gap-2 mb-2">
-        {[1, 2, 3, 4, 5].map((index) => (
-          <button
-            key={index}
-            onClick={() => handleStarClick(index)}
-            onMouseEnter={() => setHoveredRating(index)}
-            onMouseLeave={() => setHoveredRating(0)}
-            className="focus:outline-none transition-transform hover:scale-110"
-            disabled={isSubmitting}
-          >
-            <Star
-              className={`w-8 h-8 ${index <= (hoveredRating || rating)
-                ? "fill-orange-500 text-orange-500"
-                : "text-gray-300"
+          <div className="flex justify-center gap-2 mb-2">
+            {[1, 2, 3, 4, 5].map((index) => (
+              <button
+                key={index}
+                onClick={() => handleStarClick(index)}
+                onMouseEnter={() => setHoveredRating(index)}
+                onMouseLeave={() => setHoveredRating(0)}
+                className="focus:outline-none transition-transform hover:scale-110"
+                disabled={isSubmitting}
+              >
+                <Star
+                  className={`w-8 h-8 ${index <= (hoveredRating || rating)
+                    ? "fill-orange-500 text-orange-500"
+                    : "text-gray-300"
+                    }`}
+                />
+              </button>
+            ))}
+          </div>
+          {errors.rating && (
+            <p className="text-red-500 text-sm text-center mb-3">{errors.rating}</p>
+          )}
+
+          <div className="space-y-3 mt-5">
+            <div>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Full Name *"
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border-2 ${errors.fullName ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+              />
+              {errors.fullName && (
+                <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+              )}
+            </div>
+
+            <div>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email Address *"
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border-2 ${errors.email ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <textarea
+                name="review"
+                value={formData.review}
+                onChange={handleChange}
+                placeholder="Write your review"
+                rows="3"
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors resize-none text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col items-start">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
+                onChange={handleCaptchaChange}
+                onExpired={handleCaptchaExpired}
+                theme="light"
+              />
+              {errors?.captcha && (
+                <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
+              )}
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isSubmitting
+                ? "bg-gray-400 cursor-not-allowed text-white"
+                : "bg-orange-600 hover:bg-orange-700 text-white"
                 }`}
-            />
-          </button>
-        ))}
-      </div>
-      {errors.rating && (
-        <p className="text-red-500 text-sm text-center mb-3">{errors.rating}</p>
+            >
+              {isSubmitting ? "Submitting..." : "Rate Us"}
+            </button>
+          </div>
+        </>
       )}
 
-      <div className="space-y-3 mt-5">
-        <div>
-          <input
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            placeholder="Full Name *"
-            disabled={isSubmitting}
-            className={`w-full px-3 py-2 border-2 ${errors.fullName ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
-          />
-          {errors.fullName && (
-            <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
-          )}
-        </div>
-
-        <div>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Email Address *"
-            disabled={isSubmitting}
-            className={`w-full px-3 py-2 border-2 ${errors.email ? "border-red-500" : "border-gray-300"
-              } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-          )}
-        </div>
-
-        <div>
-          <textarea
-            name="review"
-            value={formData.review}
-            onChange={handleChange}
-            placeholder="Write your review"
-            rows="3"
-            disabled={isSubmitting}
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors resize-none text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col items-start">
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
-            onChange={handleCaptchaChange}
-            onExpired={handleCaptchaExpired}
-            theme="light"
-          />
-          {errors?.captcha && (
-            <p className="text-red-500 text-sm mt-2">{errors?.captcha}</p>
-          )}
-        </div>
-
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isSubmitting
-            ? "bg-gray-400 cursor-not-allowed text-white"
-            : "bg-orange-600 hover:bg-orange-700 text-white"
-            }`}
-        >
-          {isSubmitting ? "Submitting..." : "Rate Us"}
-        </button>
-      </div>
+      {pop && (
+        <OTPPopup
+          setPop={setPop}
+          userId={userId}
+          onSuccess={() => {
+            setShowRegister(false);
+          }}
+        />
+      )}
     </div>
   );
 };

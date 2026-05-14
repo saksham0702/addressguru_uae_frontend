@@ -82,15 +82,12 @@ export const rate_us = async (type, slug, payload) => {
 export const claim_business = async (payload, type, slug) => {
   console.log(payload);
   try {
-    const response = await axios.post(
-      `${API_URL}/${type}/${slug}/claim`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const response = await axios.post(`${API_URL}/${type}/${slug}/claim`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
       },
-    );
+      
+    });
     console.log(response);
     return response.data;
   } catch (error) {
