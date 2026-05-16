@@ -21,6 +21,7 @@ import { BUSINESS_POSTING_TIPS } from "@/services/constants";
 import AdditionalInfo from "@/components/Forms/FormSections/AdditionalInfo";
 import { getBusinessFeatures } from "@/api/uaeAdminCategories";
 import { add_listings, get_listing_data } from "@/api/listing-form";
+import { create_order, verify_payment } from "@/api/payment";
 import SuccessModal from "@/components/Forms/sucesspopup";
 
 const ListingForms = () => {
@@ -341,44 +342,10 @@ const ListingForms = () => {
     }
   }, [name, getListings]);
 
-  const formatOpeningHoursForState = (openingHoursArray) => {
-    if (!openingHoursArray || !Array.isArray(openingHoursArray)) {
-      return {
-        Monday: { is_open: "1", open_time: "09:00", close_time: "20:00" },
-        Tuesday: { is_open: "1", open_time: "09:00", close_time: "20:00" },
-        Wednesday: { is_open: "1", open_time: "09:00", close_time: "20:00" },
-        Thursday: { is_open: "1", open_time: "09:00", close_time: "20:00" },
-        Friday: { is_open: "1", open_time: "09:00", close_time: "20:00" },
-        Saturday: { is_open: null, open_time: null, close_time: null },
-        Sunday: { is_open: null, open_time: null, close_time: null },
-      };
-    }
-
-    const scheduleMap = {};
-
-    openingHoursArray.forEach((hour) => {
-      // Convert time from "HH:MM:SS" to "HH:MM"
-      const formatTime = (timeString) => {
-        if (!timeString) return null;
-        return timeString.substring(0, 5); // Extract "HH:MM" from "HH:MM:SS"
-      };
-
-      scheduleMap[hour.day] = {
-        // Convert is_open from number (0/1) to string ("1"/null)
-        is_open: hour.is_open === 1 || hour.is_open === "1" ? "1" : null,
-        open_time: hour.is_open === 1 ? formatTime(hour.open_time) : null,
-        close_time: hour.is_open === 1 ? formatTime(hour.close_time) : null,
-      };
-    });
-
-    return scheduleMap;
-  };
-
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     if (existingData && name && !isInitialized) {
-
       // ✅ Business Info
       setBusiness({
         name: existingData?.businessName || "",
@@ -415,7 +382,6 @@ const ListingForms = () => {
 
       setAdditionalFields(existingData?.additionalFields || []);
 
-
       // ✅ SEO (if exists)
       setSeo({
         title: existingData?.seo?.title || "",
@@ -451,8 +417,23 @@ const ListingForms = () => {
       setIsInitialized(true);
     }
   }, [existingData, name]);
+
   useEffect(() => {
     getPlans();
+  }, []);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   // Clear specific error
@@ -470,7 +451,7 @@ const ListingForms = () => {
   // get service and facilities
   useEffect(() => {
     const getServiceAndFacility = async (categoryId) => {
-      const res = await getBusinessFeatures(categoryId,true);
+      const res = await getBusinessFeatures(categoryId, true);
       const facilities = res?.features?.facilities || [];
       const services = res?.features?.services || [];
       const courses = res?.features?.courses || [];
@@ -493,8 +474,6 @@ const ListingForms = () => {
       getServiceAndFacility(categoryId);
     }
   }, [categoryId]);
-
-
 
   // Scroll to first error field
   const scrollToError = (errorKey) => {
@@ -879,6 +858,87 @@ const ListingForms = () => {
   const currentPostingStep = BUSINESS_POSTING_TIPS.find(
     (item) => item.step === currentStep,
   );
+  // payment setup
+  const handlePayment = async () => {
+    try {
+      if (!selectedPlanId) {
+        setErrors({ plan: "Please select a plan" });
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const orderResponse = await create_order({
+        plan_id: selectedPlanId,
+        listing_id: existingData?._id || listingId,
+      });
+
+      // ✅ Your API wraps data inside orderResponse.data
+      const { payment_id, order_id, amount, currency, key } =
+        orderResponse.data;
+
+      const options = {
+        key: key, // was orderResponse.razorpayKey ❌
+        amount: amount, // was orderResponse.order.amount ❌
+        currency: currency, // was orderResponse.order.currency ❌
+        name: "AddressGuru",
+        description: "Listing Plan Purchase",
+        order_id: order_id, // was orderResponse.order.id ❌
+
+        handler: async function (response) {
+          try {
+            const verifyResponse = await verify_payment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              paymentId: payment_id, // was orderResponse.paymentId ❌
+            });
+
+            if (verifyResponse.success) {
+              const formData = new FormData();
+              formData.append("plan_id", selectedPlanId);
+
+              const finalResponse = await add_listings(
+                formData,
+                6,
+                slug,
+                existingData?._id || listingId,
+              );
+
+              if (finalResponse?.data?.status === true) {
+                clearSession();
+                setShowSuccessPopup(true);
+              }
+            }
+          } catch (error) {
+            console.log("verify payment error", error);
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+
+        prefill: {
+          name: contact?.name || "",
+          email: contact?.email || "",
+          contact: contact?.number || "",
+        },
+
+        theme: { color: "#FF6E04" },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+      razorpay.on("payment.failed", function (response) {
+        setGlobalError("Payment failed. Please try again.");
+        setIsSubmitting(false);
+      });
+    } catch (error) {
+      console.log("handlePayment error", error);
+      setGlobalError("Something went wrong while initiating payment.");
+      setIsSubmitting(false);
+    }
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -1169,7 +1229,11 @@ const ListingForms = () => {
 
             <button
               onClick={async () => {
-                if (validateStep(currentStep)) {
+                if (!validateStep(currentStep)) return;
+
+                if (currentStep === 6) {
+                  await handlePayment();
+                } else {
                   await handleStepSubmit(currentStep);
                 }
               }}

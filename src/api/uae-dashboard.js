@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://192.168.31.107:5001";
 
 export const get_user_listings = async (type) => {
@@ -78,26 +78,34 @@ export const get_marketplace_listings = async (type) => {
   }
 };
 
-
 export const get_my_leads = async (listingId) => {
   const token = localStorage.getItem("authToken");
+
   try {
-    const response = await axios.get(
-      `${API_URL}/my-leads?category=business&listingId=${listingId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const params = {
+      category: "business",
+    };
+
+    // ✅ Only add listingId if it exists
+    if (listingId) {
+      params.listingId = listingId;
+    }
+
+    const response = await axios.get(`${API_URL}/my-leads`, {
+      params,
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
+
     console.log("i am user leads ", response?.data);
     return response?.data;
   } catch (error) {
     console.log("Error fetching user leads:", error);
   }
-}
+};
 
-export const update_leads_status = async (enquiryId,status) => {
+export const update_leads_status = async (enquiryId, status) => {
   const token = localStorage.getItem("authToken");
   try {
     const response = await axios.patch(
@@ -114,10 +122,9 @@ export const update_leads_status = async (enquiryId,status) => {
   } catch (error) {
     console.log("Error fetching user listings:", error);
   }
-}
+};
 
-
-export const unpublish_listing = async (listingId,type) => {
+export const unpublish_listing = async (listingId, type) => {
   const token = localStorage.getItem("authToken");
   try {
     const response = await axios.patch(
@@ -134,7 +141,7 @@ export const unpublish_listing = async (listingId,type) => {
   } catch (error) {
     console.log("Error fetching user listings:", error);
   }
-}
+};
 
 export const delete_listing = async (listingId) => {
   const token = localStorage.getItem("authToken");
@@ -152,4 +159,4 @@ export const delete_listing = async (listingId) => {
   } catch (error) {
     console.log("Error fetching user listings:", error);
   }
-}
+};

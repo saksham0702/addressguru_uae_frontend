@@ -4,6 +4,7 @@ import {
   Layers2,
   LayoutDashboard,
   List,
+  LucideHeadset,
   ShoppingBag,
   ShoppingCartIcon,
   TableConfigIcon,
@@ -902,6 +903,11 @@ export const NAV_ROUTES = [
     name: "Users",
     icon: User,
     href: "/admin/users",
+  },
+  {
+    name: "Leads",
+    icon: LucideHeadset,
+    href: "/admin/leads",
   },
   {
     name: "listings",

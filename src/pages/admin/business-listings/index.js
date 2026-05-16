@@ -240,6 +240,15 @@ const BusinessListings = () => {
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
   const [pendinglistsing, setpendinglistsing] = useState(0);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchListings();
+    }, 400);
+
+    return () => clearTimeout(delay);
+  }, [page, showEntries, statusFilter, search]);
+
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -307,15 +316,17 @@ const BusinessListings = () => {
       const res = await get_all_admin_listings({
         page,
         limit: showEntries,
-        ...(statusFilter !== "all" && { status: statusFilter }),
+        status: statusFilter,
+        search, // ✅ ADD THIS
       });
 
       console.log("API RESPONSE:", res);
 
-      // ✅ correct keys
       setListings(res?.data?.listings || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
       setTotalCount(res?.data?.pagination?.total || 0);
+
+      // ⚠️ REMOVE these if not returned from new API
       settotallistings(res?.data?.totalAll || 0);
       setapprovedlisting(res?.data?.statusCounts?.approved || 0);
       setrejectedlisting(res?.data?.statusCounts?.rejected || 0);
@@ -324,10 +335,6 @@ const BusinessListings = () => {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    fetchListings();
-  }, [page, showEntries, statusFilter]);
 
   function handleFollowUpSubmit(listingId, entry) {
     setFollowUps((prev) => ({
@@ -373,11 +380,11 @@ const BusinessListings = () => {
   ];
 
   const statCounts = {
-    all: totalCount,
-    pending: statusFilter === "pending" ? totalCount : pendinglistsing,
-    approved: statusFilter === "approved" ? totalCount : approvedlisting,
-    rejected: statusFilter === "rejected" ? totalCount : rejectedlisting,
+    pending: pendinglistsing,
+    approved: approvedlisting,
+    rejected: rejectedlisting,
   };
+
   const paginated = listings;
   const startEntry = (page - 1) * showEntries + 1;
   const endEntry = Math.min(page * showEntries, totalCount);
@@ -640,16 +647,15 @@ const BusinessListings = () => {
                     <TD vAlign="top" className="min-w-[250px]">
                       {/* TOP ROW */}
                       <div className="flex gap-3">
-                    
-
                         {/* TITLE ONLY */}
                         <div className="flex-1  min-w-0">
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="text-sm font-bold text-gray-900">
-                              ({String(
+                              (
+                              {String(
                                 (page - 1) * showEntries + idx + 1,
-                              ).padStart(2, "0")})
-                              
+                              ).padStart(2, "0")}
+                              )
                             </span>
 
                             <a
@@ -671,7 +677,6 @@ const BusinessListings = () => {
 
                             <Link
                               className="text-blue-500 font-semibold hover:underline"
-                            
                               href={`/dashboard/listing-forms?category=${
                                 listing?.category?._id
                               }&categoryName=${encodeURIComponent(
@@ -867,9 +872,7 @@ const BusinessListings = () => {
                           <>
                             {/* APPROVE */}
                             <button
-                              onClick={() =>
-                                setConfirmAction(listing)
-                              }
+                              onClick={() => setConfirmAction(listing)}
                               disabled={loadingId === listing._id}
                               className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
                             >
@@ -954,9 +957,7 @@ const BusinessListings = () => {
                         )}
                         {listing.status === "rejected" && (
                           <button
-                            onClick={() =>
-                              setConfirmAction(listing)
-                            }
+                            onClick={() => setConfirmAction(listing)}
                             disabled={loadingId === listing._id}
                             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
                           >

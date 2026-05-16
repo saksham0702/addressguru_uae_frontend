@@ -31,7 +31,7 @@ const RecentLeads = ({ queries, onStatusChange }) => {
   };
 
   const handleStatusChange = (leadId, status) => {
-    // This will be called from parent component
+    
     if (onStatusChange) {
       onStatusChange(leadId, status);
     }
