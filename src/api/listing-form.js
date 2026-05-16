@@ -1,7 +1,6 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://localhost:5001";
-
 
 export const add_listings = async (payload, step, slug, listingId) => {
   const token = localStorage.getItem("authToken");
@@ -145,23 +144,31 @@ export const get_approved_listings = async () => {
 export const get_all_admin_listings = async ({
   page = 1,
   limit = 10,
-  status = "pending",
+  status,
+  search,
+  include_deleted = false,
 } = {}) => {
+  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
-      `${API_URL}/business-listing/get-all-listings`,
+      `${API_URL}/business-listing/admin/listings/completed`,
       {
         params: {
           page,
           limit,
-          status,
+          ...(status && status !== "all" && { status }),
+          ...(search && { search }),
+          ...(include_deleted && { include_deleted: true }),
         },
-      },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching listings:", error);
+    console.error("Error fetching admin listings:", error);
     return null;
   }
 };
@@ -177,7 +184,7 @@ export const update_additional_fields = async (listingId, data) => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {

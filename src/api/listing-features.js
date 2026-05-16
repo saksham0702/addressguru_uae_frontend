@@ -26,3 +26,17 @@ export const getMyReports = async () => {
   });
   return res.data.data;
 };
+
+export const updateEnquries = async (id,status) => {
+  const res = await axios.patch(`${API_URL}/enquiries/${id}`, {
+    status,
+    headers: getAuthHeader(),
+  });
+  return res.data;
+};
+
+// admin
+export const getAllBusinessEnquiries = async (params) => {
+    const res = await axios.get(`${API_URL}/enquiries`, { params });
+    return res.data;
+};
