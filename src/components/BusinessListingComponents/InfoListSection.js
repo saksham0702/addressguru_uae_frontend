@@ -2,10 +2,9 @@
 import React from "react";
 import Link from "next/link";
 
-const InfoListSection = ({ title = "Top Listings", items = [] }) => {
+const InfoListSection = ({ title, items = [] }) => {
   if (!items || items.length === 0) return null;
-  console.log(items);
-  
+  console.log(title);
 
   return (
     <section className="w-full bg-white rounded-lg ">

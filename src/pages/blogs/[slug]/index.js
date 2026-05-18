@@ -34,7 +34,19 @@ const BlogDetail = () => {
         .replace(/<\/?(div|section|article)[^>]*>/gi, "")
         .replace(/class="[^"]*"/gi, "")
         .replace(/style="[^"]*"/gi, "")
-        .replace(/<img[^>]*src="data:image[^"]*"[^>]*>/gi, "")
+        .replace(/<img\s+([^>]*?)\/?>/gi, (match, attrs) => {
+          let updated = attrs;
+
+          if (!/loading=/i.test(updated)) {
+            updated += ' loading="lazy"';
+          }
+
+          if (!/decoding=/i.test(updated)) {
+            updated += ' decoding="async"';
+          }
+
+          return `<img ${updated.trim()} />`;
+        })
         .replace(/<h[1-6][^>]*>\s*<img[^>]*>\s*<\/h[1-6]>/gi, "")
         .replace(/<p>\s*<\/p>/gi, "")
 
@@ -579,6 +591,14 @@ const BlogDetail = () => {
 
           .blog-content .TyagGW_tableContainer {
             width: 100% !important;
+          }
+
+          .blog-content img {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px !important;
+            margin: 16px 0 !important;
+            display: block !important;
           }
 
           /* Table full width */
