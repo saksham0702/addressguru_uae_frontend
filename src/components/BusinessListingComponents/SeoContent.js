@@ -51,7 +51,7 @@ const SeoContent = ({ seoContent, items = [] }) => {
 
       {/* INFO LIST */}
       {showInfo && items.length > 0 && (
-        <InfoListSection title="Top Listings" items={items} />
+        <InfoListSection title={"Top 10 " + items[0]?.category + " in " + items[0]?.address || ""} items={items} />
       )}
 
       {/* PRICING CONTENT */}

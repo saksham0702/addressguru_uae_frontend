@@ -666,6 +666,7 @@ const SearchResults = ({
                   "No description available.",
                 address: item?.address || item?.location || canonicalCity,
                 slug: item?.slug,
+                category: item?.category?.name,
               }))}
             />
           </section>
