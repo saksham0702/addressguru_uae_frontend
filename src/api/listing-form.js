@@ -146,26 +146,25 @@ export const get_all_admin_listings = async ({
   limit = 10,
   status,
   search,
-  include_deleted = false,
+  viewType = "completed",
 } = {}) => {
   const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
-      `${API_URL}/business-listing/admin/listings/completed`,
+      `${API_URL}/business-listing/admin/listings`,
       {
         params: {
           page,
           limit,
+          viewType,
           ...(status && status !== "all" && { status }),
           ...(search && { search }),
-          ...(include_deleted && { include_deleted: true }),
         },
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
-
     return response.data;
   } catch (error) {
     console.error("Error fetching admin listings:", error);

@@ -35,6 +35,8 @@ import {
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { adminStats } from "@/api/uaeadminlogin";
+import { NAV_ROUTES } from "@/services/constants";
+import Link from "next/link";
 
 // ─── tiny reusable components ────────────────────────────────────────────────
 
@@ -258,9 +260,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen  bg-white p-4 md:p-6 font-sans">
+    <div className="min-h-screen bg-white p-4 md:p-6 ">
       {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-indigo-600 rounded-xl shadow-sm shadow-indigo-200">
             <Shield className="w-5 h-5 text-white" />
@@ -294,17 +296,49 @@ export default function AdminDashboard() {
       </div>
 
       {/* ══════════════════════════════════════════
+          QUICK LINKS
+      ══════════════════════════════════════════ */}
+      <div className="mb-6">
+        <SectionHeader title="Quick Links" subtitle="Fast navigation to admin modules" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          {NAV_ROUTES.flatMap((route) => {
+            if (route.href === "/admin") return [];
+            if (route.children) {
+              return route.children.map((child) => ({ ...child, icon: route.icon }));
+            }
+            return [route];
+          }).filter(Boolean).map((link, idx) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={idx}
+                href={link.href || "#"}
+                className="group flex flex-col items-center justify-center p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-indigo-200 hover:shadow-md transition-all"
+              >
+                <div className="p-2.5 bg-slate-50 text-slate-500 rounded-xl group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors mb-2">
+                  {Icon && <Icon className="w-5 h-5" />}
+                </div>
+                <span className="text-xs font-semibold text-slate-700 text-center group-hover:text-indigo-700 transition-colors">
+                  {link.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════
           SECTION 1 · Users
       ══════════════════════════════════════════ */}
       <SectionHeader title="Users" subtitle="Registered accounts overview" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         <StatCard
           icon={Users}
           label="Total Users"
           value={users.total}
           accent="bg-indigo-500"
         />
-        {/* <StatCard
+        <StatCard
           icon={UserCheck}
           label="Active Users"
           value={users.active}
@@ -315,7 +349,7 @@ export default function AdminDashboard() {
           label="Inactive Users"
           value={users.inactive}
           accent="bg-rose-400"
-        /> */}
+        />
         <StatCard
           icon={UserPlus}
           label="New (Last 7 Days)"
@@ -337,7 +371,7 @@ export default function AdminDashboard() {
         title="Listings"
         subtitle="All listing types across the platform"
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {/* Totals card */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 col-span-1 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2 mb-4">
@@ -441,7 +475,7 @@ export default function AdminDashboard() {
       {/* ══════════════════════════════════════════
           SECTION 3 · Engagement + Listing Events
       ══════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Engagement */}
         <div>
           <SectionHeader
@@ -540,7 +574,7 @@ export default function AdminDashboard() {
       {/* ══════════════════════════════════════════
           SECTION 4 · Catalogue + Google + Activity
       ══════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Catalogue */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -654,7 +688,7 @@ export default function AdminDashboard() {
             title="7-Day Trends"
             subtitle="Activity over the past week"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             {[
               {
                 label: "New Users",

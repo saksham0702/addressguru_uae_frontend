@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   approve_listing,
   get_all_admin_listings,
-  get_all_listings,
   reject_listing,
 } from "@/api/listing-form";
 import FollowUpModal from "@/components/admin/business/FollowUpModal";
@@ -28,25 +27,6 @@ function daysAgo(iso) {
   if (diff === 0) return "Today";
   if (diff === 1) return "1 Day Ago";
   return `${diff} Days Ago`;
-}
-
-// ── BADGES ────────────────────────────────────────────────────────────────────
-function LeadBadge({ status }) {
-  const map = {
-    warm: "bg-amber-400 text-white",
-    cold: "bg-blue-500 text-white",
-    hot: "bg-red-500 text-white",
-    convert: "bg-emerald-500 text-white",
-  };
-  const label = status || "cold";
-  const cls = map[label.toLowerCase()] || map.cold;
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${cls}`}
-    >
-      {label.charAt(0).toUpperCase() + label.slice(1)}
-    </span>
-  );
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────
@@ -240,6 +220,8 @@ const BusinessListings = () => {
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
   const [pendinglistsing, setpendinglistsing] = useState(0);
+  const [viewType, setViewType] = useState("completed");
+  // values: completed | incomplete | deleted
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -247,7 +229,7 @@ const BusinessListings = () => {
     }, 400);
 
     return () => clearTimeout(delay);
-  }, [page, showEntries, statusFilter, search]);
+  }, [page, showEntries, statusFilter, search,viewType]);
 
   function showToast(msg, type = "success") {
     setToast({ msg, type });
@@ -312,12 +294,14 @@ const BusinessListings = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchListings = async () => {
+
     try {
       const res = await get_all_admin_listings({
         page,
         limit: showEntries,
         status: statusFilter,
-        search, // ✅ ADD THIS
+        search,
+        viewType, // 👈 THIS IS THE KEY
       });
 
       console.log("API RESPONSE:", res);
@@ -495,6 +479,29 @@ const BusinessListings = () => {
             </button>
           );
         })}
+      </div>
+
+      <div className="flex gap-2 text-xs mb-5">
+        {[
+          { id: "completed", label: "Completed" },
+          { id: "incomplete", label: "Incomplete" },
+          { id: "deleted", label: "Deleted" },
+        ].map((view) => (
+          <button
+            key={view.id}
+            onClick={() => {
+              setViewType(view.id);
+              setPage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-full font-semibold transition-all border ${
+              viewType === view.id
+                ? "bg-slate-800 text-white border-slate-800 shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            {view.label}
+          </button>
+        ))}
       </div>
 
       {/* ── TABLE TOOLBAR ── */}
