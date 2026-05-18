@@ -25,3 +25,28 @@ export const verify_payment = async (data) => {
 
   return response.data;
 };
+
+export const get_all_payments = async ({
+  page = 1,
+  limit = 10,
+  status,
+  search,
+} = {}) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.get(`${API_URL}/payment/get-payments`, {
+      params: {
+        page,
+        limit,
+        ...(status && status !== "all" && { status }),
+        ...(search && { search }),
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log("response", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    return null;
+  }
+};

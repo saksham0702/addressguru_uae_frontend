@@ -880,7 +880,6 @@ export const NAV_ROUTES = [
     children: [
       { name: "All Categories", href: "/admin/categories" },
       { name: "Seo Content", href: "/admin/categories/seo-content" },
-      // { name: 'Subcategories', href: '/dashboard/categories/sub' },
     ],
   },
   {
@@ -894,9 +893,6 @@ export const NAV_ROUTES = [
     children: [
       { name: "Blog Categories", href: "/admin/blogs/blog-categories" },
       { name: "Blogs", href: "/admin/blogs/list" },
-
-      // { name: 'Add Category', href: '/dashboard/categories/add' },
-      // { name: 'Subcategories', href: '/dashboard/categories/sub' },
     ],
   },
   {
@@ -909,6 +905,7 @@ export const NAV_ROUTES = [
     icon: LucideHeadset,
     href: "/admin/leads",
   },
+
   {
     name: "listings",
     icon: ShoppingBag,
@@ -920,11 +917,6 @@ export const NAV_ROUTES = [
     ],
   },
 
-  // {
-  //   name: "Business Listings",
-  //   icon: ShoppingBag,
-  //   href: "/admin/business-listings",
-  // },
   {
     name: "Followup Configs",
     icon: TableConfigIcon,
@@ -940,48 +932,14 @@ export const NAV_ROUTES = [
     icon: User,
     href: "/admin/my-profile",
   },
-  // {
-  //   name: "Jobs Listings",
-  //   icon: WorkflowIcon,
-  //   href: "/admin/jobs-listings",
-  // },
 
-  // {
-  //   name: "Marketplace Listings",
-  //   href: "/admin/marketplace-listings",
-  //   icon: ShoppingBag,
-  // },
-  // {
-  //   name: "Property Listings",
-  //   href: "/admin/property-listings",
-  //   icon: HomeIcon,
-  // },
+  {
+    name: "Payment History",
+    href: "/admin/payment-history",
+    icon: DollarSign,
+  },
 
-  // {
-  //   name: "Users",
-  //   href: "/admin/#",
-  //   icon: Users,
-  //   // children: [
-  //   //   { name: 'All Categories', href: '/dashboard/categories' },
-  //   //   // { name: 'Add Category', href: '/dashboard/categories/add' },
-  //   //   // { name: 'Subcategories', href: '/dashboard/categories/sub' },
-  //   // ],
-  // },
-  // {
-  //   name: "Invoices",
-  //   href: "/admin/#",
-  //   icon: Users,
-  // },
-  // {
-  //   name: "Business Listings",
-  //   href: "/admin/#",
-  //   icon: ShoppingCartIcon,
-  // },
-  // {
-  //   name: "Customers",
-  //   href: "/admin/#",
-  //   icon: UserIcon,
-  // },
+
 ];
 
 //jobs related things
