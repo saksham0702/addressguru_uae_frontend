@@ -13,6 +13,7 @@ import AdminHeader from "@/components/admin/header";
 import { ErrorProvider } from "@/context/ErrorContext";
 import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
 import Head from "next/head";
+import CookieConsent from "@/components/CookieConsent";
 
 // ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
 // TODO: Replace with your real GA4 Measurement ID
@@ -159,6 +160,7 @@ export default function App({ Component, pageProps }) {
               {shouldShowFooter && <Footer />}
             </div>
           </div>
+          <CookieConsent />
         </ErrorProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
