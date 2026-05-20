@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 
 export const getCities = async () => {
   const res = await axios.get(`${API_URL}/cities/get-cities`);
@@ -23,4 +23,12 @@ export const updateCity = async (id, payload) => {
 export const deleteCity = async (id) => {
   const res = await axios.delete(`${API_URL}/cities/delete-city/${id}`);
   return res?.data?.data;
+};
+
+export const getCityLocalities = async (cityId) => {
+  const res = await axios.get(
+    `${API_URL}/cities/get-cities?parent=${cityId}&type=locality`,
+  );
+
+  return res?.data?.data || [];
 };
