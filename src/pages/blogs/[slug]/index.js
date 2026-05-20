@@ -13,6 +13,10 @@ import {
 import { FaTwitter, FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
 
 const BlogDetail = ({ initialBlog }) => {
+  const SITE_URL = "https://addressguru.ae";
+  const API_URL = "https://addressguru.ae/api";
+  // console.log("initialBlog", initialBlog);
+
   const getIcon = (name) => {
     switch (name.toLowerCase()) {
       case "twitter":
@@ -66,11 +70,13 @@ const BlogDetail = ({ initialBlog }) => {
   const [blogDetail, setBlogDetail] = useState(initialBlog);
   const [blogCategories, setBlogCategories] = useState([]);
   const [mostViewedBlogs, setMostViewedBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialBlog);
   const [error, setError] = useState(null);
-  const SITE_URL = "https://addressguru.ae";
-  const API_URL = "https://addressguru.ae/api";
   const APP_URL = "https://addressguru.ae/api";
+  const ogImageRaw = blogDetail?.seo?.ogImage || blogDetail?.coverImage || "";
+  const ogImageUrl = ogImageRaw.startsWith("http")
+    ? ogImageRaw
+    : `${API_URL}/${ogImageRaw}`;
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -148,18 +154,6 @@ const BlogDetail = ({ initialBlog }) => {
     [blogDetail?.title, currentUrl],
   );
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6E04] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Error state
   if (error || !blogDetail) {
     return (
@@ -179,81 +173,77 @@ const BlogDetail = ({ initialBlog }) => {
   return (
     <>
       <Head>
-        {/* Basic SEO */}
         <title>
           {blogDetail?.seo?.title || blogDetail?.title || "Blog Detail"}
         </title>
-
         <meta
           name="description"
           content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
         />
-
         <meta name="keywords" content={blogDetail?.seo?.keywords || ""} />
-
         <meta name="robots" content="index, follow" />
 
-        {/* Canonical */}
         <link rel="canonical" href={`${SITE_URL}/blogs/${blogDetail?.slug}`} />
 
         {/* Open Graph */}
         <meta property="og:type" content="article" />
-
+        <meta property="og:site_name" content="AddressGuru UAE" />
+        <meta
+          property="og:url"
+          content={`${SITE_URL}/blogs/${blogDetail?.slug}`}
+        />
         <meta
           property="og:title"
-          content={blogDetail?.seo?.title || blogDetail?.title}
+          content={blogDetail?.seo?.title || blogDetail?.title || ""}
         />
-
         <meta
           property="og:description"
           content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
         />
 
-        <meta
-          property="og:url"
-          content={`${SITE_URL}/blogs/${blogDetail?.slug}`}
-        />
-
-        <meta property="og:site_name" content="AddressGuru UAE" />
-
-        <meta
-          property="og:image"
-          content={`${API_URL}/${blogDetail?.coverImage}`}
-        />
-
+        {/* ✅ All three image tags — different crawlers need different ones */}
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:url" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
+        <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-
-        <meta property="og:image:alt" content={blogDetail?.title} />
+        <meta
+          property="og:image:alt"
+          content={blogDetail?.seo?.title || blogDetail?.title || ""}
+        />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-
         <meta
           name="twitter:title"
-          content={blogDetail?.seo?.title || blogDetail?.title}
+          content={blogDetail?.seo?.title || blogDetail?.title || ""}
         />
-
         <meta
           name="twitter:description"
           content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
         />
-
+        <meta name="twitter:image" content={ogImageUrl} />
         <meta
-          name="twitter:image"
-          content={`${API_URL}/${blogDetail?.coverImage}`}
+          name="twitter:image:alt"
+          content={blogDetail?.seo?.title || blogDetail?.title || ""}
         />
 
-        {/* Extra */}
+        {/* Article */}
         <meta
           property="article:published_time"
-          content={blogDetail?.publishedAt}
+          content={blogDetail?.publishedAt || blogDetail?.createdAt}
         />
-
         <meta
           property="article:modified_time"
           content={blogDetail?.updatedAt}
         />
+        {blogDetail?.category_id?.name && (
+          <meta
+            property="article:section"
+            content={blogDetail.category_id.name}
+          />
+        )}
       </Head>
 
       {/* Outer container */}
