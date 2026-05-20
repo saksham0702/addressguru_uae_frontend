@@ -865,9 +865,7 @@ const ListingForms = () => {
         setErrors({ plan: "Please select a plan" });
         return;
       }
-
       setIsSubmitting(true);
-
       const orderResponse = await create_order({
         plan_id: selectedPlanId,
         listing_id: existingData?._id || listingId,
