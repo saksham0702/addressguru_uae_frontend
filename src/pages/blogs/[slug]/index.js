@@ -12,7 +12,7 @@ import {
 } from "@/api/uae-blogs";
 import { FaTwitter, FaLinkedin, FaGithub, FaGlobe } from "react-icons/fa";
 
-const BlogDetail = () => {
+const BlogDetail = ({ initialBlog }) => {
   const getIcon = (name) => {
     switch (name.toLowerCase()) {
       case "twitter":
@@ -63,29 +63,14 @@ const BlogDetail = () => {
 
   const router = useRouter();
   const { slug } = router.query;
-  const [blogDetail, setBlogDetail] = useState(null);
+  const [blogDetail, setBlogDetail] = useState(initialBlog);
   const [blogCategories, setBlogCategories] = useState([]);
   const [mostViewedBlogs, setMostViewedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const SITE_URL = "https://addressguru.ae";
+  const API_URL = "https://addressguru.ae/api";
   const APP_URL = "https://addressguru.ae/api";
-  // Memoized fetch functions
-  const fetchBlogDetail = useCallback(async (slugParam) => {
-    if (!slugParam) return;
-
-    try {
-      const response = await getBlogDetails(slugParam);
-      if (response?.status == true) {
-        setBlogDetail(response?.data);
-        console.log("Blog Detail:", response);
-      } else {
-        setError("Blog not found");
-      }
-    } catch (error) {
-      console.error("Error fetching blog detail:", error);
-      setError("Failed to load blog");
-    }
-  }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -118,11 +103,7 @@ const BlogDetail = () => {
       setError(null);
 
       try {
-        await Promise.all([
-          fetchBlogDetail(slug),
-          fetchCategories(),
-          fetchMostViewedBlogs(),
-        ]);
+        await Promise.all([fetchCategories(), fetchMostViewedBlogs()]);
       } catch (err) {
         setError("Failed to load data");
       } finally {
@@ -131,13 +112,7 @@ const BlogDetail = () => {
     };
 
     fetchAllData();
-  }, [
-    router.isReady,
-    slug,
-    fetchBlogDetail,
-    fetchCategories,
-    fetchMostViewedBlogs,
-  ]);
+  }, [router.isReady, slug, fetchCategories, fetchMostViewedBlogs]);
 
   // Memoized formatted date and time
   const { formattedDate, formattedTime } = useMemo(() => {
@@ -204,53 +179,81 @@ const BlogDetail = () => {
   return (
     <>
       <Head>
+        {/* Basic SEO */}
         <title>
           {blogDetail?.seo?.title || blogDetail?.title || "Blog Detail"}
         </title>
 
         <meta
           name="description"
-          content={blogDetail?.seo?.description || blogDetail?.title || ""}
+          content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
         />
 
         <meta name="keywords" content={blogDetail?.seo?.keywords || ""} />
 
-        {/* ✅ Robots Meta Tag */}
         <meta name="robots" content="index, follow" />
 
-        {/* Open Graph Meta Tags */}
+        {/* Canonical */}
+        <link rel="canonical" href={`${SITE_URL}/blogs/${blogDetail?.slug}`} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+
         <meta
           property="og:title"
           content={blogDetail?.seo?.title || blogDetail?.title}
         />
+
         <meta
           property="og:description"
-          content={blogDetail?.seo?.description || ""}
+          content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
         />
+
+        <meta
+          property="og:url"
+          content={`${SITE_URL}/blogs/${blogDetail?.slug}`}
+        />
+
+        <meta property="og:site_name" content="AddressGuru UAE" />
+
         <meta
           property="og:image"
-          content={`${APP_URL}/${blogDetail?.coverImage}`}
+          content={`${API_URL}/${blogDetail?.coverImage}`}
         />
-        <meta property="og:url" content={currentUrl} />
-        <meta property="og:type" content="article" />
 
-        {/* Twitter Card Meta Tags */}
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <meta property="og:image:alt" content={blogDetail?.title} />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
+
         <meta
           name="twitter:title"
-          content={blogDetail?.meta_title || blogDetail?.title}
-        />
-        <meta
-          name="twitter:description"
-          content={blogDetail?.meta_description || ""}
-        />
-        <meta
-          name="twitter:image"
-          content={`${APP_URL}/${blogDetail?.coverImage}`}
+          content={blogDetail?.seo?.title || blogDetail?.title}
         />
 
-        {/* Canonical URL */}
-        <link rel="canonical" href={currentUrl} />
+        <meta
+          name="twitter:description"
+          content={blogDetail?.seo?.description || blogDetail?.excerpt || ""}
+        />
+
+        <meta
+          name="twitter:image"
+          content={`${API_URL}/${blogDetail?.coverImage}`}
+        />
+
+        {/* Extra */}
+        <meta
+          property="article:published_time"
+          content={blogDetail?.publishedAt}
+        />
+
+        <meta
+          property="article:modified_time"
+          content={blogDetail?.updatedAt}
+        />
       </Head>
 
       {/* Outer container */}
@@ -713,3 +716,27 @@ const BlogDetail = () => {
 };
 
 export default BlogDetail;
+
+export async function getServerSideProps(context) {
+  try {
+    const { slug } = context.params;
+
+    const response = await getBlogDetails(slug);
+
+    if (!response?.status || !response?.data) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {
+        initialBlog: response.data,
+      },
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
+}
