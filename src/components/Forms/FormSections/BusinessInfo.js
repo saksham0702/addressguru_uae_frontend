@@ -195,10 +195,9 @@ const BusinessInfo = ({
         />
       </div>
 
-      {/* establishment year and tax number */}
-
-      <section className="flex gap-5 max-w-[600px] w-full items-center">
-        <div className="w-sm" ref={refs?.establishmentYearRef}>
+      {/* establishment year */}
+      <section className="flex flex-col sm:flex-row gap-5 max-w-full md:max-w-[600px] w-full items-start sm:items-center">
+        <div className="w-full sm:w-sm" ref={refs?.establishmentYearRef}>
           <InputWithTitle
             placeholder={"yyyy"}
             error={errors?.establishmentYear}

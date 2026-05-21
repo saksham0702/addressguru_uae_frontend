@@ -33,7 +33,7 @@ export const getBlogs = async ({ page = 1, limit = 10, search = "" } = {}) => {
     });
     // console.log("response of blogs:", res);
 
-    return res?.data?.data?.blogs; // full response (pagination + blogs)
+    return res?.data?.data; // full response (pagination + blogs)
   } catch (error) {
     console.log("Error fetching blogs:", error);
     throw error;
