@@ -29,6 +29,5 @@ export const getCityLocalities = async (cityId) => {
   const res = await axios.get(
     `${API_URL}/cities/get-cities?parent=${cityId}&type=locality`,
   );
-
   return res?.data?.data || [];
 };
