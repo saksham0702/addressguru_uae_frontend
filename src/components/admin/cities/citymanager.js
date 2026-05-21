@@ -14,7 +14,6 @@ import {
 import { useCities } from "@/hooks/usecities";
 import CityModal from "./citymodal";
 import DeleteConfirmModal from "./deletemodal";
-
 export default function CitiesManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCity, setEditingCity] = useState(null);

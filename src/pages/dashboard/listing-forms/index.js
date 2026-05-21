@@ -865,35 +865,78 @@ const ListingForms = () => {
         setErrors({ plan: "Please select a plan" });
         return;
       }
+
       setIsSubmitting(true);
+
+      // FIRST create order
       const orderResponse = await create_order({
         plan_id: selectedPlanId,
         listing_id: existingData?._id || listingId,
       });
 
-      // ✅ Your API wraps data inside orderResponse.data
+      /*
+    |--------------------------------------------------------------------------
+    | FREE PLAN FLOW
+    |--------------------------------------------------------------------------
+    */
+
+      if (orderResponse.free_plan) {
+        const formData = new FormData();
+
+        formData.append("plan_id", selectedPlanId);
+
+        const finalResponse = await add_listings(
+          formData,
+          6,
+          slug,
+          existingData?._id || listingId,
+        );
+
+        if (finalResponse?.data?.status === true) {
+          clearSession();
+          setShowSuccessPopup(true);
+        }
+
+        setIsSubmitting(false);
+
+        return;
+      }
+
+      /*
+    |--------------------------------------------------------------------------
+    | PAID PLAN FLOW
+    |--------------------------------------------------------------------------
+    */
+
       const { payment_id, order_id, amount, currency, key } =
         orderResponse.data;
 
       const options = {
-        key: key, // was orderResponse.razorpayKey ❌
-        amount: amount, // was orderResponse.order.amount ❌
-        currency: currency, // was orderResponse.order.currency ❌
+        key,
+        amount,
+        currency,
+
         name: "AddressGuru",
+
         description: "Listing Plan Purchase",
-        order_id: order_id, // was orderResponse.order.id ❌
+
+        order_id,
 
         handler: async function (response) {
           try {
             const verifyResponse = await verify_payment({
               razorpay_order_id: response.razorpay_order_id,
+
               razorpay_payment_id: response.razorpay_payment_id,
+
               razorpay_signature: response.razorpay_signature,
-              paymentId: payment_id, // was orderResponse.paymentId ❌
+
+              paymentId: payment_id,
             });
 
             if (verifyResponse.success) {
               const formData = new FormData();
+
               formData.append("plan_id", selectedPlanId);
 
               const finalResponse = await add_listings(
@@ -921,19 +964,25 @@ const ListingForms = () => {
           contact: contact?.number || "",
         },
 
-        theme: { color: "#FF6E04" },
+        theme: {
+          color: "#FF6E04",
+        },
       };
 
       const razorpay = new window.Razorpay(options);
+
       razorpay.open();
 
-      razorpay.on("payment.failed", function (response) {
+      razorpay.on("payment.failed", function () {
         setGlobalError("Payment failed. Please try again.");
+
         setIsSubmitting(false);
       });
     } catch (error) {
       console.log("handlePayment error", error);
+
       setGlobalError("Something went wrong while initiating payment.");
+
       setIsSubmitting(false);
     }
   };
