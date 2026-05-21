@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -20,7 +20,18 @@ import {
   getRecentBlogs,
 } from "@/api/uae-blogs";
 
-const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
+const Blogs = ({
+  blogs: initialBlogs,
+  blogCategories,
+  recentBlogs,
+  mostViewedBlogs,
+  initialTotalPages,
+}) => {
+  const [blogs, setBlogs] = useState(initialBlogs || []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
+  const [loading, setLoading] = useState(false);
+
   // Slider settings for recent blogs
   const sliderSettings = {
     dots: true,
@@ -47,7 +58,27 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
       },
     ],
   };
-  const APP_URL = "https://addressguru.ae/api/";
+  const APP_URL = "https://addressguru.ae/api";
+
+  const handleLoadMore = async () => {
+    if (currentPage >= totalPages) return;
+
+    setLoading(true);
+    const nextPage = currentPage + 1;
+    try {
+      const res = await getBlogs({ page: nextPage, limit: 10 });
+      if (res && res.blogs) {
+        setBlogs((prev) => [...prev, ...res.blogs]);
+        setCurrentPage(nextPage);
+        setTotalPages(res?.pagination?.totalPages || totalPages);
+      }
+      console.log("response of blogs:", res);
+    } catch (error) {
+      console.error("Error loading more blogs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -152,48 +183,7 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
         />
       </Head>
       <div className="min-h-screen bg-white max-md:w-full max-w-[2000px] w-[80%] p-6 mx-auto py-8">
-        {/* Recent Blogs Slider Section */}
-        {/* <div className="mb-16">
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Recent Blogs
-          </h2>
-          <div className="w-20 h-1 bg-[#FF6E04]"></div>
-        </div>
-
-        <Slider {...sliderSettings} className="recent-blogs-slider">
-          {mostViewedBlogs?.map((blog) => (
-            <div key={blog.id} className="px-3 ">
-              <div className="bg-white h-100 rounded-lg overflow-hidden  transition-shadow duration-300 border border-gray-100">
-                <div className="relative h-56  overflow-hidden">
-                  <Image
-                    src={`${APP_URL}/${blog.featured_image}`}
-                    alt={blog.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4 text-xs bg-[#FF6E04] text-white px-3 py-1 rounded-full  font-medium">
-                    {blog.category}
-                  </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-gray-500 text-xs mb-2">{blog.date}</p>
-                  <h3 className="text-md font-semibold text-gray-800 mb-1.5 line-clamp-2 hover:text-[#FF6E04] transition-colors cursor-pointer">
-                    {blog.title}
-                  </h3>
-                  <p className="text-gray-600 text-xs mb-3 line-clamp-1">
-                    {blog.excerpt}
-                  </p>
-                  <button className="text-[#FF6E04] border text-xs border-[#FF6E04] px-4 py-1 rounded hover:bg-[#FF6E04] hover:text-white transition-all duration-300 font-medium">
-                    Read More
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </Slider>
-      </div>  */}
+        {/* ... (Slider remains unchanged) */}
 
         {/* Main Content Section - Left: All Blogs, Right: Sidebar */}
         <div className="flex flex-col lg:flex-row gap-8">
@@ -231,11 +221,9 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
                       {blog?.title}
                     </Link>
                     <div className="flex items-center gap-3 my-2">
-                      {/* <span className="text-[#FF6E04] text-xs font-medium  rounded-full">
-                        {blog?.category_id?.name}
-                      </span> */}
                       <span className="text-gray-500 text-xs">
-                        {blog?.date}
+                        {blog?.date ||
+                          new Date(blog?.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div
@@ -250,24 +238,25 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
               ))}
             </div>
 
-            {/* Pagination */}
-            {/* <div className="flex justify-center items-center gap-2 mt-10">
-            <button className="px-4 py-2 border border-gray-300 rounded hover:border-[#FF6E04] hover:text-[#FF6E04] transition-colors">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-[#FF6E04] text-white rounded">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded hover:border-[#FF6E04] hover:text-[#FF6E04] transition-colors">
-              2
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded hover:border-[#FF6E04] hover:text-[#FF6E04] transition-colors">
-              3
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded hover:border-[#FF6E04] hover:text-[#FF6E04] transition-colors">
-              Next
-            </button>
-          </div> */}
+            {/* Load More Button */}
+            {currentPage < totalPages && (
+              <div className="flex justify-center mt-12 mb-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="bg-[#FF6E04] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#e56303] transition-colors shadow-md flex items-center gap-2 disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More Blogs"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right Section - Sidebar (35% width) - Sticky */}
@@ -316,7 +305,7 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
                 </div>
               </div>
 
-              {/* Ad Banner Section 1 */}
+              {/* Ad Banners */}
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-md border-2 border-[#FF6E04] p-8 mb-6 text-center">
                 <h4 className="text-xl font-semibold text-gray-800 mb-2">
                   Advertise Here
@@ -324,17 +313,6 @@ const Blogs = ({ blogs, blogCategories, recentBlogs, mostViewedBlogs }) => {
                 <p className="text-gray-600 mb-4">300 x 250</p>
                 <button className="text-[#FF6E04] border border-[#FF6E04] px-6 py-2 rounded hover:bg-[#FF6E04] hover:text-white transition-all duration-300 font-medium">
                   Learn More
-                </button>
-              </div>
-
-              {/* Ad Banner Section 2 */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-md border border-gray-200 p-8 text-center">
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">
-                  Sponsored Content
-                </h4>
-                <p className="text-gray-600 mb-4">300 x 250</p>
-                <button className="text-[#FF6E04] border border-[#FF6E04] px-6 py-2 rounded hover:bg-[#FF6E04] hover:text-white transition-all duration-300 font-medium">
-                  Contact Us
                 </button>
               </div>
             </div>
@@ -369,7 +347,7 @@ export async function getServerSideProps() {
   try {
     const [blogsRes, categoriesRes, recentRes, mostViewedRes] =
       await Promise.all([
-        getBlogs(),
+        getBlogs({ page: 1, limit: 10 }),
         getCategories(),
         getRecentBlogs(),
         getMostViewedBlogs(),
@@ -377,7 +355,8 @@ export async function getServerSideProps() {
 
     return {
       props: {
-        blogs: blogsRes || [],
+        blogs: blogsRes?.blogs || [],
+        initialTotalPages: blogsRes?.pagination?.totalPages || 1,
         blogCategories: categoriesRes?.data || [],
         recentBlogs: recentRes?.data?.blogs || [],
         mostViewedBlogs: mostViewedRes?.data?.blogs || [],
@@ -387,6 +366,7 @@ export async function getServerSideProps() {
     return {
       props: {
         blogs: [],
+        initialTotalPages: 1,
         blogCategories: [],
         recentBlogs: [],
         mostViewedBlogs: [],

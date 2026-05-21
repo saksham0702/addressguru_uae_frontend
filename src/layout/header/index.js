@@ -129,13 +129,13 @@ const Header = () => {
   }, [pathname]);
 
   const logos = [
-    { title: "to let", img: "/assets/toLet.png", link: "/properties" },
-    { title: "jobs", img: "/assets/Dashboard/jobs.png", link: "/jobs" },
-    {
-      title: "marketplace",
-      img: "/assets/marketPlace.png",
-      link: "/marketplace",
-    },
+    // { title: "to let", img: "/assets/toLet.png", link: "/properties" },
+    // { title: "jobs", img: "/assets/Dashboard/jobs.png", link: "/jobs" },
+    // {
+    //   title: "marketplace",
+    //   img: "/assets/marketPlace.png",
+    //   link: "/marketplace",
+    // },
   ];
 
   const handlePostAd = () => {

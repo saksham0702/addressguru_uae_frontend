@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import InputWithTitle from "../InputWithTitle";
 import axios from "axios";
 import { API_URL, COUNTRY_CODES } from "@/services/constants";
-import { getCities } from "@/api/uaeadminCities";
+import { getCities, getCityLocalities } from "@/api/uaeadminCities";
 
 const ContactDetails = ({
   contact,
@@ -19,6 +19,10 @@ const ContactDetails = ({
   const [countryOpen, setCountryOpen] = useState(false);
   const [altCountryOpen, setAltCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
+  const [localities, setLocalities] = useState([]);
+  const [localityOpen, setLocalityOpen] = useState(false);
+  const [localitySearch, setLocalitySearch] = useState("");
+  const [localitiesLoading, setLocalitiesLoading] = useState(false);
 
   const filteredCountries = COUNTRY_CODES.filter((item) =>
     `${item.country} ${item.code}`
@@ -26,6 +30,7 @@ const ContactDetails = ({
       .includes(countrySearch.toLowerCase()),
   );
   const cityRef = useRef(null);
+  const localityRef = useRef(null);
   const countryRef = useRef(null);
   const altCountryRef = useRef(null);
 
@@ -55,12 +60,34 @@ const ContactDetails = ({
     fetchCities();
   }, []);
 
+  useEffect(() => {
+    const fetchLocalities = async () => {
+      if (!contact?.cityId) {
+        setLocalities([]);
+        return;
+      }
+      setLocalitiesLoading(true);
+      try {
+        const data = await getCityLocalities(contact.cityId);
+        setLocalities(data || []);
+      } catch (err) {
+        console.error("Locality fetch error:", err);
+      } finally {
+        setLocalitiesLoading(false);
+      }
+    };
+    fetchLocalities();
+  }, [contact?.cityId]);
+
   /* ---------------- CLOSE DROPDOWNS ---------------- */
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (cityRef.current && !cityRef.current.contains(e.target))
         setCityOpen(false);
+
+      if (localityRef.current && !localityRef.current.contains(e.target))
+        setLocalityOpen(false);
 
       if (countryRef.current && !countryRef.current.contains(e.target))
         setCountryOpen(false);
@@ -84,7 +111,14 @@ const ContactDetails = ({
 
   const handleCitySelect = (city) => {
     handleChange("cityId", city._id, "contactCity");
+    handleChange("locality", "", "contactLandmark"); // Reset locality when city changes
     setCityOpen(false);
+  };
+
+  const handleLocalitySelect = (localityName) => {
+    handleChange("locality", localityName, "contactLandmark");
+    setLocalityOpen(false);
+    setLocalitySearch("");
   };
 
   /* ---------------- PHONE HANDLING ---------------- */
@@ -104,6 +138,9 @@ const ContactDetails = ({
   /* ---------------- UI ---------------- */
 
   const selectedCity = cities.find((c) => c._id === contact?.cityId);
+  const filteredLocalities = localities.filter((loc) =>
+    loc.name.toLowerCase().includes(localitySearch.toLowerCase()),
+  );
 
   return (
     <div className="bg-white  rounded-xl p-8 ">
@@ -258,17 +295,6 @@ const ContactDetails = ({
           </div>
         </div>
 
-        {/* LOCALITY */}
-        <InputWithTitle
-          title="Locality / Landmark"
-          placeholder="Enter locality"
-          value={contact?.locality || ""}
-          error={error?.contactLandmark}
-          onChange={(e) =>
-            handleChange("locality", e.target.value, "contactLandmark")
-          }
-        />
-
         {/* ADDRESS */}
         {!islistingForm && (
           <InputWithTitle
@@ -283,7 +309,7 @@ const ContactDetails = ({
         )}
 
         {/* CITY */}
-        <div className="relative md:col-span-2" ref={cityRef}>
+        <div className="relative" ref={cityRef}>
           <label className="text-sm font-medium text-gray-700 mb-2 block">
             City / Region *
           </label>
@@ -314,6 +340,69 @@ const ContactDetails = ({
                   {city.name}
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+        {/* LOCALITY */}
+        <div className="relative" ref={localityRef}>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
+            Locality
+          </label>
+
+          <button
+            type="button"
+            disabled={!contact?.cityId || localitiesLoading}
+            onClick={() => setLocalityOpen(!localityOpen)}
+            className={`w-full border border-gray-300 rounded-lg px-4 py-2 text-left text-gray-700 hover:border-orange-400 focus:ring-2 focus:ring-orange-500 disabled:bg-gray-50 disabled:cursor-not-allowed ${
+              error?.contactLandmark ? "border-red-500" : ""
+            }`}
+          >
+            {localitiesLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                Loading localities...
+              </span>
+            ) : (
+              contact?.locality || "Select Locality"
+            )}
+          </button>
+
+          {error?.contactLandmark && (
+            <p className="text-xs text-red-500 mt-1">{error.contactLandmark}</p>
+          )}
+
+          {localityOpen && (
+            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-md max-h-60 flex flex-col">
+              <div className="p-2 border-b border-gray-100">
+                <input
+                  type="text"
+                  placeholder="Search locality..."
+                  value={localitySearch}
+                  onChange={(e) => setLocalitySearch(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              <div className="overflow-y-auto max-h-48">
+                {filteredLocalities.length > 0 ? (
+                  filteredLocalities.map((loc) => (
+                    <div
+                      key={loc._id}
+                      onClick={() => handleLocalitySelect(loc.name)}
+                      className={`px-4 py-2 cursor-pointer hover:bg-orange-50 ${
+                        contact?.locality === loc.name
+                          ? "bg-orange-50 text-orange-600 font-medium"
+                          : ""
+                      }`}
+                    >
+                      {loc.name}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    No results found
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

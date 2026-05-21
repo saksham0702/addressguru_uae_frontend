@@ -108,7 +108,10 @@ const Timings = ({ schedule, setSchedule }) => {
           const toTime12h = convertTo12Hour(settings.close_time);
 
           return (
-            <div key={day} className="flex items-center justify-between py-3">
+            <div
+              key={day}
+              className="flex flex-col md:flex-row items-start md:items-center justify-between py-4 border-b border-gray-100 last:border-0 gap-4"
+            >
               {/* Toggle Switch and Day */}
               <div className="flex items-center space-x-4">
                 <button
@@ -127,7 +130,7 @@ const Timings = ({ schedule, setSchedule }) => {
               </div>
 
               {/* Time Selectors and 24 Hours */}
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
                 {/* From */}
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-500 text-sm">From</span>

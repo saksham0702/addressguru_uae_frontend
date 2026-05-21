@@ -64,7 +64,7 @@ const Steps = ({ steps, setActiveStep }) => {
       </div>
 
       {/* Mobile View */}
-      <div className="md:hidden flex items-start px-2 py-2">
+      <div className="md:hidden flex items-start px-2 py-2 overflow-x-auto scrollbar-hide">
         {steps?.map((step, index) => (
           <div key={index} className="flex items-center ">
             {/* Step circle and info */}
@@ -112,5 +112,4 @@ const Steps = ({ steps, setActiveStep }) => {
   );
 };
 
-export default Steps
-
+export default Steps;

@@ -980,9 +980,7 @@ const ListingForms = () => {
       });
     } catch (error) {
       console.log("handlePayment error", error);
-
       setGlobalError("Something went wrong while initiating payment.");
-
       setIsSubmitting(false);
     }
   };
@@ -991,7 +989,7 @@ const ListingForms = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="w-[72%]">
+          <div className="w-full md:w-[72%]">
             <BusinessInfo
               category={category}
               subCategory={subCategory}
@@ -1127,7 +1125,7 @@ const ListingForms = () => {
       bg-white border border-gray-200 
       hover:bg-gray-50 
       text-gray-600 
-      w-10 h-10 flex items-center justify-center 
+      w-10 h-10 md:flex hidden items-center justify-center 
       rounded-full shadow-md 
       font-semibold 
       transition-all duration-200
@@ -1238,7 +1236,7 @@ const ListingForms = () => {
             )} */}
           </div>
 
-          <section className="mt-26 md:scale-85 max-md:scale-90 2xl:scale-95 flex max-md:mb-5 justify-center">
+          <section className="mt-26 md:scale-85 max-md:scale-100 2xl:scale-95 flex max-md:mb-5 justify-center">
             <Steps steps={steps} setActiveStep={setActiveStep} />
           </section>
 
