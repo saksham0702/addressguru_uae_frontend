@@ -472,8 +472,12 @@ const SearchResults = ({
               name="business listings"
             />
           </div>
+          <h1 className="font-semibold text-[20px] max-md:hidden my-2 capitalize leading-tight whitespace-nowrap">
+            Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
+            {canonicalCity}
+          </h1>
 
-          <div className="flex items-center justify-between md:hidden  px-2.5 mt-2 w-full  mb-1">
+          <div className="flex  justify-between md:hidden border-b border-gray-200 pb-3  px-2.5 mt-2 w-full  mb-1">
             <h1 className="font-semibold text-[14px] capitalize leading-tight whitespace-nowrap">
               Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
               {canonicalCity}
@@ -614,7 +618,7 @@ const SearchResults = ({
 
                       return (
                         <React.Fragment key={item._id || index}>
-                          <div className="w-full md:mb-4 mb-0.5 border-b border-gray-300 last:border-0">
+                          <div className="w-full md:mb-4 mb-0.5 border-b-1 border-orange-100 last:border-0">
                             <BusinessCard data={item} />
                           </div>
 

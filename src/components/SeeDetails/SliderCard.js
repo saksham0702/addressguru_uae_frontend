@@ -39,7 +39,7 @@ const NextArrow = ({ onClick }) => (
   </button>
 );
 
-const SliderCard = ({ images, slider }) => {
+const SliderCard = ({ images }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
@@ -51,73 +51,121 @@ const SliderCard = ({ images, slider }) => {
     autoplay: true,
     prevArrow: <PrevArrow />,
     nextArrow: <NextArrow />,
-    customPaging: () => <div className="custom-dot"></div>,
+    customPaging: () => <div className="custom-dot" />,
     dotsClass: "slick-dots custom-dots",
   };
 
   return (
-    <div className="relative md:w-full md:max-h-[450px] max-md:h-[240px] border-2 border-gray-200 p-[2px] flex justify-center rounded-lg overflow-hidden">
-      <Slider {...settings} className="w-full h-full">
+    <div className="slider-card-wrapper">
+      <Slider {...settings}>
         {images?.map((src, idx) => (
-          <div key={idx} className="h-[450px] w-full relative">
-            <Image
-              src={`${APP_URL}/${src}`}
-              alt={`slider-image-${idx}`}
-              height={1000}
-              width={1000}
-              className="h-full w-full rounded-lg absolute object-cover"
-            />
+          <div key={idx} className="slide-item">
+            <div className="slide-inner">
+              <Image
+                src={`${APP_URL}/${src}`}
+                alt={`slider-image-${idx}`}
+                fill
+                className="slide-image"
+                sizes="(max-width: 768px) 100vw, 700px"
+              />
+            </div>
           </div>
         ))}
       </Slider>
 
       <style jsx global>{`
+        /* ── Wrapper ── */
+        .slider-card-wrapper {
+          position: relative;
+          width: 100%;
+          /* Consistent 16:9 aspect ratio for both mobile and desktop */
+          aspect-ratio: 16 / 9;
+          border: 2px solid #e5e7eb;
+          border-radius: 0.5rem;
+          overflow: hidden;
+          background: #f3f4f6;
+        }
+
+        @media (min-width: 768px) {
+          .slider-card-wrapper {
+            max-height: 450px;
+          }
+        }
+
+        /* ── Slick core overrides ── */
+        .slider-card-wrapper .slick-slider,
+        .slider-card-wrapper .slick-list,
+        .slider-card-wrapper .slick-track {
+          height: 100%;
+        }
+
+        .slider-card-wrapper .slick-slide > div {
+          height: 100%;
+        }
+
+        /* ── Each slide ── */
+        .slide-item {
+          height: 100%;
+        }
+
+        .slide-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+
+        /* ── Image: cover so it fills the card fully ── */
+        .slide-image {
+          object-fit: cover;
+          object-position: center;
+        }
+
+        /* ── Hide default slick arrows ── */
+        .slider-card-wrapper .slick-prev,
+        .slider-card-wrapper .slick-next {
+          display: none !important;
+        }
+
+        /* ── Dots container ── */
         .custom-dots {
-          bottom: 16px;
+          position: absolute;
+          bottom: 12px;
+          left: 0;
+          right: 0;
           display: flex !important;
           justify-content: center;
           align-items: center;
           gap: 5px;
+          padding: 0;
+          margin: 0;
+          list-style: none;
           z-index: 20;
         }
+
         .custom-dots li {
           margin: 0;
           width: auto;
           height: auto;
         }
-        /* Inactive — orange thin line */
+
+        /* Inactive dot — orange bar, NO border-radius */
         .custom-dot {
           width: 20px;
           height: 3px;
-          border-radius: 999px;
+          border-radius: 0;
           background: #ff7a00;
           opacity: 1;
           transition: all 0.3s ease;
           cursor: pointer;
         }
-        /* Active — white thin line, slightly wider */
+
+        /* Active dot — white bar, slightly wider, NO border-radius */
         .custom-dots li.slick-active .custom-dot {
           width: 28px;
           height: 3px;
-          border-radius: 999px;
+          border-radius: 0;
           background: #ffffff;
           opacity: 1;
-        }
-        .slick-slider {
-          width: 100%;
-          height: 100%;
-        }
-        .slick-list,
-        .slick-track {
-          height: 100%;
-        }
-        .slick-slide > div {
-          height: 100%;
-        }
-        /* Reset slick default arrow styles */
-        .slick-prev,
-        .slick-next {
-          display: none !important;
         }
       `}</style>
     </div>

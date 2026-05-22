@@ -919,7 +919,9 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
             {/* ── RIGHT COLUMN ───────────────────────────────── */}
             <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-5">
-              <div className={`sticky top-24 ${!isSliderFull ? "-mt-116" : ""}`}>
+              <div
+                className={`sticky top-24 ${!isSliderFull ? "-mt-116" : ""}`}
+              >
                 {" "}
                 <QuickInformation
                   id={data?.id}
