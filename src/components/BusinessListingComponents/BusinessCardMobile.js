@@ -45,7 +45,7 @@ const MiniSlider = ({ images, businessName, logo }) => {
   if (!images || images.length === 0) {
     return (
       <div
-        className="relative flex-shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden rounded-l-xl"
+        className="relative flex-shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden"
         style={{ width: 120, alignSelf: "stretch" }}
       >
         {logo ? (
@@ -65,7 +65,7 @@ const MiniSlider = ({ images, businessName, logo }) => {
 
   return (
     <div
-      className="relative flex-shrink-0 overflow-hidden rounded-l-xl bg-gray-100"
+      className="relative flex-shrink-0 overflow-hidden bg-gray-100"
       style={{ width: 120, alignSelf: "stretch" }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -160,7 +160,7 @@ const BusinessCardMobile = ({ data }) => {
   return (
     <div className="md:hidden w-full">
       <div
-        className="flex bg-white mx-2 my-1 rounded-xl overflow-hidden"
+        className="flex bg-white mx-2 my-1 rounded-sm overflow-hidden"
         style={{ minHeight: 130 }}
       >
         {/* Left image */}
