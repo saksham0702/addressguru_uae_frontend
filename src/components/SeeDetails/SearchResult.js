@@ -447,9 +447,13 @@ const SearchResults = ({
       </Head>
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-x-clip justify-center bg-[#F8F7F7]">
-        <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20 pr-2">
+        <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20">
           <section className="h-[113px] w-full max-w-[1000%] mt-1 mx-auto  rounded-lg">
-            <Link target="_blank" href="https://dubai.adxventure.com" className="h-full w-full text-lg tect-center flex justify-center items-center">
+            <Link
+              target="_blank"
+              href="https://dubai.adxventure.com"
+              className="h-full w-full text-lg tect-center flex justify-center items-center"
+            >
               <Image
                 src="/assets/ads-city-slug.jpeg"
                 alt="ad1"
@@ -469,25 +473,39 @@ const SearchResults = ({
             />
           </div>
 
-          <h1 className="font-semibold text-xl 2xl:text-2xl mt-2 capitalize max-md:hidden mb-3">
-            Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
-            {canonicalCity}
-          </h1>
+          <div className="flex items-center justify-between md:hidden  px-2.5 mt-2 w-full  mb-1">
+            <h1 className="font-semibold text-[14px] capitalize leading-tight whitespace-nowrap">
+              Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
+              {canonicalCity}
+            </h1>
+            <FilterBar
+              hasActiveFilters={hasActiveFilters}
+              handleReset={handleReset}
+              dynamicFilters={dynamicFilters}
+              filters={activeFilters}
+              searchInput={searchInput}
+              onSearchChange={(val) => setSearchInput(val)}
+              onFilterChange={handleFilterChange}
+              onFilterRemove={handleFilterRemove}
+            />
+          </div>
 
-          <FilterBar
-            hasActiveFilters={hasActiveFilters}
-            handleReset={handleReset}
-            dynamicFilters={dynamicFilters}
-            filters={activeFilters}
-            searchInput={searchInput}
-            onSearchChange={(val) => setSearchInput(val)}
-            onFilterChange={handleFilterChange}
-            onFilterRemove={handleFilterRemove}
-          />
+          <div className="hidden md:block">
+            <FilterBar
+              hasActiveFilters={hasActiveFilters}
+              handleReset={handleReset}
+              dynamicFilters={dynamicFilters}
+              filters={activeFilters}
+              searchInput={searchInput}
+              onSearchChange={(val) => setSearchInput(val)}
+              onFilterChange={handleFilterChange}
+              onFilterRemove={handleFilterRemove}
+            />
+          </div>
 
           <div className="flex w-full gap-4 items-start">
             <div className="flex flex-col my-2 md:my-4 gap-2 w-full max-md:mb-32">
-              <div className="bg-white w-full rounded-lg pl-2">
+              <div className="bg-white w-full rounded-lg md:pl-2">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <BusinessCardSkeleton key={i} />
@@ -596,7 +614,7 @@ const SearchResults = ({
 
                       return (
                         <React.Fragment key={item._id || index}>
-                          <div className="w-full md:mb-4 mb-1">
+                          <div className="w-full md:mb-4 mb-0.5 border-b border-gray-300 last:border-0">
                             <BusinessCard data={item} />
                           </div>
 
@@ -643,7 +661,7 @@ const SearchResults = ({
               )}
             </div>
 
-            <div className="mt-4 max-md:hidden sticky  top-[80px]">
+            <div className="mt-4 hidden xl:block sticky top-[80px]">
               <RightBusinessCard
                 name={apiListings?.[0]?.category?.name}
                 city={apiListings?.[0]?.city?.name}

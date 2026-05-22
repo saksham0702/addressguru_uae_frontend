@@ -27,7 +27,7 @@ const FilterBar = ({
     {
       label: "By Ratings",
       hasDropdown: true,
-       dropdownOptions: ["5 stars", "4+ stars", "3+ stars",],
+      dropdownOptions: ["5 stars", "4+ stars", "3+ stars"],
     },
     ...(dynamicFilters?.facilities?.length > 0
       ? [
@@ -106,7 +106,6 @@ const FilterBar = ({
 
   // handleFilterSelect is called by FilterItem — only on APPLY actions → triggers API
   const handleFilterSelect = (label, value = null) => {
-    
     switch (label) {
       case "Sort by":
         onFilterChange({ sort_by: value?.toLowerCase() || null });
@@ -258,7 +257,7 @@ const FilterBar = ({
       )}
 
       {/* ── Desktop filter row ── */}
-      <div className="flex items-center max-md:bg-gray-100 max-md:py-1 md:w-full px-2 py-1 max-md:w-[90vh] max-md:max-w-[350px] max-md:ml-2 max-md:my-2 rounded-lg">
+      <div className="flex items-center md:w-full px-2 py-1 rounded-lg">
         <div
           ref={containerRef}
           className="relative z-40 flex items-center gap-2.5 max-md:hidden flex-wrap"
@@ -356,19 +355,17 @@ const FilterBar = ({
                     : item.label === "By Ratings"
                       ? Boolean(filters?.rating)
                       : item.label === "Facilities"
-                      ? filters?.facilities_id?.length > 0
-                      : item.label === "Services"
-                        ? filters?.services_id?.length > 0
-                        : item.label === "Courses"
-                          ? filters?.courses_id?.length > 0
-                          : item.label === "Payment Mode"
-                            ? filters?.payment_mode_id?.length > 0
-                            : false
+                        ? filters?.facilities_id?.length > 0
+                        : item.label === "Services"
+                          ? filters?.services_id?.length > 0
+                          : item.label === "Courses"
+                            ? filters?.courses_id?.length > 0
+                            : item.label === "Payment Mode"
+                              ? filters?.payment_mode_id?.length > 0
+                              : false
               }
             />
           ))}
-  
-
 
           {/* "Clear all" in the filter bar → calls handleReset → hits API */}
           {hasActiveFilters && (
@@ -399,7 +396,6 @@ const FilterBar = ({
           )}
         </div>
       </div>
-      
 
       {/* ── Active filter chips (horizontal) ── */}
       {activeChips.length > 0 && (
