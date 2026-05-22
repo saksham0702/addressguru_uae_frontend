@@ -448,7 +448,7 @@ const SearchResults = ({
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-x-clip justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20">
-          <section className="h-[113px] w-full max-w-[1000%] mt-1 mx-auto  rounded-lg">
+          <section className="md:h-[113px] h-[50px] w-full max-w-[1000%] mt-1 mx-auto  rounded-lg">
             <Link
               target="_blank"
               href="https://dubai.adxventure.com"
@@ -464,14 +464,6 @@ const SearchResults = ({
             </Link>
           </section>
 
-          <div className="mt-3 max-md:ml-2.5 ">
-            <BreadCrumbs
-              slug={canonicalSlug}
-              city={canonicalCity}
-              length={pageData?.total}
-              name="business listings"
-            />
-          </div>
           <h1 className="font-semibold text-[20px] max-md:hidden my-2 capitalize leading-tight whitespace-nowrap">
             Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
@@ -606,23 +598,29 @@ const SearchResults = ({
                 ) : (
                   <>
                     {listings.map((item, index) => {
-                      const position = index + 1;
+                      const position = index + 1; // 1-based position in the listing array
 
-                      // 👉 Inline card: 5, 15, 25, 35...
+                      // Inline lead card: at position 5, then every 10 after (5, 15, 25, 35 ...)
                       const showInline =
                         position === 5 ||
                         (position > 5 && (position - 5) % 10 === 0);
 
-                      // 👉 Ads card: every 7
+                      // Ads card: every 7th listing (7, 14, 21 ...)
                       const showAds = position % 7 === 0;
 
+                      const isFilledCall = position === 1 || position % 3 === 0;
                       return (
-                        <React.Fragment key={item._id || index}>
-                          <div className="w-full md:mb-4 mb-0.5 border-b-1 border-orange-100 last:border-0">
-                            <BusinessCard data={item} />
+                        <React.Fragment key={item._id ?? index}>
+                          {/* ── Business card ── */}
+                          <div className="w-full md:mb-4 mb-3 last:border-0">
+                            <BusinessCard
+                              data={item}
+                              index={index}
+                              isFilledCall={isFilledCall}
+                            />
                           </div>
 
-                          {/* InlineLeadCard */}
+                          {/* ── Inline lead card: 5, 15, 25 ... ── */}
                           {showInline && (
                             <div className="my-3">
                               <InlineLeadCard
@@ -632,7 +630,7 @@ const SearchResults = ({
                             </div>
                           )}
 
-                          {/* AdsCard */}
+                          {/* ── Ads card: every 7th ── */}
                           {showAds && (
                             <div className="my-3">
                               <AdsCard />

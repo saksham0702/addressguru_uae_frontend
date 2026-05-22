@@ -12,7 +12,7 @@ import { MapPin } from "lucide-react";
 import BusinessCardMobile from "./BusinessCardMobile";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
-const BusinessCard = ({ data }) => {
+const BusinessCard = ({ data, index, isFilledCall }) => {
   console.log(data);
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +37,11 @@ https://addressguru.ae/${data?.slug}`;
 
   return (
     <>
-      <BusinessCardMobile data={data} />
+      <BusinessCardMobile
+        data={data}
+        index={index}
+        isFilledCall={isFilledCall}
+      />
       <div className="max-md:max-w-full md:p-3 p-2 rounded-lg md:my-1 my-0.5 hidden md:block  md:border-none ">
         <div className="md:w-[98%] max-md:p-[1px] ">
           <div className=" py-1.5 relative flex max-md:gap-2 md:gap-4 gap-3  max-[340px]:!gap-2 ">
@@ -138,23 +142,23 @@ https://addressguru.ae/${data?.slug}`;
                     {data?.statistics?.totalReviews} Ratings
                   </p>
                 )}
-                {/* <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-semibold">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="8" cy="8" r="8" fill="#FF6E04" />
-                  <path
-                    d="M13.7212 4.25825C13.3499 3.91381 12.747 3.91402 12.3752 4.25825L6.31744 9.87088L3.62503 7.37643C3.25325 7.03198 2.65061 7.03198 2.27883 7.37643C1.90706 7.72087 1.90706 8.27921 2.27883 8.62365L5.6442 11.7416C5.82998 11.9137 6.07357 12 6.31718 12C6.5608 12 6.80463 11.9139 6.9904 11.7416L13.7212 5.50546C14.0929 5.16125 14.0929 4.60267 13.7212 4.25825Z"
-                    fill="white"
-                  />
-                </svg>
-                <p>AG</p>
-                <p className="text-black">Verified</p>
-              </span> */}
+                <span className="flex items-center bg-[#EEF7FF] text-[#FF6E04] gap-1 py-1.5 px-2 text-[12px] rounded-full  max-md:ml-7 max-md:scale-80 font-semibold">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="8" cy="8" r="8" fill="#FF6E04" />
+                    <path
+                      d="M13.7212 4.25825C13.3499 3.91381 12.747 3.91402 12.3752 4.25825L6.31744 9.87088L3.62503 7.37643C3.25325 7.03198 2.65061 7.03198 2.27883 7.37643C1.90706 7.72087 1.90706 8.27921 2.27883 8.62365L5.6442 11.7416C5.82998 11.9137 6.07357 12 6.31718 12C6.5608 12 6.80463 11.9139 6.9904 11.7416L13.7212 5.50546C14.0929 5.16125 14.0929 4.60267 13.7212 4.25825Z"
+                      fill="white"
+                    />
+                  </svg>
+                  <p>AG</p>
+                  <p className="text-black">Verified</p>
+                </span>
               </div>
 
               {/* Tags bring tag randomly from anywhere */}
