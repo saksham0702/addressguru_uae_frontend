@@ -464,6 +464,15 @@ const SearchResults = ({
             </Link>
           </section>
 
+          <div className="mt-3 max-md:ml-2.5 ">
+            <BreadCrumbs
+              slug={canonicalSlug}
+              city={canonicalCity}
+              length={pageData?.total}
+              name="business listings"
+            />
+          </div>
+
           <h1 className="font-semibold text-[20px] max-md:hidden my-2 capitalize leading-tight whitespace-nowrap">
             Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
@@ -608,11 +617,13 @@ const SearchResults = ({
                       // Ads card: every 7th listing (7, 14, 21 ...)
                       const showAds = position % 7 === 0;
 
+                      // Filled "Call Now" button: every 3rd listing (3, 6, 9 ...)
+                      // Uses position (1-based) so card 3, 6, 9 ... get the filled style
                       const isFilledCall = position === 1 || position % 3 === 0;
                       return (
                         <React.Fragment key={item._id ?? index}>
                           {/* ── Business card ── */}
-                          <div className="w-full md:mb-4 mb-3 last:border-0">
+                          <div className="w-full md:mb-4 mb-3.5 last:border-0">
                             <BusinessCard
                               data={item}
                               index={index}

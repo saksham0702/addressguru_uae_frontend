@@ -12,11 +12,11 @@ const Foot2 = () => {
       </div>
 
       {/* Section 2: Support */}
-      <div className=" mb-4">
+      {/* <div className=" mb-4">
         <h3 className="font-semibold mb-1">Services & Support</h3>
         <p className="font-bold">Support Centre</p>
         <p className="text-xs text-gray-500">29, Tagore Villa, Dehradun</p>
-      </div>
+      </div> */}
 
       {/* Section 3: Our Partners */}
       <div className=" mb-4">

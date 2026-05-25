@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Star, User, Calendar } from "lucide-react";
 import { getReviews } from "@/api/Reviews";
 
-const ReviewSection = ({ slug }) => {
+const ReviewSection = ({ slug, handlePop }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -139,17 +139,32 @@ const ReviewSection = ({ slug }) => {
   if (!reviews.length) {
     return (
       <div className="w-full bg-white rounded-xl border border-gray-200 p-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          Customer Reviews
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Customer Reviews
+          </h2>
+          <button
+            onClick={() => handlePop("rateus")}
+            className="px-5 py-2.5 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0"
+          >
+            Write a Review
+          </button>
+        </div>
         <div className="text-center py-12">
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Star size={32} className="text-gray-400" />
           </div>
           <p className="text-gray-500 text-lg">No reviews yet</p>
-          <p className="text-gray-400 text-sm mt-2">
+          <p className="text-gray-400 text-sm mt-2 mb-6">
             Be the first to review this listing
           </p>
+          <button
+            onClick={() => handlePop("rateus")}
+            className="inline-flex items-center gap-2 text-orange-600 font-semibold hover:text-orange-700 transition-colors"
+          >
+            <Star size={20} />
+            Share your experience
+          </button>
         </div>
       </div>
     );
@@ -247,146 +262,3 @@ const ReviewSection = ({ slug }) => {
 };
 
 export default ReviewSection;
-
-
-
-// import React, { useState, useEffect } from "react";
-// import { Star, Calendar } from "lucide-react";
-
-// const CompactReviewSection = ({ slug }) => {
-//   const [reviews, setReviews] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     if (slug) {
-//       fetchReviews();
-//     }
-//   }, [slug]);
-
-//   const fetchReviews = async () => {
-//     try {
-//       setLoading(true);
-//       // Replace with your actual API endpoint
-//       const response = await fetch(`/api/reviews/${slug}`);
-//       const data = await response.json();
-
-//       if (data.success) {
-//         setReviews(data.reviews || []);
-//       }
-//     } catch (error) {
-//       console.error("Error fetching reviews:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const formatDate = (dateString) => {
-//     const date = new Date(dateString);
-//     const now = new Date();
-//     const diffTime = Math.abs(now - date);
-//     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-//     if (diffDays === 0) return "Today";
-//     if (diffDays === 1) return "Yesterday";
-//     if (diffDays < 7) return `${diffDays} days ago`;
-//     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-//     return date.toLocaleDateString("en-US", {
-//       month: "short",
-//       day: "numeric",
-//       year: "numeric",
-//     });
-//   };
-
-//   const StarRating = ({ rating }) => {
-//     return (
-//       <div className="flex items-center gap-0.5">
-//         {[1, 2, 3, 4, 5].map((star) => (
-//           <Star
-//             key={star}
-//             size={14}
-//             className={`${
-//               star <= rating
-//                 ? "fill-yellow-400 text-yellow-400"
-//                 : "fill-gray-200 text-gray-200"
-//             }`}
-//           />
-//         ))}
-//       </div>
-//     );
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="w-full bg-white rounded-lg border border-gray-200 p-6">
-//         <div className="animate-pulse space-y-4">
-//           {[1, 2, 3].map((i) => (
-//             <div key={i} className="space-y-2">
-//               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-//               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (!reviews.length) {
-//     return (
-//       <div className="w-full bg-white rounded-lg border border-gray-200 p-8 text-center">
-//         <Star size={32} className="text-gray-300 mx-auto mb-2" />
-//         <p className="text-gray-500">No reviews yet</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
-//       {/* Header */}
-//       <div className="px-6 py-4 border-b border-gray-200">
-//         <h3 className="text-lg font-semibold text-gray-900">
-//           Reviews ({reviews.length})
-//         </h3>
-//       </div>
-
-//       {/* Reviews List */}
-//       <div className="divide-y divide-gray-200">
-//         {reviews.map((review) => (
-//           <div key={review._id} className="px-6 py-4">
-//             <div className="flex items-start gap-3">
-//               {/* Avatar */}
-//               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-//                 <span className="text-white font-semibold text-sm">
-//                   {review.fullName.charAt(0).toUpperCase()}
-//                 </span>
-//               </div>
-
-//               {/* Content */}
-//               <div className="flex-1 min-w-0">
-//                 {/* Name and Rating */}
-//                 <div className="flex items-center justify-between mb-1">
-//                   <h4 className="font-medium text-gray-900 text-sm">
-//                     {review.fullName}
-//                   </h4>
-//                   <StarRating rating={review.rating} />
-//                 </div>
-
-//                 {/* Review Text */}
-//                 <p className="text-gray-700 text-sm leading-relaxed mb-2">
-//                   {review.reviewText}
-//                 </p>
-
-//                 {/* Date */}
-//                 <div className="flex items-center gap-1 text-xs text-gray-500">
-//                   <Calendar size={12} />
-//                   <span>{formatDate(review.createdAt)}</span>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CompactReviewSection;

@@ -1,40 +1,43 @@
 import React from "react";
 import CardB from "../CardB";
 import CardS from "../CardS";
-// import CardD from "../CardD";
 import dynamic from "next/dynamic";
 
-// const CardD = dynamic(() => import("../CardD"), { ssr: false });
-
-// OR with SSR (default behavior)
 const CardD = dynamic(() => import("../CardD"));
 
 const data = [
   {
     title: "Domestic Services",
     imgSrc: "small1.png",
+    link: "/maid",
   },
   {
     title: "Packers and Movers",
     imgSrc: "small2.png",
+    link: "/logistics-services",
   },
   {
     title: "Pest Control Service",
     imgSrc: "small3.png",
+    link: "/pest-control",
   },
   {
     title: "AC Service",
     imgSrc: "small4.png",
+    link: "/ac-service",
   },
   {
     title: "Repair & Service",
     imgSrc: "small5.png",
+    link: "/repair-service",
   },
   {
     title: "Carpenter",
     imgSrc: "small6.png",
+    link: "/carpenter",
   },
 ];
+
 const data2 = [
   {
     title: "Budget Hotel",
@@ -53,11 +56,11 @@ const data2 = [
     buttonBgColor: "#FDF0ED",
   },
   {
-    title: "Doctor",
+    title: "Doctor & Hospital",
     desc: "Book an Appointment",
     img: "dets3.png",
     color: "#00B5A1",
-    link: "/doctor",
+    link: "/hospital",
     buttonBgColor: "#E5F8F4",
   },
   {
@@ -77,50 +80,36 @@ const data2 = [
     buttonBgColor: "#D5E7FE",
   },
 ];
+
 const PopularServices = () => {
   return (
-    <>
-      <div className="w-full md:pr-5 2xl:pr-10 min-md:pl-4 ">
-        <div className="lg:flex lg:justify-between gap-5 2xl:gap-7 h-auto">
-          <div className="max-md:w-full md:pr-4 max-md:pl-2">
-            <CardB />
-          </div>
-          <div className="flex flex-col 2xl:gap-5 xl:gap-5 max-md:flex-row max-md:overflow-x-scroll hide-scroll max-md:w-full max-md:mt-5 max-md:gap-4 2xl:pt-2 w-[65%] relative left-2 min-2xl:pr-10">
-            {/* Desktop: Show in grid format */}
-            <div className="md:block hidden">
-              {/* First Row */}
-              <div className="grid grid-cols-3 2xl:gap-10 mb-5">
-                {data.slice(0, 3).map((item, index) => (
-                  <CardS key={index} data={item} />
-                ))}
-              </div>
+    <div className="w-full flex flex-col gap-10 py-6 px-4 md:px-6 2xl:px-10">
+      {/* Top Section: CardB + Small Cards Grid */}
+      <div className="flex flex-col lg:flex-row lg:items-stretch gap-8">
+        {/* Large Card Section */}
+        <div className="w-full lg:w-auto shrink-0">
+          <CardB />
+        </div>
 
-              {/* Second Row */}
-              <div className="grid grid-cols-3 2xl:gap-10">
-                {data.slice(3, 6).map((item, index) => (
-                  <CardS key={index + 3} data={item} />
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile: Show all cards in a single row with horizontal scroll */}
-            <div className="md:hidden flex flex-row gap-4 overflow-x-scroll  hide-scroll">
-              {data.slice(0, 6).map((item, index) => (
-                <CardS key={index} data={item} />
-              ))}
-            </div>
+        {/* Small Cards Grid */}
+        <div className="w-full flex-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 md:gap-8 lg:gap-6 2xl:gap-10">
+            {data.map((item, index) => (
+              <CardS key={index} data={item} />
+            ))}
           </div>
         </div>
       </div>
 
-      <div className=" py-8 ">
-        <div className=" w-full md:pl-4 flex md:pr-7 2xl:pr-10 max-md:overflow-x-scroll max-md:bg-[#FEF5EF] max-md:py-3 rounded-xl hide-scroll   justify-between">
+      {/* Bottom Section: CardD Row */}
+      <div className="py-8">
+        <div className="w-full md:pl-4 flex md:pr-7 2xl:pr-10 overflow-x-scroll bg-[#FEF5EF] md:bg-transparent py-4 rounded-xl hide-scroll justify-between gap-4">
           {data2.map((item, index) => (
             <CardD key={index} data={item} />
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
