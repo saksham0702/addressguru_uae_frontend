@@ -913,7 +913,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
               {/* reviews section */}
               <div className="mt-5 md:pl-2 px-1">
-                <ReviewSection slug={data?.slug} />
+                <ReviewSection slug={data?.slug} handlePop={handlePop} />
               </div>
             </div>
 

@@ -134,7 +134,10 @@ const Foot1 = () => {
         <h3 className="uppercase font-bold">Download our app here..</h3>
 
         <div className="flex flex-col px-2 gap-4 my-5 w-sm">
-          <Link href="https://play.google.com" target="_blank">
+          <p className="text-sm text-orange-600 font-semibold">
+            Coming Soon...
+          </p>
+          {/* <Link href="https://play.google.com" target="_blank">
             <Image
               src="/assets/Png/last-banner/play-store.png"
               alt="Play Store"
@@ -142,9 +145,9 @@ const Foot1 = () => {
               height={1000}
               className="w-40 h-12 cursor-pointer"
             />
-          </Link>
+          </Link> */}
 
-          <Link href="https://www.apple.com/app-store/" target="_blank">
+          {/* <Link href="https://www.apple.com/app-store/" target="_blank">
             <Image
               src="/assets/Png/last-banner/app-store.png"
               alt="App Store"
@@ -152,7 +155,7 @@ const Foot1 = () => {
               height={1000}
               className="w-40 h-12 cursor-pointer"
             />
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

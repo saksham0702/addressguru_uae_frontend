@@ -169,7 +169,7 @@ export default function Home({ categories, cities }) {
             {/* popular services section */}
 
             <h3 className=" mt-4 mb-3  text-[#212121] max-md:text-lg max-md:pl-2  pl-5">
-              Popular Services
+              Popular Home Services
             </h3>
             <div className="">
               <PopularServices />

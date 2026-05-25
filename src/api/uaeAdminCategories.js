@@ -570,10 +570,10 @@ export const deleteFeatureApi = async (id) => {
 
 /* Get category assigned features */
 
-export const getCategoryFeaturesApi = async (categoryId) => {
-  const res = await fetch(`${API_URL}/categories/${categoryId}/features`);
-  return await res.json();
-};
+// export const getCategoryFeaturesApi = async (categoryId) => {
+//   const res = await fetch(`${API_URL}/categories/${categoryId}/features`);
+//   return await res.json();
+// };
 
 /* Assign features to category */
 

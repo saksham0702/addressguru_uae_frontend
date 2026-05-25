@@ -46,23 +46,10 @@ export default function EditCategoryPage() {
   const [entity, setEntity] = useState(null);
   const [tagInput, setTagInput] = useState("");
 
-  /* ================= CATEGORY ================= */
-  const [category, setCategory] = useState({
-    id: "",
-    name: "",
-    slug: "",
-    color: "",
-    svg: "",
-    iconPng: "",
-    type: "business",
-    status: "Active",
-  });
-
   /* ================= FEATURES ================= */
   const [facilities, setFacilities] = useState([]);
   const [services, setServices] = useState([]);
 
-  const [editingItem, setEditingItem] = useState(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignType, setAssignType] = useState(null); // facility | service | course
   const [allFeatures, setAllFeatures] = useState([]);
@@ -92,7 +79,6 @@ export default function EditCategoryPage() {
       if (isSubCategory) {
         // 1️⃣ Get subcategory basic data
         const subRes = await getsingleSubCategory({ id });
-
         const subData = subRes?.data;
 
         setEntity({
@@ -104,7 +90,7 @@ export default function EditCategoryPage() {
 
         // 2️⃣ Get subcategory assigned features
         const featureRes = await getSubCategoryFeaturesApi(
-          subData?.category, // assuming backend sends this
+          subData?.category,
           id,
         );
 
@@ -115,7 +101,6 @@ export default function EditCategoryPage() {
         res = await getallfeaturesdatabyCategory(id);
 
         const data = res?.data?.data;
-
         setEntity({
           id: data.category._id,
           name: data.category.name || "",
@@ -128,6 +113,10 @@ export default function EditCategoryPage() {
           textColor: data.category.textColor || "",
           metaTitle: data.category.metaTitle || "",
           metaDescription: data.category.metaDescription || "",
+          isPopular:
+            data.category.isPopular === true ||
+            data.category.isPopular === "true" ||
+            data.category.isPopular === 1,
           ogImage: data.category.ogImage || "",
           tags: data.category.tags || [],
         });
@@ -170,7 +159,6 @@ export default function EditCategoryPage() {
       const res = await getallfeaturesdatabyCategory(id);
       const data = res?.data?.data;
       console.log("data", data);
-
       // CATEGORY
       setEntity({
         id: data?.category?._id,
@@ -178,6 +166,10 @@ export default function EditCategoryPage() {
         slug: data?.category?.slug || "",
         svg: data?.category?.iconSvg || "",
         iconPng: data?.category?.iconPng || "",
+        isPopular:
+          data.category.isPopular === true ||
+          data.category.isPopular === "true" ||
+          data.category.isPopular === 1,
         type: data?.category?.type || "business",
         status: data.category.isActive ? "Active" : "Inactive",
         metaTitle: data?.category?.seo?.title || "",
@@ -281,6 +273,7 @@ export default function EditCategoryPage() {
       formData.append("slug", entity.slug);
       formData.append("color", entity.color);
       formData.append("iconSvg", entity.svg);
+      formData.append("isPopular", entity.isPopular);
       formData.append("isActive", entity.status === "Active");
 
       formData.append("metaTitle", entity.metaTitle || "");
@@ -467,6 +460,39 @@ export default function EditCategoryPage() {
                 <option>Active</option>
                 <option>Inactive</option>
               </select>
+            </div>
+            {/* POPULAR TOGGLE */}
+            <div className="border-t pt-6">
+              <div className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-800">
+                    Popular Category
+                  </h3>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    Popular categories will appear first in listing pages
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEntity((prev) => ({
+                      ...prev,
+                      isPopular: !prev?.isPopular,
+                    }))
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                    entity?.isPopular ? "bg-blue-600" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                      entity?.isPopular ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
             <div className="border-t pt-6 space-y-4">
               <h3 className="text-md font-semibold text-gray-800">
