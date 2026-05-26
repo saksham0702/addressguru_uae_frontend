@@ -15,7 +15,7 @@ const Register = () => {
   const [userId, setUserId] = useState(null);
   return (
     <div className="h-full w-full  flex flex-col items-center overflow-hidden">
-      <div className=" md:w-[80%] max-md:w-full  bg-white">
+      <div className=" md:w-[80%] max-md:w-full bg-white">
         <div className="relative max-md:h-[500px] overflow-hidden bg-[#FFF8F3] max-md:mt-3 max-md:p-4 md:p-8">
           <span className="">
             <p className="font-bold md:text-3xl max-md:font-extrabold max-md:text-xl  ">

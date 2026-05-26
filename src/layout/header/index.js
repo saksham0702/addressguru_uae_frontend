@@ -34,48 +34,6 @@ const Header = () => {
   // const [currentCity, setCurrentCity] = useState(null);
 
   const [loginPop, setLoginPop] = useState(false);
-  const handleSearch = async (query) => {
-    if (!query?.trim()) return;
-
-    try {
-      const res = await resolveSearch(query.trim());
-
-      switch (res.intent) {
-        // ── Category + city → go to that page ───────────────────────────────
-        case "category_city":
-          router.push(res.redirectUrl); // e.g. /gym/dubai
-          break;
-
-        // ── Category only → go to category page ─────────────────────────────
-        case "category":
-          router.push(res.redirectUrl); // e.g. /gym
-          break;
-
-        // ── Exact single business match → go to that listing ────────────────
-        case "exact_business":
-          router.push(res.redirectUrl); // e.g. /listing/gold-gym-dubai
-          break;
-
-        // ── Multiple name matches / service / course / keyword fallback
-        // → go to search results page and let it render the listings
-        case "business_list":
-        case "service_match":
-        case "course_match":
-        case "keyword_search":
-          router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-          break;
-
-        case "no_results":
-        default:
-          router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-          break;
-      }
-    } catch (error) {
-      console.error("Search resolve failed:", error);
-      // Fallback to search page
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
-  };
 
   const handleLoginClick = () => {
     setLoginPop(true);
@@ -305,15 +263,14 @@ const Header = () => {
         </div>
 
         {showSearchBar && (
-          <div className="absolute left-[220px] max-xl:mr-5 2xl:left-[240px] top-[9px] max-md:hidden min-[1600px]:scale-75 z-[100] scale-70">
-            {" "}
+          <div className="flex-1 max-w-[500px] mx-8 max-md:hidden z-[100]">
             <SearchBar
               value={slug}
               setValue={setSlug}
-              onSearch={handleSearch}
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               data={cities}
+              variant="header"
             />
           </div>
         )}

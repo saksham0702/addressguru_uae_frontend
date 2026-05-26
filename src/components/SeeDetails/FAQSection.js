@@ -1,12 +1,43 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const FAQSection = ({ faqs }) => {
+const FAQSection = ({ faqs, onContactClick, onShowNumberClick }) => {
   const [openIndex, setOpenIndex] = useState(null);
 
   if (!faqs || faqs.length === 0) return null;
 
   const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
+
+  const renderAnswer = (answer) => {
+    if (!answer) return null;
+    const parts = answer.split(/(\[PHONE_MASKED:.*?\]|\[EMAIL_MASKED:.*?\])/g);
+    return parts.map((part, index) => {
+      const isPhone = part.startsWith("[PHONE_MASKED:");
+      const isEmail = part.startsWith("[EMAIL_MASKED:");
+
+      if (isPhone || isEmail) {
+        const match = part.match(/:(.*?)\]/);
+        const maskedValue = match ? match[1] : "";
+        return (
+          <span
+            key={index}
+            className="text-orange-600 font-semibold cursor-pointer hover:underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isPhone && onShowNumberClick) {
+                onShowNumberClick();
+              } else if (isEmail && onContactClick) {
+                onContactClick();
+              }
+            }}
+          >
+            {maskedValue}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
 
   return (
     <div className="mt-5 md:pl-2 px-1">
@@ -40,7 +71,7 @@ const FAQSection = ({ faqs }) => {
             >
               <div className="overflow-hidden">
                 <p className="text-sm md:text-base text-gray-500 leading-relaxed pb-3.5">
-                  {faq.answer}
+                  {renderAnswer(faq.answer)}
                 </p>
               </div>
             </div>

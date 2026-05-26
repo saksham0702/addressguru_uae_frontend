@@ -1,3 +1,4 @@
+import { maskEmail, maskPhone } from "@/utils/maskContact";
 import BusinessHours from "./BusinessHours";
 import { Check, CircleCheck } from "lucide-react";
 import { useState } from "react";
@@ -105,6 +106,7 @@ const QuickInformation = ({
   handleWebsiteClick,
   id,
   positions,
+  onContactClick,
 }) => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const categoryName = job ? category?.name : category?.name;
@@ -172,13 +174,50 @@ const QuickInformation = ({
                 {/* 🔥 IMPORTANT: group wrapper */}
                 <div className="relative group max-w-[180px]">
                   {/* Truncated text */}
-                  <span className="block truncate font-medium text-[16px] text-orange-600">
-                    {value}
+                  <span
+                    className={`block truncate font-medium text-[16px] text-orange-600 ${
+                      (field?.label?.toLowerCase()?.includes("phone") ||
+                        field?.label?.toLowerCase()?.includes("mobile") ||
+                        field?.label?.toLowerCase()?.includes("email")) &&
+                      (onContactClick || onShowNumberClick)
+                        ? "cursor-pointer hover:underline"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      const label = field?.label?.toLowerCase() || "";
+                      const isPhone =
+                        label.includes("phone") || label.includes("mobile");
+                      const isEmail = label.includes("email");
+
+                      if (isPhone && onShowNumberClick) {
+                        onShowNumberClick();
+                      } else if (isEmail && onContactClick) {
+                        onContactClick();
+                      }
+                    }}
+                  >
+                    {field?.label?.toLowerCase()?.includes("phone") ||
+                    field?.label?.toLowerCase()?.includes("mobile")
+                      ? maskPhone(value)
+                      : field?.label?.toLowerCase()?.includes("email")
+                        ? maskEmail(value)
+                        : value}
                   </span>
                   {/* ✅ Hover popup ONLY if long - positioned BELOW */}
-                  {isLong && (
+                  {(field?.label?.toLowerCase()?.includes("phone") ||
+                  field?.label?.toLowerCase()?.includes("mobile")
+                    ? maskPhone(value)
+                    : field?.label?.toLowerCase()?.includes("email")
+                      ? maskEmail(value)
+                      : value
+                  )?.length > 20 && (
                     <div className="absolute left-0 top-full  hidden group-hover:block z-50 bg-white border border-gray-300 shadow-lg rounded px-3 py-2 text-[14px] text-orange-600 whitespace-normal break-words max-w-[280px]">
-                      {value}
+                      {field?.label?.toLowerCase()?.includes("phone") ||
+                      field?.label?.toLowerCase()?.includes("mobile")
+                        ? maskPhone(value)
+                        : field?.label?.toLowerCase()?.includes("email")
+                          ? maskEmail(value)
+                          : value}
                     </div>
                   )}
                 </div>

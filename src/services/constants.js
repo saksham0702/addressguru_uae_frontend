@@ -907,7 +907,7 @@ export const NAV_ROUTES = [
   },
 
   {
-    name: "listings",
+    name: "Listings",
     icon: ShoppingBag,
     children: [
       { name: "Business Listings", href: "/admin/business-listings" },
@@ -916,7 +916,15 @@ export const NAV_ROUTES = [
       { name: "Property Listings", href: "/admin/property-listings" },
     ],
   },
-
+  {
+    name: "Engagement",
+    icon: User,
+    children: [
+      { name: "Reviews", href: "/admin/reviews" },
+      // { name: "Claims", href: "/admin/claims" },
+      // { name: "Enquiries", href: "/admin/enquiries" },
+    ],
+  },
   {
     name: "Followup Configs",
     icon: TableConfigIcon,
@@ -938,8 +946,6 @@ export const NAV_ROUTES = [
     href: "/admin/payment-history",
     icon: DollarSign,
   },
-
-
 ];
 
 //jobs related things

@@ -15,6 +15,7 @@ const TitleAndLogoMobile = ({
   data,
   handleClick,
   openingHours,
+  showNumber,
 }) => {
   const message = `Hi,
 ${data?.businessName}, i am looking for ${data?.category?.name}
@@ -201,9 +202,10 @@ https://addressguru.ae/${data?.slug}`;
       {/* buttons section */}
       <div className="flex justify-between gap-2 items-center md:hidden">
         <CustomButton
-          // showToggle={true}
+          showToggle={true}
+          forcedToggled={showNumber}
           defaultText="CALL NOW"
-          toggledText={data?.mobile_number}
+          toggledText={data?.countryCode + data?.mobileNumber}
           icon={
             <svg
               width="17"
@@ -242,7 +244,7 @@ https://addressguru.ae/${data?.slug}`;
           fontWeight="800"
           onClick={() => {
             if (data?.mobileNumber) {
-              window.location.href = `tel:${data?.countryCode}${data?.mobileNumber}`;
+              handleClick(data?.slug, "phone");
             }
           }}
         />

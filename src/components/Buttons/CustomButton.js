@@ -22,20 +22,21 @@ const CustomButton = ({
   fontWeight = 500,
   borderRadius = "4px",
   onClick = null,
+  forcedToggled = null,
 }) => {
   const [toggled, setToggled] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const isToggled = (forcedToggled !== null ? forcedToggled : toggled) && showToggle;
+
   const handleClick = () => {
     if (showToggle) {
-      if (!toggled && onClick) onClick();
-      setToggled(!toggled);
+      if (!isToggled && onClick) onClick();
+      if (forcedToggled === null) setToggled(!toggled);
     } else {
       if (onClick) onClick();
     }
   };
-
-  const isToggled = toggled && showToggle;
 
   const currentBg = isToggled
     ? toggledBgColor

@@ -27,7 +27,7 @@ export const getMyReports = async () => {
   return res.data.data;
 };
 
-export const updateEnquries = async (id,status) => {
+export const updateEnquries = async (id, status) => {
   const res = await axios.patch(`${API_URL}/enquiries/${id}`, {
     status,
     headers: getAuthHeader(),
@@ -37,6 +37,27 @@ export const updateEnquries = async (id,status) => {
 
 // admin
 export const getAllBusinessEnquiries = async (params) => {
-    const res = await axios.get(`${API_URL}/enquiries`, { params });
-    return res.data;
+  const res = await axios.get(`${API_URL}/enquiries`, { params });
+  return res.data;
+};
+
+export const getAllReviewsAdmin = async (params) => {
+  const res = await axios.get(`${API_URL}/admin/reviews`, {
+    params,
+    headers: getAuthHeader(),
+  });
+
+  return res.data;
+};
+
+export const updateReviewStatus = async (reviewId, status) => {
+  const res = await axios.patch(
+    `${API_URL}/admin/reviews/${reviewId}`,
+    { status },
+    {
+      headers: getAuthHeader(),
+    },
+  );
+
+  return res.data;
 };

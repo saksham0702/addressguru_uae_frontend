@@ -180,6 +180,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const [loadingAction, setLoadingAction] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showNumber, setShowNumber] = useState(false);
 
   //  Derived values
   const isAdmin = user?.data?.roles?.[0] === 1;
@@ -297,6 +298,12 @@ const SeeDetails = ({ initialData, initialRooms }) => {
     track_event("business", listingSlug, "call").catch(() => {});
   const handlePop = (name) => setActivePop(name);
   const closePopup = () => setActivePop(null);
+
+  const handleShowNumber = () => {
+    setShowNumber(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    handleClick(data?.slug);
+  };
 
   //  Admin actions
   const handleApprove = async () => {
@@ -759,6 +766,26 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         </div>
       )}
 
+      {/* PREVIEW BANNER */}
+      {(preview === "true" || isAdmin) && (
+        <div className="w-full bg-orange-600 text-white text-center py-2 text-sm font-bold sticky top-0 z-[100] shadow-md flex items-center justify-center gap-2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          PREVIEW MODE - THIS IS HOW YOUR LISTING LOOKS TO USERS
+        </div>
+      )}
+
       {/* MAIN CONTENT */}
       <div
         className={`h-auto flex flex-col items-center w-full bg-[#F8F7F7] md:mt-2 ${
@@ -790,6 +817,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               openingHours={data?.workingHours}
               enquirePop={enquirePop}
               setEnquirePop={setEnquirePop}
+              showNumber={showNumber}
             />
           </div>
 
@@ -820,6 +848,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                   enquirePop={enquirePop}
                   setEnquirePop={setEnquirePop}
                   handleClick={handleClick}
+                  showNumber={showNumber}
                 />
               </div>
 
@@ -865,7 +894,11 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                 // useGrid={true}
               />
               {/* FAQ SECTION */}
-              <FAQSection faqs={faqs} />
+              <FAQSection
+                faqs={faqs}
+                onContactClick={() => setEnquirePop(true)}
+                onShowNumberClick={handleShowNumber}
+              />
 
               {/* OVERVIEW */}
               <div className="max-w-5xl mt-5 md:pl-2 px-1">
@@ -931,6 +964,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                   link={data?.websiteLink}
                   handlePop={handlePop}
                   handleWebsiteClick={handleWebsiteClick}
+                  onContactClick={() => setEnquirePop(true)}
+                  onShowNumberClick={handleShowNumber}
                 />
                 {rooms?.rooms?.length > 0 ? (
                   <RoomsSection

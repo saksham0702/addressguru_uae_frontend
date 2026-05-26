@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://192.168.31.104:5001";
 // const API_URL = "http://localhost:5001";
 
@@ -56,8 +56,11 @@ export const updateUser = async (id, payload) => {
   return res.data;
 };
 
-export const getUsers = async () => {
-  const res = await axios.get(`${API_URL}/admin/users/get-all`, {
+export const getUsers = async ({ page = 1, limit = 10, search = "" } = {}) => {
+  const params = new URLSearchParams({ page, limit });
+  if (search) params.append("search", search);
+
+  const res = await axios.get(`${API_URL}/admin/users/get-all?${params.toString()}`, {
     withCredentials: true,
   });
   return res.data;
@@ -78,12 +81,16 @@ export const deleteUser = async (id) => {
 
 // api/auth.js
 export const loginAsUser = async (id) => {
-  const response = await axios.post(`${API_URL}/user/user-login/${id}`, {}, {
-    headers: {
-      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+  const response = await axios.post(
+    `${API_URL}/user/user-login/${id}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      withCredentials: true,
     },
-    withCredentials: true,
-  });
+  );
   console.log("login as user response:", response?.data?.data);
   const { authToken, adminBackupToken } = response?.data?.data;
   localStorage.setItem("adminBackupToken", adminBackupToken);
@@ -95,14 +102,10 @@ export const loginAsUser = async (id) => {
 export const exitLoginAsUser = async () => {
   const backupToken = localStorage.getItem("adminBackupToken");
 
-  const response = await axios.post(
-    `${API_URL}/impersonate/exit`,
-    null,
-    {
-      headers: { "x-admin-backup-token": backupToken },
-      withCredentials: true,
-    }
-  );
+  const response = await axios.post(`${API_URL}/impersonate/exit`, null, {
+    headers: { "x-admin-backup-token": backupToken },
+    withCredentials: true,
+  });
 
   const { authToken } = response?.data?.data;
 
@@ -156,14 +159,13 @@ export const verify_otp = async (postdata) => {
   }
 };
 
-
-// admin stats 
+// admin stats
 
 export const adminStats = async () => {
   try {
     const res = await axios.get(`${API_URL}/admin/users/statistics`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       withCredentials: true,
     });

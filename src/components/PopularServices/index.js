@@ -83,7 +83,7 @@ const data2 = [
 
 const PopularServices = () => {
   return (
-    <div className="w-full flex flex-col gap-10 py-6 px-4 md:px-6 2xl:px-10">
+    <div className="w-full flex flex-col gap-10 py-6 px-4 ">
       {/* Top Section: CardB + Small Cards Grid */}
       <div className="flex flex-col lg:flex-row lg:items-stretch gap-8">
         {/* Large Card Section */}

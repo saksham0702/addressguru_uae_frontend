@@ -2,10 +2,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 
-export default function CityDropdown({ data, isOpen, setIsOpen }) {
+export default function CityDropdown({ data, isOpen, setIsOpen, header = false }) {
   const { city, setCity } = useAuth();
   const dropdownRef = useRef(null);
   const router = useRouter();
+  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -19,28 +20,29 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
 
   useEffect(() => {
     const handleRouteChange = () => setIsOpen(false);
-
-    router.events.on("routeChangeStart", handleRouteChange);
-
+    router.events?.on("routeChangeStart", handleRouteChange);
     return () => {
-      router.events.off("routeChangeStart", handleRouteChange);
+      router.events?.off("routeChangeStart", handleRouteChange);
     };
-  }, []);
+  }, [router, setIsOpen]);
 
   return (
-    <div ref={dropdownRef} className=" w-full z-[9999999]">
-      {" "}
+    <div ref={dropdownRef} className=" w-full relative z-[9999999]">
       <span
         onClick={() => setIsOpen(!isOpen)}
-        className="text-[#FF6E04] font-semibold text-[15px] md:text-[16px] flex gap-2 items-center cursor-pointer justify-center text-center w-full  py-1 rounded-md transition"
+        className={`
+          flex gap-2 items-center cursor-pointer justify-center text-center w-full py-1 
+          transition-colors text-[#FF6E04]
+          ${header ? "text-[13px] font-bold" : "text-[15px] md:text-[16px] font-semibold"}
+        `}
       >
-        <p> {city} </p>
+        <p className="truncate px-1"> {city} </p>
         <svg
           className={`transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
-          } relative top-0.5`}
-          width="14"
-          height="7"
+          } flex-shrink-0`}
+          width={header ? "10" : "14"}
+          height={header ? "5" : "7"}
           viewBox="0 0 14 7"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -54,61 +56,55 @@ export default function CityDropdown({ data, isOpen, setIsOpen }) {
         </svg>
       </span>
       {isOpen && (
-        <div className="absolute mt-3.5 bg-white shadow-md border rounded text-black w-[200px] border-gray-200 hide-scroll max-h-[300px] overflow-y-auto z-50">
-          {/* Header with Close Button */}
-          <div className="px-4 py-2 text-xs text-gray-400 my-3 uppercase border-b border-gray-100 flex items-center justify-between">
-            <span>Popular Locations</span>
+        <div className={`
+          absolute left-0 mt-3.5 bg-white shadow-2xl border border-gray-200 
+          rounded-xl text-black w-[220px] hide-scroll max-h-[350px] overflow-y-auto z-50
+        `}>
+          {/* Header with Title & Close Button */}
+          <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between sticky top-0 bg-white z-10">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Popular Locations</span>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
               aria-label="Close dropdown"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"
-                  fill="currentColor"
-                />
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="currentColor" />
               </svg>
             </button>
           </div>
 
           {/* City List */}
-          {data?.map((item) => (
-            <div
-              key={item._id}
-              onClick={() => {
-                setCity(item.name);
-                setIsOpen(false);
-              }}
-              className={`px-4 py-3 cursor-pointer font-normal hover:bg-gray-50 flex items-center gap-2 ${
-                city === item.name
-                  ? " text-[#FF6E04]"
-                  : "text-gray-700"
-              }`}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="flex-shrink-0"
+          <div className="py-1">
+            {data?.map((item) => (
+              <button
+                key={item._id}
+                onClick={() => {
+                  setCity(item.name);
+                  setIsOpen(false);
+                }}
+                className={`
+                  w-full px-4 py-2.5 text-left transition-colors flex items-center gap-2.5
+                  ${city === item.name ? "bg-orange-50 text-[#FF6E04] font-bold" : "hover:bg-gray-50 text-gray-700 font-medium"}
+                `}
               >
-                <path
-                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                  fill="currentColor"
-                  opacity="0.6"
-                />
-              </svg>
-
-              <p className="text-[14px]">{item.name}</p>
-            </div>
-          ))}
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="flex-shrink-0"
+                >
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                    fill="currentColor"
+                    opacity={city === item.name ? "0.8" : "0.4"}
+                  />
+                </svg>
+                <span className="text-[13px]">{item.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
