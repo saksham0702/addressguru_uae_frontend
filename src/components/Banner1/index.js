@@ -1,36 +1,10 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import SearchBar from "../SearchBar";
-import { searchData } from "@/api/search";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/router";
 
 const Banner1 = ({ data, isOpen, setIsOpen }) => {
-  const { city } = useAuth();
   const [slug, setSlug] = useState("");
 
-  const router = useRouter();
-  const handleSearch = async () => {
-    if (!slug?.trim()) return;
-
-    try {
-      const res = await searchData(slug, city);
-
-      if (!res || res.status === false || !res.category) {
-        console.warn("Invalid search response", res);
-        return;
-      }
-
-      const categorySlug = res.category.toLowerCase().replace(/\s+/g, "-");
-
-      const citySlug = city.toLowerCase().replace(/\s+/g, "-");
-
-      // ✅ THIS creates /hotel/UAE
-      router.push(`/${categorySlug}/${citySlug}`);
-    } catch (error) {
-      console.error("Search API failed:", error);
-    }
-  };
   return (
     <div className="w-full 2xl:w-[80%] h-[290px] bg-blue-700 max-md:hidden flex items-center  relative ">
       <div className="h-full w-full absolute top-[0px]  px-5 z-10">
@@ -51,10 +25,10 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
           <SearchBar
             value={slug}
             setValue={setSlug}
-            onSearch={handleSearch}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             data={data}
+            variant="banner"
           />
         </div>
       </div>

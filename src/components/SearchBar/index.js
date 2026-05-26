@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Typewriter from "typewriter-effect";
 import CityDropdown from "../CityDropdown";
@@ -13,7 +13,8 @@ import {
   FiBriefcase,
   FiBook,
 } from "react-icons/fi";
-import { fetchSearchSuggestions, resolveSearch } from "@/api/search";
+import { fetchSearchSuggestions } from "@/api/search";
+import { useSearchHandler } from "@/hooks/useSearchHandler";
 
 // ─── Icon per suggestion type ────────────────────────────────────────────────
 const TYPE_META = {
@@ -60,7 +61,14 @@ function useDebounce(value, delay) {
 }
 
 // ─── Main SearchBar ───────────────────────────────────────────────────────────
-const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
+const SearchBar = ({ 
+  data, 
+  isOpen, 
+  setIsOpen, 
+  value, 
+  setValue, 
+  variant = "banner" // "banner" or "header"
+}) => {
   const placeholders = [
     "What are you looking for?",
     "Restaurants in Dubai",
@@ -70,6 +78,8 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
   ];
 
   const router = useRouter();
+  const { handleSearch, handleSuggestionClick: processSuggestion } = useSearchHandler();
+  
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -81,6 +91,28 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
 
   const debouncedValue = useDebounce(value, 300);
   const showTypewriter = !isFocused && !value;
+
+  // ── Auto-close on scroll ────────────────────────────────────────────────
+  useEffect(() => {
+    const handleScroll = () => {
+      if (showDropdown) {
+        setShowDropdown(false);
+        setIsFocused(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [showDropdown]);
+
+  // ── Auto-close on route change ──────────────────────────────────────────
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setShowDropdown(false);
+      setIsFocused(false);
+    };
+    router.events?.on("routeChangeStart", handleRouteChange);
+    return () => router.events?.off("routeChangeStart", handleRouteChange);
+  }, [router]);
 
   // ── Fetch suggestions ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -124,7 +156,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
   // ── Handle keyboard navigation ────────────────────────────────────────────
   const handleKeyDown = (e) => {
     if (!showDropdown || !suggestions.length) {
-      if (e.key === "Enter") handleSubmit(value);
+      if (e.key === "Enter") handleSearch(value);
       return;
     }
 
@@ -139,7 +171,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
       if (activeIndex >= 0 && suggestions[activeIndex]) {
         handleSuggestionClick(suggestions[activeIndex]);
       } else {
-        handleSubmit(value);
+        handleSearch(value);
       }
     } else if (e.key === "Escape") {
       setShowDropdown(false);
@@ -147,23 +179,10 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
     }
   };
 
-  // ── Navigate based on suggestion type ────────────────────────────────────
   const handleSuggestionClick = (suggestion) => {
     setShowDropdown(false);
     setValue(suggestion.label);
-    router.push(suggestion.redirectUrl);
-  };
-
-  // ── On submit (enter or search button) ───────────────────────────────────
-  const handleSubmit = async (query) => {
-    if (!query?.trim()) return;
-    setShowDropdown(false);
-
-    // Push to search page immediately for UX
-    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-
-    // Optionally call onSearch prop if parent needs it
-    if (onSearch) onSearch(query);
+    processSuggestion(suggestion);
   };
 
   const handleClear = () => {
@@ -173,12 +192,18 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
     inputRef.current?.focus();
   };
 
+  const isHeader = variant === "header";
+
   return (
-    <div ref={containerRef} className="relative w-full max-w-[620px]">
-      {/* Search pill - FIXED: Full rounded corners */}
+    <div 
+      ref={containerRef} 
+      className={`relative w-full ${isHeader ? "max-w-[500px]" : "max-w-[720px]"}`}
+    >
+      {/* Search pill - Design: Square left, Rounded right */}
       <div
         className={`
-          w-full h-[52px] rounded-full bg-white flex items-center
+          w-full ${isHeader ? "h-[44px]" : "h-[56px]"} 
+          rounded-l-none rounded-r-full bg-white flex items-center
           border transition-all duration-200
           ${
             isFocused || showDropdown
@@ -187,15 +212,21 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
           }
         `}
       >
-        {/* City Dropdown - FIXED: Rounded left side */}
-        <div className="flex items-center border-r border-gray-200 min-w-[140px] h-full rounded-l-full overflow-hidden">
-          <CityDropdown isOpen={isOpen} setIsOpen={setIsOpen} data={data} />
+        {/* City Dropdown - Square left */}
+        <div 
+          className={`
+            flex items-center border-r border-gray-200 
+            ${isHeader ? "min-w-[120px]" : "min-w-[160px]"} 
+            h-full rounded-l-none overflow-hidden
+          `}
+        >
+          <CityDropdown isOpen={isOpen} setIsOpen={setIsOpen} data={data} header={isHeader} />
         </div>
 
         {/* Input area */}
         <div className="flex-1 relative px-4 h-full flex items-center">
           {showTypewriter && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[14px] font-medium pointer-events-none select-none">
+            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 ${isHeader ? "text-[13px]" : "text-[15px]"} font-medium pointer-events-none select-none`}>
               <Typewriter
                 options={{
                   strings: placeholders,
@@ -219,7 +250,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
               if (suggestions.length) setShowDropdown(true);
             }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent outline-none text-gray-800 text-[14px] font-medium placeholder-transparent"
+            className={`w-full bg-transparent outline-none text-gray-800 ${isHeader ? "text-[13px]" : "text-[15px]"} font-medium placeholder-transparent`}
             autoComplete="off"
             spellCheck={false}
           />
@@ -233,7 +264,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
               onClick={handleClear}
               className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
             >
-              <FiX size={16} />
+              <FiX size={isHeader ? 14 : 16} />
             </button>
           )}
 
@@ -243,21 +274,25 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
           )}
 
           {/* Mic */}
-          <button className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
-            <FiMic size={18} />
+          <button className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition max-md:hidden">
+            <FiMic size={isHeader ? 16 : 18} />
           </button>
 
           {/* Search */}
           <button
-            onClick={() => handleSubmit(value)}
-            className="w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#FF6E04] hover:bg-[#e55e00] active:scale-95 transition-all"
+            onClick={() => handleSearch(value)}
+            className={`
+              ${isHeader ? "w-[34px] h-[34px]" : "w-[44px] h-[44px]"} 
+              flex items-center justify-center rounded-full bg-[#FF6E04] 
+              hover:bg-[#e55e00] active:scale-95 transition-all
+            `}
           >
-            <FiSearch className="text-white" size={18} />
+            <FiSearch className="text-white" size={isHeader ? 16 : 20} />
           </button>
         </div>
       </div>
 
-      {/* ── Suggestions Dropdown - FIXED: Proper positioning & z-index ───── */}
+      {/* ── Suggestions Dropdown ───── */}
       {showDropdown && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
@@ -329,7 +364,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
             <button
               onMouseDown={(e) => {
                 e.preventDefault();
-                handleSubmit(value);
+                handleSearch(value);
               }}
               className="text-[11px] text-[#FF6E04] font-semibold hover:underline flex items-center gap-1"
             >
@@ -353,7 +388,7 @@ const SearchBar = ({ data, isOpen, setIsOpen, value, setValue, onSearch }) => {
               <button
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  handleSubmit(value);
+                  handleSearch(value);
                 }}
                 className="mt-2 text-[12px] text-[#FF6E04] font-semibold hover:underline"
               >

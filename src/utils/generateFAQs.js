@@ -1,3 +1,5 @@
+import { maskEmail, maskPhone } from "./maskContact";
+
 export const generateFAQs = (data, city) => {
   const faqs = [];
   const businessName = data?.businessName || "this business";
@@ -74,11 +76,11 @@ export const generateFAQs = (data, city) => {
     const contactInfo = [];
     if (data.mobileNumber) {
       contactInfo.push(
-        `phone at ${data.countryCode || ""} ${data.mobileNumber}`,
+        `phone at [PHONE_MASKED:${maskPhone(data.mobileNumber, data.countryCode)}]`,
       );
     }
     if (data.email) {
-      contactInfo.push(`email at ${data.email}`);
+      contactInfo.push(`email at [EMAIL_MASKED:${maskEmail(data.email)}]`);
     }
     faqs.push({
       question: `How can I contact ${businessName}?`,

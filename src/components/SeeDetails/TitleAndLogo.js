@@ -20,6 +20,7 @@ const TitleAndLogo = ({
   extraFields,
   enquirePop,
   setEnquirePop,
+  showNumber,
 }) => {
   console.log("extra fields", extraFields);
   const message = `Hi,
@@ -190,6 +191,7 @@ https://addressguru.ae/${data?.slug}`;
           <CustomButton
             hoverBgColor="red-300"
             showToggle={true}
+            forcedToggled={showNumber}
             defaultText="SHOW NUMBER"
             toggledText={data?.countryCode + data?.mobileNumber}
             icon={
