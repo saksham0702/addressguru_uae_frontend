@@ -199,11 +199,11 @@ const SearchBar = ({
       ref={containerRef} 
       className={`relative w-full ${isHeader ? "max-w-[500px]" : "max-w-[720px]"}`}
     >
-      {/* Search pill - Design: Square left, Rounded right */}
+      {/* Search pill - Design: Full pill */}
       <div
         className={`
-          w-full ${isHeader ? "h-[44px]" : "h-[56px]"} 
-          rounded-l-none rounded-r-full bg-white flex items-center
+          w-full ${isHeader ? "h-[44px]" : "h-[54px]"} 
+          rounded-full bg-white flex items-center
           border transition-all duration-200
           ${
             isFocused || showDropdown
@@ -212,21 +212,21 @@ const SearchBar = ({
           }
         `}
       >
-        {/* City Dropdown - Square left */}
+        {/* City Dropdown - Rounded left */}
         <div 
           className={`
             flex items-center border-r border-gray-200 
-            ${isHeader ? "min-w-[120px]" : "min-w-[160px]"} 
-            h-full rounded-l-none overflow-hidden
+            ${isHeader ? "min-w-[120px]" : "min-w-[150px]"} 
+            h-full rounded-l-full overflow-hidden
           `}
         >
-          <CityDropdown isOpen={isOpen} setIsOpen={setIsOpen} data={data} header={isHeader} />
+          <CityDropdown isOpen={isOpen} setIsOpen={setIsOpen} data={data} />
         </div>
 
         {/* Input area */}
         <div className="flex-1 relative px-4 h-full flex items-center">
           {showTypewriter && (
-            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 ${isHeader ? "text-[13px]" : "text-[15px]"} font-medium pointer-events-none select-none`}>
+            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 ${isHeader ? "text-[13px]" : "text-[14px]"} font-medium pointer-events-none select-none`}>
               <Typewriter
                 options={{
                   strings: placeholders,
@@ -250,7 +250,7 @@ const SearchBar = ({
               if (suggestions.length) setShowDropdown(true);
             }}
             onKeyDown={handleKeyDown}
-            className={`w-full bg-transparent outline-none text-gray-800 ${isHeader ? "text-[13px]" : "text-[15px]"} font-medium placeholder-transparent`}
+            className={`w-full bg-transparent outline-none text-gray-800 ${isHeader ? "text-[13px]" : "text-[14px]"} font-medium placeholder-transparent`}
             autoComplete="off"
             spellCheck={false}
           />
@@ -282,12 +282,12 @@ const SearchBar = ({
           <button
             onClick={() => handleSearch(value)}
             className={`
-              ${isHeader ? "w-[34px] h-[34px]" : "w-[44px] h-[44px]"} 
+              ${isHeader ? "w-[34px] h-[34px]" : "w-[38px] h-[38px]"} 
               flex items-center justify-center rounded-full bg-[#FF6E04] 
               hover:bg-[#e55e00] active:scale-95 transition-all
             `}
           >
-            <FiSearch className="text-white" size={isHeader ? 16 : 20} />
+            <FiSearch className="text-white" size={isHeader ? 16 : 18} />
           </button>
         </div>
       </div>

@@ -14,9 +14,9 @@ export const useSearchHandler = () => {
       const res = await resolveSearch(trimmedQuery);
 
       if (res && res.redirectUrl) {
-         // Log the success or perform any analytics tracking here if needed
-         router.push(res.redirectUrl);
-         return true;
+        // Log the success or perform any analytics tracking here if needed
+        router.push(res.redirectUrl);
+        return true;
       }
 
       // Fallback: If no specialized intent is found, go to the generic search results page
