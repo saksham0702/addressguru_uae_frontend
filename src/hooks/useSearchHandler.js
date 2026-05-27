@@ -3,22 +3,17 @@ import { resolveSearch } from "@/api/search";
 
 export const useSearchHandler = () => {
   const router = useRouter();
-
   const handleSearch = async (query, city) => {
     if (!query?.trim()) return;
-
     const trimmedQuery = query.trim();
-
     try {
       // First attempt to resolve the intent using the specialized API
       const res = await resolveSearch(trimmedQuery);
-
       if (res && res.redirectUrl) {
         // Log the success or perform any analytics tracking here if needed
         router.push(res.redirectUrl);
         return true;
       }
-
       // Fallback: If no specialized intent is found, go to the generic search results page
       router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
       return true;

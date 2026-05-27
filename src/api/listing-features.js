@@ -6,8 +6,9 @@ const getAuthHeader = () => ({
   Authorization: `Bearer ${localStorage.getItem("authToken")}`,
 });
 
-export const getMyReviews = async () => {
+export const getMyReviews = async (params) => {
   const res = await axios.get(`${API_URL}/my-reviews`, {
+    params,
     headers: getAuthHeader(),
   });
   return res.data.data;

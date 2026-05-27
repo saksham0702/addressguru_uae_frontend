@@ -3,16 +3,18 @@ import PlanList from "@/components/Plans/PlanList";
 import PlanForm from "@/components/Plans/PlanForm";
 import { useEffect, useState } from "react";
 
+const planTypes = ["business", "marketplace", "property", "job"];
 const Plans = () => {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const fetchPlans = async () => {
+  const [activePlanType, setActivePlanType] = useState("business");
+  const fetchPlans = async (planType = "business") => {
+    // ← accept planType
     try {
       setLoading(true);
-      const res = await get_plans();
+      const res = await get_plans(planType); // ← pass it to your API call
       if (res?.data?.plans) {
         setPlans(res.data.plans);
       }
@@ -24,8 +26,8 @@ const Plans = () => {
   };
 
   useEffect(() => {
-    fetchPlans();
-  }, []);
+    fetchPlans(activePlanType);
+  }, [activePlanType]);
 
   const handleEdit = (plan) => {
     setSelectedPlan(plan);
@@ -55,6 +57,24 @@ const Plans = () => {
               <p className="mt-1 text-sm text-gray-500">
                 Manage your pricing plans and features
               </p>
+            </div>
+            {/* Tabs */}
+            <div className="mb-6 border-b border-gray-200">
+              <nav className="flex gap-1">
+                {planTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActivePlanType(type)}
+                    className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-colors capitalize ${
+                      activePlanType === type
+                        ? "bg-white border border-b-white border-gray-200 text-blue-600 -mb-px"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </nav>
             </div>
             <button
               onClick={handleCreate}
@@ -92,7 +112,8 @@ const Plans = () => {
           <PlanForm
             plan={selectedPlan}
             onClose={handleCloseForm}
-            refresh={fetchPlans}
+            refresh={() => fetchPlans(activePlanType)}
+            defaultPlanType={activePlanType} // ← add this
           />
         )}
       </div>

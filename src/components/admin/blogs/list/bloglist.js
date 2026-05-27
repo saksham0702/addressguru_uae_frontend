@@ -28,7 +28,6 @@ export default function BlogList() {
         limit: limit,
         search: searchQuery,
       });
-      console.log("res", res);
 
       if (!res) {
         setBlogs([]);
@@ -45,7 +44,7 @@ export default function BlogList() {
         title: item.title,
         slug: item.slug,
         image: `${API_URL}/${item.coverImage}`,
-        category: item.category?.name || "—",
+        category: item.category_id?.name || "—",
         author: item.author?.name || "—",
         createdAt: new Date(item.createdAt).toLocaleDateString("en-GB", {
           day: "2-digit",
@@ -54,7 +53,6 @@ export default function BlogList() {
         }),
         status: item.status,
       }));
-
       setBlogs(formatted);
       setTotalPages(pages || 1);
       setTotalBlogs(totalResults || 0);
@@ -203,7 +201,7 @@ export default function BlogList() {
 
                     {/* Category */}
                     <td className="px-4 py-4 border-r border-gray-200 text-gray-700">
-                      {blog.category}
+                      {blog?.category}
                     </td>
 
                     {/* Author */}

@@ -15,8 +15,8 @@ import {
 } from "react-icons/fi";
 import { fetchSearchSuggestions } from "@/api/search";
 import { useSearchHandler } from "@/hooks/useSearchHandler";
+import { useAuth } from "@/context/AuthContext";
 
-// ─── Icon per suggestion type ────────────────────────────────────────────────
 const TYPE_META = {
   category_city: {
     icon: FiMapPin,
@@ -50,7 +50,6 @@ const TYPE_META = {
   },
 };
 
-// ─── Debounce hook ────────────────────────────────────────────────────────────
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -60,14 +59,69 @@ function useDebounce(value, delay) {
   return debounced;
 }
 
-// ─── Main SearchBar ───────────────────────────────────────────────────────────
-const SearchBar = ({ 
-  data, 
-  isOpen, 
-  setIsOpen, 
-  value, 
-  setValue, 
-  variant = "banner" // "banner" or "header"
+const SuggestionIcon = ({ s, meta }) => {
+  const Icon = meta.icon;
+
+  if (s.type === "business" && s.logo) {
+    return (
+      <img
+        src={`${process.env.NEXT_PUBLIC_API_URL}/${s.logo}`}
+        alt={s.label}
+        className="flex-shrink-0 w-8 h-8 object-cover rounded-lg"
+        onError={(e) => {
+          e.currentTarget.outerHTML = `<span style="background:${meta.bg}" class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"></span>`;
+        }}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+      style={{ background: meta.bg }}
+    >
+      <Icon size={15} style={{ color: meta.color }} />
+    </span>
+  );
+};
+
+// pass selectedCity into SuggestionLabels
+const SuggestionLabels = ({ s, selectedCity }) => (
+  <div className="flex-1 min-w-0">
+    <p className="text-[13.5px] font-semibold text-gray-800 truncate leading-tight">
+      {s.type === "category" && selectedCity
+        ? `${s.label} in ${selectedCity}`
+        : s.label}
+    </p>
+
+    {s.type === "business" && (s.category || s.city) && (
+      <p className="text-[11.5px] text-gray-400 truncate mt-0.5">
+        {[s.category, s.city].filter(Boolean).join(" · ")}
+      </p>
+    )}
+
+    {s.type === "category" && s.category?.description && (
+      <p className="text-[11.5px] text-gray-400 truncate mt-0.5">
+        {s.category.description}
+      </p>
+    )}
+
+    {s.type === "category_city" && s.city && (
+      <p className="text-[11px] text-[#FF6E04] font-medium mt-0.5 flex items-center gap-1">
+        <FiMapPin size={10} />
+        {s.city.name}
+      </p>
+    )}
+  </div>
+);
+
+const SearchBar = ({
+  data,
+  isOpen,
+  setIsOpen,
+  value,
+  setValue,
+  variant = "banner",
 }) => {
   const placeholders = [
     "What are you looking for?",
@@ -78,8 +132,11 @@ const SearchBar = ({
   ];
 
   const router = useRouter();
-  const { handleSearch, handleSuggestionClick: processSuggestion } = useSearchHandler();
-  
+  const { handleSearch, handleSuggestionClick: processSuggestion } =
+    useSearchHandler();
+  const { city } = useAuth();
+  console.log("city from auth", city);
+
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +149,6 @@ const SearchBar = ({
   const debouncedValue = useDebounce(value, 300);
   const showTypewriter = !isFocused && !value;
 
-  // ── Auto-close on scroll ────────────────────────────────────────────────
   useEffect(() => {
     const handleScroll = () => {
       if (showDropdown) {
@@ -104,7 +160,6 @@ const SearchBar = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showDropdown]);
 
-  // ── Auto-close on route change ──────────────────────────────────────────
   useEffect(() => {
     const handleRouteChange = () => {
       setShowDropdown(false);
@@ -114,7 +169,6 @@ const SearchBar = ({
     return () => router.events?.off("routeChangeStart", handleRouteChange);
   }, [router]);
 
-  // ── Fetch suggestions ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!debouncedValue || debouncedValue.trim().length < 2) {
       setSuggestions([]);
@@ -141,7 +195,6 @@ const SearchBar = ({
     return () => controller.abort();
   }, [debouncedValue]);
 
-  // ── Close dropdown on outside click ─────────────────────────────────────
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -153,13 +206,11 @@ const SearchBar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ── Handle keyboard navigation ────────────────────────────────────────────
   const handleKeyDown = (e) => {
     if (!showDropdown || !suggestions.length) {
       if (e.key === "Enter") handleSearch(value);
       return;
     }
-
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
@@ -182,6 +233,15 @@ const SearchBar = ({
   const handleSuggestionClick = (suggestion) => {
     setShowDropdown(false);
     setValue(suggestion.label);
+
+    if (suggestion.type === "category" && city?.slug) {
+      processSuggestion({
+        ...suggestion,
+        redirectUrl: `${suggestion.redirectUrl}/${city.slug}`,
+      });
+      return;
+    }
+
     processSuggestion(suggestion);
   };
 
@@ -195,14 +255,13 @@ const SearchBar = ({
   const isHeader = variant === "header";
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={`relative w-full ${isHeader ? "max-w-[500px]" : "max-w-[720px]"}`}
     >
-      {/* Search pill - Design: Full pill */}
       <div
         className={`
-          w-full ${isHeader ? "h-[44px]" : "h-[54px]"} 
+          w-full ${isHeader ? "h-[44px]" : "h-[54px]"}
           rounded-full bg-white flex items-center
           border transition-all duration-200
           ${
@@ -212,21 +271,23 @@ const SearchBar = ({
           }
         `}
       >
-        {/* City Dropdown - Rounded left */}
-        <div 
+        <div
           className={`
-            flex items-center border-r border-gray-200 
-            ${isHeader ? "min-w-[120px]" : "min-w-[150px]"} 
+            flex items-center border-r border-gray-200
+            ${isHeader ? "min-w-[120px]" : "min-w-[150px]"}
             h-full rounded-l-full overflow-hidden
           `}
         >
           <CityDropdown isOpen={isOpen} setIsOpen={setIsOpen} data={data} />
         </div>
 
-        {/* Input area */}
         <div className="flex-1 relative px-4 h-full flex items-center">
           {showTypewriter && (
-            <div className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 ${isHeader ? "text-[13px]" : "text-[14px]"} font-medium pointer-events-none select-none`}>
+            <div
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 ${
+                isHeader ? "text-[13px]" : "text-[14px]"
+              } font-medium pointer-events-none select-none`}
+            >
               <Typewriter
                 options={{
                   strings: placeholders,
@@ -239,7 +300,6 @@ const SearchBar = ({
               />
             </div>
           )}
-
           <input
             ref={inputRef}
             type="text"
@@ -250,15 +310,15 @@ const SearchBar = ({
               if (suggestions.length) setShowDropdown(true);
             }}
             onKeyDown={handleKeyDown}
-            className={`w-full bg-transparent outline-none text-gray-800 ${isHeader ? "text-[13px]" : "text-[14px]"} font-medium placeholder-transparent`}
+            className={`w-full bg-transparent outline-none text-gray-800 ${
+              isHeader ? "text-[13px]" : "text-[14px]"
+            } font-medium placeholder-transparent`}
             autoComplete="off"
             spellCheck={false}
           />
         </div>
 
-        {/* Right icons */}
         <div className="flex items-center gap-1 pr-2">
-          {/* Clear button — only when there's text */}
           {value && (
             <button
               onClick={handleClear}
@@ -267,23 +327,17 @@ const SearchBar = ({
               <FiX size={isHeader ? 14 : 16} />
             </button>
           )}
-
-          {/* Loading spinner */}
           {isLoading && (
             <div className="w-5 h-5 border-2 border-gray-200 border-t-[#FF6E04] rounded-full animate-spin mr-1" />
           )}
-
-          {/* Mic */}
           <button className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition max-md:hidden">
             <FiMic size={isHeader ? 16 : 18} />
           </button>
-
-          {/* Search */}
           <button
             onClick={() => handleSearch(value)}
             className={`
-              ${isHeader ? "w-[34px] h-[34px]" : "w-[38px] h-[38px]"} 
-              flex items-center justify-center rounded-full bg-[#FF6E04] 
+              ${isHeader ? "w-[34px] h-[34px]" : "w-[38px] h-[38px]"}
+              flex items-center justify-center rounded-full bg-[#FF6E04]
               hover:bg-[#e55e00] active:scale-95 transition-all
             `}
           >
@@ -292,7 +346,7 @@ const SearchBar = ({
         </div>
       </div>
 
-      {/* ── Suggestions Dropdown ───── */}
+      {/* Suggestions Dropdown */}
       {showDropdown && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
@@ -301,7 +355,6 @@ const SearchBar = ({
           <ul className="py-2 max-h-[420px] overflow-y-auto">
             {suggestions.map((s, idx) => {
               const meta = TYPE_META[s.type] || TYPE_META.business;
-              const Icon = meta.icon;
               const isActive = idx === activeIndex;
 
               return (
@@ -317,33 +370,8 @@ const SearchBar = ({
                       ${isActive ? "bg-orange-50" : "hover:bg-gray-50"}
                     `}
                   >
-                    {/* Type icon */}
-                    <span
-                      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ background: meta.bg }}
-                    >
-                      <Icon size={15} style={{ color: meta.color }} />
-                    </span>
-
-                    {/* Labels */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13.5px] font-semibold text-gray-800 truncate leading-tight">
-                        {s.label}
-                      </p>
-                      {s.sublabel && (
-                        <p className="text-[11.5px] text-gray-400 truncate mt-0.5">
-                          {s.sublabel}
-                        </p>
-                      )}
-                      {s.type === "category_city" && s.city && (
-                        <p className="text-[11px] text-[#FF6E04] font-medium mt-0.5 flex items-center gap-1">
-                          <FiMapPin size={10} />
-                          {s.city.name}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Right hint badge */}
+                    <SuggestionIcon s={s} meta={meta} />
+                    <SuggestionLabels s={s} selectedCity={city} />{" "}
                     <span
                       className="flex-shrink-0 text-[10.5px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: meta.bg, color: meta.color }}
@@ -356,7 +384,6 @@ const SearchBar = ({
             })}
           </ul>
 
-          {/* Footer: "press enter to search" */}
           <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
             <span className="text-[11px] text-gray-400">
               ↑↓ navigate · Enter to search · Esc to close
@@ -374,7 +401,7 @@ const SearchBar = ({
         </div>
       )}
 
-      {/* ── No results state ───────────────────────────────────────────────── */}
+      {/* No results */}
       {showDropdown &&
         !isLoading &&
         suggestions.length === 0 &&

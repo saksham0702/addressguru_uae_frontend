@@ -2,7 +2,17 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { LayoutDashboard, Briefcase, Package, Home, List, User, LucideHeadset, CreditCard } from "lucide-react";
+import {
+  LayoutDashboard,
+  Briefcase,
+  Package,
+  Home,
+  List,
+  User,
+  LucideHeadset,
+  CreditCard,
+  Star,
+} from "lucide-react";
 
 const DashboardSidebar = () => {
   const router = useRouter();
@@ -39,20 +49,26 @@ const DashboardSidebar = () => {
       icon: <Home size={18} />,
     },
     {
-       label: "My leads",
-       link: "/dashboard/my-leads",
-       icon: <LucideHeadset size={18} />,
+      label: "My leads",
+      link: "/dashboard/my-leads",
+      icon: <LucideHeadset size={18} />,
+    },
+    {
+      label: "My Reviews",
+      link: "/dashboard/my-reviews",
+      icon: <Star size={18} />,
     },
     {
       label: "My Profile",
       link: "/dashboard/my-profile",
       icon: <User size={18} />,
     },
+
     {
       label: "Payment History",
       link: "/dashboard/payment-history",
       icon: <CreditCard size={18} />,
-    }
+    },
   ];
 
   // ✅ NAVIGATION FIX
