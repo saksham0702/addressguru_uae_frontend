@@ -8,9 +8,9 @@ const api = axios.create({
 });
 
 // PUBLIC
-export const get_plans = async () => {
+export const get_plans = async (planType = "business") => {
   try {
-    const res = await api.get("/plans");
+    const res = await api.get(`/plans?planType=${planType}`);
     return res?.data;
   } catch (error) {
     console.log("get_plans error:", error);

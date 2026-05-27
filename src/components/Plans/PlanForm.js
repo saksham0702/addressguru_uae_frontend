@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { create_plan, update_plan } from "@/api/plans";
 
-const PlanForm = ({ plan, onClose, refresh }) => {
+const PlanForm = ({ plan, onClose, refresh, defaultPlanType }) => {
   const [form, setForm] = useState({
     name: plan?.name || "",
     slug: plan?.slug || "",
     price: plan?.price || 0,
     currency: plan?.currency || "AED",
+    planType: plan?.planType || defaultPlanType || "business",
     billingCycle: plan?.billingCycle || "year",
     tagline: plan?.tagline || "",
     ctaLabel: plan?.ctaLabel || "Get Started",
@@ -160,6 +161,22 @@ const PlanForm = ({ plan, onClose, refresh }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Plan Type *
+                </label>
+                <select
+                  name="planType"
+                  value={form.planType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="business">Business</option>
+                  <option value="marketplace">Marketplace</option>
+                  <option value="property">Property</option>
+                  <option value="job">Job</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

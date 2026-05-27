@@ -1,11 +1,14 @@
 import { send_listings_in_mail } from "@/api/queries";
 import NameNumberCard from "./NameNumberCard";
 import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function RightBusinessCard({ name, city }) {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [errors, setErrors] = useState({ name: false, email: false });
   const [status, setStatus] = useState("idle");
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaError, setCaptchaError] = useState(false);
 
   const sendListing = async () => {
     const newErrors = {
@@ -15,6 +18,10 @@ export default function RightBusinessCard({ name, city }) {
 
     if (newErrors.name || newErrors.email) {
       setErrors(newErrors);
+      return;
+    }
+    if (!captchaVerified) {
+      setCaptchaError(true);
       return;
     }
 
@@ -84,6 +91,27 @@ export default function RightBusinessCard({ name, city }) {
           <li>✔ Best pricing & offers available</li>
           <li>✔ Quick comparison of top options</li>
         </ul>
+      </div>
+
+      <div className="mb-4">
+        <div className="scale-[0.88] origin-left">
+          <ReCAPTCHA
+            sitekey="6Lfw3xcsAAAAAP94VC18dOlxvN93hwgBcqpdRWTT"
+            onChange={(val) => {
+              if (val) {
+                setCaptchaVerified(true);
+                setCaptchaError(false);
+              }
+            }}
+            onExpired={() => {
+              setCaptchaVerified(false);
+            }}
+          />
+        </div>
+
+        {captchaError && (
+          <p className="text-xs text-red-500 mt-1">Please verify captcha</p>
+        )}
       </div>
 
       {/* CTA */}

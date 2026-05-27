@@ -39,9 +39,6 @@ export const searchListings = async (query) => {
   }
 };
 
-
-
-
 export const searchData = async (slug, city) => {
   try {
     const url = `${API_URL}/global-search`;
