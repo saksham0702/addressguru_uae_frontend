@@ -77,7 +77,7 @@ const MyReviews = () => {
         search: overrides.search ?? search,
       });
       console.log(res);
-      setReviews(res?.listings || []);
+      setReviews(res?.data || []);
       setStatistics(res.statistics || {});
       setPagination(res.pagination || {});
     } catch (err) {
@@ -292,17 +292,17 @@ const MyReviews = () => {
                         {/* Reviewer */}
                         <td className="px-5 py-4">
                           <p className="text-sm font-semibold text-gray-800 truncate">
-                            {review.fullName}
+                            {review.reviewerName}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {review.email}
+                            {review.reviewerEmail}
                           </p>
                         </td>
 
                         {/* Listing */}
                         <td className="px-4 py-4">
                           <p className="text-sm font-medium text-gray-800 truncate">
-                            {review.listingId?.businessName}
+                            {review?.listingTitle}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
                             {review.listingModel}
