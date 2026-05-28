@@ -3,6 +3,7 @@ import {
   approve_listing,
   get_all_admin_listings,
   reject_listing,
+  update_lead_status,
 } from "@/api/listing-form";
 import FollowUpModal from "@/components/admin/business/FollowUpModal";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
@@ -220,6 +221,8 @@ const BusinessListings = () => {
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
   const [pendinglistsing, setpendinglistsing] = useState(0);
+  const [leadFilter, setLeadFilter] = useState("all");
+  const [followUpFilter, setFollowUpFilter] = useState("all");
   const [viewType, setViewType] = useState("completed");
   // values: completed | incomplete | deleted
 
@@ -227,9 +230,16 @@ const BusinessListings = () => {
     const delay = setTimeout(() => {
       fetchListings();
     }, 400);
-
     return () => clearTimeout(delay);
-  }, [page, showEntries, statusFilter, search,viewType]);
+  }, [
+    page,
+    showEntries,
+    statusFilter,
+    search,
+    viewType,
+    leadFilter,
+    followUpFilter,
+  ]);
 
   function showToast(msg, type = "success") {
     setToast({ msg, type });
@@ -294,7 +304,6 @@ const BusinessListings = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchListings = async () => {
-
     try {
       const res = await get_all_admin_listings({
         page,
@@ -302,6 +311,8 @@ const BusinessListings = () => {
         status: statusFilter,
         search,
         viewType, // 👈 THIS IS THE KEY
+        leadStatus: leadFilter !== "all" ? leadFilter : undefined, // 👈 added
+        followUpFilter: followUpFilter !== "all" ? followUpFilter : undefined,
       });
 
       console.log("API RESPONSE:", res);
@@ -504,6 +515,82 @@ const BusinessListings = () => {
         ))}
       </div>
 
+      {/* ── LEAD STATUS FILTER ── */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">
+          Lead
+        </span>
+        <div className="flex gap-1.5 flex-wrap">
+          {[
+            { id: "all", label: "All", emoji: "" },
+            { id: "hot", label: "Hot", emoji: "🔥" },
+            { id: "warm", label: "Warm", emoji: "🌤️" },
+            { id: "cold", label: "Cold", emoji: "🧊" },
+            { id: "new", label: "New", emoji: "✨" },
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => {
+                setLeadFilter(s.id);
+                setPage(1);
+              }}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all
+          ${
+            leadFilter === s.id
+              ? s.id === "hot"
+                ? "bg-red-500 text-white border-red-500 shadow-sm"
+                : s.id === "warm"
+                  ? "bg-orange-400 text-white border-orange-400 shadow-sm"
+                  : s.id === "cold"
+                    ? "bg-blue-400 text-white border-blue-400 shadow-sm"
+                    : s.id === "new"
+                      ? "bg-purple-500 text-white border-purple-500 shadow-sm"
+                      : "bg-slate-800 text-white border-slate-800 shadow-sm"
+              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+          }`}
+            >
+              {s.emoji && <span>{s.emoji}</span>}
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FOLLOW-UP DATE FILTER ── */}
+      <div className="flex items-center gap-2 mb-5">
+        <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">
+          Follow Up
+        </span>
+        <div className="flex gap-1.5 flex-wrap">
+          {[
+            { id: "all", label: "All" },
+            { id: "overdue", label: "⚠️ Overdue" },
+            { id: "today", label: "Today" },
+            { id: "tomorrow", label: "Tomorrow" },
+            { id: "this_week", label: "This Week" },
+            { id: "no_followup", label: "No Follow-up" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => {
+                setFollowUpFilter(f.id);
+                setPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all
+          ${
+            followUpFilter === f.id
+              ? f.id === "overdue"
+                ? "bg-red-500 text-white border-red-500 shadow-sm"
+                : "bg-blue-600 text-white border-blue-600 shadow-sm"
+              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+          }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── TABLE TOOLBAR ── */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
@@ -615,8 +702,7 @@ const BusinessListings = () => {
               )}
 
               {paginated.map((listing, idx) => {
-                const leadStatus =
-                  listing.leadStatus || (idx % 3 === 0 ? "warm" : "cold");
+                const leadStatus = listing.leadStatus || "new"; // real value from DB now
                 const isSelected = selected.has(listing._id);
 
                 return (
@@ -692,6 +778,53 @@ const BusinessListings = () => {
                             >
                               Edit
                             </Link>
+
+                            {/* Lead Status Badge */}
+                            <div className="mt-2 ml-[3px]">
+                              <select
+                                value={listing.leadStatus || "new"}
+                                onChange={async (e) => {
+                                  const newStatus = e.target.value;
+                                  try {
+                                    await update_lead_status(
+                                      listing._id,
+                                      newStatus,
+                                    ); // 👈 your API fn
+                                    setListings((prev) =>
+                                      prev.map((l) =>
+                                        l._id === listing._id
+                                          ? { ...l, leadStatus: newStatus }
+                                          : l,
+                                      ),
+                                    );
+                                    showToast(
+                                      `Lead marked as ${newStatus}`,
+                                      "success",
+                                    );
+                                  } catch {
+                                    showToast(
+                                      "Failed to update lead status",
+                                      "error",
+                                    );
+                                  }
+                                }}
+                                className={`text-[10px] font-bold px-2 py-1 rounded-md border cursor-pointer appearance-none focus:outline-none
+      ${
+        (listing.leadStatus || "new") === "hot"
+          ? "bg-red-50 text-red-600 border-red-200"
+          : (listing.leadStatus || "new") === "warm"
+            ? "bg-orange-50 text-orange-600 border-orange-200"
+            : (listing.leadStatus || "new") === "cold"
+              ? "bg-blue-50 text-blue-500 border-blue-200"
+              : "bg-purple-50 text-purple-600 border-purple-200"
+      }`}
+                              >
+                                <option value="new">✨ New</option>
+                                <option value="hot">🔥 Hot</option>
+                                <option value="warm">🌤️ Warm</option>
+                                <option value="cold">🧊 Cold</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1128,6 +1261,16 @@ const BusinessListings = () => {
           onClose={() => setFollowUpModal(null)}
           onSubmit={handleFollowUpSubmit}
           source={"BusinessListing"}
+          onLeadStatusChange={async (id, newStatus) => {
+            // 👈 add this
+            await update_lead_status(id, newStatus);
+            setListings((prev) =>
+              prev.map((l) =>
+                l._id === id ? { ...l, leadStatus: newStatus } : l,
+              ),
+            );
+            showToast(`Lead marked as ${newStatus}`, "success");
+          }}
         />
       )}
 

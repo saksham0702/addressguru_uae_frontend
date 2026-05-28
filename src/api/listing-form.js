@@ -147,8 +147,11 @@ export const get_all_admin_listings = async ({
   status,
   search,
   viewType = "completed",
+  leadStatus,
+  followUpFilter,
 } = {}) => {
   const token = localStorage.getItem("token");
+
   try {
     const response = await axios.get(
       `${API_URL}/business-listing/admin/listings`,
@@ -157,14 +160,21 @@ export const get_all_admin_listings = async ({
           page,
           limit,
           viewType,
+
           ...(status && status !== "all" && { status }),
           ...(search && { search }),
+
+          // ✅ ADD THESE
+          ...(leadStatus && { leadStatus }),
+          ...(followUpFilter && { followUpFilter }),
         },
+
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
+
     return response.data;
   } catch (error) {
     console.error("Error fetching admin listings:", error);
@@ -190,4 +200,22 @@ export const update_additional_fields = async (listingId, data) => {
     console.error("API ERROR:", error?.response);
     return error.response?.data;
   }
+};
+
+export const update_lead_status = async (id, leadStatus) => {
+  console.log("id", id);
+  console.log("leadStatus", leadStatus);
+  const token = localStorage.getItem("token"); // ✅ FIXED
+
+  const res = await axios.patch(
+    `${API_URL}/business-listing/${id}/lead-status`,
+    { leadStatus },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return res.data;
 };
