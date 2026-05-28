@@ -4,32 +4,6 @@ import { getFollowupConfig } from "@/api/followupconfig";
 import { formatDateTime } from "@/helpers/helper";
 import React, { useEffect, useState } from "react";
 
-const ACTIVITY_OPTIONS = [
-  "Call Back Later",
-  "Call Me Tomorrow",
-  "Payment Tomorrow",
-  "Talk With My Partner",
-  "Work With Other Company",
-  "Not Interested",
-  "Interested",
-  "Wrong Information",
-  "Not Pickup",
-  "Other",
-];
-
-function nowStr() {
-  const n = new Date();
-  return (
-    n.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }) +
-    " " +
-    n.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-  );
-}
-
 // ── PHONE ICON ────────────────────────────────────────────────────────────────
 const PhoneIcon = () => (
   <svg
@@ -48,7 +22,14 @@ const PhoneIcon = () => (
 );
 
 // ── FOLLOW UP MODAL ───────────────────────────────────────────────────────────
-const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
+const FollowUpModal = ({
+  listing,
+  history,
+  onClose,
+  onSubmit,
+  source,
+  onLeadStatusChange,
+}) => {
   const [selected, setSelected] = useState("");
   const [remark, setRemark] = useState("");
   const [date, setDate] = useState("");
@@ -56,6 +37,8 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
   const [followupConfig, setFollowupConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [logs, setLogs] = useState([]);
+  const [leadStatus, setLeadStatus] = useState(listing.leadStatus || "new");
+  const [updatingLead, setUpdatingLead] = useState(false);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -139,6 +122,18 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
     }
   }
 
+  async function handleLeadStatusChange(newStatus) {
+    try {
+      setUpdatingLead(true);
+      setLeadStatus(newStatus);
+      await onLeadStatusChange(listing._id, newStatus); // calls parent
+    } catch (err) {
+      console.error("Failed to update lead status", err);
+    } finally {
+      setUpdatingLead(false);
+    }
+  }
+
   const selectedOption = followupConfig?.options?.find(
     (o) => o._id === selected,
   );
@@ -154,51 +149,96 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
         style={{ animation: "modalIn 0.2s ease" }}
       >
         {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-300">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
               <PhoneIcon />
             </div>
             <div className="flex flex-col gap-1">
-              {/* Title */}
               <h2 className="text-base font-semibold text-gray-800 leading-tight">
                 {listing.businessName || listing.title}
                 <span className="ml-2 text-xs font-medium text-gray-800">
                   Follow Up
                 </span>
               </h2>
-
-              {/* Info Row */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-800">
-                {/* Contact Person */}
                 <span className="font-medium text-gray-800">
                   {listing?.contactPersonName || "—"}
                 </span>
-
-                {/* Divider */}
-                <span className="text-gray-800">•</span>
-
-                {/* Email */}
+                <span>•</span>
                 <span className="text-orange-500 font-medium break-all">
                   {listing.email || "—"}
                 </span>
-
-                {/* Divider */}
-                <span className="text-gray-800">•</span>
-
-                {/* Phone */}
+                <span>•</span>
                 <span className="text-orange-500 font-medium whitespace-nowrap">
                   {listing.countryCode} {listing.mobileNumber}
                 </span>
               </div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg border border-gray-300 bg-slate-50 text-gray-800 hover:text-gray-800 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
-          >
-            ✕
-          </button>
+
+          {/* 👇 Lead status pills — right side of header */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 mr-1">
+                Lead
+              </span>
+              {[
+                {
+                  id: "new",
+                  label: "New",
+                  emoji: "✨",
+                  active: "bg-purple-500 text-white border-purple-500",
+                  inactive:
+                    "bg-white text-purple-500 border-purple-200 hover:bg-purple-50",
+                },
+                {
+                  id: "hot",
+                  label: "Hot",
+                  emoji: "🔥",
+                  active: "bg-red-500 text-white border-red-500",
+                  inactive:
+                    "bg-white text-red-500 border-red-200 hover:bg-red-50",
+                },
+                {
+                  id: "warm",
+                  label: "Warm",
+                  emoji: "🌤️",
+                  active: "bg-orange-400 text-white border-orange-400",
+                  inactive:
+                    "bg-white text-orange-500 border-orange-200 hover:bg-orange-50",
+                },
+                {
+                  id: "cold",
+                  label: "Cold",
+                  emoji: "🧊",
+                  active: "bg-blue-400 text-white border-blue-400",
+                  inactive:
+                    "bg-white text-blue-500 border-blue-200 hover:bg-blue-50",
+                },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  disabled={updatingLead}
+                  onClick={() => handleLeadStatusChange(s.id)}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all
+            ${leadStatus === s.id ? s.active : s.inactive}
+            ${updatingLead ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <span>{s.emoji}</span>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg border border-gray-300 bg-slate-50 text-gray-800 hover:bg-slate-100 transition-colors flex items-center justify-center text-base"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* ── Body ── */}
@@ -271,6 +311,7 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
                 <input
                   type="date"
                   value={date}
+                  min={new Date().toISOString().split("T")[0]} // 👈 add this
                   onChange={(e) => setDate(e.target.value)}
                   className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none focus:border-orange-400 transition-colors"
                 />
@@ -303,7 +344,7 @@ const FollowUpModal = ({ listing, history, onClose, onSubmit, source }) => {
           </div>
 
           {/* RIGHT – Interaction History */}
-          
+
           <div className="overflow-y-auto p-5 flex-1 max-h-[65vh]">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] font-bold tracking-widest uppercase text-gray-800">
