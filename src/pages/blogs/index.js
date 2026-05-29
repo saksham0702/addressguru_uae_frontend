@@ -13,12 +13,7 @@ import Image from "next/image";
 // } from "@/api/blogs";
 
 import Head from "next/head";
-import {
-  getBlogs,
-  getCategories,
-  getMostViewedBlogs,
-  getRecentBlogs,
-} from "@/api/uae-blogs";
+import { getBlogs, getCategories } from "@/api/uae-blogs";
 
 const Blogs = ({
   blogs: initialBlogs,
@@ -285,7 +280,7 @@ const Blogs = ({
               </div>
 
               {/* Popular Blogs Section */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
+              {/* <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Popular Posts
                 </h3>
@@ -302,7 +297,7 @@ const Blogs = ({
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Ad Banners */}
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-md border-2 border-[#FF6E04] p-8 mb-6 text-center">
@@ -344,21 +339,16 @@ export default Blogs;
 
 export async function getServerSideProps() {
   try {
-    const [blogsRes, categoriesRes, recentRes, mostViewedRes] =
-      await Promise.all([
-        getBlogs({ page: 1, limit: 10 }),
-        getCategories(),
-        getRecentBlogs(),
-        getMostViewedBlogs(),
-      ]);
+    const [blogsRes, categoriesRes] = await Promise.all([
+      getBlogs({ page: 1, limit: 10 }),
+      getCategories(),
+    ]);
 
     return {
       props: {
         blogs: blogsRes?.blogs || [],
         initialTotalPages: blogsRes?.pagination?.totalPages || 1,
         blogCategories: categoriesRes?.data || [],
-        recentBlogs: recentRes?.data?.blogs || [],
-        mostViewedBlogs: mostViewedRes?.data?.blogs || [],
       },
     };
   } catch (error) {
