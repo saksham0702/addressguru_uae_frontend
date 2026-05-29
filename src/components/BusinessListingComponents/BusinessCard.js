@@ -1,5 +1,3 @@
-//
-
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +11,6 @@ import BusinessCardMobile from "./BusinessCardMobile";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data, index, isFilledCall }) => {
-  console.log(data);
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const message = `Hi,

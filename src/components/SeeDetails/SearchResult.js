@@ -21,6 +21,7 @@ import Image from "next/image";
 import InlineLeadCard from "../BusinessListingComponents/InlineLeadCard";
 import AdsCard from "./AdsCard";
 import Link from "next/link";
+import { API_URL } from "@/services/constants";
 
 const SearchResults = ({
   ssrListings,
@@ -83,12 +84,17 @@ const SearchResults = ({
   const [dynamicFilters] = useState({
     facilities:
       ssrFilters?.facilities?.map((f) => ({ id: f._id, name: f.name })) || [],
+
     services:
       ssrFilters?.services?.map((s) => ({ id: s._id, name: s.name })) || [],
+
     courses:
       ssrFilters?.courses?.map((c) => ({ id: c._id, name: c.name })) || [],
+
     paymentModes:
-      ssrFilters?.paymentModes?.map((p) => ({ id: p._id, name: p.name })) || [],
+      (ssrFilters?.payment_modes || ssrFilters?.paymentModes || []).map(
+        (p) => ({ id: p._id?.toString(), name: p.name }), // 👈 force plain string
+      ) || [],
   });
   const [filters, setFilters] = useState({
     sort_by: null,
@@ -139,7 +145,7 @@ const SearchResults = ({
       try {
         setIsLoading(true);
         const res = await axios.get(
-          `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${canonicalSlug}/${canonicalCity}?${buildQueryParams(1)}`,
+          `${API_URL}/business-listing/get-listing-by-category-and-city/${canonicalSlug}/${canonicalCity}?${buildQueryParams(1)}`,
         );
         const data = res?.data?.data;
         if (data?.listings) {
@@ -174,11 +180,17 @@ const SearchResults = ({
     setCity(formatted);
   }, [router.query.city, router.isReady, setCity]);
 
-  const matchIds = (itemArray = [], selectedIds = []) =>
-    itemArray.some((entry) => {
-      const id = typeof entry === "string" ? entry : entry?._id;
-      return selectedIds.includes(id);
+  const matchIds = (itemArray = [], selectedIds = []) => {
+    if (!selectedIds || selectedIds.length === 0) return true;
+    if (!itemArray || itemArray.length === 0) return false;
+
+    const normalizedSelected = selectedIds.map((sid) => sid?.toString().trim());
+
+    return itemArray.some((entry) => {
+      const id = (entry?._id ?? entry)?.toString().trim();
+      return normalizedSelected.includes(id);
     });
+  };
 
   const activeFilters = localFilters ?? filters;
 
@@ -219,7 +231,7 @@ const SearchResults = ({
       result = result.filter((item) => matchIds(item.courses, f.courses_id));
     if (f.payment_mode_id?.length > 0)
       result = result.filter((item) =>
-        matchIds(item.paymentModes, f.payment_mode_id),
+        matchIds(item.paymentModes || item.payment_modes, f.payment_mode_id),
       );
     if (f.sort_by === "newest")
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -325,7 +337,7 @@ const SearchResults = ({
       const currentCity = router.query.city;
 
       const res = await axios.get(
-        `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${currentSlug}/${currentCity}?page=${pageData.nextPage}&limit=5`,
+        `${API_URL}/business-listing/get-listing-by-category-and-city/${currentSlug}/${currentCity}?page=${pageData.nextPage}&limit=5`,
       );
 
       const data = res?.data?.data;

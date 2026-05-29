@@ -3,6 +3,7 @@
 import axios from "axios";
 import { get_seo_data } from "@/api/seoApi";
 import SearchResults from "@/components/SeeDetails/SearchResult";
+import { API_URL } from "@/services/constants";
 
 export async function getServerSideProps(context) {
   const { slug, city } = context.params;
@@ -14,7 +15,7 @@ export async function getServerSideProps(context) {
 
   try {
     const res = await axios.get(
-      `https://addressguru.ae/api/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
+      `${API_URL}/business-listing/get-listing-by-category-and-city/${slug}/${city}?page=1&limit=10`,
     );
     // const res = [];
     const data = res?.data?.data;
@@ -32,17 +33,14 @@ export async function getServerSideProps(context) {
 
   // ✅ ADD THIS BLOCK (filters API)
   try {
-    const res = await axios.get(
-      `https://addressguru.ae/api/business-listing/features/${slug}`,
-    );
-
+    const res = await axios.get(`${API_URL}/business-listing/features/${slug}`);
     const data = res?.data?.data;
-
     ssrFilters = {
       facilities: data?.features?.facilities || [],
       services: data?.features?.services || [],
       courses: data?.features?.courses || [],
-      paymentModes: data?.payment_modes || [],
+      payment_modes: data?.payment_modes || [],
+      paymentModes: data?.payment_modes || [], // 👈 keep BOTH for safety
     };
   } catch (err) {
     console.error("SSR filters fetch failed:", err.message);
