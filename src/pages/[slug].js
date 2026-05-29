@@ -768,7 +768,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
       {/* PREVIEW BANNER */}
       {(preview === "true" || isAdmin) && (
-        <div className="w-full bg-orange-600 text-white text-center py-2 text-sm font-bold sticky top-0 z-[100] shadow-md flex items-center justify-center gap-2">
+        <div className="w-full bg-orange-600 text-white text-center py-1 text-sm font-bold fixed mx-auto left-0  z-[100] shadow-md flex items-center justify-center gap-2">
           <svg
             width="16"
             height="16"

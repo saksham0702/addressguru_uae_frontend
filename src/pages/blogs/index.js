@@ -226,10 +226,9 @@ const Blogs = ({
                           new Date(blog?.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <div
-                      dangerouslySetInnerHTML={{ __html: blog?.content }}
-                      className="description-blog text-gray-600 text-xs mb-4 line-clamp-2 overflow-hidden"
-                    />
+                    <p className="text-gray-600 text-xs mb-4 line-clamp-2 overflow-hidden">
+                      {blog?.content}
+                    </p>
                     <span className="text-[#FF6E04] font-medium py-1 flex items-center gap-1 rounded-full">
                       <h3 className=" ">{blog?.category_id?.name}</h3>
                     </span>
