@@ -382,7 +382,7 @@ const SearchResults = ({
 
   const pageTitle =
     seoTitle ??
-    `Top ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
+    `Best ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
 
   const pageDescription =
     seoDescription ??
@@ -635,7 +635,7 @@ const SearchResults = ({
                       return (
                         <React.Fragment key={item._id ?? index}>
                           {/* ── Business card ── */}
-                          <div className="w-full md:mb-4 mb-3.5 last:border-0">
+                          <div className="w-full md:mb-4 mb-3.5 border-b border-gray-200 last:border-0">
                             <BusinessCard
                               data={item}
                               index={index}

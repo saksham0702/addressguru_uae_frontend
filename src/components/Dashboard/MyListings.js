@@ -130,7 +130,6 @@ const MyListings = ({ data, onRefresh }) => {
   const [selectedListing, setSelectedListing] = useState(null);
   const [roomsModalListing, setRoomsModalListing] = useState(null);
   const [addInfoListing, setAddInfoListing] = useState(null);
-
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     action: null,
@@ -148,9 +147,9 @@ const MyListings = ({ data, onRefresh }) => {
 
   // Handle publish (direct, no popup)
   const handlePublish = async (listing) => {
-    console.log("listing", listing);
+    // console.log("listing", listing);
     const listingId = listing?.slug;
-    console.log(listingId);
+    // console.log(listingId);
     setPublishLoading((prev) => ({ ...prev, [listingId]: true }));
     try {
       const res = await unpublish_listing(listingId, "publish");

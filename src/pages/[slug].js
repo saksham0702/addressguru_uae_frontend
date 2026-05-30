@@ -228,7 +228,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
   // Generate FAQs
   const faqs = generateFAQs(data, serverCity);
-  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${data?.city?.name} | AddressGuru`;
+  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${data?.city?.name}`;
   const pageDesc = (
     data?.seo?.description ||
     data?.description ||
@@ -300,9 +300,9 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const closePopup = () => setActivePop(null);
 
   const handleShowNumber = () => {
-    setShowNumber(true);
+    setShowNumber(true); // ✅ this flips the button
     window.scrollTo({ top: 0, behavior: "smooth" });
-    handleClick(data?.slug);
+    handleClick(data?.slug); // ✅ this tracks the event
   };
 
   //  Admin actions
@@ -809,6 +809,8 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               handlePop={handlePop}
               name={data?.businessName}
               address={data?.businessAddress}
+              onClick={() => handleShowNumber(data?.slug)}
+              onShowNumberClick={handleShowNumber}
               extraFields={formattedFields?.logo}
               data={data}
               logo={data?.logo}

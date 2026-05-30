@@ -1,51 +1,118 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { APP_URL } from "@/services/constants";
-import Link from "next/link"; 
+import Link from "next/link";
+import { MapPin } from "lucide-react";
 
 const RecentBusinessCard = ({ data }) => {
+  const [current, setCurrent] = useState(0);
+  const images = data?.images || [];
+  const hasImages = images.length > 0;
+
+  const prev = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((p) => (p === 0 ? images.length - 1 : p - 1));
+  };
+
+  const next = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((p) => (p === images.length - 1 ? 0 : p + 1));
+  };
+
   return (
     <Link
       href={`/${data?.slug}`}
-      className="xl:w-47 min-2xl:w-54 border-gray-100 border 2xl:h-55 bg-white rounded-lg md:mt-5 shadow-md max-md:min-w-46  flex flex-col "
+      className="flex flex-col bg-white rounded-sm overflow-hidden border h-60 border-gray-100 flex-shrink-0 w-[calc(20%-13px)] max-md:min-w-[160px] max-md:w-[160px] hover:opacity-90 transition-opacity"
     >
-      {/* Logo */}
-      <div className="w-full flex justify-center border-b text-gray-200">
-        <Image
-          src={`${APP_URL}/${data?.logo}`} // Replace with your actual image path in public folder
-          alt={data?.business_name}
-          width={500}
-          height={500}
-          className="h-25 2xl:h-32 w-full  p-1 object-cover"
-        />
+      {/* Image Slider */}
+      <div className="relative w-full h-[130px] max-md:h-[140px] bg-gray-100 overflow-hidden group">
+        {hasImages ? (
+          <>
+            <Image
+              src={`${APP_URL}/${images[current]}`}
+              alt={data?.businessName}
+              width={500}
+              height={500}
+              className="w-full h-full object-cover transition-all duration-300"
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={next}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+
+                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                  {images.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`block rounded-full transition-all ${
+                        i === current
+                          ? "w-2.5 h-1 bg-white"
+                          : "w-1 h-1 bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-50">
+            <span className="text-gray-300 text-[10px]">No image</span>
+          </div>
+        )}
       </div>
 
-      {/* Title */}
-      <div className="w-full p-1.5">
-        <h3
-          className="font-semibold leading-4 line-clamp-2
-         text-[12px] 2xl:text-[16px]"
-        >
-          {data?.business_name}
-        </h3>
-      </div>
-
-      {/* Service Icon and Label */}
-      <div className="flex ">
-        {/* <Image
-          src="/assets/Png/recentBusiness/taxiIcon.png" // Replace with your actual icon path
-          alt="Taxi Icon"
-          width={500}
-          height={500}
-          className='relative h-10 w-15  2xl:scale-110 right-4 2xl:right-6 '
-        /> */}
-        <span className="text-[10px] 2xl:text-sm whitespace-nowrap text-gray-700  px-2 relative">
-          {data?.category?.name || data?.sub_category?.name || "category"}
+      {/* Content */}
+      <div className="flex flex-col gap-1 p-3">
+        {/* Category */}
+        <span className="text-[12px] font-semibold text-orange-500">
+          {data?.category?.name || "General"}
         </span>
-      </div>
 
-      {/* Date */}
-      {/* <p className="text-[8px] text-gray-600 text-end p-1">1 Month Ago</p> */}
+        {/* Name */}
+        <h3 className="text-md font-semibold text-[#212121] line-clamp-1 leading-snug">
+          {data?.businessName}
+        </h3>
+
+        {/* Address */}
+        <div className="flex items-start gap-0.5">
+          <MapPin size={14} className="text-gray-800 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-gray-800 line-clamp-2 leading-snug">
+            {data?.businessAddress}
+          </p>
+        </div>
+      </div>
     </Link>
   );
 };

@@ -17,9 +17,10 @@ import { get_recent_listings } from "@/api/showlistings";
 import Head from "next/head";
 import { getAllCategories } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
+import { getRecentListings } from "@/api/listing-form";
 
-export default function Home({ categories, cities }) {
-  const [recentListing, setRecentListing] = useState(null);
+export default function Home({ categories, cities, recentListings }) {
+  const [recentListing, setRecentListing] = useState(recentListings);
   const [recentJobs, setRecentJobs] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
@@ -175,8 +176,22 @@ export default function Home({ categories, cities }) {
               <PopularServices />
             </div>
           </div>
-          {/* customer section */}
+          {/* Recent Listings */}
+          <div className="flex flex-col w-full  mb-4">
+            <div className="flex items-center justify-between px-5 max-md:px-2 mb-3">
+              <h3 className="text-xl max-md:text-lg font-semibold text-[#212121]">
+                Recent Listings
+              </h3>
+            </div>
 
+            <div className="flex gap-3 px-5 max-md:px-2 max-md:overflow-x-scroll max-md:pb-2 hide-scroll">
+              {recentListing?.map((item) => (
+                <RecentBusinessCard key={item._id} data={item} />
+              ))}
+            </div>
+          </div>
+
+          {/* customer section */}
           <Customers />
 
           <BannerLast />
@@ -188,15 +203,17 @@ export default function Home({ categories, cities }) {
 
 export async function getServerSideProps() {
   try {
-    const [categoriesRes, citiesRes] = await Promise.all([
+    const [categoriesRes, citiesRes, recentRes] = await Promise.all([
       getAllCategories(),
       getCities(),
+      getRecentListings(),
     ]);
 
     return {
       props: {
         categories: categoriesRes?.data || [], // ✅ FIXED
         cities: citiesRes?.data || [], // ✅ FIXED
+        recentListings: recentRes?.data || [],
       },
     };
   } catch (err) {
@@ -205,6 +222,7 @@ export async function getServerSideProps() {
       props: {
         categories: [],
         cities: [],
+        recentlistings: [],
       },
     };
   }
