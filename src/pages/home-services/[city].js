@@ -114,7 +114,7 @@ const HomeServices = () => {
   return (
     <div className="mx-auto max-w-[2000px] min-h-screen bg-gray-50 2xl:max-w-[80%]">
       <Head>
-        <title>Home Services in {city} | AddressGuru UAE</title>
+        <title>Home Services in {city}</title>
         <meta
           name="description"
           content={`Find the best home services in ${city}.`}

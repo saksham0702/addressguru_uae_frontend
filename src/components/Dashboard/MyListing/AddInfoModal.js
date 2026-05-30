@@ -6,6 +6,7 @@ import AdditionalInfo from "@/components/Forms/FormSections/AdditionalInfo";
 // import toast from "react-hot-toast";
 
 const AddInfoModal = ({ isOpen, onClose, listingData }) => {
+  console.log("listingdata", listingData);
   const [additionalFields, setAdditionalFields] = useState([]);
   const [values, setValues] = useState({});
   const [loading, setLoading] = useState(true);
@@ -23,8 +24,12 @@ const AddInfoModal = ({ isOpen, onClose, listingData }) => {
       if (res?.additionalFields) {
         setAdditionalFields(res.additionalFields);
       }
-      if (listingData?.additionalFields) {
-        setValues(listingData.additionalFields);
+      if (listingData?.additionalFields?.length) {
+        const mappedValues = {};
+        listingData.additionalFields.forEach((item) => {
+          if (item.field_id) mappedValues[item.field_id] = item.value; // ✅ field_id is already a string
+        });
+        setValues(mappedValues);
       }
     } catch (error) {
       console.error("Error fetching additional fields:", error);
@@ -218,7 +223,8 @@ const AddInfoModal = ({ isOpen, onClose, listingData }) => {
                   No additional fields available
                 </p>
                 <p className="text-xs text-gray-500 mt-1 max-w-xs">
-                  Your category doesn&apos;t require extra information at this time.
+                  Your category doesn&apos;t require extra information at this
+                  time.
                 </p>
               </div>
             )}

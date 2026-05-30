@@ -71,6 +71,18 @@ export const get_all_listings = async (SLUG) => {
   }
 };
 
+export const getRecentListings = async () => {
+  try {
+    const res = await axios.get(
+      `${API_URL}/business-listing/get-recent-listings`,
+    );
+    console.log("response of recent listing", res?.data);
+    return res?.data;
+  } catch (error) {
+    return error;
+  }
+};
+
 // get single listing  for landing page
 
 export const get_listing_by_businessslug = async (SLUG) => {
@@ -186,7 +198,7 @@ export const update_additional_fields = async (listingId, data) => {
   const token = localStorage.getItem("authToken");
   try {
     const response = await axios.put(
-      `${API_URL}/business-listings/${listingId}/additional-fields`,
+      `${API_URL}/business-listing/${listingId}/additional-fields`,
       data,
       {
         headers: {

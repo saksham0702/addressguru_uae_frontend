@@ -2,6 +2,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { APP_URL } from "@/services/constants";
 import {
   LayoutDashboard,
   Briefcase,
@@ -12,7 +13,9 @@ import {
   LucideHeadset,
   CreditCard,
   Star,
+  Globe, // 👈 add Globe
 } from "lucide-react";
+import Image from "next/image";
 
 const DashboardSidebar = () => {
   const router = useRouter();
@@ -37,6 +40,12 @@ const DashboardSidebar = () => {
       label: "Jobs",
       link: "/dashboard/jobs",
       icon: <Briefcase size={18} />,
+    },
+    {
+      label: "Visit Website",
+      link: "https://addressguru.ae",
+      icon: <Globe size={18} />,
+      external: true, // 👈 flag for new tab
     },
     {
       label: "Marketplace",
@@ -72,12 +81,12 @@ const DashboardSidebar = () => {
   ];
 
   // ✅ NAVIGATION FIX
-  const handleNavigation = (link) => {
-    if (link === "/") {
-      window.open("https://addressguru.ae", "_blank");
+  const handleNavigation = (item) => {
+    if (item.external) {
+      window.open(item.link, "_blank");
       return;
     }
-    router.push(link);
+    router.push(item.link);
   };
 
   return (
@@ -88,24 +97,41 @@ const DashboardSidebar = () => {
       </div> */}
 
       {/* USER */}
-      <div className="p-2 text-center mt-5">
-        <div className="w-12 h-12 bg-orange-500 rounded-full mx-auto flex items-center justify-center text-white font-bold">
-          {user?.data?.name?.[0]}
+      <div className="p-2 text-center ">
+        <div className="p-2 text-center mt-5">
+          <div className="w-12 h-12 rounded-full mx-auto overflow-hidden">
+            {user?.data?.avatar ? (
+              <Image
+                src={
+                  user.data.avatar.startsWith("https")
+                    ? user.data.avatar
+                    : `${APP_URL}/${user.data.avatar}`
+                }
+                alt={user?.data?.name}
+                width={48}
+                height={48}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-orange-500 flex items-center justify-center text-white font-bold">
+                {user?.data?.name?.[0]}
+              </div>
+            )}
+          </div>
+          {!isCollapsed && (
+            <p className="text-sm mt-2 font-semibold">{user?.data?.name}</p>
+          )}
         </div>
-        {!isCollapsed && (
-          <p className="text-sm mt-2 font-semibold">{user?.data?.name}</p>
-        )}
       </div>
 
       {/* MENU */}
       <div className="flex-1 py-2">
         {menuItems.map((item, index) => {
           const isActive = router.pathname === item.link;
-
           return (
             <div
               key={index}
-              onClick={() => handleNavigation(item.link)}
+              onClick={() => handleNavigation(item)}
               className={`mb-1 cursor-pointer flex items-center gap-2 py-2 px-3 mx-2 rounded-lg transition-all
                 ${
                   isActive

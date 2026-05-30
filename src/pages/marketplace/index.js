@@ -135,7 +135,7 @@ const Marketplace = ({ initialCity }) => {
     <div className="flex flex-col items-center w-full justify-center bg-[#F8F7F7]">
       {/* ── SEO Head ─────────────────────────────────────────────────────────── */}
       <Head>
-        <title>{`Top Marketplace Listings in ${city || "UAE"} | Buy & Sell | AddressGuru UAE`}</title>
+        <title>{`Top Marketplace Listings in ${city || "UAE"} | Buy & Sell `}</title>
         <meta
           name="description"
           content={`Browse the best marketplace listings in ${city || "UAE"}. Find products to buy and sell — electronics, furniture, fashion, and more on AddressGuru UAE.`}
@@ -148,24 +148,36 @@ const Marketplace = ({ initialCity }) => {
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={`Marketplace in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          property="og:title"
+          content={`Marketplace in ${city || "UAE"} `}
+        />
         <meta
           property="og:description"
           content={`Discover products for sale in ${city || "UAE"}. Buy and sell with ease on AddressGuru.`}
         />
         <meta property="og:url" content="https://addressguru.ae/marketplace" />
-        <meta property="og:image" content="https://addressguru.ae/seo/default-marketplace-og.jpg" />
+        <meta
+          property="og:image"
+          content="https://addressguru.ae/seo/default-marketplace-og.jpg"
+        />
         <meta property="og:site_name" content="AddressGuru UAE" />
         <meta property="og:locale" content="en_AE" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`Marketplace in ${city || "UAE"} | AddressGuru UAE`} />
+        <meta
+          name="twitter:title"
+          content={`Marketplace in ${city || "UAE"} `}
+        />
         <meta
           name="twitter:description"
           content={`Find products to buy and sell in ${city || "UAE"} on AddressGuru.`}
         />
-        <meta name="twitter:image" content="https://addressguru.ae/seo/default-marketplace-og.jpg" />
+        <meta
+          name="twitter:image"
+          content="https://addressguru.ae/seo/default-marketplace-og.jpg"
+        />
 
         {/* JSON-LD: ItemList */}
         <script
@@ -177,12 +189,13 @@ const Marketplace = ({ initialCity }) => {
               name: `Marketplace Listings in ${city || "UAE"}`,
               url: "https://addressguru.ae/marketplace",
               numberOfItems: listings?.length || 0,
-              itemListElement: listings?.slice(0, 10).map((item, i) => ({
-                "@type": "ListItem",
-                position: i + 1,
-                name: item?.title || item?.name,
-                url: `https://addressguru.ae/marketplace/${item?.slug}`,
-              })) || [],
+              itemListElement:
+                listings?.slice(0, 10).map((item, i) => ({
+                  "@type": "ListItem",
+                  position: i + 1,
+                  name: item?.title || item?.name,
+                  url: `https://addressguru.ae/marketplace/${item?.slug}`,
+                })) || [],
             }),
           }}
         />

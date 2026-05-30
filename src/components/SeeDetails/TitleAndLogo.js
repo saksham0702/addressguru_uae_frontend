@@ -20,6 +20,7 @@ const TitleAndLogo = ({
   extraFields,
   enquirePop,
   setEnquirePop,
+  onShowNumberClick,
   showNumber,
 }) => {
   console.log("extra fields", extraFields);
@@ -185,7 +186,6 @@ https://addressguru.ae/${data?.slug}`;
           </div>
         </address>
 
-        {/* buttons section */}
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 items-center mt-2">
           <CustomButton
@@ -228,7 +228,7 @@ https://addressguru.ae/${data?.slug}`;
             textColor="#FF6E04"
             toggledTextColor="#fff"
             width="150px"
-            onClick={() => handleClick(data?.slug, "phone")}
+            onClick={onShowNumberClick}
           />
 
           {/* enquire now */}
