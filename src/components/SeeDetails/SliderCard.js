@@ -39,7 +39,7 @@ const NextArrow = ({ onClick }) => (
   </button>
 );
 
-const SliderCard = ({ images }) => {
+const SliderCard = ({ images, businessName = "business" }) => {
   const APP_URL = "https://addressguru.ae/api";
 
   const settings = {
@@ -63,7 +63,7 @@ const SliderCard = ({ images }) => {
             <div className="slide-inner">
               <Image
                 src={`${APP_URL}/${src}`}
-                alt={`slider-image-${idx}`}
+                alt={`${businessName}-${idx + 1}`}
                 fill
                 className="slide-image"
                 sizes="(max-width: 768px) 100vw, 700px"

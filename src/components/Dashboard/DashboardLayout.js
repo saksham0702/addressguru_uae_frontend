@@ -3,6 +3,7 @@ import DashboardNavbar from "./DashboardNavbar";
 import PostAdsPop from "./Popups/PostAdsPop";
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 // Fixed dimensions
 const SIDEBAR_W = 240; // ✅ CHANGED from 160 to 240
@@ -14,7 +15,6 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      
       {/* FIXED SIDEBAR - Left */}
       <aside className="fixed left-0 top-0 h-screen w-60 z-40 bg-white border-r border-gray-200">
         {/* ✅ CHANGED w-40 to w-60 */}
@@ -64,7 +64,9 @@ const DashboardLayout = ({ children }) => {
             className="flex-shrink-0 pt-6 hidden xl:block"
             style={{ width: RIGHT_BANNER_W }}
           >
-            <div
+            <Link
+              href="https://dubai.adxventure.com/"
+              target="_blank"
               className="sticky top-6"
               style={{ height: `calc(100vh - ${NAVBAR_H}px - 120px)` }}
             >
@@ -80,7 +82,7 @@ const DashboardLayout = ({ children }) => {
                   objectFit: "contain",
                 }}
               />
-            </div>
+            </Link>
           </aside>
         </div>
       </div>

@@ -466,10 +466,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
       {/* POPUPS */}
       {activePop && (
-        <div
-          className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0"
-          onClick={closePopup}
-        >
+        <div className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-50 items-center justify-center top-0">
           <div onClick={(e) => e.stopPropagation()}>
             {activePop === "share" && <Share onClose={closePopup} />}
             {activePop === "claim" && (
@@ -826,14 +823,21 @@ const SeeDetails = ({ initialData, initialRooms }) => {
           {/* Full-width hero gallery (Hotel / Yoga Studio with 5+ images, desktop) */}
           {isSliderFull && !isMobile && (
             <div className="w-full mt-1 px-2 md:px-0 mb-4">
-              <FullWidthGallery images={data?.images} />
+              <FullWidthGallery
+                images={data?.images}
+                businessName={data?.businessName}
+              />
             </div>
           )}
 
           {/* Standard slider (mobile OR normal categories) */}
           {(isMobile || !isSliderFull) && (
             <div className={!isMobile ? "md:w-[64.5%]" : "w-full"}>
-              <SliderCard slider={false} images={data?.images} />
+              <SliderCard
+                slider={false}
+                images={data?.images}
+                businessName={data?.businessName}
+              />{" "}
             </div>
           )}
 
@@ -1022,7 +1026,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
           className="inset-0 flex items-center fixed justify-center backdrop-blur-xs bg-black/60 z-50 py-20 px-5"
           onClick={() => setEnquirePop(false)}
         >
-          <div onClick={(e) => e.stopPropagation()}>
+          <div>
             <GetMoreInfo
               isPop={true}
               logo={`${APP_URL}/${data?.logo}`}

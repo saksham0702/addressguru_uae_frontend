@@ -14,6 +14,7 @@ import { ErrorProvider } from "@/context/ErrorContext";
 import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
 import Head from "next/head";
 import CookieConsent from "@/components/CookieConsent";
+import UTMTracker from "@/components/UTMTracker";
 
 // ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
 // TODO: Replace with your real GA4 Measurement ID
@@ -100,6 +101,7 @@ export default function App({ Component, pageProps }) {
   return (
     <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
+        <UTMTracker />
         <ErrorProvider>
           {/* <Head>
             <title>addressguru.ae | Find the best businesses in UAE</title>
