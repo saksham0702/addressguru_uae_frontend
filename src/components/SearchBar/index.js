@@ -234,14 +234,13 @@ const SearchBar = ({
     setShowDropdown(false);
     setValue(suggestion.label);
 
-    if (suggestion.type === "category" && city?.slug) {
+    if (suggestion.type === "category" && city) {
       processSuggestion({
         ...suggestion,
-        redirectUrl: `${suggestion.redirectUrl}/${city.slug}`,
+        redirectUrl: `${suggestion.redirectUrl}/${city.toLowerCase()}`,
       });
       return;
     }
-
     processSuggestion(suggestion);
   };
 

@@ -6,6 +6,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 export default function RightBusinessCard({ name, city }) {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [errors, setErrors] = useState({ name: false, email: false });
+  const [countryCode, setCountryCode] = useState("+971");
   const [status, setStatus] = useState("idle");
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaError, setCaptchaError] = useState(false);
@@ -81,6 +82,8 @@ export default function RightBusinessCard({ name, city }) {
             setErrors({ name: false, email: false });
           }}
           errors={errors}
+          countryCode={countryCode}
+          setCountryCode={setCountryCode}
         />
       </div>
 

@@ -226,13 +226,13 @@ const PhoneInput = ({
 // ─────────────────────────────────────────────
 // Registration Form
 // ─────────────────────────────────────────────
-const RegistrationForm = ({ setPop, setUserId, type }) => {
+const RegistrationForm = ({ setPop, setUserId, type, initialData }) => {
   const router = useRouter();
   const recaptchaRef = useRef(null);
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [email, setEmail] = useState(initialData?.email || "");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+971");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");

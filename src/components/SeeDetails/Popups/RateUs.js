@@ -5,7 +5,6 @@ import { rate_us } from "@/api/queries";
 import RegistrationForm from "../../Register/RegistrationForm";
 import OTPPopup from "../../Register/OTPPopup";
 
-
 const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
   const recaptchaRef = useRef(null);
   const [rating, setRating] = useState(0);
@@ -165,7 +164,14 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
             {registerMessage}
           </h2>
           <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden p-1 custom-scrollbar">
-            <RegistrationForm setPop={setPop} setUserId={setUserId} />
+            <RegistrationForm
+              setPop={setPop}
+              setUserId={setUserId}
+              initialData={{
+                name: formData.fullName,
+                email: formData.email,
+              }}
+            />
           </div>
         </div>
       ) : (
@@ -188,16 +194,19 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
                 disabled={isSubmitting}
               >
                 <Star
-                  className={`w-8 h-8 ${index <= (hoveredRating || rating)
-                    ? "fill-orange-500 text-orange-500"
-                    : "text-gray-300"
-                    }`}
+                  className={`w-8 h-8 ${
+                    index <= (hoveredRating || rating)
+                      ? "fill-orange-500 text-orange-500"
+                      : "text-gray-300"
+                  }`}
                 />
               </button>
             ))}
           </div>
           {errors.rating && (
-            <p className="text-red-500 text-sm text-center mb-3">{errors.rating}</p>
+            <p className="text-red-500 text-sm text-center mb-3">
+              {errors.rating}
+            </p>
           )}
 
           <div className="space-y-3 mt-5">
@@ -209,8 +218,9 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
                 onChange={handleChange}
                 placeholder="Full Name *"
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border-2 ${errors.fullName ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+                className={`w-full px-3 py-2 border-2 ${
+                  errors.fullName ? "border-red-500" : "border-gray-300"
+                } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
               />
               {errors.fullName && (
                 <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
@@ -225,8 +235,9 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
                 onChange={handleChange}
                 placeholder="Email Address *"
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border-2 ${errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
+                className={`w-full px-3 py-2 border-2 ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                } rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm`}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -261,10 +272,11 @@ const RateUs = ({ onClose, id, slug, type, setType, setThanksPop }) => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isSubmitting
-                ? "bg-gray-400 cursor-not-allowed text-white"
-                : "bg-orange-600 hover:bg-orange-700 text-white"
-                }`}
+              className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-orange-600 hover:bg-orange-700 text-white"
+              }`}
             >
               {isSubmitting ? "Submitting..." : "Rate Us"}
             </button>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { createUser, updateUser } from "@/api/uaeadminlogin";
+import CountryCodePhoneInput from "@/components/shared/CountryCodePhoneInput";
 
 export default function CreateUser({ initialData = null }) {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function CreateUser({ initialData = null }) {
     password: "",
     confirmPassword: "",
     phone: "",
+    countryCode: "+971",
     roles: [],
   });
 
@@ -48,6 +50,7 @@ export default function CreateUser({ initialData = null }) {
         password: "",
         confirmPassword: "",
         phone: initialData.phone || "",
+        countryCode: initialData.country_code || "+971",
         roles: initialData.roles || [],
       });
     }
@@ -82,8 +85,8 @@ export default function CreateUser({ initialData = null }) {
       newErrors.email = "Invalid email format";
 
     if (!form.phone.trim()) newErrors.phone = "Phone number is required";
-    else if (!/^[0-9]{10}$/.test(form.phone))
-      newErrors.phone = "Phone must be 10 digits";
+    else if (!/^[0-9]{4,15}$/.test(form.phone))
+      newErrors.phone = "Phone must be 4-15 digits";
 
     if (!isEditMode || form.password) {
       if (!form.password) newErrors.password = "Password is required";
@@ -109,13 +112,14 @@ export default function CreateUser({ initialData = null }) {
     if (!validate()) return;
 
     setLoading(true);
-    console.log(form);
+    // console.log(form);
 
     try {
       const payload = {
         name: form.name,
         email: form.email,
         phone: form.phone,
+        country_code: form.countryCode,
         roles: form.roles,
       };
 
@@ -201,20 +205,15 @@ export default function CreateUser({ initialData = null }) {
                 Phone Number
               </label>
 
-              <div className="mt-1 flex items-center border border-gray-300 rounded-lg px-3 h-11 focus-within:ring-2 focus-within:ring-[#FF6E04]">
-                <Phone size={18} className="text-gray-400 mr-2" />
-                <input
-                  type="text"
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder="9876543210"
-                  className="w-full outline-none text-sm"
-                />
-              </div>
-
-              {errors.phone && (
-                <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
-              )}
+              <CountryCodePhoneInput
+                value={form.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                countryCode={form.countryCode}
+                setCountryCode={(code) => handleChange("countryCode", code)}
+                error={errors.phone}
+                placeholder="Enter phone number"
+                variant="admin"
+              />
             </div>
 
             {/* Email */}

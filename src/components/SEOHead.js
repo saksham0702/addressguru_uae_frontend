@@ -30,7 +30,7 @@ export default function SEOHead({
   const fullTitle = title
     ? title.includes(SITE_NAME)
       ? title
-      : `${title} | ${SITE_NAME}`
+      : `${title}`
     : SITE_NAME;
 
   const safeDescription = description

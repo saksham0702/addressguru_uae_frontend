@@ -228,7 +228,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const pageUrl = `https://addressguru.ae/${data?.slug ?? ""}`;
   // Generate FAQs
   const faqs = generateFAQs(data, serverCity);
-  const pageTitle = `${data?.seo?.title || data?.businessName || ""} | ${data?.city?.name}`;
+  const pageTitle = `${data?.seo?.title || data?.businessName || ""} - ${data?.city?.name}`;
   const pageDesc = (
     data?.seo?.description ||
     data?.description ||
@@ -358,7 +358,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
         {/* Open Graph */}
         <meta property="og:type" content="business.business" />
-        {/* <meta property="og:site_name" content="AddressGuru UAE" /> */}
+        <meta property="og:site_name" content="AddressGuru UAE" />
         <meta property="og:locale" content="en_AE" />
         <meta property="og:title" content={data.businessName ?? ""} />
         <meta property="og:description" content={pageDesc} />

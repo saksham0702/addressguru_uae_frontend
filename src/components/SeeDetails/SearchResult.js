@@ -382,7 +382,7 @@ const SearchResults = ({
 
   const pageTitle =
     seoTitle ??
-    `Best ${canonicalSlug} in ${canonicalCity} | Best ${canonicalSlug} Listings`;
+    `Best ${canonicalSlug} in ${canonicalCity} - Best ${canonicalSlug} Listings`;
 
   const pageDescription =
     seoDescription ??
@@ -426,7 +426,7 @@ const SearchResults = ({
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={ogDescription} />
         <meta property="og:url" content={canonicalUrl} />
-        {/* <meta property="og:site_name" content="AddressGuru" /> */}
+        <meta property="og:site_name" content="AddressGuru" />
         <meta property="og:image" content={absoluteOgImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -451,7 +451,7 @@ const SearchResults = ({
                 "@type": "ListItem",
                 position: i + 1,
                 name: item?.businessName ?? item?.name,
-                url: `${APP_URL}/listing/${item?.slug}`,
+                url: `${APP_URL}/${item?.slug}`,
               })),
             }),
           }}
@@ -486,13 +486,13 @@ const SearchResults = ({
           </div>
 
           <h1 className="font-semibold text-[20px] max-md:hidden my-2 capitalize leading-tight whitespace-nowrap">
-            Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
+            Best {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
             {canonicalCity}
           </h1>
 
           <div className="flex  justify-between md:hidden border-b border-gray-200 pb-3  px-2.5 mt-2 w-full  mb-1">
             <h1 className="font-semibold text-[14px] capitalize leading-tight whitespace-nowrap">
-              Top {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
+              Best {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
               {canonicalCity}
             </h1>
             <FilterBar

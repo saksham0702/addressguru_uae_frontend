@@ -1,7 +1,15 @@
 import React from "react";
-import { User, Mail, Phone } from "lucide-react";
+import { User, Mail } from "lucide-react";
+import CountryCodePhoneInput from "@/components/shared/CountryCodePhoneInput";
 
-const NameNumberCard = ({ layout, formData, setFormData, errors = {} }) => {
+const NameNumberCard = ({
+  layout,
+  formData,
+  setFormData,
+  errors = {},
+  countryCode = "+971",
+  setCountryCode,
+}) => {
   return (
     <div
       className={`${layout === "row" ? "flex gap-3 w-sm" : "flex flex-col"}`}
@@ -50,17 +58,15 @@ const NameNumberCard = ({ layout, formData, setFormData, errors = {} }) => {
         />
       </div>
 
-      {/* PHONE (OPTIONAL - no mention) */}
-      <div className="mb-1 flex items-center border rounded-lg bg-white border-gray-300">
-        <div className="border-r p-2 border-gray-300">
-          <Phone size={16} className="text-gray-400" />
-        </div>
-        <input
-          type="tel"
-          placeholder="Enter your phone"
+      {/* PHONE with Country Code */}
+      <div className="mb-1">
+        <CountryCodePhoneInput
           value={formData.phone || ""}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="w-full outline-none text-sm px-3 py-2 font-medium bg-transparent"
+          countryCode={countryCode}
+          setCountryCode={setCountryCode || (() => {})}
+          placeholder="Enter your phone"
+          variant="bordered"
         />
       </div>
     </div>

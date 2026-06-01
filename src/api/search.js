@@ -7,6 +7,7 @@ export const fetchSearchSuggestions = async (query) => {
     const response = await axios.get(
       `${API_URL}/search/suggestions?q=${encodeURIComponent(query)}`,
     );
+    console.log("suggestions response", response?.data);
     return response?.data;
   } catch (error) {
     console.log("suggestions error", error);
