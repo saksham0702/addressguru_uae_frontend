@@ -358,7 +358,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
 
         {/* Open Graph */}
         <meta property="og:type" content="business.business" />
-        <meta property="og:site_name" content="AddressGuru UAE" />
+        {/* <meta property="og:site_name" content="AddressGuru UAE" /> */}
         <meta property="og:locale" content="en_AE" />
         <meta property="og:title" content={data.businessName ?? ""} />
         <meta property="og:description" content={pageDesc} />
