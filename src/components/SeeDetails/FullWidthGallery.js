@@ -2,20 +2,24 @@
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 
-const FullWidthGallery = ({ images = [] }) => {
+const FullWidthGallery = ({ images = [], businessName = "business" }) => {
   const APP_URL = "https://addressguru.ae/api";
   const [lightbox, setLightbox] = useState({ open: false, index: 0 });
 
   const openLightbox = (index) => setLightbox({ open: true, index });
   const closeLightbox = () => setLightbox({ open: false, index: 0 });
 
-  const prev = useCallback(() =>
-    setLightbox((s) => ({ ...s, index: (s.index - 1 + images.length) % images.length })),
-    [images.length]
+  const prev = useCallback(
+    () =>
+      setLightbox((s) => ({
+        ...s,
+        index: (s.index - 1 + images.length) % images.length,
+      })),
+    [images.length],
   );
-  const next = useCallback(() =>
-    setLightbox((s) => ({ ...s, index: (s.index + 1) % images.length })),
-    [images.length]
+  const next = useCallback(
+    () => setLightbox((s) => ({ ...s, index: (s.index + 1) % images.length })),
+    [images.length],
   );
 
   useEffect(() => {
@@ -45,7 +49,7 @@ const FullWidthGallery = ({ images = [] }) => {
         >
           <Image
             src={`${APP_URL}/${mainImage}`}
-            alt="main"
+            alt={`${businessName}-${0 + 1}`}
             fill
             className="object-cover group-hover:scale-[1.02]  transition-transform duration-300"
           />
@@ -61,7 +65,7 @@ const FullWidthGallery = ({ images = [] }) => {
             >
               <Image
                 src={`${APP_URL}/${img}`}
-                alt={`side-${i}`}
+                alt={`${businessName}-${i + 2}`}
                 fill
                 className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
               />
@@ -69,10 +73,17 @@ const FullWidthGallery = ({ images = [] }) => {
               {i === 3 && images.length > 5 && (
                 <div
                   className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center rounded-xl cursor-pointer"
-                  onClick={(e) => { e.stopPropagation(); openLightbox(4); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openLightbox(4);
+                  }}
                 >
-                  <span className="text-white text-2xl font-medium">+{images.length - 4}</span>
-                  <span className="text-white/70 text-xs mt-0.5">more photos</span>
+                  <span className="text-white text-2xl font-medium">
+                    +{images.length - 4}
+                  </span>
+                  <span className="text-white/70 text-xs mt-0.5">
+                    more photos
+                  </span>
                 </div>
               )}
             </div>
@@ -101,7 +112,7 @@ const FullWidthGallery = ({ images = [] }) => {
           >
             <Image
               src={`${APP_URL}/${images[lightbox.index]}`}
-              alt={`gallery-${lightbox.index}`}
+              alt={`${businessName}-${lightbox.index + 1}`}
               fill
               className="object-contain"
             />
@@ -130,7 +141,10 @@ const FullWidthGallery = ({ images = [] }) => {
           </div>
 
           {/* Dot indicators */}
-          <div className="flex gap-1.5 mt-3" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex gap-1.5 mt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
             {images.map((_, i) => (
               <button
                 key={i}
@@ -159,7 +173,7 @@ const FullWidthGallery = ({ images = [] }) => {
               >
                 <Image
                   src={`${APP_URL}/${img}`}
-                  alt={`thumb-${i}`}
+                  alt={`${businessName}-${i + 1}`}
                   fill
                   className="object-cover"
                 />
