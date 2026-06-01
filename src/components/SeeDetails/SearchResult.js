@@ -426,7 +426,7 @@ const SearchResults = ({
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={ogDescription} />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="AddressGuru" />
+        {/* <meta property="og:site_name" content="AddressGuru" /> */}
         <meta property="og:image" content={absoluteOgImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
