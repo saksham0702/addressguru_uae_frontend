@@ -1,16 +1,27 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useAuth } from "@/context/AuthContext";
 import React from "react";
 
 const Slash = () => <span className="text-gray-400">/</span>;
 
-const BreadCrumbs = ({ slug, name, length, type,city }) => {
+const BreadCrumbs = ({ slug, name, length, type, city }) => {
   const router = useRouter();
+  const { city: globalCity } = useAuth();
+
+  // Build the category+city URL smartly
+  const citySlug = (city || globalCity || "")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+  const categorySlug = slug?.toLowerCase().replace(/\s+/g, "-");
+
+  const categoryUrl =
+    categorySlug && citySlug ? `/${categorySlug}/${citySlug}` : null;
 
   return (
     <div>
       <span className="text-xs flex items-center whitespace-nowrap max-md:text-[11px] w-full overflow-x-auto font-light gap-1 hide-scroll">
-        {" "}
         {/* Home */}
         <Link
           href="/"
@@ -18,6 +29,7 @@ const BreadCrumbs = ({ slug, name, length, type,city }) => {
         >
           Home
         </Link>
+
         {/* City */}
         {city && (
           <>
@@ -30,18 +42,22 @@ const BreadCrumbs = ({ slug, name, length, type,city }) => {
             </span>
           </>
         )}
-        {/* Slug */}
+
+        {/* Slug/Category — now goes to /{slug}/{city} */}
         {slug && (
           <>
             <Slash />
             <span
-              onClick={() => router.back()}
+              onClick={() =>
+                categoryUrl ? router.push(categoryUrl) : router.back()
+              }
               className="text-gray-500 capitalize cursor-pointer hover:text-orange-500 transition-colors"
             >
               {slug}
             </span>
           </>
         )}
+
         {/* Type */}
         {type && type !== true && (
           <>
@@ -54,6 +70,7 @@ const BreadCrumbs = ({ slug, name, length, type,city }) => {
             </span>
           </>
         )}
+
         {/* Name — final crumb, not clickable */}
         {name && (
           <>

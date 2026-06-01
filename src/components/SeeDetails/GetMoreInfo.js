@@ -5,6 +5,7 @@ import { query } from "@/api/queries";
 import ResponseAlert from "@/components/ResponseAlert";
 import ReCAPTCHA from "react-google-recaptcha";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import CountryCodePhoneInput from "@/components/shared/CountryCodePhoneInput";
 
 const GetMoreInfo = ({
   setEnquirePop,
@@ -25,6 +26,7 @@ const GetMoreInfo = ({
 
   const [res, setRes] = useState(null);
   const [errors, setErrors] = useState({});
+  const [countryCode, setCountryCode] = useState("+971");
   const [infoQuery, setInfoQuery] = useState({
     name: "",
     email: "",
@@ -70,7 +72,7 @@ const GetMoreInfo = ({
   const validatePhone = (phone) => {
     if (!phone.trim()) return "Phone number is required";
     if (!/^\d+$/.test(phone)) return "Phone number should only contain digits";
-    if (phone.length < 10) return "Phone number must be at least 10 digits";
+    if (phone.length < 7) return "Phone number must be at least 7 digits";
     if (phone.length > 15) return "Phone number is too long";
     return "";
   };
@@ -125,7 +127,7 @@ const GetMoreInfo = ({
     const payload = {
       fullName: infoQuery.name,
       email: infoQuery.email,
-      mobileNumber: infoQuery.phone,
+      mobileNumber: `${countryCode}${infoQuery.phone}`,
       message: infoQuery.message,
     };
 
@@ -244,21 +246,15 @@ const GetMoreInfo = ({
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Mobile Number <span className="text-red-500">*</span>
                 </label>
-                <input
+                <CountryCodePhoneInput
                   value={infoQuery.phone}
                   onChange={(e) => handleFieldChange("phone", e.target.value)}
-                  placeholder="10-15 digit mobile number"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
-                    errors.phone
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                  }`}
+                  countryCode={countryCode}
+                  setCountryCode={setCountryCode}
+                  error={errors.phone}
+                  placeholder="Mobile number"
+                  variant="bordered"
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1.5">
-                    ⚠️ {errors.phone}
-                  </p>
-                )}
               </div>
 
               {/* Message */}
@@ -433,21 +429,15 @@ const GetMoreInfo = ({
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <input
+                  <CountryCodePhoneInput
                     value={infoQuery.phone}
                     onChange={(e) => handleFieldChange("phone", e.target.value)}
-                    placeholder="10-15 digit mobile number"
-                    className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${
-                      errors.phone
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                    }`}
+                    countryCode={countryCode}
+                    setCountryCode={setCountryCode}
+                    error={errors.phone}
+                    placeholder="Mobile number"
+                    variant="bordered"
                   />
-                  {errors.phone && (
-                    <p className="text-red-500 text-xs mt-1.5">
-                      ⚠️ {errors.phone}
-                    </p>
-                  )}
                 </div>
 
                 {/* Message */}
@@ -557,19 +547,15 @@ const GetMoreInfo = ({
 
               {/* Phone */}
               <div>
-                <input
+                <CountryCodePhoneInput
                   value={infoQuery.phone}
                   onChange={(e) => handleFieldChange("phone", e.target.value)}
+                  countryCode={countryCode}
+                  setCountryCode={setCountryCode}
+                  error={errors.phone}
                   placeholder="Mobile Number"
-                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-colors ${
-                    errors.phone
-                      ? "border-red-500"
-                      : "border-gray-200 focus:border-orange-500"
-                  }`}
+                  variant="bordered"
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-                )}
               </div>
 
               {/* Message */}
