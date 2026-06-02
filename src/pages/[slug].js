@@ -1026,7 +1026,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
           className="inset-0 flex items-center fixed justify-center backdrop-blur-xs bg-black/60 z-50 py-20 px-5"
           onClick={() => setEnquirePop(false)}
         >
-          <div>
+          <div onClick={(e) => e.stopPropagation()}>
             <GetMoreInfo
               isPop={true}
               logo={`${APP_URL}/${data?.logo}`}

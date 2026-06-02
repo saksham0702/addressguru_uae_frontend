@@ -22,6 +22,8 @@ import { useRouter } from "next/navigation";
 import DeleteConfirmModal from "../cities/deletemodal";
 import { deleteUser, getUsers, loginAsUser } from "@/api/uaeadminlogin";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
+import { socket } from "@/lib/socket";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "";
 
@@ -33,7 +35,7 @@ const roleMap = {
   5: "User",
 };
 
-const LIMIT = 10;
+const LIMIT = 20;
 
 function getAvatarUrl(avatar) {
   if (!avatar) return null;
@@ -82,9 +84,11 @@ function UserAvatar({ user }) {
 
   if (avatarUrl && !imgError) {
     return (
-      <img
+      <Image
         src={avatarUrl}
         alt={user.name}
+        height={500}
+        width={500}
         onError={() => setImgError(true)}
         className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow flex-shrink-0"
       />
@@ -126,6 +130,7 @@ export default function UsersTable() {
   const { setUser } = useAuth();
 
   const [users, setUsers] = useState([]);
+  const [onlineFilter, setOnlineFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -142,6 +147,7 @@ export default function UsersTable() {
         page: currentPage,
         limit: LIMIT,
         search: currentSearch,
+        isOnline: onlineFilter,
       });
       const data = res?.data;
       console.log("data", data);
@@ -157,7 +163,27 @@ export default function UsersTable() {
 
   useEffect(() => {
     fetchUsers(page, search);
-  }, [page, search, fetchUsers]);
+  }, [page, search, fetchUsers, onlineFilter]);
+
+  useEffect(() => {
+    socket.on("user-status-changed", (data) => {
+      setUsers((prev) =>
+        prev.map((user) =>
+          user._id === data.userId
+            ? {
+                ...user,
+                isOnline: data.isOnline,
+                lastSeen: data.lastSeen,
+              }
+            : user,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("user-status-changed");
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -233,7 +259,7 @@ export default function UsersTable() {
         </div>
 
         {/* Search */}
-        <div className="px-8 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 bg-gray-50">
           <div className="relative max-w-sm">
             <Search
               size={15}
@@ -247,6 +273,19 @@ export default function UsersTable() {
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6E04]/20 focus:border-[#FF6E04] transition placeholder:text-gray-400"
             />
           </div>
+          {/* online offline filter */}
+          <select
+            value={onlineFilter}
+            onChange={(e) => {
+              setPage(1);
+              setOnlineFilter(e.target.value);
+            }}
+            className="border font-sans rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="">All Users</option>
+            <option value="true">Online</option>
+            <option value="false">Offline</option>
+          </select>
         </div>
 
         {/* Table */}
@@ -274,9 +313,9 @@ export default function UsersTable() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                   Joined
                 </th>
-                {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
                   Last Active
-                </th> */}
+                </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">
                   Actions
                 </th>
@@ -317,9 +356,17 @@ export default function UsersTable() {
                       <div className="flex items-center gap-3">
                         <UserAvatar user={user} />
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 truncate leading-tight">
-                            {user.name}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-800 truncate leading-tight">
+                              {user.name}
+                            </p>
+
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                user.isOnline ? "bg-green-500" : "bg-gray-300"
+                              }`}
+                            />
+                          </div>
                           <div className="flex items-center gap-1 mt-0.5">
                             <Mail
                               size={11}
@@ -398,7 +445,7 @@ export default function UsersTable() {
                     </td>
 
                     {/* Last Active */}
-                    {/* <td className="px-4 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex items-start gap-1.5">
                         <Clock
                           size={13}
@@ -406,14 +453,18 @@ export default function UsersTable() {
                         />
                         <div>
                           <p className="text-sm font-medium text-gray-700">
-                            {formatLastActive(user.lastActive)}
+                            {user.isOnline
+                              ? "Online"
+                              : formatLastActive(
+                                  user.lastSeen || user?.lastActive,
+                                )}
                           </p>
                           <p className="text-xs text-gray-400">
-                            {formatDate(user.lastActive)}
+                            {formatDate(user.lastSeen || user?.lastActive)}
                           </p>
                         </div>
                       </div>
-                    </td> */}
+                    </td>
 
                     {/* Actions */}
                     <td className="px-4 py-4">

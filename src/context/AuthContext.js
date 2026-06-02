@@ -1,6 +1,7 @@
 "use client";
 import { get_user_details } from "@/api/uaeadminlogin";
 import { createContext, useContext, useState, useEffect } from "react";
+import { socket } from "@/lib/socket";
 
 const AuthContext = createContext(null);
 
@@ -28,8 +29,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
-
   // load token and city on first mount
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -51,6 +50,14 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
   }, [token]);
+  console.log("user", user);
+
+  useEffect(() => {
+    if (!user?.data?._id) return;
+
+    socket.emit("user-online", user?.data._id);
+    console.log("EMITTED ONLINE", user?.data._id);
+  }, [user]);
 
   // persist city when it changes
   useEffect(() => {
