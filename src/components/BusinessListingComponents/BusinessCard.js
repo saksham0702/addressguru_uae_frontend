@@ -13,9 +13,9 @@ import BusinessCardMobile from "./BusinessCardMobile";
 const BusinessCard = ({ data, index, isFilledCall }) => {
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const message = `Hi,
-${data?.businessName}, i am looking for ${data?.category?.name}
-I found your business on AddressGuru UAE
+  const message = `Hi
+I am looking for *${data?.category?.name}*.
+I found your business *${data?.businessName}* on *AddressGuru UAE*.
 https://addressguru.ae/${data?.slug}`;
 
   const handleShowNumber = async (type) => {
@@ -99,11 +99,11 @@ https://addressguru.ae/${data?.slug}`;
 
               <div className="flex items-center md:gap-4 max-md:gap-1.5 my-1 max-[340px]:!scale-90 w-20">
                 {data?.statistics?.averageRating > 0 && (
-                  <div className="flex  gap-1 bg-[#3D8727] text-white md:px-1.5 px-1 py-[1px] text-xs  max-md:mr-2 rounded md:text-sm">
+                  <div className="flex  gap-1 bg-[#3D8727] items-center text-white md:px-1.5 px-1 py-[1px] text-xs  max-md:mr-2 rounded md:text-sm">
                     <span>{data?.statistics?.averageRating}</span>
                     <svg
                       width="17"
-                      height="16"
+                      height="14"
                       viewBox="0 0 17 16"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"

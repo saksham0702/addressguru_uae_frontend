@@ -362,7 +362,7 @@ const GetMoreInfo = ({
                   <span className="font-semibold text-orange-600">{name}</span>.
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Fill the form and we will connect you shortly.
+                  Fill the form and {name} will connect you shortly.
                 </p>
               </div>
             </div>
