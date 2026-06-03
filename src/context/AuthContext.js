@@ -50,14 +50,26 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
   }, [token]);
-  console.log("user", user);
 
   useEffect(() => {
-    if (!user?.data?._id) return;
+    const userId = user?.data?._id;
 
-    socket.emit("user-online", user?.data._id);
-    console.log("EMITTED ONLINE", user?.data._id);
-  }, [user]);
+    // ✅ user exists → connect + emit online
+    if (userId) {
+      if (!socket.connected) {
+        socket.connect(); // 👈 ADD THIS
+      }
+
+      socket.emit("user-online", userId);
+    }
+    // ✅ user null → disconnect (offline)
+    else {
+      if (socket.connected) {
+        socket.disconnect();
+        console.log("FORCED OFFLINE");
+      }
+    }
+  }, [user?.data?._id]);
 
   // persist city when it changes
   useEffect(() => {

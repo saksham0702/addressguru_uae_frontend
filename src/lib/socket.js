@@ -5,5 +5,6 @@ const SOCKET_URL = API_URL;
 
 export const socket = io(SOCKET_URL, {
   autoConnect: true,
+  withCredentials: true,
   transports: ["websocket"],
 });

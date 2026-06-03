@@ -37,6 +37,27 @@ export const logoutUser = async () => {
   );
 };
 
+export const getUsers = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  online = "",
+  sortBy = "new",
+} = {}) => {
+  const params = new URLSearchParams({ page, limit });
+
+  if (search) params.append("search", search);
+  if (online !== "") params.append("online", online);
+  if (sortBy === "old") params.append("sortBy", "old");
+
+  const res = await axios.get(
+    `${API_URL}/admin/users/get-all?${params.toString()}`,
+    { withCredentials: true },
+  );
+
+  return res.data;
+};
+
 export const createUser = async (data) => {
   const res = await axios.post(`${API_URL}/admin/users/create`, data, {
     withCredentials: true,
@@ -53,16 +74,6 @@ export const updateUser = async (id, payload) => {
     },
   );
 
-  return res.data;
-};
-
-export const getUsers = async ({ page = 1, limit = 10, search = "" } = {}) => {
-  const params = new URLSearchParams({ page, limit });
-  if (search) params.append("search", search);
-
-  const res = await axios.get(`${API_URL}/admin/users/get-all?${params.toString()}`, {
-    withCredentials: true,
-  });
   return res.data;
 };
 

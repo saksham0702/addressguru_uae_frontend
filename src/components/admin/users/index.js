@@ -44,13 +44,17 @@ function getAvatarUrl(avatar) {
   return `${APP_URL}/${avatar}`;
 }
 
-function formatDate(dateStr) {
+function formatDateTime(dateStr) {
   if (!dateStr) return "—";
+
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-GB", {
+
+  return d.toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -67,7 +71,7 @@ function formatLastActive(dateStr) {
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays}d ago`;
-  return formatDate(dateStr);
+  return formatDateTime(dateStr);
 }
 
 function UserAvatar({ user }) {
@@ -134,32 +138,37 @@ export default function UsersTable() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [sortType, setSortType] = useState("new");
+  const [sortBy, setSortBy] = useState("new");
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
 
-  const fetchUsers = useCallback(async (currentPage, currentSearch) => {
-    setLoading(true);
-    try {
-      const res = await getUsers({
-        page: currentPage,
-        limit: LIMIT,
-        search: currentSearch,
-        isOnline: onlineFilter,
-      });
-      const data = res?.data;
-      console.log("data", data);
-      setUsers(data?.users || []);
-      setTotal(data?.total || 0);
-      setTotalPages(Math.ceil((data?.total || 0) / LIMIT));
-    } catch (err) {
-      console.error("Failed to fetch users");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchUsers = useCallback(
+    async (currentPage, currentSearch) => {
+      setLoading(true);
+      try {
+        const res = await getUsers({
+          page: currentPage,
+          limit: LIMIT,
+          search: currentSearch,
+          online: onlineFilter,
+          sortBy,
+        });
+        const data = res?.data;
+        setUsers(data?.users || []);
+        setTotal(data?.total || 0);
+        setTotalPages(Math.ceil((data?.total || 0) / LIMIT));
+      } catch (err) {
+        console.error("Failed to fetch users");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onlineFilter, sortBy],
+  );
 
   useEffect(() => {
     fetchUsers(page, search);
@@ -167,22 +176,20 @@ export default function UsersTable() {
 
   useEffect(() => {
     socket.on("user-status-changed", (data) => {
-      setUsers((prev) =>
-        prev.map((user) =>
+      setUsers((prev) => {
+        const updated = prev.map((user) =>
           user._id === data.userId
-            ? {
-                ...user,
-                isOnline: data.isOnline,
-                lastSeen: data.lastSeen,
-              }
+            ? { ...user, isOnline: data.isOnline, lastSeen: data.lastSeen }
             : user,
-        ),
-      );
+        );
+        return [...updated].sort((a, b) => {
+          if (a.isOnline === b.isOnline) return 0;
+          return a.isOnline ? -1 : 1;
+        });
+      });
     });
 
-    return () => {
-      socket.off("user-status-changed");
-    };
+    return () => socket.off("user-status-changed");
   }, []);
 
   useEffect(() => {
@@ -234,7 +241,7 @@ export default function UsersTable() {
   };
 
   return (
-    <div className="w-full py-8">
+    <div className="w-full">
       <div className="max-w-8xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-5 border-b border-gray-200">
@@ -258,7 +265,6 @@ export default function UsersTable() {
           </button>
         </div>
 
-        {/* Search */}
         <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 bg-gray-50">
           <div className="relative max-w-sm">
             <Search
@@ -273,19 +279,31 @@ export default function UsersTable() {
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6E04]/20 focus:border-[#FF6E04] transition placeholder:text-gray-400"
             />
           </div>
-          {/* online offline filter */}
-          <select
-            value={onlineFilter}
-            onChange={(e) => {
-              setPage(1);
-              setOnlineFilter(e.target.value);
-            }}
-            className="border font-sans rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">All Users</option>
-            <option value="true">Online</option>
-            <option value="false">Offline</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <select
+              value={onlineFilter}
+              onChange={(e) => {
+                setPage(1);
+                setOnlineFilter(e.target.value);
+              }}
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF6E04]/20 focus:border-[#FF6E04] transition cursor-pointer"
+            >
+              <option value="">All Users</option>
+              <option value="true">Online</option>
+              <option value="false">Offline</option>
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setPage(1);
+                setSortBy(e.target.value);
+              }}
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF6E04]/20 focus:border-[#FF6E04] transition cursor-pointer"
+            >
+              <option value="new">Newest First</option>
+              <option value="old">Oldest First</option>
+            </select>
+          </div>
         </div>
 
         {/* Table */}
@@ -437,7 +455,7 @@ export default function UsersTable() {
                         />
                         <div>
                           <p className="text-sm font-medium text-gray-700">
-                            {formatDate(user.createdAt)}
+                            {formatDateTime(user.createdAt)}
                           </p>
                           <p className="text-xs text-gray-400">Registered</p>
                         </div>
@@ -460,7 +478,7 @@ export default function UsersTable() {
                                 )}
                           </p>
                           <p className="text-xs text-gray-400">
-                            {formatDate(user.lastSeen || user?.lastActive)}
+                            {formatDateTime(user.lastSeen || user?.lastActive)}
                           </p>
                         </div>
                       </div>
