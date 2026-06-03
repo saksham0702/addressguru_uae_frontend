@@ -161,6 +161,7 @@ export const get_all_admin_listings = async ({
   viewType = "completed",
   leadStatus,
   followUpFilter,
+  onlineUsers,
 } = {}) => {
   const token = localStorage.getItem("token");
 
@@ -179,6 +180,7 @@ export const get_all_admin_listings = async ({
           // ✅ ADD THESE
           ...(leadStatus && { leadStatus }),
           ...(followUpFilter && { followUpFilter }),
+          ...(onlineUsers && { onlineUsers }),
         },
 
         headers: {

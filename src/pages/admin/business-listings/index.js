@@ -8,6 +8,7 @@ import {
 import FollowUpModal from "@/components/admin/business/FollowUpModal";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 import Link from "next/link";
+import { socket } from "@/lib/socket";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 export function fmtDate(iso) {
@@ -212,6 +213,7 @@ const BusinessListings = () => {
   const [selected, setSelected] = useState(new Set());
   const [showEntries, setShowEntries] = useState(10);
   const [page, setPage] = useState(1);
+  const [onlineUsersFilter, setOnlineUsersFilter] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [rejectModalData, setRejectModalData] = useState(null);
@@ -239,6 +241,7 @@ const BusinessListings = () => {
     viewType,
     leadFilter,
     followUpFilter,
+    onlineUsersFilter,
   ]);
 
   function showToast(msg, type = "success") {
@@ -310,9 +313,10 @@ const BusinessListings = () => {
         limit: showEntries,
         status: statusFilter,
         search,
-        viewType, // 👈 THIS IS THE KEY
-        leadStatus: leadFilter !== "all" ? leadFilter : undefined, // 👈 added
+        viewType,
+        leadStatus: leadFilter !== "all" ? leadFilter : undefined,
         followUpFilter: followUpFilter !== "all" ? followUpFilter : undefined,
+        onlineUsers: onlineUsersFilter ? "true" : undefined,
       });
 
       console.log("API RESPONSE:", res);
@@ -330,6 +334,27 @@ const BusinessListings = () => {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    socket.on("user-status-changed", (data) => {
+      setListings((prev) =>
+        prev.map((listing) =>
+          listing?.createdBy?._id === data.userId
+            ? {
+                ...listing,
+                createdBy: {
+                  ...listing.createdBy,
+                  isOnline: data.isOnline,
+                  lastSeen: data.lastSeen,
+                },
+              }
+            : listing,
+        ),
+      );
+    });
+
+    return () => socket.off("user-status-changed");
+  }, []);
 
   function handleFollowUpSubmit(listingId, entry) {
     setFollowUps((prev) => ({
@@ -398,196 +423,173 @@ const BusinessListings = () => {
   }
 
   return (
-    <div
-      className="bg-gray-50 min-h-screen p-6"
-      style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}
-    >
+    <div className=" min-h-screen bg-white p-3">
       {/* ── PAGE HEADER ── */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="">
-          <h1 className="text-xl font-bold text-slate-800 leading-tight">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold text-slate-800">
             Business Listings
           </h1>
-
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm text-slate-500 font-medium">
-              Total Listings:
-            </span>
-            <span className="px-2.5 py-0.5 text-sm font-bold bg-orange-100 text-orange-600 rounded-lg">
-              {totallistings}
-            </span>
-          </div>
-        </div>
-        <div className="relative">
-          {/* <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition-colors"
-          >
-            Assign Lead
-            <ChevronIcon dir={dropdownOpen ? "up" : "down"} />
-          </button> */}
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1 overflow-hidden">
-              {["Ayushe Gupta", "Vikas Suyal", "Shivani Gupta"].map((u) => (
-                <button
-                  key={u}
-                  onClick={() => setDropdownOpen(false)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors font-medium"
-                >
-                  {u}
-                </button>
-              ))}
-            </div>
-          )}
+          <span className="px-2 py-0.5 text-xs font-bold bg-orange-100 text-orange-600 rounded-md">
+            {totallistings} total
+          </span>
         </div>
       </div>
 
-      {/* ── STAT / FILTER CARDS ── */}
-      <div className="flex gap-3 mb-5">
-        {stats.map((s) => {
-          const active = statusFilter === s.key;
-          const count = statCounts[s.key];
-
-          return (
-            <button
-              key={s.key}
-              onClick={() => {
-                setStatusFilter(s.key);
-                setPage(1);
-              }}
-              className={`flex items-center justify-between min-w-[140px] px-4 py-2.5 rounded-lg border text-left transition-all
-        ${
-          active
-            ? `${s.activeBg} text-white border-transparent shadow`
-            : `bg-white border-slate-200 hover:shadow-sm`
-        }`}
-            >
-              {/* LEFT TEXT */}
-              <div className="flex flex-col">
+      {/* ── STATUS + VIEW TYPE IN ONE ROW ── */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          {stats.map((s) => {
+            const active = statusFilter === s.key;
+            const count = statCounts[s.key];
+            return (
+              <button
+                key={s.key}
+                onClick={() => {
+                  setStatusFilter(s.key);
+                  setPage(1);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-semibold transition-all ${
+                  active
+                    ? `${s.activeBg} text-white border-transparent shadow-sm`
+                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                }`}
+              >
+                {s.label}
                 <span
-                  className={`text-[11px] font-semibold uppercase tracking-wide ${
-                    active ? "text-white/80" : "text-slate-400"
-                  }`}
-                >
-                  {s.label}
-                </span>
-
-                <span
-                  className={`text-sm font-bold ${
-                    active ? "text-white" : "text-slate-800"
+                  className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
+                    active
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {count}
                 </span>
-              </div>
+              </button>
+            );
+          })}
+        </div>
 
-              {/* RIGHT DOT INDICATOR */}
-              <div
-                className={`w-2.5 h-2.5 rounded-full ${
-                  active ? "bg-white" : "bg-slate-300"
-                }`}
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex gap-2 text-xs mb-5">
-        {[
-          { id: "completed", label: "Completed" },
-          { id: "incomplete", label: "Incomplete" },
-          { id: "deleted", label: "Deleted" },
-        ].map((view) => (
-          <button
-            key={view.id}
-            onClick={() => {
-              setViewType(view.id);
-              setPage(1);
-            }}
-            className={`px-3.5 py-1.5 rounded-full font-semibold transition-all border ${
-              viewType === view.id
-                ? "bg-slate-800 text-white border-slate-800 shadow-sm"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
-            }`}
-          >
-            {view.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── LEAD STATUS FILTER ── */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">
-          Lead
-        </span>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
           {[
-            { id: "all", label: "All", emoji: "" },
-            { id: "hot", label: "Hot", emoji: "🔥" },
-            { id: "warm", label: "Warm", emoji: "🌤️" },
-            { id: "cold", label: "Cold", emoji: "🧊" },
-            { id: "new", label: "New", emoji: "✨" },
-          ].map((s) => (
+            { id: "completed", label: "Completed" },
+            { id: "incomplete", label: "Incomplete" },
+            { id: "deleted", label: "Deleted" },
+          ].map((view) => (
             <button
-              key={s.id}
+              key={view.id}
               onClick={() => {
-                setLeadFilter(s.id);
+                setViewType(view.id);
                 setPage(1);
               }}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all
-          ${
-            leadFilter === s.id
-              ? s.id === "hot"
-                ? "bg-red-500 text-white border-red-500 shadow-sm"
-                : s.id === "warm"
-                  ? "bg-orange-400 text-white border-orange-400 shadow-sm"
-                  : s.id === "cold"
-                    ? "bg-blue-400 text-white border-blue-400 shadow-sm"
-                    : s.id === "new"
-                      ? "bg-purple-500 text-white border-purple-500 shadow-sm"
-                      : "bg-slate-800 text-white border-slate-800 shadow-sm"
-              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-          }`}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                viewType === view.id
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
             >
-              {s.emoji && <span>{s.emoji}</span>}
-              {s.label}
+              {view.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── FOLLOW-UP DATE FILTER ── */}
-      <div className="flex items-center gap-2 mb-5">
-        <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">
-          Follow Up
-        </span>
-        <div className="flex gap-1.5 flex-wrap">
-          {[
-            { id: "all", label: "All" },
-            { id: "overdue", label: "⚠️ Overdue" },
-            { id: "today", label: "Today" },
-            { id: "tomorrow", label: "Tomorrow" },
-            { id: "this_week", label: "This Week" },
-            { id: "no_followup", label: "No Follow-up" },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => {
-                setFollowUpFilter(f.id);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all
-          ${
-            followUpFilter === f.id
-              ? f.id === "overdue"
-                ? "bg-red-500 text-white border-red-500 shadow-sm"
-                : "bg-blue-600 text-white border-blue-600 shadow-sm"
-              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-          }`}
-            >
-              {f.label}
-            </button>
-          ))}
+      {/* ── FILTERS ROW ── */}
+      <div className="mb-5 bg-white border border-slate-200 rounded-xl overflow-hidden">
+        {/* Online */}
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 flex-shrink-0">
+            Users
+          </span>
+          <button
+            onClick={() => {
+              setOnlineUsersFilter((v) => !v);
+              setPage(1);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+              onlineUsersFilter
+                ? "bg-green-500 text-white border-green-500"
+                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${onlineUsersFilter ? "bg-white" : "bg-green-400"}`}
+            />
+            Online Only
+          </button>
+        </div>
+
+        {/* Lead */}
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 flex-shrink-0">
+            Lead
+          </span>
+          <div className="flex gap-1.5">
+            {[
+              { id: "all", label: "All" },
+              { id: "hot", label: "🔥 Hot" },
+              { id: "warm", label: "🌤 Warm" },
+              { id: "cold", label: "🧊 Cold" },
+              { id: "new", label: "✨ New" },
+            ].map((s) => (
+              <button
+                key={s.id}
+                onClick={() => {
+                  setLeadFilter(s.id);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  leadFilter === s.id
+                    ? s.id === "hot"
+                      ? "bg-red-500 text-white border-red-500"
+                      : s.id === "warm"
+                        ? "bg-orange-400 text-white border-orange-400"
+                        : s.id === "cold"
+                          ? "bg-blue-400 text-white border-blue-400"
+                          : s.id === "new"
+                            ? "bg-purple-500 text-white border-purple-500"
+                            : "bg-slate-700 text-white border-slate-700"
+                    : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-700"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Follow Up */}
+        <div className="flex items-center gap-3 px-4 py-2.5">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 flex-shrink-0">
+            Follow Up
+          </span>
+          <div className="flex gap-1.5">
+            {[
+              { id: "all", label: "All" },
+              { id: "overdue", label: "⚠ Overdue" },
+              { id: "today", label: "Today" },
+              { id: "tomorrow", label: "Tomorrow" },
+              { id: "this_week", label: "This Week" },
+              { id: "no_followup", label: "None" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => {
+                  setFollowUpFilter(f.id);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  followUpFilter === f.id
+                    ? f.id === "overdue"
+                      ? "bg-red-500 text-white border-red-500"
+                      : "bg-blue-600 text-white border-blue-600"
+                    : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-700"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -942,6 +944,7 @@ const BusinessListings = () => {
                               listing?.createdBy?.name ||
                               listing.contactPersonName ||
                               "Admin",
+                            isOnline: listing?.createdBy?.isOnline,
                           },
 
                           {
@@ -970,7 +973,7 @@ const BusinessListings = () => {
                               listing.contactPersonName ||
                               "Admin",
                           },
-                        ].map(({ label, value, isStatus }) => {
+                        ].map(({ label, value, isStatus, isOnline }) => {
                           // 🎯 Status color logic
                           const statusColor =
                             value === "approved"
@@ -991,13 +994,23 @@ const BusinessListings = () => {
                                 {label}:
                               </span>
 
-                              <span
-                                className={`text-[11px] font-bold truncate max-w-[110px] ${
-                                  isStatus ? statusColor : "text-slate-700"
-                                }`}
-                              >
-                                {value}
-                              </span>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-[11px] font-bold truncate max-w-[110px] ${
+                                    isStatus ? statusColor : "text-slate-700"
+                                  }`}
+                                >
+                                  {value}
+                                </span>
+                                {isOnline !== undefined && (
+                                  <span
+                                    title={isOnline ? "Online" : "Offline"}
+                                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                      isOnline ? "bg-green-500" : "bg-gray-300"
+                                    }`}
+                                  />
+                                )}
+                              </div>
                             </div>
                           );
                         })}
