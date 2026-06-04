@@ -1,10 +1,3 @@
-import { get_company_data } from "@/api/forms";
-import InputWithTitle from "@/components/Forms/InputWithTitle";
-import Navbar from "@/components/Forms/Navbar";
-import { SearchableMultiSelect } from "@/components/Forms/SearchableMultiSelect";
-import Steps from "@/components/Forms/Steps";
-import DynamicArrayInput from "@/components/Forms/DynamicArrayInput";
-import DropDown from "@/components/Forms/DropDown";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef } from "react";
 import ResponseAlert from "@/components/ResponseAlert";
@@ -34,7 +27,9 @@ import {
 } from "@/services/constants";
 import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 import { getCities } from "@/api/uaeadminCities";
-import MultiSelectDropDown from "@/components/Forms/MultiSelect";
+import Navbar from "@/components/Forms/Navbar";
+
+import JobForm from "@/components/Forms/JobForm/JobForm";
 
 const JobListing = () => {
   const router = useRouter();
@@ -120,7 +115,9 @@ const JobListing = () => {
     name: "",
     email: "",
     phone: "",
+    countryCode: "+971",
     city: "",
+    locality: "",
     address: "",
   });
 
@@ -520,7 +517,12 @@ const JobListing = () => {
       ) {
         newErrors.openings = "Openings must be a number";
       }
-      if (postJobData.skills.length === 0) {
+      // Skills is now an array
+      if (
+        !postJobData.skills ||
+        postJobData.skills.length === 0 ||
+        postJobData.skills.every((s) => !s.trim())
+      ) {
         newErrors.skills = "Please add at least one skill";
       }
     }
@@ -536,7 +538,7 @@ const JobListing = () => {
       if (!postJobData.phone) {
         newErrors.phone = "Phone number is required";
       } else if (!/^\d{10}$/.test(postJobData.phone)) {
-        newErrors.phone = "Phone number must be 10 digits";
+        newErrors.phone = "Phone number must be exactly 10 digits";
       }
     }
     setErrors(newErrors);
@@ -668,24 +670,7 @@ const JobListing = () => {
           JSON.stringify(postJobData.nationality || []),
         );
 
-        // location JSON
-        const selectedCity = cityOptions.find(
-          (c) => c.value === postJobData.location,
-        );
-
-        const locationObj = {
-          city: selectedCity
-            ? {
-              _id: selectedCity.value,
-              name: selectedCity.label,
-              slug: selectedCity.slug, // ✅ ADD THIS
-            }
-            : null,
-          isRemote: postJobData.workMode === "remote",
-        };
-
-        formData.append("location", JSON.stringify(locationObj));
-
+        // location → removed from Step 1 as requested
         formData.append("noOfExperience", postJobData.minExperience);
 
         formData.append("gender", postJobData.gender);
@@ -709,16 +694,17 @@ const JobListing = () => {
         break;
       case 2:
         formData.append("folder", "Jobs");
-        // formData.append("slug", String(slug));
 
         const contactObj = {
           name: postJobData.name,
           email: postJobData.email,
           phone: String(postJobData.phone),
+          countryCode: postJobData.countryCode,
         };
 
         formData.append("contact", JSON.stringify(contactObj));
 
+        const cityOptions = options.cityOptions || [];
         const selectedCompanyCity = cityOptions.find(
           (c) => c.value === postJobData.city,
         );
@@ -728,15 +714,16 @@ const JobListing = () => {
           description: postJobData.companyDescription,
           website: postJobData.companyWebsite,
           address: postJobData.address,
+          locality: postJobData.locality,
 
           city: selectedCompanyCity
             ? {
-              _id: selectedCompanyCity.value,
-              name: selectedCompanyCity.label,
-              slug:
-                selectedCompanyCity.slug ||
-                selectedCompanyCity.label.toLowerCase().replace(/\s+/g, "-"),
-            }
+                _id: selectedCompanyCity.value,
+                name: selectedCompanyCity.label,
+                slug:
+                  selectedCompanyCity.slug ||
+                  selectedCompanyCity.label.toLowerCase().replace(/\s+/g, "-"),
+              }
             : null,
         };
 
@@ -833,7 +820,7 @@ const JobListing = () => {
       } else {
         setResponse(
           error?.response?.data?.message ||
-          "Something went wrong. Please try again.",
+            "Something went wrong. Please try again.",
         );
       }
       setLoading(false);
@@ -841,711 +828,89 @@ const JobListing = () => {
     }
   };
 
-  // Convert dropdown data to options format
-  const categoryOptions = (categories || []).map((cat) => ({
-    value: cat._id,
-    label: cat.name,
-    slug: cat.slug, // ✅ IMPORTANT
-  }));
-
-  const cityOptions = cities?.map((city) => ({
-    value: city._id, // important → ID
-    label: city.name, // display name
-    slug: city.slug,
-  }));
+  const options = {
+    categoryOptions: (categories || []).map((cat) => ({
+      value: cat._id,
+      label: cat.name,
+      slug: cat.slug,
+    })),
+    cityOptions: cities?.map((city) => ({
+      value: city._id,
+      label: city.name,
+      slug: city.slug,
+    })),
+    sectorOptions,
+    jobTypeOptions,
+    workModeOptions,
+    experienceLevelOptions,
+    salaryOptions,
+    BenefitOptions,
+    educationLevels: (educationLevels || []).map((item) => ({
+      value: item.value,
+      label: item.name,
+    })),
+    ageOptions: AGE_OPTIONS.map((a) => ({
+      value: a.value,
+      label: a.name,
+    })),
+    genderOptions,
+    nationalityOptions,
+    languageOptions,
+  };
 
   const getSelectedOption = (options = [], value) => {
     if (!value) return null;
     return options.find((opt) => opt?.value === value) || null;
   };
 
-  const jobInfoForms = [
-    {
-      id: 1,
-      name: "Category",
-      key: "category_id",
-      type: "dropdown",
-      placeholder: "Select category",
-      required: true,
-      ref: categoryRef,
-      options: categoryOptions,
-    },
-    {
-      id: 2,
-      name: "Sub Category",
-      key: "sub_category_id",
-      type: "dropdown",
-      placeholder: "Select sub category",
-      ref: subCategoryRef,
-      options: subCategories,
-    },
-    {
-      id: 3,
-      name: "Job Title",
-      key: "title",
-      type: "text",
-      placeholder: "Enter job title",
-      ref: titleRef,
-      required: true,
-      minlength: 20,
-      maxlength: 100,
-    },
-    {
-      id: 4,
-      name: "Description",
-      key: "description",
-      type: "textarea",
-      placeholder: "Enter description",
-      ref: descriptionRef,
-      required: true,
-      minlength: 200,
-      maxlength: 500,
-    },
-    {
-      id: 5,
-      name: "Requirements",
-      key: "requirements",
-      type: "array",
-      placeholder: "Enter requirement",
-    },
-    {
-      id: 6,
-      name: "Responsibilities",
-      key: "responsibilities",
-      type: "array",
-      placeholder: "Enter responsibility",
-    },
-
-    {
-      id: 8,
-      name: "Skills",
-      key: "skills",
-      type: "search",
-      placeholder: "Enter skill",
-      ref: skillsRef,
-      required: true,
-    },
-    {
-      id: 9,
-      width: true,
-      name: "Sector",
-      key: "sector",
-      type: "dropdown",
-      placeholder: "Select sector",
-      options: sectorOptions,
-      required: true,
-    },
-    {
-      id: 10,
-      width: true,
-      name: "Job Type",
-      key: "jobType",
-      type: "dropdown",
-      placeholder: "Select job type",
-      ref: jobTypeRef,
-      options: jobTypeOptions,
-      required: true,
-    },
-    {
-      id: 11,
-      width: true,
-      name: "Work Mode",
-      key: "workMode",
-      type: "dropdown",
-      placeholder: "Remote / Onsite / Hybrid",
-      options: workModeOptions,
-    },
-    {
-      id: 12,
-      width: true,
-      name: "Experience Level",
-      key: "experienceLevel",
-      type: "dropdown",
-      placeholder: "Select experience level",
-      options: experienceLevelOptions,
-      requried: true,
-    },
-    {
-      id: 13,
-      width: true,
-      name: "Monthly Salary",
-      key: "salaryRange",
-      type: "dropdown",
-      options: salaryOptions,
-      required: true,
-    },
-    {
-      id: 7,
-      width: true,
-      name: "Benefits",
-      key: "benefits",
-      type: "multiselect",
-      options: BenefitOptions,
-      placeholder: "Enter benefit",
-    },
-    {
-      id: 14,
-      width: true,
-      name: "Minimum Work Experience",
-      key: "minExperience",
-      type: "text",
-    },
-    {
-      id: 18,
-      width: true,
-      name: "Total Positions",
-      key: "openings",
-      type: "text",
-      placeholder: "Enter number of positions",
-      ref: openingsRef,
-      required: true,
-    },
-    {
-      id: 15,
-      width: true,
-      name: "Location",
-      key: "location",
-      type: "dropdown",
-      options: cityOptions,
-    },
-    {
-      id: 16,
-      width: true,
-      name: "Education",
-      key: "education",
-      type: "dropdown",
-      ref: educationLevelRef,
-      options: (educationLevels || []).map((item) => ({
-        value: item.value,
-        label: item.name,
-      })),
-    },
-
-    {
-      id: 17,
-      width: true,
-      name: "Age Range",
-      key: "ageRange",
-      type: "dropdown",
-      options: AGE_OPTIONS.map((a) => ({
-        value: a.value,
-        label: a.name,
-      })),
-    },
-
-    {
-      id: 19,
-      width: true,
-      name: "Gender",
-      key: "gender",
-      type: "dropdown",
-      options: genderOptions,
-      required: true,
-    },
-
-    {
-      id: 20,
-      width: true,
-      name: "Nationality",
-      key: "nationality",
-      type: "multiselect", // multi-select
-    },
-
-    {
-      id: 21,
-      width: true,
-      name: "Languages",
-      key: "languages",
-      type: "multiselect",
-    },
-  ];
-
-  const companyForms = [
-    {
-      id: 1,
-      name: "Company Logo",
-      key: "companyLogo",
-      type: "file",
-      ref: companyLogoRef,
-    },
-    {
-      id: 2,
-      name: "Company Name",
-      key: "companyName",
-      type: "text",
-      placeholder: "Enter company name",
-      required: true,
-      ref: companyNameRef,
-    },
-    {
-      id: 3,
-      name: "Company Description",
-      key: "companyDescription",
-      type: "textarea",
-      placeholder: "Enter company description",
-      ref: companyDescriptionRef,
-    },
-    {
-      id: 4,
-      name: "Company Website",
-      key: "companyWebsite",
-      type: "text",
-      placeholder: "Enter website",
-      ref: companyWebsiteRef,
-    },
-    {
-      id: 5,
-      width: true,
-      name: "Name",
-      key: "name",
-      type: "text",
-      placeholder: "Enter contact person name",
-      ref: nameRef,
-    },
-    {
-      id: 6,
-      width: true,
-      name: "Email",
-      key: "email",
-      type: "text",
-      placeholder: "Enter email",
-      required: true,
-      ref: emailRef,
-    },
-    {
-      id: 7,
-      width: true,
-      name: "Phone",
-      key: "phone",
-      type: "text",
-      placeholder: "Enter phone number",
-      required: true,
-      ref: phoneRef,
-    },
-    {
-      id: 8,
-      width: true,
-      name: "City",
-      key: "city",
-      type: "dropdown",
-      placeholder: "Select city",
-      ref: cityRef,
-      options: cityOptions,
-    },
-    {
-      id: 9,
-      name: "Address",
-      key: "address",
-      type: "textarea",
-      placeholder: "Enter address",
-      ref: addressRef,
-    },
-  ];
-
-  const activeStep = steps.find((s) => s.active)?.step;
-  const currentForms = activeStep === 1 ? jobInfoForms : companyForms;
+  const refs = {
+    categoryRef,
+    subCategoryRef,
+    titleRef,
+    descriptionRef,
+    skillsRef,
+    jobTypeRef,
+    educationLevelRef,
+    openingsRef,
+    companyLogoRef,
+    companyNameRef,
+    companyDescriptionRef,
+    companyWebsiteRef,
+    nameRef,
+    emailRef,
+    phoneRef,
+    cityRef,
+    addressRef,
+  };
 
   return (
     <>
       <div className="min-h-screen w-full relative">
-        <div className="bg-white w-[95%] mx-auto flex flex-col items-center relative max-w-[2000px]">
-          {/* navbar */}
-          <div className="fixed top-0 w-[90%] max-w-[1400px] bg-white z-40">
+        <div className="fixed top-0 w-full bg-white z-40 flex justify-center">
+          <div className="w-[90%] max-w-[1400px]">
             <Navbar />
           </div>
-          {/* steps */}
-          <section className="mt-26 w-[80%] flex justify-center">
-            <Steps steps={steps} setActiveStep={setActiveStep} />
-          </section>
-
-          {/* inputs */}
-          <div className="flex gap-2 w-[80%] mt-14 items-center relative">
-            <section className="w-[85%] h-full space-y-7 p-4 mb-12 rounded-xl">
-              <div className="grid grid-cols-2 gap-6">
-                {currentForms.map((item, index) => {
-                  // ✅ Hide Sub Category if no data
-                  if (
-                    item.key === "sub_category_id" &&
-                    subCategories.length === 0
-                  ) {
-                    return null;
-                  }
-                  const commonProps = {
-                    key: item.id || index,
-                    title: item.name,
-                    placeholder: item.placeholder,
-                    value: postJobData[item.key],
-                    onChange: (e) => {
-                      setPostJobData({
-                        ...postJobData,
-                        [item.key]: e.target.value,
-                      });
-                      clearError(item.key);
-                    },
-                  };
-
-                  return (
-                    <div
-                      key={item.id || index}
-                      ref={item.ref}
-                      className={`${item?.width ? "col-span-1" : "col-span-2"}`}
-                    >
-                      {item.type === "dropdown" && (
-                        <>
-                          <label className="text-black font-medium">
-                            {item.name}
-                            {item.required && (
-                              <span className="text-red-600 font-semibold ml-1">
-                                &#42;
-                              </span>
-                            )}
-                          </label>
-                          <DropDown
-                            options={item.options || []}
-                            placeholder={item.placeholder}
-                            value={getSelectedOption(
-                              item.options || [],
-                              postJobData[item.key],
-                            )}
-                            onChange={(option) => {
-                              if (!option) return;
-                              if (item.key === "category_id") {
-                                setPostJobData({
-                                  ...postJobData,
-                                  category_id: option.value,
-                                  category_slug: option.slug,
-                                  sub_category_id: "",
-                                });
-                              } else {
-                                setPostJobData({
-                                  ...postJobData,
-                                  [item.key]: option.value,
-                                });
-                              }
-
-                              clearError(item.key);
-                            }}
-                          />
-
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "text" && (
-                        <>
-                          <InputWithTitle
-                            isTextarea={false}
-                            minLength={item?.minlength || ""}
-                            maxLength={item?.maxlength || ""}
-                            required={item.required}
-                            {...commonProps}
-                          />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "textarea" && (
-                        <>
-                          <InputWithTitle
-                            isTextarea={true}
-                            minLength={200}
-                            maxLength={500}
-                            required={item.required}
-                            rows={3}
-                            {...commonProps}
-                          />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "array" && (
-                        <>
-                          <DynamicArrayInput
-                            title={item.name}
-                            value={postJobData[item.key] || []}
-                            onChange={(newValue) => {
-                              setPostJobData({
-                                ...postJobData,
-                                [item.key]: newValue,
-                              });
-                              clearError(item.key);
-                            }}
-                            placeholder={item.placeholder}
-                          />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "search" && (
-                        <>
-                          <label className="text-black font-medium">
-                            {item.name}
-                            {item.required && (
-                              <span className="text-red-600 font-semibold ml-1">
-                                &#42;
-                              </span>
-                            )}
-                          </label>
-                          <SearchableMultiSelect
-                            item={item}
-                            options={
-                              item.key === "nationality"
-                                ? nationalityOptions
-                                : item.key === "languages"
-                                  ? languageOptions
-                                  : []
-                            }
-                            value={postJobData[item.key] || []}
-                            onChange={(selected) => {
-                              setPostJobData({
-                                ...postJobData,
-                                [item.key]: selected,
-                              });
-                            }}
-                          />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "multiselect" && (
-                        <>
-                          <label className="text-black font-medium">
-                            {item.name}
-                            {item.required && (
-                              <span className="text-red-600 font-semibold ml-1">
-                                *
-                              </span>
-                            )}
-                          </label>
-
-                          <MultiSelectDropDown
-                            options={
-                              item.key === "nationality"
-                                ? nationalityOptions
-                                : item.key === "languages"
-                                  ? languageOptions
-                                  : item.key === "benefits"
-                                    ? BenefitOptions
-                                    : []
-                            }
-                            value={postJobData[item.key] || []}
-                            onChange={(selectedValues) => {
-                              setPostJobData({
-                                ...postJobData,
-                                [item.key]: selectedValues,
-                              });
-                            }}
-                          />
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-
-                      {item.type === "file" && (
-                        <>
-                          <label className="text-black font-medium">
-                            {item.name}
-                            {item.required && (
-                              <span className="text-red-600 font-semibold ml-1">
-                                &#42;
-                              </span>
-                            )}
-                          </label>
-                          <div className="flex items-center gap-6">
-                            {/* Upload Input */}
-                            <div className="flex-1">
-                              <input
-                                id="logoInput"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (!file) return;
-
-                                  setPostJobData({
-                                    ...postJobData,
-                                    companyLogo: file,
-                                  });
-
-                                  setLogoPreview(URL.createObjectURL(file));
-                                  clearError("companyLogo");
-                                }}
-                                className="block w-full px-4 py-3 text-sm border border-gray-300 rounded-lg
-      file:mr-4 file:py-2 file:px-4
-      file:rounded-md file:border-0
-      file:text-sm file:font-semibold
-      file:bg-gray-100 file:text-gray-700
-      hover:file:bg-gray-200
-      focus:outline-none focus:ring-2 focus:ring-[#FF6E04]"
-                              />
-                            </div>
-
-                            {/* BIG Preview */}
-                            <div className="relative w-50 h-30 rounded-xl border border-gray-200 bg-white shadow-md flex items-center justify-center overflow-hidden group">
-                              {logoPreview || postJobData.companyLogo ? (
-                                <>
-                                  <img
-                                    src={
-                                      logoPreview
-                                        ? logoPreview
-                                        : typeof postJobData.companyLogo ===
-                                          "string"
-                                          ? `${API_URL}/${postJobData.companyLogo}`
-                                          : "/placeholder.png"
-                                    }
-                                    alt="Company Logo"
-                                    className="w-full h-full object-cover p-3"
-                                  />
-
-                                  {/* Hover overlay */}
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                                    <span className="text-sm text-white font-medium">
-                                      Change Logo
-                                    </span>
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="flex flex-col items-center text-gray-400">
-                                  <span className="text-3xl">🏢</span>
-                                  <span className="text-sm mt-2">
-                                    Upload Logo
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {errors[item.key] && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors[item.key]}
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {Object.keys(errors).length > 0 && (
-                <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded-lg">
-                  <h3 className="text-red-600 font-semibold mb-2">
-                    Please fix the following errors:
-                  </h3>
-
-                  <ul className="list-disc list-inside space-y-1">
-                    {Object.entries(errors).map(([key, message]) => (
-                      <li key={key} className="text-red-500 text-sm">
-                        {message}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {/* Navigation buttons */}
-              <div className="flex justify-between items-center mt-8">
-                {activeStep > 1 && (
-                  <button
-                    onClick={() => setActiveStep(activeStep - 1)}
-                    disabled={loading}
-                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                )}
-
-                <div className="ml-auto flex gap-2 ">
-                  {activeStep === 2 && (
-                    <button
-                      type="button"
-                      onClick={handleUsePreviousCompany}
-                      className="absolute top-[-70px] right-6 flex items-center gap-2 px-3 py-1.5 text-xs font-medium 
-  bg-white border border-gray-200 rounded-md shadow-sm hover:shadow 
-  hover:bg-gray-50 transition-all"
-                    >
-                      Use previous company details
-                    </button>
-                  )}
-                  <button
-                    onClick={async () => {
-                      if (validateStep(activeStep)) {
-                        await handleStepSubmit(activeStep);
-                      }
-                    }}
-                    disabled={loading}
-                    className="px-6 py-3 bg-[#FF6E04] hover:bg-[#E55A03] text-white font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <>
-                        <svg
-                          className="animate-spin h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          ></path>
-                        </svg>
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        {activeStep === 2 ? "Submit Job" : "Next Step"}
-                        {activeStep < 2 && (
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        )}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </section>
-          </div>
+        </div>
+        <div className="pt-20">
+          <JobForm
+            steps={steps}
+            setActiveStep={setActiveStep}
+            postJobData={postJobData}
+            setPostJobData={setPostJobData}
+            errors={errors}
+            clearError={clearError}
+            refs={refs}
+            options={options}
+            subCategories={subCategories}
+            loading={loading}
+            handleStepSubmit={handleStepSubmit}
+            validateStep={validateStep}
+            handleUsePreviousCompany={handleUsePreviousCompany}
+            logoPreview={logoPreview}
+            setLogoPreview={setLogoPreview}
+            API_URL={API_URL}
+            getSelectedOption={getSelectedOption}
+          />
         </div>
       </div>
 
