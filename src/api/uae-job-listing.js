@@ -179,6 +179,24 @@ export const get_all_applications = async () => {
     return error?.response?.data;
   }
 }
+export const update_application_status = async (applicationId, status, adminNote = "") => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const response = await axios.patch(
+      `${API_URL}/applications/${applicationId}/status`,
+      { status, adminNote },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response?.data;
+  } catch (error) {
+    console.log("error updating application status", error?.response?.data);
+    return error?.response?.data;
+  }
+}
 
 
 

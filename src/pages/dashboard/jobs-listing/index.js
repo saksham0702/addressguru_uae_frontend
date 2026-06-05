@@ -66,6 +66,8 @@ const JobListing = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [cities, setCities] = useState([]);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [submittedSlug, setSubmittedSlug] = useState("");
 
   // Dropdown data states
   const [categories, setCategories] = useState([]);
@@ -321,6 +323,7 @@ const JobListing = () => {
       phone: res.contact?.phone || "",
 
       city: res.company?.city?._id || "",
+      locality: res.localities?.[0] || "",
       address: res.company?.address || "",
     }));
   };
@@ -794,13 +797,11 @@ const JobListing = () => {
         }
 
         clearSession();
-        setResponse("Job listing posted successfully!");
 
-        if (res?.job_id) {
-          setTimeout(() => {
-            router.push(`/dashboard`);
-          }, 2000);
-        }
+        // Show thank-you popup
+        const jobSlug = res?.data?.data?.slug || res?.data?.slug || slug;
+        setSubmittedSlug(jobSlug);
+        setShowThankYou(true);
       } else {
         setActiveStep(stepNumber + 1);
       }
@@ -914,7 +915,113 @@ const JobListing = () => {
         </div>
       </div>
 
+      {/* Thank You Popup Modal */}
+      {showThankYou && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-[90%] text-center animate-[fadeInUp_0.3s_ease-out]">
+            {/* Success Icon */}
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <svg
+                className="w-8 h-8 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Thank You! 🎉
+            </h2>
+            <p className="text-gray-600 mb-1">
+              Your job has been submitted successfully with
+            </p>
+            <p className="text-[#FF6E04] font-semibold text-lg mb-4">
+              AddressGuru UAE
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Our team will review your listing and approve it shortly. You will
+              receive an email notification once it&apos;s live.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              {submittedSlug && (
+                <button
+                  onClick={() => {
+                    setShowThankYou(false);
+                    router.push(`/job/${submittedSlug}`);
+                  }}
+                  className="w-full px-6 py-3 bg-[#FF6E04] hover:bg-[#E55A03] text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                  Preview Job
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowThankYou(false);
+                  router.push("/dashboard");
+                }}
+                className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ResponseAlert text={response} onClose={() => setResponse("")} />
+
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </>
   );
 };
