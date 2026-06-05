@@ -14,6 +14,7 @@ import Login from "@/components/UserLogin/Login";
 import { searchData, searchListings, resolveSearch } from "@/api/search";
 import { useRouter } from "next/router";
 import { getCities } from "@/api/uaeadminCities";
+import { Briefcase } from "lucide-react";
 
 const Header = () => {
   const [cities, setCities] = useState([]);
@@ -86,14 +87,10 @@ const Header = () => {
     };
   }, [pathname]);
 
-  const logos = [
-    // { title: "to let", img: "/assets/toLet.png", link: "/properties" },
-    // { title: "jobs", img: "/assets/Dashboard/jobs.png", link: "/jobs" },
-    // {
-    //   title: "marketplace",
-    //   img: "/assets/marketPlace.png",
-    //   link: "/marketplace",
-    // },
+  const navLinks = [
+    { title: "jobs", icon: Briefcase, link: "/jobs" },
+    // { title: "properties", icon: null, link: "/properties" },
+    // { title: "marketplace", icon: null, link: "/marketplace" },
   ];
 
   const handlePostAd = () => {
@@ -188,11 +185,11 @@ const Header = () => {
         )}
 
         {/* Left Section */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
           {open ? (
             <svg
               onClick={handleCloseSidebar}
-              className="h-[20px] cursor-pointer w-[23.33px] text-orange-600"
+              className="h-[20px] cursor-pointer w-[23.33px] flex-shrink-0 text-orange-600"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -212,10 +209,10 @@ const Header = () => {
               alt="nav logo"
               height={500}
               width={500}
-              className="h-[16px] cursor-pointer w-[23.33px]"
+              className="h-[16px] cursor-pointer w-[23.33px] flex-shrink-0"
             />
           )}
-          <Link href="/">
+          <Link href="/" className="flex-shrink-0">
             <Image
               src="/assets/addressguru_logo.png"
               alt="nav logo"
@@ -224,6 +221,20 @@ const Header = () => {
               className="h-[40px] w-[150px] max-md:hidden"
             />
           </Link>
+
+          {/* Search Bar - beside logo, fixed width */}
+          {showSearchBar && (
+            <div className="w-[400px] flex-shrink-0 max-md:hidden z-[100]">
+              <SearchBar
+                value={slug}
+                setValue={setSlug}
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                data={cities}
+                variant="header"
+              />
+            </div>
+          )}
         </div>
 
         <Link href="/">
@@ -235,9 +246,6 @@ const Header = () => {
             className="w-28 scale-110 md:hidden"
           />
         </Link>
-        {/* <div className="md:hidden scale-75 w-28 whitespace-nowrap mr-1 mt-1 ml-2 ">
-          <CityDropdown data={cities} />
-        </div> */}
 
         <div
           onClick={handleCities}
@@ -262,51 +270,35 @@ const Header = () => {
           </svg>
         </div>
 
-        {showSearchBar && (
-          <div className="flex-1 max-w-[500px] mx-8 max-md:hidden z-[100]">
-            <SearchBar
-              value={slug}
-              setValue={setSlug}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              data={cities}
-              variant="header"
-            />
-          </div>
-        )}
-
         {/* Right Section */}
-        <div className="flex items-center  max-md:hidden gap-10">
+        <div className="flex items-center max-md:hidden gap-6 flex-shrink-0">
           <div className="flex gap-5 lg:gap-3 xl:gap-5">
-            {logos.map((item, index) => (
-              <Link
-                href={item?.link}
-                key={index}
-                className="
-        flex flex-col items-center gap-1 w-12 text-xs
-
-        lg:w-10 lg:gap-0.5 lg:text-[10px]
-        xl:w-12 xl:gap-1 xl:text-xs
-      "
-              >
-                <Image
-                  src={item.img}
-                  alt={item.title}
-                  height={100}
-                  width={100}
+            {navLinks.map((item, index) => {
+              const IconComp = item.icon;
+              return (
+                <Link
+                  href={item.link}
+                  key={index}
                   className="
-          h-[20px] w-[25px]
-
-          lg:h-[16px] lg:w-[20px]
-          xl:h-[20px] xl:w-[25px]
+          flex flex-col items-center gap-1 w-12 text-xs
+          lg:w-10 lg:gap-0.5 lg:text-[10px]
+          xl:w-12 xl:gap-1 xl:text-xs
+          hover:text-[#EE7630] transition-colors
         "
-                />
-
-                <p className="capitalize font-semibold text-[#4B4B4B]">
-                  {item.title}
-                </p>
-              </Link>
-            ))}
+                >
+                  {IconComp && (
+                    <IconComp
+                      size={20}
+                      strokeWidth={2}
+                      className="text-[#4B4B4B] lg:w-[18px] lg:h-[18px] xl:w-[20px] xl:h-[20px]"
+                    />
+                  )}
+                  <p className="capitalize font-semibold text-[#4B4B4B]">
+                    {item.title}
+                  </p>
+                </Link>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-5 lg:gap-3 xl:gap-5 font-bold">

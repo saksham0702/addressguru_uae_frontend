@@ -17,7 +17,9 @@ const BreadCrumbs = ({ slug, name, length, type, city }) => {
   const categorySlug = slug?.toLowerCase().replace(/\s+/g, "-");
 
   const categoryUrl =
-    categorySlug && citySlug ? `/${categorySlug}/${citySlug}` : null;
+    categorySlug === "jobs" 
+      ? "/jobs" 
+      : categorySlug && citySlug ? `/${categorySlug}/${citySlug}` : null;
 
   return (
     <div>

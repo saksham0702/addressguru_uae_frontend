@@ -41,7 +41,7 @@ const JobsListings = () => {
         setPagination({
           page: 1,
           hasMore: jobsRes?.data?.pagination?.hasMore || false,
-          nextPage: jobsRes?.data?.pagination?.nextPage
+          nextPage: jobsRes?.data?.pagination?.nextPage,
         });
         setFiltersData(filtersRes?.filter || null);
       } catch (error) {
@@ -54,7 +54,11 @@ const JobsListings = () => {
     fetchInitialData();
   }, []);
 
-  const fetchJobsWithFilters = async (filters, page = 1, isLoadMore = false) => {
+  const fetchJobsWithFilters = async (
+    filters,
+    page = 1,
+    isLoadMore = false,
+  ) => {
     if (isLoadMore) setIsLoadingMore(true);
     else setLoading(true);
 
@@ -75,20 +79,21 @@ const JobsListings = () => {
 
       // Salary range handling
       if (filters.salary?.length) {
-        const ranges = filters.salary.map(s => {
-          if (s.includes("+")) return { min: parseInt(s.replace("+", "")), max: 1000000 };
+        const ranges = filters.salary.map((s) => {
+          if (s.includes("+"))
+            return { min: parseInt(s.replace("+", "")), max: 1000000 };
           const [min, max] = s.split("-").map(Number);
           return { min, max };
         });
-        params.salaryMin = Math.min(...ranges.map(r => r.min));
-        params.salaryMax = Math.max(...ranges.map(r => r.max));
+        params.salaryMin = Math.min(...ranges.map((r) => r.min));
+        params.salaryMax = Math.max(...ranges.map((r) => r.max));
       }
 
       const res = await get_all_jobs_listings(params);
       const newJobs = res?.data?.jobs || [];
-      
+
       if (isLoadMore) {
-        setAllJobs(prev => [...prev, ...newJobs]);
+        setAllJobs((prev) => [...prev, ...newJobs]);
       } else {
         setAllJobs(newJobs);
       }
@@ -96,7 +101,7 @@ const JobsListings = () => {
       setPagination({
         page,
         hasMore: res?.data?.pagination?.hasMore || false,
-        nextPage: res?.data?.pagination?.nextPage
+        nextPage: res?.data?.pagination?.nextPage,
       });
       setActiveFilters(filters);
     } catch (error) {
@@ -128,12 +133,15 @@ const JobsListings = () => {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <link rel="canonical" href={canonicalUrl} />
-        
+
         <meta property="og:type" content="website" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={`${APP_URL}/seo/default-job-og.jpg`} />
+        <meta
+          property="og:image"
+          content={`${APP_URL}/seo/default-job-og.jpg`}
+        />
 
         <script
           type="application/ld+json"
@@ -157,9 +165,12 @@ const JobsListings = () => {
 
       <div className="flex flex-col items-center w-full h-full justify-center bg-[#F8F7F7]">
         <div className="md:w-[80%] w-full rounded-lg pb-10 bg-white md:pl-3 max-md:px-2">
-          
           <div className="max-md:hidden mt-3">
-            <BreadCrumbs slug={"jobs"} name={"Verified Jobs"} length={allJobs?.length} />
+            <BreadCrumbs
+              slug={"jobs"}
+              name={"Verified Jobs"}
+              length={allJobs?.length}
+            />
           </div>
 
           <div className="flex items-center max-md:my-4 px-1 justify-between">
@@ -177,7 +188,6 @@ const JobsListings = () => {
 
           {/* main section */}
           <div className="flex justify-between w-full md:pr-3 md:mt-5 items-start">
-            
             {/* filter section */}
             <div className="w-[19%] md:sticky max-md:hidden self-start top-20">
               <Filters
@@ -192,7 +202,9 @@ const JobsListings = () => {
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6E04]"></div>
-                  <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Searching vacancies...</p>
+                  <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">
+                    Searching vacancies...
+                  </p>
                 </div>
               ) : allJobs.length > 0 ? (
                 <>
@@ -215,18 +227,32 @@ const JobsListings = () => {
                   )}
 
                   <div className="mt-8 border-t border-gray-100 pt-8">
-                     <HelpFull layout={"col"} />
+                    <HelpFull layout={"col"} />
                   </div>
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-32 text-gray-500 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                     <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                     </svg>
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center  mb-4">
+                    <svg
+                      className="w-8 h-8 text-gray-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
                   </div>
-                  <p className="text-lg font-bold text-gray-900">No jobs found</p>
-                  <p className="text-sm mt-1">Try adjusting your filters or search criteria</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    No jobs found
+                  </p>
+                  <p className="text-sm mt-1">
+                    Try adjusting your filters or search criteria
+                  </p>
                 </div>
               )}
             </div>
@@ -235,12 +261,15 @@ const JobsListings = () => {
             <div className="flex flex-col gap-3 w-[24%] max-md:hidden sticky self-start top-20">
               <div className="w-full h-70 relative group transition-all">
                 <div className="absolute top-5 left-5 z-10 flex flex-col gap-2">
-                  <span className="flex items-center text-white font-bold gap-1 text-base drop-shadow-md">
+                  <span className="flex items-center text-white font-bold gap-1 text-base">
                     Looking for <span className="font-black">Candidates?</span>
                   </span>
-                  <Link href="/dashboard/post-job" className="bg-white text-[#FF6E04] px-4 py-2 text-[11px] font-black rounded-lg shadow-xl hover:scale-105 transition-transform uppercase tracking-wider text-center">
+                  {/* <Link
+                    href="/dashboard/post-job"
+                    className="bg-white text-[#FF6E04] px-4 py-2 text-[11px] font-black rounded-lg  hover:scale-105 transition-transform uppercase tracking-wider text-center"
+                  >
                     POST FREE JOB
-                  </Link>
+                  </Link> */}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
@@ -248,7 +277,7 @@ const JobsListings = () => {
                   alt="looking for jobs"
                   height={500}
                   width={500}
-                  className="h-full w-full rounded-2xl object-cover shadow-lg"
+                  className="h-full w-full rounded-2xl object-cover "
                 />
               </div>
 
@@ -257,9 +286,12 @@ const JobsListings = () => {
                   <span className="flex items-center text-white font-bold gap-1 text-base drop-shadow-md">
                     Looking for <span className="font-black">Jobs?</span>
                   </span>
-                  <Link href="/dashboard/profile" className="bg-[#FF6E04] text-white px-4 py-2 text-[11px] font-black rounded-lg shadow-xl hover:scale-105 transition-transform uppercase tracking-wider text-center">
+                  {/* <Link
+                    href="/dashboard/profile"
+                    className="bg-[#FF6E04] text-white px-4 py-2 text-[11px] font-black rounded-lg  hover:scale-105 transition-transform uppercase tracking-wider text-center"
+                  >
                     CREATE PROFILE
-                  </Link>
+                  </Link> */}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
@@ -267,16 +299,20 @@ const JobsListings = () => {
                   alt="looking for jobs"
                   height={500}
                   width={500}
-                  className="h-full w-full rounded-2xl object-cover shadow-lg"
+                  className="h-full w-full rounded-2xl object-cover "
                 />
               </div>
 
               <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-4">
-                 <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4">Job Seekers Tip</h4>
-                 <p className="text-[11px] text-gray-500 leading-relaxed font-medium">Use advanced filters to find jobs matching your exact skills and experience level in Dubai.</p>
+                <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4">
+                  Job Seekers Tip
+                </h4>
+                <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
+                  Use advanced filters to find jobs matching your exact skills
+                  and experience level in Dubai.
+                </p>
               </div>
             </div>
-
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import {
   get_all_jobs_listings,
   reject_jobs_listing,
 } from "@/api/uae-job-listing";
+import Image from "next/image";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 export function fmtDate(iso) {
@@ -35,7 +36,7 @@ function Toast({ toast }) {
   if (!toast) return null;
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-2xl border
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium  border
       ${toast.type === "error" ? "bg-red-50 border-red-200 text-red-600" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}
       style={{ animation: "slideUp 0.2s ease" }}
     >
@@ -255,10 +256,10 @@ const JobsListings = () => {
           status: "approved",
         });
       }
-      if (action === "unapproved") {
+      if (action === "pending") {
         console.log("checking");
         await approve_reject_jobs_listing(listing._id, {
-          status: "unapproved",
+          status: "pending",
           //   rejectionReason: reason,
         });
       }
@@ -569,19 +570,20 @@ const JobsListings = () => {
                     <TD vAlign="top" className="min-w-[240px]">
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0">
-                          <img
+                          <Image
+                            height={500}
+                            width={500}
                             className="w-14 h-14 rounded-xl object-cover border border-slate-200 bg-white shadow-sm"
                             src={
-                              listing.companyLogo
-                                ? `https://addressguru.ae/api/${listing.companyLogo}`
-                                : listing.images?.[0]
-                                  ? `https://addressguru.ae/api/${listing.images[0]}`
-                                  : undefined
+                              listing.company?.logo
+                                ? `https://addressguru.ae/api/${listing.company.logo}`
+                                : listing.companyLogo
                             }
                             alt={listing.title}
                             onError={(e) => {
                               e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "flex";
+                              if (e.target.nextSibling)
+                                e.target.nextSibling.style.display = "flex";
                             }}
                           />
                           <div
@@ -596,6 +598,8 @@ const JobsListings = () => {
                           <a
                             className="font-semibold text-blue-600 text-md leading-snug truncate max-w-[210px] block"
                             href={`/jobs/${listing?.slug}?preview=true`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {listing.title}
                           </a>
@@ -625,28 +629,30 @@ const JobsListings = () => {
                             </Link>
                           </div>
 
-                          {listing.companyName && (
+                          {(listing.company?.name || listing.companyName) && (
                             <div className="flex items-center gap-1.5 mt-2">
                               <BriefcaseIcon />
                               <span className="text-[11px] text-black font-medium">
-                                {listing.companyName}
+                                {listing.company?.name || listing.companyName}
                               </span>
                             </div>
                           )}
 
-                          {listing.mobileNumber && (
+                          {(listing.contact?.phone || listing.mobileNumber) && (
                             <div className="flex items-center font-medium gap-1.5 mt-1">
                               <PhoneIcon />
                               <span className="text-[11px] text-black font-medium">
-                                {listing.countryCode} {listing.mobileNumber}
+                                {listing.contact?.countryCode ||
+                                  listing.countryCode}{" "}
+                                {listing.contact?.phone || listing.mobileNumber}
                               </span>
                             </div>
                           )}
-                          {listing.email && (
+                          {(listing.contact?.email || listing.email) && (
                             <div className="flex items-center font-medium gap-1.5 mt-1">
                               <MailIcon />
                               <span className="text-[11px] text-black truncate max-w-[200px]">
-                                {listing.email}
+                                {listing.contact?.email || listing.email}
                               </span>
                             </div>
                           )}
@@ -696,12 +702,19 @@ const JobsListings = () => {
                       <div className="flex items-center gap-1">
                         <PinIcon />
                         <div className="text-[14px] text-gray-900 font-medium">
-                          {listing.city?.name || "N/A"}
+                          {listing.company?.city?.name ||
+                            listing.city?.name ||
+                            listing.location?.city?.name ||
+                            "N/A"}
                         </div>
                       </div>
-                      {listing.locality && (
-                        <div className="text-[11px] text-slate-400 mt-0.5 ml-5">
-                          {listing.locality}
+                      {(listing.company?.locality ||
+                        listing.locality ||
+                        listing.localities?.[0]) && (
+                        <div className="text-[11px] text-slate-400 mt-0.5 ml-5 font-medium">
+                          {listing.company?.locality ||
+                            listing.locality ||
+                            listing.localities?.[0]}
                         </div>
                       )}
                     </TD>
@@ -722,62 +735,81 @@ const JobsListings = () => {
                       </button>
                     </TD>
 
-                    {/* User */}
                     <TD vAlign="top" className="min-w-[190px]">
-                      <div className="space-y-2">
-                        {[
-                          {
-                            label: "Created by",
-                            value:
-                              listing?.createdBy?.name ||
-                              listing.contactPersonName ||
-                              "Admin",
-                          },
-                          {
-                            label: "Status",
-                            value: listing.status,
-                            isStatus: true,
-                          },
-                          ...(["approved", "rejected"].includes(listing.status)
-                            ? [
-                                {
-                                  label:
-                                    listing.status === "approved"
-                                      ? "Approved by"
-                                      : "Rejected by",
-                                  value:
-                                    listing.approvedBy?.name ||
-                                    listing.rejectedBy?.name ||
-                                    "Admin",
-                                },
-                              ]
-                            : []),
-                        ].map(({ label, value, isStatus }) => {
-                          const statusColor =
-                            value === "approved"
-                              ? "text-green-600"
-                              : value === "rejected"
-                                ? "text-red-600"
-                                : value === "pending"
-                                  ? "text-yellow-500"
-                                  : "text-slate-700";
-                          return (
-                            <div
-                              key={label}
-                              className="flex items-center gap-1.5"
-                            >
+                      <div className="space-y-3">
+                        {/* Created By Section */}
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                              Created by:
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
                               <UserIcon />
-                              <span className="text-[11px] text-slate-400 font-medium">
-                                {label}:
+                              <span className="text-[11px] font-bold text-gray-900 truncate max-w-[140px]">
+                                {listing?.createdBy?.name || "Admin"}
                               </span>
-                              <span
-                                className={`text-[11px] font-bold truncate max-w-[110px] ${isStatus ? statusColor : "text-slate-700"}`}
-                              >
-                                {value}
+                              {listing?.createdBy?.isOnline !== undefined && (
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${listing?.createdBy?.isOnline ? "bg-green-500" : "bg-gray-300"}`}
+                                />
+                              )}
+                            </div>
+                            {listing?.createdBy?.email && (
+                              <div className="flex items-center gap-1.5 ml-0.5">
+                                <MailIcon className="w-3 h-3 text-slate-400" />
+                                <span className="text-[10px] text-slate-600 truncate max-w-[150px]">
+                                  {listing.createdBy.email}
+                                </span>
+                              </div>
+                            )}
+                            {listing?.createdBy?.phone && (
+                              <div className="flex items-center gap-1.5 ml-0.5">
+                                <PhoneIcon className="w-3 h-3 text-slate-400" />
+                                <span className="text-[10px] text-slate-600">
+                                  {listing.createdBy.phone}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status & Moderation */}
+                        <div className="pt-2 border-t border-slate-100">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                              Status:
+                            </span>
+                            <span
+                              className={`text-[10px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded
+                              ${
+                                listing.status === "approved"
+                                  ? "bg-green-50 text-green-600"
+                                  : listing.status === "rejected"
+                                    ? "bg-red-50 text-red-600"
+                                    : "bg-yellow-50 text-yellow-600"
+                              }`}
+                            >
+                              {listing.status}
+                            </span>
+                          </div>
+
+                          {(listing.approvedBy?.name ||
+                            listing.rejectedBy?.name) && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+                                {listing.status === "approved"
+                                  ? "Approved by:"
+                                  : "Rejected by:"}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-700 truncate max-w-[100px]">
+                                {listing.approvedBy?.name ||
+                                  listing.rejectedBy?.name}
                               </span>
                             </div>
-                          );
-                        })}
+                          )}
+                        </div>
                       </div>
                     </TD>
 
@@ -816,7 +848,7 @@ const JobsListings = () => {
                         {listing.status === "approved" && (
                           <button
                             onClick={() =>
-                              handleApproveReject(listing, "unapproved")
+                              handleApproveReject(listing, "pending")
                             }
                             disabled={loadingId === listing._id}
                             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors shadow-sm"
