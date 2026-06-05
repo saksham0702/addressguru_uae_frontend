@@ -5,45 +5,47 @@ import Filters from "@/components/Jobs/Filters";
 import JobCard from "@/components/Jobs/JobCard";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { APP_URL } from "@/services/constants";
 import Head from "next/head";
 import { get_job_filter } from "@/api/filter";
 import MobileJobFilter from "@/components/Jobs/MobileJobFilter";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const JobsListings = () => {
+  const router = useRouter();
   const { city: contextCity } = useAuth();
   const city = contextCity || "UAE";
   const [allJobs, setAllJobs] = useState([]);
-  const [filters, setFilters] = useState(null);
+  const [filtersData, setFiltersData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, hasMore: false });
   const [activeFilters, setActiveFilters] = useState({});
 
-  const canonicalUrl = `${APP_URL}/jobs/${city
-    ?.toLowerCase()
-    .replace(/\s+/g, "-")}`;
+  const canonicalCity = city?.toLowerCase().replace(/\s+/g, "-");
+  const canonicalUrl = `${APP_URL}/jobs/${canonicalCity}`;
 
-  // Fetch initial data on mount
+  // Fetch initial data
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
         const [jobsRes, filtersRes] = await Promise.all([
-          get_all_jobs_listings(),
-          get_job_filter().catch((err) => {
-            console.error("Filter fetch failed:", err);
-            return { filter: null };
-          }),
+          get_all_jobs_listings({ page: 1, limit: 10 }),
+          get_job_filter().catch(() => ({ filter: null })),
         ]);
 
-        // console.log("Jobs Response:", jobsRes);
-        // console.log("Filters Response:", filtersRes);
-
         setAllJobs(jobsRes?.data?.jobs || []);
-        setFilters(filtersRes?.filter || null);
+        setPagination({
+          page: 1,
+          hasMore: jobsRes?.data?.pagination?.hasMore || false,
+          nextPage: jobsRes?.data?.pagination?.nextPage
+        });
+        setFiltersData(filtersRes?.filter || null);
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        setAllJobs([]);
       } finally {
         setLoading(false);
       }
@@ -52,88 +54,87 @@ const JobsListings = () => {
     fetchInitialData();
   }, []);
 
-  // Function to fetch jobs with filters
-  const fetchJobsWithFilters = async (filters) => {
-    setLoading(true);
+  const fetchJobsWithFilters = async (filters, page = 1, isLoadMore = false) => {
+    if (isLoadMore) setIsLoadingMore(true);
+    else setLoading(true);
 
     try {
       const params = {
-        work_mode: filters.workMode?.length ? filters.workMode : undefined,
-        job_type: filters.jobType?.length ? filters.jobType : undefined,
-        industry: filters.industry?.length ? filters.industry : undefined,
-        location: filters.location?.length ? filters.location : undefined,
-        experience: filters.experience?.length ? filters.experience : undefined,
-        salary: filters.salary?.length ? filters.salary : undefined,
+        page,
+        limit: 10,
+        workMode: filters.workMode?.join(","),
+        sector: filters.sector?.join(","),
+        jobType: filters.jobType?.join(","),
+        location: filters.location?.join(","),
+        category: filters.category?.join(","),
+        subCategory: filters.subCategory?.join(","),
+        language: filters.language?.join(","),
+        gender: filters.gender?.join(","),
+        locality: filters.locality?.join(","),
       };
 
-      // Remove undefined values
-      Object.keys(params).forEach((key) => {
-        if (params[key] === undefined) delete params[key];
-      });
-
-      console.log("params", params);
+      // Salary range handling
+      if (filters.salary?.length) {
+        const ranges = filters.salary.map(s => {
+          if (s.includes("+")) return { min: parseInt(s.replace("+", "")), max: 1000000 };
+          const [min, max] = s.split("-").map(Number);
+          return { min, max };
+        });
+        params.salaryMin = Math.min(...ranges.map(r => r.min));
+        params.salaryMax = Math.max(...ranges.map(r => r.max));
+      }
 
       const res = await get_all_jobs_listings(params);
-      console.log("res", res);
-      setAllJobs(res?.data?.jobs || []);
+      const newJobs = res?.data?.jobs || [];
+      
+      if (isLoadMore) {
+        setAllJobs(prev => [...prev, ...newJobs]);
+      } else {
+        setAllJobs(newJobs);
+      }
+
+      setPagination({
+        page,
+        hasMore: res?.data?.pagination?.hasMore || false,
+        nextPage: res?.data?.pagination?.nextPage
+      });
       setActiveFilters(filters);
     } catch (error) {
-      console.error("Error fetching filtered jobs:", error);
-      setAllJobs([]);
+      console.error("Error fetching jobs:", error);
     } finally {
-      setLoading(false);
+      if (isLoadMore) setIsLoadingMore(false);
+      else setLoading(false);
     }
   };
 
   const handleApplyFilters = (filters) => {
-    fetchJobsWithFilters(filters);
+    fetchJobsWithFilters(filters, 1, false);
   };
+
+  const handleLoadMore = () => {
+    if (pagination.hasMore && !isLoadingMore) {
+      fetchJobsWithFilters(activeFilters, pagination.page + 1, true);
+    }
+  };
+
+  // SEO Handling mirroring SearchResult.js logic
+  const firstJob = allJobs[0];
+  const pageTitle = `Top Jobs in ${city} | Latest Openings & Vacancies`;
+  const pageDescription = `Find the latest job openings in ${city}. Explore verified vacancies across ${filtersData?.industries?.length || "various"} sectors. Apply now on AddressGuru UAE.`;
 
   return (
     <>
       <Head>
-        {/* ===== META BASIC ===== */}
-        <title>{`Top Jobs in ${city} | Latest Job Openings`}</title>
-        <meta
-          name="description"
-          content={`Find the latest jobs in ${city}. Explore verified job openings, salary, company details, and apply instantly.`}
-        />
-        <meta
-          name="keywords"
-          content={`jobs in ${city}, ${city} job openings, latest jobs, hiring in ${city}, apply for jobs ${city}`}
-        />
-
-        {/* ===== CANONICAL ===== */}
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <link rel="canonical" href={canonicalUrl} />
-
-        {/* ===== OPEN GRAPH (FB / WHATSAPP) ===== */}
+        
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={`Top Jobs in ${city} | Apply Now`} />
-        <meta
-          property="og:description"
-          content={`Browse the latest job vacancies in ${city}. Verified companies with salary information.`}
-        />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="AddressGuru UAE" />
-        <meta property="og:locale" content="en_AE" />
-        <meta
-          property="og:image"
-          content={`${APP_URL}/seo/default-job-og.jpg`}
-        />
+        <meta property="og:image" content={`${APP_URL}/seo/default-job-og.jpg`} />
 
-        {/* ===== TWITTER CARDS ===== */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`Top Jobs in ${city}`} />
-        <meta
-          name="twitter:description"
-          content={`Find verified job openings in ${city}. Apply now.`}
-        />
-        <meta
-          name="twitter:image"
-          content={`${APP_URL}/seo/default-job-og.jpg`}
-        />
-
-        {/* ===== STRUCTURED DATA (JSON-LD) ===== */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -142,15 +143,13 @@ const JobsListings = () => {
               "@type": "ItemList",
               name: `Top Jobs in ${city}`,
               url: canonicalUrl,
-              numberOfItems: allJobs?.length || 0,
-              itemListElement:
-                allJobs?.map((job, i) => ({
-                  "@type": "ListItem",
-                  position: i + 1,
-                  name: job?.title,
-                  description: job?.shortDescription,
-                  url: `https://addressguru.ae/jobs/${job?.slug}`,
-                })) || [],
+              numberOfItems: allJobs.length,
+              itemListElement: allJobs.map((job, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: job?.title,
+                url: `${APP_URL}/jobs/${job?.slug}`,
+              })),
             }),
           }}
         />
@@ -158,95 +157,126 @@ const JobsListings = () => {
 
       <div className="flex flex-col items-center w-full h-full justify-center bg-[#F8F7F7]">
         <div className="md:w-[80%] w-full rounded-lg pb-10 bg-white md:pl-3 max-md:px-2">
+          
           <div className="max-md:hidden mt-3">
-            <BreadCrumbs slug={"jobs"} name={"jobs"} length={allJobs?.length} />
+            <BreadCrumbs slug={"jobs"} name={"Verified Jobs"} length={allJobs?.length} />
           </div>
 
           <div className="flex items-center max-md:my-4 px-1 justify-between">
             <h1 className="capitalize font-semibold max-md:text-lg text-2xl">
-              top jobs in {city}
+              top jobs in <span className="text-[#FF6E04]">{city}</span>
             </h1>
 
             <div className="md:hidden">
               <MobileJobFilter
-                jobFilters={filters}
+                jobFilters={filtersData}
                 onApplyFilters={handleApplyFilters}
               />
             </div>
           </div>
 
           {/* main section */}
-          <div className="flex justify-between w-full md:pr-3 md:mt-5">
+          <div className="flex justify-between w-full md:pr-3 md:mt-5 items-start">
+            
             {/* filter section */}
             <div className="w-[19%] md:sticky max-md:hidden self-start top-20">
               <Filters
-                jobFilters={filters}
+                jobFilters={filtersData}
                 onApplyFilters={handleApplyFilters}
+                compact={true}
               />
             </div>
 
             {/* main card section */}
             <div className="md:w-[55%] w-full flex flex-col gap-2">
               {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                <div className="flex flex-col items-center justify-center py-24 gap-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6E04]"></div>
+                  <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Searching vacancies...</p>
                 </div>
-              ) : allJobs && allJobs.length > 0 ? (
+              ) : allJobs.length > 0 ? (
                 <>
-                  {allJobs.map((item, index) => (
-                    <JobCard key={item.id || item.slug || index} data={item} />
-                  ))}
-                  <HelpFull layout={"col"} />
+                  <div className="flex flex-col gap-3">
+                    {allJobs.map((item, index) => (
+                      <JobCard key={item._id || index} data={item} />
+                    ))}
+                  </div>
+
+                  {pagination.hasMore && (
+                    <div className="py-8 flex justify-center">
+                      <button
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        className="px-8 py-2.5 border border-[#FF6E04] text-[#FF6E04] font-bold rounded-lg hover:bg-[#FF6E04] hover:text-white transition-all disabled:opacity-50"
+                      >
+                        {isLoadingMore ? "Loading more..." : "Load More Jobs"}
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="mt-8 border-t border-gray-100 pt-8">
+                     <HelpFull layout={"col"} />
+                  </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                  <p className="text-lg font-semibold">No jobs found</p>
-                  <p className="text-sm mt-2">
-                    Try adjusting your filters or search criteria
-                  </p>
+                <div className="flex flex-col items-center justify-center py-32 text-gray-500 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                     <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                     </svg>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900">No jobs found</p>
+                  <p className="text-sm mt-1">Try adjusting your filters or search criteria</p>
                 </div>
               )}
             </div>
 
             {/* ads section */}
-            <div className="flex flex-col gap-2 w-[24%] max-md:hidden sticky self-start top-20">
-              <div className="w-full h-70 relative">
-                <div className="absolute top-4 left-4 flex flex-col gap-1">
-                  <span className="flex items-center font-[500] gap-1 text-lg">
-                    Looking for{" "}
-                    <h2 className="text-xl font-semibold">Candidates</h2>
+            <div className="flex flex-col gap-3 w-[24%] max-md:hidden sticky self-start top-20">
+              <div className="w-full h-70 relative group transition-all">
+                <div className="absolute top-5 left-5 z-10 flex flex-col gap-2">
+                  <span className="flex items-center text-white font-bold gap-1 text-base drop-shadow-md">
+                    Looking for <span className="font-black">Candidates?</span>
                   </span>
-                  <button className="text-[#FF6E04] bg-white py-1.5 w-40 text-[13px] font-bold rounded-sm">
+                  <Link href="/dashboard/post-job" className="bg-white text-[#FF6E04] px-4 py-2 text-[11px] font-black rounded-lg shadow-xl hover:scale-105 transition-transform uppercase tracking-wider text-center">
                     POST FREE JOB
-                  </button>
+                  </Link>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
                   src="/assets/jobsad1.png"
                   alt="looking for jobs"
                   height={500}
                   width={500}
-                  className="h-full w-full"
+                  className="h-full w-full rounded-2xl object-cover shadow-lg"
                 />
               </div>
 
-              <div className="w-full h-70 relative">
-                <div className="absolute bottom-4 right-2 flex flex-col">
-                  <span className="flex items-center relative left-4 font-[500] gap-1">
-                    Looking for <h2 className="text-lg font-semibold">Jobs</h2>
+              <div className="w-full h-70 relative group transition-all">
+                <div className="absolute bottom-5 right-5 z-10 flex flex-col items-end gap-2">
+                  <span className="flex items-center text-white font-bold gap-1 text-base drop-shadow-md">
+                    Looking for <span className="font-black">Jobs?</span>
                   </span>
-                  <button className="text-[#FF6E04] bg-white py-1.5 px-2 text-xs font-bold rounded-sm">
-                    CREATE YOUR PROFILE
-                  </button>
+                  <Link href="/dashboard/profile" className="bg-[#FF6E04] text-white px-4 py-2 text-[11px] font-black rounded-lg shadow-xl hover:scale-105 transition-transform uppercase tracking-wider text-center">
+                    CREATE PROFILE
+                  </Link>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
                   src="/assets/jobsad2.png"
                   alt="looking for jobs"
                   height={500}
                   width={500}
-                  className="h-full w-full"
+                  className="h-full w-full rounded-2xl object-cover shadow-lg"
                 />
               </div>
+
+              <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-4">
+                 <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4">Job Seekers Tip</h4>
+                 <p className="text-[11px] text-gray-500 leading-relaxed font-medium">Use advanced filters to find jobs matching your exact skills and experience level in Dubai.</p>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
