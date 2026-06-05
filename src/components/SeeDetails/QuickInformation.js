@@ -49,53 +49,6 @@ const CategoryIcon = () => (
   </svg>
 );
 
-const PriceIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect
-      x="2"
-      y="4"
-      width="20"
-      height="14"
-      rx="3"
-      stroke="#333"
-      strokeWidth="2"
-    />
-    <rect
-      x="6"
-      y="8"
-      width="12"
-      height="8"
-      rx="1.5"
-      stroke="#333"
-      strokeWidth="1.2"
-    />
-    <line
-      x1="9"
-      y1="11"
-      x2="15"
-      y2="11"
-      stroke="#333"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <line
-      x1="9"
-      y1="13.5"
-      x2="13"
-      y2="13.5"
-      stroke="#333"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 const QuickInformation = ({
   handlePop,
   category,
@@ -240,20 +193,20 @@ const QuickInformation = ({
             Visit Website
           </a>
         )}
-
         <span
           onClick={() => handlePop("report")}
           className="font-medium text-red-600 px-2 py-1 text-sm cursor-pointer rounded"
         >
           Report
         </span>
-
-        <span
-          onClick={() => handlePop("claim")}
-          className="font-medium bg-gray-100 text-gray-600 px-2 py-1 text-sm rounded cursor-pointer"
-        >
-          Claim this Business
-        </span>
+        {!job && (
+          <span
+            onClick={() => handlePop("claim")}
+            className="font-medium bg-gray-100 text-gray-600 px-2 py-1 text-sm rounded cursor-pointer"
+          >
+            Claim this Business
+          </span>
+        )}
       </div>
     </div>
   );

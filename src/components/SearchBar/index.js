@@ -261,7 +261,7 @@ const SearchBar = ({
       <div
         className={`
           w-full ${isHeader ? "h-[44px]" : "h-[54px]"}
-          rounded-full bg-white flex items-center
+          rounded-r-full bg-white flex items-center
           border transition-all duration-200
           ${
             isFocused || showDropdown

@@ -323,7 +323,7 @@ const JobListing = () => {
       phone: res.contact?.phone || "",
 
       city: res.company?.city?._id || "",
-      locality: res.localities?.[0] || "",
+      locality: res.company?.locality || res.locality || res.localities?.[0] || "",
       address: res.company?.address || "",
     }));
   };

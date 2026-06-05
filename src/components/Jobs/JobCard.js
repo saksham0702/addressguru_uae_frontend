@@ -31,8 +31,7 @@ const JobCard = ({ data }) => {
   return (
     <Link
       href={`/jobs/${data?.slug}`}
-      style={{ boxShadow: "0px 4px 15px 0px #0000001A" }}
-      className="bg-white  rounded-lg relative  pl-1 md:pl-4 "
+      className="bg-white  rounded-sm border border-gray-100 relative  pl-1 md:pl-4 "
     >
       <section className="flex gap-2 ">
         {/* company image section */}
@@ -72,7 +71,7 @@ const JobCard = ({ data }) => {
           </span> */}
           </div>
           <div className="flex gap-3 items-center max-md:mb-2">
-            <p className="text-sm max-md:text-[13px] max-md:w-[250px] max-md:truncate max-md:text-gray-500  max-md:font-semibold">
+            <p className="text-sm max-md:text-[13px] capitalize font-medium max-md:w-[250px] max-md:truncate text-orange-500  max-md:font-semibold">
               {data?.company?.name}
             </p>
             {/* right company image */}
@@ -286,7 +285,10 @@ const JobCard = ({ data }) => {
               fill="#8C8C8C"
             />
           </svg>
-          <p>Total Position : <span className="font-semibold">{data?.totalPositions}</span></p>
+          <p>
+            Total Position :{" "}
+            <span className="font-semibold">{data?.totalPositions}</span>
+          </p>
         </span>
 
         <span className="flex gap-2">

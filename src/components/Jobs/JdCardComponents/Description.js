@@ -1,5 +1,16 @@
 import React from "react";
 
+const Section = ({ title, children }) => (
+  <div className="space-y-2.5">
+    <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wide">
+      {title}
+    </h3>
+    <div className="text-sm text-zinc-600 leading-relaxed">{children}</div>
+  </div>
+);
+
+const Divider = () => <hr className="border-zinc-100" />;
+
 const Description = ({
   desc,
   roles = [],
@@ -10,82 +21,85 @@ const Description = ({
   address,
   city,
 }) => {
-  console.log("responses", qualifications, roles, keySkills);
-
   return (
-    <section className="space-y-5 max-md:mt-5 max-md:pb-10">
-      {/* Job Details */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-2 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">Job Details</h4>
-        <p className="text-[13px] font-[500]">
-          {desc || "No job description available."}
-        </p>
-      </div>
+    <div className="space-y-5">
+      {/* Job Description */}
+      {desc && (
+        <>
+          <Section title="About the Role">
+            <p>{desc}</p>
+          </Section>
+          <Divider />
+        </>
+      )}
 
-      {/* Roles */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-1 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">Role</h4>
-        <ul className="list-disc list-inside text-[13px] font-[500]">
-          {roles.length > 0 ? (
-            roles.map((item, index) => <li key={index}>{item}</li>)
-          ) : (
-            <li>No roles provided</li>
-          )}
-        </ul>
-      </div>
+      {/* Responsibilities */}
+      {roles.length > 0 && (
+        <>
+          <Section title="Responsibilities">
+            <ul className="space-y-1.5">
+              {roles.map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Section>
+          <Divider />
+        </>
+      )}
 
-      {/* Qualifications */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-1 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">Qualification Required</h4>
-        <ul className="list-disc list-inside text-[13px] font-[500]">
-          {qualifications.length > 0 ? (
-            qualifications.map((item, index) => (
-              <li key={index}>
-                {/* handles both string OR object */}
-                {typeof item === "string" ? item : item?.level || "N/A"}
-              </li>
-            ))
-          ) : (
-            <li>No qualifications specified</li>
-          )}
-        </ul>
-      </div>
+      {/* Requirements */}
+      {qualifications.length > 0 && (
+        <>
+          <Section title="Requirements">
+            <ul className="space-y-1.5">
+              {qualifications.map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0" />
+                  {typeof item === "string" ? item : item?.level || "N/A"}
+                </li>
+              ))}
+            </ul>
+          </Section>
+          <Divider />
+        </>
+      )}
 
       {/* Skills */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-1 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">Key Skills</h4>
-        <ul className="list-disc list-inside text-[13px] font-[500]">
-          {keySkills.length > 0 ? (
-            keySkills.map((item, index) => <li key={index}>{item}</li>)
-          ) : (
-            <li>No skills listed</li>
-          )}
-        </ul>
-      </div>
+      {keySkills.length > 0 && (
+        <>
+          <Section title="Key Skills">
+            <div className="flex flex-wrap gap-2 mt-1">
+              {keySkills.map((skill, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-zinc-100 text-zinc-700 text-xs font-semibold rounded"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </Section>
+          <Divider />
+        </>
+      )}
 
       {/* Company */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-2 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">{companyName || "Company"}</h4>
-        <p className="text-[13px] font-[500]">
-          {companyDesc || "No company description available"}
-        </p>
-      </div>
-
-      {/* Contact */}
-      <hr className="w-full h-[1px] my-4 text-gray-200 max-md:hidden" />
-      <div className="space-y-2 max-md:pl-2.5 md:pl-6 pr-2">
-        <h4 className="font-semibold text-lg">Contact Details</h4>
-        <span className="text-[13px] font-[500]">
-          <strong>Address:</strong> {address || "Not provided"} <br />
-          <strong>City:</strong> {city || "Not provided"}
-        </span>
-      </div>
-    </section>
+      {(companyName || companyDesc) && (
+        <>
+          <Section title={companyName || "About the Company"}>
+            {companyDesc && <p>{companyDesc}</p>}
+            {(address || city) && (
+              <p className="mt-2 text-zinc-500">
+                {[address, city].filter(Boolean).join(", ")}
+              </p>
+            )}
+          </Section>
+        </>
+      )}
+    </div>
   );
 };
 
