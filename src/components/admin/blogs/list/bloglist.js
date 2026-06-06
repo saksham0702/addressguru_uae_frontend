@@ -137,7 +137,7 @@ export default function BlogList() {
                   "Title",
                   "Slug",
                   "Category",
-                  "Author",
+                  // "Author",
                   "Created",
                   "Status",
                   "Operation",
@@ -205,9 +205,9 @@ export default function BlogList() {
                     </td>
 
                     {/* Author */}
-                    <td className="px-4 py-4 border-r border-gray-200 text-gray-700">
-                      {blog.author}
-                    </td>
+                    {/* <td className="px-4 py-4 border-r border-gray-200 text-gray-700">
+                      {blog.author?.name}
+                    </td> */}
 
                     {/* Date */}
                     <td className="px-4 py-4 border-r border-gray-200 text-gray-500 whitespace-nowrap">
@@ -217,7 +217,7 @@ export default function BlogList() {
                     {/* Status */}
                     <td className="px-4 py-4 border-r border-gray-200">
                       <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                        {blog.status === "published" ? "Active" : "Draft"}
+                        {blog.status === "published" ? "Active" : "published"}
                       </span>
                     </td>
 
