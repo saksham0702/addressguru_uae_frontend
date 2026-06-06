@@ -323,7 +323,8 @@ const JobListing = () => {
       phone: res.contact?.phone || "",
 
       city: res.company?.city?._id || "",
-      locality: res.company?.locality || res.locality || res.localities?.[0] || "",
+      locality:
+        res.company?.locality || res.locality || res.localities?.[0] || "",
       address: res.company?.address || "",
     }));
   };
@@ -732,8 +733,10 @@ const JobListing = () => {
 
         formData.append("company", JSON.stringify(companyObj));
 
-        if (postJobData.companyLogo) {
+        if (postJobData.companyLogo instanceof File) {
           formData.append("logo", postJobData.companyLogo);
+        } else if (typeof postJobData.companyLogo === "string") {
+          formData.append("previous_company_logo", postJobData.companyLogo);
         }
 
         break;
@@ -955,7 +958,7 @@ const JobListing = () => {
                 <button
                   onClick={() => {
                     setShowThankYou(false);
-                    router.push(`/job/${submittedSlug}`);
+                    router.push(`/jobs/${submittedSlug}`);
                   }}
                   className="w-full px-6 py-3 bg-[#FF6E04] hover:bg-[#E55A03] text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
                 >

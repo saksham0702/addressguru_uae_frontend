@@ -68,7 +68,14 @@ const QuickInformation = ({
     ...(extraFields?.logo || []),
     ...(extraFields?.description || []),
     ...(extraFields?.additional || []),
-  ];
+  ].filter((field) => {
+    const val = field?.value;
+    if (val === null || val === undefined || val === "") return false;
+    if (typeof val === "string" && val.trim() === "") return false;
+    if (field?.type === "price" && (val?.amount === "" || val?.amount == null))
+      return false;
+    return true;
+  });
 
   return (
     <div className="w-full max-md:hidden mb-3 rounded-t-lg">

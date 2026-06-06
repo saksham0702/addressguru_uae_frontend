@@ -12,6 +12,7 @@ const BusinessInfo = ({
   category,
   subCategory,
   errors,
+  setErrors,
   facilities,
   services,
   courses,
@@ -36,8 +37,28 @@ const BusinessInfo = ({
   const handleInputChange = (field, value, errorKey) => {
     handleChange(field, value);
 
-    // Clear error when user starts typing
-    if (clearError && errorKey) {
+    // Immediate validation for description if field is "description"
+    if (field === "description" && setErrors) {
+      const phoneRegex = /\d{7,}/;
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+      const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
+
+      let errorMsg = "";
+      if (phoneRegex.test(value)) {
+        errorMsg = "Phone numbers are not allowed in description";
+      } else if (emailRegex.test(value)) {
+        errorMsg = "Email addresses are not allowed in description";
+      } else if (linkRegex.test(value)) {
+        errorMsg = "Links/URLs are not allowed in description";
+      }
+
+      if (errorMsg) {
+        setErrors((prev) => ({ ...prev, [errorKey]: errorMsg }));
+      } else if (clearError && errorKey) {
+        clearError(errorKey);
+      }
+    } else if (clearError && errorKey) {
+      // Clear error when user starts typing for other fields
       clearError(errorKey);
     }
   };
@@ -349,18 +370,36 @@ const BusinessInfo = ({
 
         <div className="relative">
           <textarea
-            className="w-full border border-gray-200 p-2 pr-32 rounded-md resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className={`w-full border p-2 pr-32 rounded-md resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none ${
+              errors?.businessDescription ? "border-red-500 ring-1 ring-red-500" : "border-gray-200"
+            }`}
             rows={5}
             placeholder="Enter description or generate using AI"
             value={business.description || ""}
-            onChange={(e) =>
-              handleInputChange(
-                "description",
-                e.target.value,
-                "businessDescription",
-              )
-            }
-            //
+            onChange={(e) => {
+              const val = e.target.value;
+              handleInputChange("description", val, "businessDescription");
+
+              // Immediate validation feedback
+              const phoneRegex = /\d{7,}/;
+              const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+              const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
+
+              let errorMsg = "";
+              if (phoneRegex.test(val)) {
+                errorMsg = "Phone numbers are not allowed in description";
+              } else if (emailRegex.test(val)) {
+                errorMsg = "Email addresses are not allowed in description";
+              } else if (linkRegex.test(val)) {
+                errorMsg = "Links/URLs are not allowed in description";
+              }
+
+              // We can't set parent errors directly without setErrors prop, 
+              // but handleInputChange clears errors. 
+              // If we want real-time, we should ideally pass a validation function or setErrors.
+              // For now, the border color and existing error display will work once validateStep is called.
+              // However, the user wants "redish lines as its giving".
+            }}
           />
           <button
             onClick={generateDescription}

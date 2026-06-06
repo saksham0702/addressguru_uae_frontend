@@ -18,6 +18,8 @@ import {
   GraduationCap,
   Globe,
   ChevronRight,
+  CheckCircle,
+  X,
 } from "lucide-react";
 
 /* ─── tiny helpers ─── */
@@ -59,6 +61,7 @@ const StatCell = ({
 /* ─── main component ─── */
 const JobDetails = ({ jobData }) => {
   const [apply, setApply] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const city =
     jobData?.location?.city?.name || jobData?.company?.city?.name || "";
@@ -271,6 +274,7 @@ const JobDetails = ({ jobData }) => {
                 highlight={apply}
                 slug={jobData?.slug}
                 setHighlight={setApply}
+                onSuccess={() => setShowSuccess(true)}
               />
             </div>
 
@@ -278,6 +282,44 @@ const JobDetails = ({ jobData }) => {
           </div>
         </div>
       </div>
+
+      {/* Global Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-8 text-center relative shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-[#FF6E04] rounded-t-2xl" />
+
+            <button
+              onClick={() => setShowSuccess(false)}
+              className="absolute top-4 right-4 p-1.5 hover:bg-zinc-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-zinc-400" />
+            </button>
+
+            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
+            </div>
+
+            <h3 className="text-2xl font-bold text-zinc-900 mb-3">
+              Application Sent!
+            </h3>
+            <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
+              Your application for <span className="font-semibold text-zinc-800">{jobData?.title}</span> has been successfully submitted. The hiring team will get back to you soon.
+            </p>
+
+            <button
+              onClick={() => setShowSuccess(false)}
+              className="w-full py-3 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-[#FF6E04] transition-colors shadow-lg shadow-zinc-200"
+            >
+              Got it, thanks!
+            </button>
+
+            <p className="mt-6 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              Verified by AddressGuru UAE
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };

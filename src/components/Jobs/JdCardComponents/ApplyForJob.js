@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { apply_for_job } from "@/api/uae-job-listing";
+import CountryCodePhoneInput from "@/components/shared/CountryCodePhoneInput";
 import {
   CheckCircle,
   ArrowRight,
@@ -55,10 +56,10 @@ const FormInput = ({
 );
 
 /* ─── main component ─── */
-const ApplyForJob = ({ highlight, setHighlight, slug }) => {
+const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
   const [loading, setLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState({});
+  const [countryCode, setCountryCode] = useState("+971");
   const [jobQuery, setJobQuery] = useState({
     name: "",
     email: "",
@@ -94,13 +95,13 @@ const ApplyForJob = ({ highlight, setHighlight, slug }) => {
       const res = await apply_for_job(slug, {
         fullName: jobQuery.name,
         email: jobQuery.email,
-        phone: jobQuery.phone,
+        phone: `${countryCode}${jobQuery.phone}`,
         totalExperience: jobQuery.experience,
         skills: jobQuery.skills,
         message: jobQuery.message,
       });
       if (res?.status === true || res?.success === true) {
-        setShowSuccess(true);
+        if (onSuccess) onSuccess();
         setJobQuery({
           name: "",
           email: "",
@@ -161,14 +162,21 @@ const ApplyForJob = ({ highlight, setHighlight, slug }) => {
           icon={<Mail className="w-4 h-4" />}
           type="email"
         />
-        <FormInput
-          label="Phone"
-          placeholder="+971 50 000 0000"
-          value={jobQuery.phone}
-          onChange={(v) => handleFieldChange("phone", v)}
-          error={errors.phone}
-          icon={<Phone className="w-4 h-4" />}
-        />
+
+        <div className="space-y-1">
+          <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide">
+            Phone
+          </label>
+          <CountryCodePhoneInput
+            value={jobQuery.phone}
+            onChange={(e) => handleFieldChange("phone", e.target.value)}
+            countryCode={countryCode}
+            setCountryCode={setCountryCode}
+            error={errors.phone}
+            placeholder="Mobile number"
+            variant="bordered"
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <FormInput
@@ -220,45 +228,6 @@ const ApplyForJob = ({ highlight, setHighlight, slug }) => {
           )}
         </button>
       </div>
-
-      {/* Success Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-8 text-center relative">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-[#FF6E04] rounded-t-2xl" />
-
-            <button
-              onClick={() => setShowSuccess(false)}
-              className="absolute top-4 right-4 p-1.5 hover:bg-zinc-100 rounded-full transition-colors"
-            >
-              <X className="w-4 h-4 text-zinc-400" />
-            </button>
-
-            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5">
-              <CheckCircle className="w-8 h-8 text-emerald-500" />
-            </div>
-
-            <h3 className="text-xl font-bold text-zinc-900 mb-2">
-              Application Submitted
-            </h3>
-            <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-              Your application has been received. The hiring team will review it
-              and contact you shortly.
-            </p>
-
-            <button
-              onClick={() => setShowSuccess(false)}
-              className="px-5 py-2.5 border border-zinc-200 text-zinc-700 text-sm font-semibold rounded-lg hover:bg-zinc-50 transition-colors"
-            >
-              Back to Job
-            </button>
-
-            <p className="mt-5 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
-              Verified by AddressGuru UAE
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

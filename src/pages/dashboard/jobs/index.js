@@ -14,12 +14,16 @@ export default function JobsPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) return router.replace("/");
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    if (!user && !token) {
+      router.replace("/");
+      return;
+    }
 
     get_job_listings().then((res) => {
       if (res) setData(res);
     });
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   if (loading || !user) return null;
 
