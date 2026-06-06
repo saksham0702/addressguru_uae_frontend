@@ -416,10 +416,7 @@ const PaymentHistory = ({ isAdmin = false }) => {
   ];
 
   return (
-    <div
-      className="bg-gray-50 min-h-screen p-6"
-      style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}
-    >
+    <div className="bg-white min-h-screen p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-slate-800">
