@@ -201,6 +201,23 @@ const SeeDetails = ({ initialData, initialRooms }) => {
     };
 
     fields.forEach((item) => {
+      // Skip if value is empty/null/undefined
+      if (item.value === null || item.value === undefined || item.value === "")
+        return;
+
+      // Skip if string is just whitespace
+      if (typeof item.value === "string" && item.value.trim() === "") return;
+
+      // Handle price objects
+      if (
+        item.field_type === "price" &&
+        (item.value?.amount === null ||
+          item.value?.amount === undefined ||
+          item.value?.amount === "")
+      ) {
+        return;
+      }
+
       const field = {
         label: item.field_label,
         value: item.value,

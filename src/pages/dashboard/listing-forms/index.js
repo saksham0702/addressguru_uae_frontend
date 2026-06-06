@@ -526,6 +526,19 @@ const ListingForms = () => {
       }
       if (!business.description.trim()) {
         newErrors.businessDescription = "Description is required";
+      } else {
+        // Restricted content validation
+        const phoneRegex = /\d{7,}/; // 7+ consecutive digits
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+        const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
+
+        if (phoneRegex.test(business.description)) {
+          newErrors.businessDescription = "Phone numbers are not allowed in description";
+        } else if (emailRegex.test(business.description)) {
+          newErrors.businessDescription = "Email addresses are not allowed in description";
+        } else if (linkRegex.test(business.description)) {
+          newErrors.businessDescription = "Links/URLs are not allowed in description";
+        }
       }
       if (facility.length > 0 && selectedFacilities.length === 0) {
         newErrors.facilities = "Please select at least one facility";
@@ -1008,6 +1021,7 @@ const ListingForms = () => {
               courses={courses}
               payment={payment}
               errors={errors}
+              setErrors={setErrors}
               schedule={schedule}
               setSchedule={setSchedule}
               clearError={clearError}

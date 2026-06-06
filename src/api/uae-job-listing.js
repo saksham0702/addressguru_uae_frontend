@@ -1,8 +1,5 @@
 import axios from "axios";
-
-// const API_URL = "http://192.168.31.104:5001";
-// const API_URL = "http://192.168.31.107:5001";
-const API_URL = "https://addressguru.ae/api";
+import { API_URL } from "@/services/constants";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");
@@ -19,7 +16,6 @@ const getAuthConfig = () => {
 
   return {
     headers: {
-      "Content-Type": "multipart/form-data",
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
       withCredentials: true,
@@ -92,6 +88,7 @@ export const get_job_categories = async () => {
 export const save_job = async ({ step, formData, isEdit = false }) => {
   try {
     const url = `${API_URL}/jobs-listing/save-job/${step}`;
+    console.log("formdata", formData);
 
     // ✅ Decide method
     const method = isEdit ? "put" : step === 1 ? "post" : "put";
@@ -137,26 +134,29 @@ export const get_all_jobs_listings = async ({ page, limit, status }) => {
   }
 };
 
-
 export const apply_for_job = async (slug, formData) => {
   try {
-    const response = await axios.post(`${API_URL}/applications/${slug}/apply`, formData,{
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json",
+    const response = await axios.post(
+      `${API_URL}/applications/${slug}/apply`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
       },
-    });
+    );
     console.log("response from applying for job", response?.data);
     return response?.data;
   } catch (error) {
     console.log("error applying for job", error?.response?.data);
     return error?.response?.data;
   }
-}
+};
 
 export const get_applications_by_jobs = async (slug) => {
   try {
-    const response = await axios.get(`${API_URL}/applications/${slug}`,{
+    const response = await axios.get(`${API_URL}/applications/${slug}`, {
       withCredentials: true,
     });
     console.log("response from getting applications by jobs", response?.data);
@@ -165,21 +165,28 @@ export const get_applications_by_jobs = async (slug) => {
     console.log("error getting applications by jobs", error?.response?.data);
     return error?.response?.data;
   }
-}
+};
 
 export const get_all_applications = async () => {
   try {
-    const response = await axios.get(`${API_URL}/applications/get-all-applications`,{
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      `${API_URL}/applications/get-all-applications`,
+      {
+        withCredentials: true,
+      },
+    );
     console.log("response from getting all applications", response?.data);
     return response?.data;
   } catch (error) {
     console.log("error getting all applications", error?.response?.data);
     return error?.response?.data;
   }
-}
-export const update_application_status = async (applicationId, status, adminNote = "") => {
+};
+export const update_application_status = async (
+  applicationId,
+  status,
+  adminNote = "",
+) => {
   const token = localStorage.getItem("authToken");
   try {
     const response = await axios.patch(
@@ -189,16 +196,14 @@ export const update_application_status = async (applicationId, status, adminNote
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return response?.data;
   } catch (error) {
     console.log("error updating application status", error?.response?.data);
     return error?.response?.data;
   }
-}
-
-
+};
 
 // // APPROVE JOB
 // export const approve_jobs_listing = async (id) => {

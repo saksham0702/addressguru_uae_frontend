@@ -3,6 +3,7 @@ import InputWithTitle from "@/components/Forms/InputWithTitle";
 import DropDown from "@/components/Forms/DropDown";
 import { getCityLocalities } from "@/api/uaeadminCities";
 import { COUNTRY_CODES } from "@/services/constants";
+import Image from "next/image";
 
 const CompanyInfoSection = ({
   postJobData,
@@ -103,7 +104,9 @@ const CompanyInfoSection = ({
           <div className="relative w-50 h-30 rounded-xl border border-gray-200 bg-white shadow-md flex items-center justify-center overflow-hidden group">
             {logoPreview || postJobData.companyLogo ? (
               <>
-                <img
+                <Image
+                  width={500}
+                  height={500}
                   src={
                     logoPreview ||
                     (typeof postJobData.companyLogo === "string"
@@ -114,7 +117,9 @@ const CompanyInfoSection = ({
                   className="w-full h-full object-cover p-3"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                  <span className="text-sm text-white font-medium">Change Logo</span>
+                  <span className="text-sm text-white font-medium">
+                    Change Logo
+                  </span>
                 </div>
               </>
             ) : (
@@ -149,7 +154,9 @@ const CompanyInfoSection = ({
           title="Company Description"
           placeholder="Enter company description"
           value={postJobData.companyDescription || ""}
-          onChange={(e) => handleInputChange("companyDescription", e.target.value)}
+          onChange={(e) =>
+            handleInputChange("companyDescription", e.target.value)
+          }
           rows={3}
           error={errors.companyDescription}
         />
@@ -205,8 +212,18 @@ const CompanyInfoSection = ({
               className="w-full py-2 text-sm font-medium text-gray-700 flex items-center justify-center gap-1"
             >
               {postJobData.countryCode || "+971"}
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -318,14 +335,18 @@ const CompanyInfoSection = ({
                       setLocalitySearch("");
                     }}
                     className={`px-4 py-2 cursor-pointer hover:bg-orange-50 text-sm ${
-                      postJobData.locality === loc.name ? "bg-orange-50 text-orange-600 font-medium" : ""
+                      postJobData.locality === loc.name
+                        ? "bg-orange-50 text-orange-600 font-medium"
+                        : ""
                     }`}
                   >
                     {loc.name}
                   </div>
                 ))
               ) : (
-                <div className="px-4 py-3 text-xs text-gray-500 text-center">No results found</div>
+                <div className="px-4 py-3 text-xs text-gray-500 text-center">
+                  No results found
+                </div>
               )}
             </div>
           </div>

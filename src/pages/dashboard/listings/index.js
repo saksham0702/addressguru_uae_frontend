@@ -19,12 +19,13 @@ const ListingsPage = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    if (!user && !token) {
       router.replace("/");
       return;
     }
     fetchListings();
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   if (loading || !user) return null;
 
