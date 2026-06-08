@@ -67,7 +67,7 @@ const CompanyInfoSection = ({
   };
 
   const handlePhoneChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
     handleInputChange("phone", digits);
   };
 
@@ -158,6 +158,8 @@ const CompanyInfoSection = ({
             handleInputChange("companyDescription", e.target.value)
           }
           rows={3}
+          minLength={200}
+          maxLength={500}
           error={errors.companyDescription}
         />
       </div>

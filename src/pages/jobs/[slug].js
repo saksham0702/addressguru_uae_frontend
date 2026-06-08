@@ -176,7 +176,7 @@ const JobDetails = ({ jobData }) => {
                   <StatCell
                     icon={Briefcase}
                     label="Experience"
-                    value={`${jobData?.noOfExperience || "—"} yrs`}
+                    value={`${jobData?.noOfExperience || "—"} years`}
                     iconColor="text-sky-500"
                   />
                   <StatCell
@@ -304,7 +304,12 @@ const JobDetails = ({ jobData }) => {
               Application Sent!
             </h3>
             <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
-              Your application for <span className="font-semibold text-zinc-800">{jobData?.title}</span> has been successfully submitted. The hiring team will get back to you soon.
+              Your application for{" "}
+              <span className="font-semibold text-zinc-800">
+                {jobData?.title}
+              </span>{" "}
+              has been successfully submitted. The hiring team will get back to
+              you soon.
             </p>
 
             <button
