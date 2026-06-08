@@ -193,8 +193,8 @@ const JobInfoSection = ({
       width: true,
       name: "Age Range",
       key: "ageRange",
-      type: "dropdown",
-      options: ageOptions,
+      type: "text",
+      placeholder: "e.g. 18-25 or 25-40",
     },
     {
       id: 19,

@@ -266,6 +266,7 @@ const JobListing = () => {
       ...prev,
 
       // ✅ CATEGORY
+      category_id: res.category?._id || "",
       category_slug: res.category?.slug || "",
 
       // ❌ subCategory may be null
@@ -416,14 +417,14 @@ const JobListing = () => {
       clearSession();
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    // window.addEventListener("beforeunload", handleBeforeUnload);
     router.events.on("routeChangeStart", handleRouteChange);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // window.removeEventListener("beforeunload", handleBeforeUnload);
       router.events.off("routeChangeStart", handleRouteChange);
     };
-  }, []);
+  }, [router.events]);
 
   const setActiveStep = (stepNumber) => {
     setSteps((prevSteps) =>
@@ -541,8 +542,14 @@ const JobListing = () => {
       }
       if (!postJobData.phone) {
         newErrors.phone = "Phone number is required";
-      } else if (!/^\d{10}$/.test(postJobData.phone)) {
-        newErrors.phone = "Phone number must be exactly 10 digits";
+      } else if (!/^\d{5,12}$/.test(postJobData.phone)) {
+        newErrors.phone = "Phone number must be between 5 and 12 digits";
+      }
+
+      const descLen = postJobData.companyDescription?.trim().length || 0;
+      if (descLen > 0 && (descLen < 200 || descLen > 500)) {
+        newErrors.companyDescription =
+          "Company description must be between 200 and 500 characters";
       }
     }
     setErrors(newErrors);
