@@ -30,11 +30,11 @@ const DropDown = ({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex justify-between items-center w-full px-4 py-2 bg-white border border-gray-200 cursor-pointer rounded-lg shadow-sm text-left text-gray-800 hover:border-orange-600 focus:outline-none"
+        className="flex justify-between items-center w-full px-4 py-2 bg-white border border-gray-200 cursor-pointer rounded-lg shadow-sm text-left text-gray-700 hover:border-gray-400 focus:outline-none"
       >
         <span>{selected ? selected.label : placeholder}</span>
         <FaChevronDown
-          className={`w-5 h-5 text-orange-500 transition-transform duration-200 ${
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -49,10 +49,10 @@ const DropDown = ({
                 key={option.value}
                 type="button"
                 onClick={() => handleSelect(option)}
-                className={`w-full px-4 py-2 text-left cursor-pointer text-sm font-semibold hover:bg-orange-100 ${
+                className={`w-full px-4 py-2 text-left cursor-pointer text-sm hover:bg-gray-50 ${
                   selected?.value === option.value
-                    ? "bg-orange-50 text-orange-600"
-                    : ""
+                    ? "bg-orange-50 text-orange-600 font-semibold"
+                    : "text-gray-700 font-normal"
                 }`}
               >
                 {option.label}
