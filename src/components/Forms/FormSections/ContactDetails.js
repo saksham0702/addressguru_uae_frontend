@@ -124,14 +124,14 @@ const ContactDetails = ({
   /* ---------------- PHONE HANDLING ---------------- */
 
   const handleNumberChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, "");
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
     setRawNumber(digits);
     handleChange("number", digits, "contactNumber");
   };
 
   const handleAltNumberChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, "");
-    setRawAltNumber(digits);
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+    setRawNumber(digits);
     handleChange("altNumber", digits, "contactAltNumber");
   };
 
@@ -144,14 +144,15 @@ const ContactDetails = ({
 
   return (
     <div className="bg-white  rounded-xl p-8 ">
-      <h2 className="text-xl font-semibold text-gray-800 mb-8">
-        Business Contact Details
-      </h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-8 flex items-center gap-1">
+          Business Contact Details <span className="text-red-600 md:hidden">*</span>
+        </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* NAME */}
         <InputWithTitle
           title="Full Name"
+          required={true}
           placeholder="Enter full name"
           value={contact?.name || ""}
           error={error?.contactName}
@@ -162,6 +163,7 @@ const ContactDetails = ({
 
         <InputWithTitle
           title="Email Address"
+          required={true}
           placeholder="Enter email address"
           value={contact?.email || ""}
           error={error?.contactEmail}
@@ -299,6 +301,7 @@ const ContactDetails = ({
         {!islistingForm && (
           <InputWithTitle
             title="Address"
+            required={true}
             placeholder="Enter full address"
             value={contact?.address || ""}
             error={error?.contactAddress}

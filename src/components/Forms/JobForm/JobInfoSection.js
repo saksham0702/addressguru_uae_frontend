@@ -132,6 +132,7 @@ const JobInfoSection = ({
       type: "dropdown",
       placeholder: "Remote / Onsite / Hybrid",
       options: workModeOptions,
+      required: true,
     },
     {
       id: 12,

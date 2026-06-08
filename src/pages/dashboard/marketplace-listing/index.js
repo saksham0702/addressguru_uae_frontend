@@ -24,7 +24,9 @@ import { APP_URL } from "@/services/constants";
 import {
   add_marketplace_listing,
   get_marketplace_by_slug,
+  get_marketplace_category_info,
 } from "@/api/uae-marketplace";
+import AdditionalInfo from "@/components/Forms/FormSections/AdditionalInfo";
 import SuccessModal from "@/components/Forms/sucesspopup";
 
 const MarketPlaceListing = () => {
@@ -48,6 +50,8 @@ const MarketPlaceListing = () => {
   const [slug, setSlug] = useState(null);
   const [editcategory, seteditcategory] = useState("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [additionalFieldsList, setAdditionalFieldsList] = useState([]);
+  const [additionalFieldsValues, setAdditionalFieldsValues] = useState({});
   // Refs for error scrolling
   const conditionRef = useRef(null);
   const titleRef = useRef(null);
@@ -64,9 +68,12 @@ const MarketPlaceListing = () => {
   const seoDescriptionRef = useRef(null);
   const planRef = useRef(null);
 
-  const getSubCategories = async (id) => {
-    const res = await get_marketplace_subcategories(id);
-    setSubSubCategories(res);
+  const getCategoryInfo = async (id) => {
+    const data = await get_marketplace_category_info(id);
+    if (data) {
+      setSubSubCategories(data.subCategories || []);
+      setAdditionalFieldsList(data.additionalFields || []);
+    }
   };
 
   const getPlansData = async () => {
@@ -79,7 +86,7 @@ const MarketPlaceListing = () => {
   };
 
   useEffect(() => {
-    if (categoryId) getSubCategories(categoryId);
+    if (categoryId) getCategoryInfo(categoryId);
     getPlansData();
   }, [categoryId]);
 
@@ -239,9 +246,21 @@ const MarketPlaceListing = () => {
           description: d.seo?.description || "",
         });
 
-        // If the listing has a category, fetch its subcategories
-        if (d.category_id) {
-          getSubCategories(d.category_id);
+        // If the listing has a category, fetch its subcategories and additional fields
+        if (d.category?._id || d.category) {
+          getCategoryInfo(d.category?._id || d.category);
+        }
+
+        // Pre-fill additional fields values
+        if (Array.isArray(d.additionalFields)) {
+          const mappedValues = {};
+          d.additionalFields.forEach((item) => {
+            const fieldId = item.field_id?._id || item.field_id;
+            if (fieldId) {
+              mappedValues[fieldId] = item.value;
+            }
+          });
+          setAdditionalFieldsValues(mappedValues);
         }
       } catch (err) {
         console.error("Error fetching edit data:", err);
@@ -553,9 +572,26 @@ const MarketPlaceListing = () => {
       if (!adInfo.description.trim()) {
         newErrors.description = "Description is required";
       }
+      if (subSubCategories.length > 0 && !adInfo.subcategoryId) {
+        newErrors.subcategoryId = "Please select a sub-category";
+      }
       if (adInfo.priceType === "amount" && !adInfo.amount) {
         newErrors.amount = "Price amount is required";
       }
+
+      // additional fields validation
+      additionalFieldsList.forEach((field) => {
+        if (
+          field.is_required &&
+          (!additionalFieldsValues[field._id] ||
+            (field.field_type === "price" &&
+              !additionalFieldsValues[field._id]?.amount) ||
+            (field.field_type === "checkbox" &&
+              additionalFieldsValues[field._id]?.length === 0))
+        ) {
+          newErrors[field._id] = `${field.field_label} is required`;
+        }
+      });
     }
 
     if (step === 2) {
@@ -577,6 +613,8 @@ const MarketPlaceListing = () => {
 
       if (!contact.number) {
         newErrors.contactNumber = "Mobile number is required";
+      } else if (!/^\d{5,12}$/.test(contact.number)) {
+        newErrors.contactNumber = "Mobile number must be 5 to 12 digits";
       }
 
       // if (!contact.cityId) {
@@ -680,7 +718,13 @@ const MarketPlaceListing = () => {
         }
 
         // additional fields
-        formData.append("additional_fields", JSON.stringify([]));
+        const formattedFields = Object.entries(additionalFieldsValues).map(
+          ([id, val]) => ({
+            field_id: id,
+            value: val,
+          }),
+        );
+        formData.append("additional_fields", JSON.stringify(formattedFields));
 
         break;
       case 2: {
@@ -889,7 +933,7 @@ const MarketPlaceListing = () => {
               {subSubCategories.length > 0 && (
                 <div className="w-1/2">
                   <h4 className="font-semibold text-gray-500 mb-1">
-                    Sub Category
+                    Sub Category *
                   </h4>
 
                   <DropDown
@@ -915,6 +959,10 @@ const MarketPlaceListing = () => {
                 </div>
               )}
             </div>
+            {errors.subcategoryId && (
+              <p className="text-red-500 text-sm mt-1">{errors.subcategoryId}</p>
+            )}
+
             <div ref={titleRef}>
               <InputWithTitle
                 title={"Add Title "}
@@ -946,7 +994,9 @@ const MarketPlaceListing = () => {
             </div>
             <div className="md:flex gap-3 w-full items-center">
               <div className="w-full">
-                <h4 className="font-semibold text-gray-500 mb-1">Price Type</h4>
+                <h4 className="font-semibold text-gray-500 mb-1">
+                  Price Type *
+                </h4>
                 <DropDown
                   placeholder="Select price type"
                   options={priceOptions}
@@ -977,14 +1027,21 @@ const MarketPlaceListing = () => {
                 </div>
               )}
             </div>
+            {additionalFieldsList.length > 0 && (
+              <AdditionalInfo
+                additionalFields={additionalFieldsList}
+                values={additionalFieldsValues}
+                setValues={setAdditionalFieldsValues}
+              />
+            )}
           </section>
         );
 
       case 2:
         return (
           <section ref={imagesRef}>
-            <h3 className="text-xl font-semibold mb-6 uppercase text-gray-800">
-              Upload Images *
+            <h3 className="text-xl font-semibold mb-6 uppercase text-gray-800 flex items-center gap-1">
+              Upload Images <span className="text-red-600">*</span>
             </h3>
             <div
               className={`bg-white rounded-lg border-2 border-dashed p-8 ${

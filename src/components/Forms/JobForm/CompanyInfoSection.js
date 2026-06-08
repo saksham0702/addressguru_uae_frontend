@@ -152,6 +152,7 @@ const CompanyInfoSection = ({
         <InputWithTitle
           isTextarea
           title="Company Description"
+          required={true}
           placeholder="Enter company description"
           value={postJobData.companyDescription || ""}
           onChange={(e) =>
@@ -179,6 +180,7 @@ const CompanyInfoSection = ({
       <div className="col-span-1" ref={refs.nameRef}>
         <InputWithTitle
           title="Contact Name"
+          required={true}
           placeholder="Enter contact person name"
           value={postJobData.name || ""}
           onChange={(e) => handleInputChange("name", e.target.value)}
@@ -277,7 +279,9 @@ const CompanyInfoSection = ({
 
       {/* City */}
       <div className="col-span-1" ref={refs.cityRef}>
-        <label className="text-black font-medium block mb-1">City</label>
+        <label className="text-black font-medium block mb-1">
+          City <span className="text-red-600 ml-1">*</span>
+        </label>
         <DropDown
           options={cityOptions || []}
           placeholder="Select city"
@@ -296,7 +300,7 @@ const CompanyInfoSection = ({
       {/* Locality */}
       <div className="col-span-1" ref={localityRef}>
         <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Locality
+          Locality <span className="text-red-600 ml-1">*</span>
         </label>
         <button
           type="button"
@@ -363,6 +367,7 @@ const CompanyInfoSection = ({
         <InputWithTitle
           isTextarea
           title="Address"
+          required={true}
           placeholder="Enter address"
           value={postJobData.address || ""}
           onChange={(e) => handleInputChange("address", e.target.value)}

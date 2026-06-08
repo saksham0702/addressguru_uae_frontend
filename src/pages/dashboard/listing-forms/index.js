@@ -567,6 +567,8 @@ const ListingForms = () => {
       }
       if (!contact.number.toString().trim()) {
         newErrors.contactNumber = "Mobile number is required";
+      } else if (!/^\d{5,12}$/.test(contact.number)) {
+        newErrors.contactNumber = "Mobile number must be 5 to 12 digits";
       }
       // if (contact.altNumber.trim() && !/^[6-9]\d{9}$/.test(contact.altNumber)) {
       //   newErrors.contactAltNumber = "Enter a valid alternate number";

@@ -162,3 +162,15 @@ export const approve_marketplace_listing = (id) => {
     },
   );
 };
+
+export const get_marketplace_category_info = async (categoryId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/marketplace/category-info/${categoryId}`,
+    );
+    return response?.data?.data;
+  } catch (error) {
+    console.log("error getting marketplace category info", error);
+    return null;
+  }
+};

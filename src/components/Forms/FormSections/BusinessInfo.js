@@ -240,7 +240,7 @@ const BusinessInfo = ({
         <div ref={refs?.facilitiesRef}>
           <CheckBox
             error={errors?.facilities}
-            heading="Facility"
+            heading="Facility *"
             options={facilities}
             selectedIds={selectedFacilities}
             onChange={(ids) => {
@@ -257,7 +257,7 @@ const BusinessInfo = ({
         <div ref={refs?.servicesRef}>
           <CheckBox
             error={errors?.services}
-            heading="Service"
+            heading="Service *"
             options={services}
             selectedIds={selectedServices}
             onChange={(ids) => {
@@ -274,7 +274,7 @@ const BusinessInfo = ({
         <div ref={refs?.coursesRef}>
           <CheckBox
             error={errors?.courses}
-            heading="Courses"
+            heading="Courses *"
             options={courses}
             selectedIds={selectedCourses}
             onChange={(ids) => {
@@ -290,7 +290,7 @@ const BusinessInfo = ({
       <div ref={refs?.payment}>
         <CheckBox
           error={errors?.payments}
-          heading="Payment Mode"
+          heading="Payment Mode *"
           options={payment}
           selectedIds={selectedPayment} // ✅ Use actual state
           onChange={(ids) => {
