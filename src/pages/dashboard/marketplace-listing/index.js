@@ -20,7 +20,8 @@ import {
   clearSession,
 } from "@/utils/sessionStorage";
 import ContactDetails from "@/components/Forms/FormSections/ContactDetails";
-import { APP_URL } from "@/services/constants";
+import { APP_URL, CURRENCY_OPTIONS } from "@/services/constants";
+import ImageUploadSections from "@/components/Forms/FormSections/ImageUploadSections";
 import {
   add_marketplace_listing,
   get_marketplace_by_slug,
@@ -98,6 +99,7 @@ const MarketPlaceListing = () => {
     description: "",
     priceType: "amount",
     amount: "",
+    currency: "AED",
   });
 
   // Section 2: Media (Images)
@@ -201,6 +203,7 @@ const MarketPlaceListing = () => {
                 : "amount",
 
           amount: d.price?.amount ? String(d.price.amount) : "",
+          currency: d.price?.currency || "AED",
         });
 
         // Pre-fill step 2 — Images
@@ -687,7 +690,7 @@ const MarketPlaceListing = () => {
         }
 
         // ===== Price handling =====
-        formData.append("price_currency", "AED");
+        formData.append("price_currency", adInfo.currency);
 
         if (adInfo.priceType === "amount") {
           formData.append("price_amount", adInfo.amount);
@@ -1012,15 +1015,50 @@ const MarketPlaceListing = () => {
               </div>
               {adInfo.priceType === "amount" && (
                 <div className="w-full" ref={priceRef}>
-                  <InputWithTitle
-                    type="number"
-                    title="Amount"
-                    value={adInfo.amount}
-                    required={true}
-                    onChange={(e) =>
-                      handleAdInfoChange("amount", e.target.value)
-                    }
-                  />
+                  <label className="text-black font-medium text-sm mb-1 block capitalize">
+                    Amount <span className="text-red-600">*</span>
+                  </label>
+                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 focus-within:border-orange-500 transition-all">
+                    {/* Currency Selector */}
+                    <div className="relative group min-w-[80px]">
+                      <select
+                        value={adInfo.currency}
+                        onChange={(e) =>
+                          handleAdInfoChange("currency", e.target.value)
+                        }
+                        className="w-full h-full bg-gray-50 border-r border-gray-200 px-3 py-[9px] text-sm font-bold text-gray-700 outline-none cursor-pointer appearance-none hover:bg-gray-100 transition-colors"
+                      >
+                        {CURRENCY_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.value}
+                          </option>
+                        ))}
+                      </select>
+                      {/* Custom Arrow */}
+                      <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-gray-400 group-hover:text-gray-600">
+                        <svg
+                          className="w-4 h-4 fill-current"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Amount Input */}
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Enter amount"
+                      value={adInfo.amount}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^0-9]/g, "");
+                        handleAdInfoChange("amount", val);
+                      }}
+                      className="w-full px-4 py-2 text-sm font-medium outline-none placeholder:text-gray-400"
+                    />
+                  </div>
                   {errors.amount && (
                     <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
                   )}
@@ -1040,89 +1078,14 @@ const MarketPlaceListing = () => {
       case 2:
         return (
           <section ref={imagesRef}>
-            <h3 className="text-xl font-semibold mb-6 uppercase text-gray-800 flex items-center gap-1">
-              Upload Images <span className="text-red-600">*</span>
-            </h3>
-            <div
-              className={`bg-white rounded-lg border-2 border-dashed p-8 ${
-                isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-300"
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <div className="text-center">
-                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <FaUpload className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-600 mb-2">
-                  Drag and drop images here, or click to select
-                </p>
-                <p className="text-sm text-gray-500 mb-4">
-                  Maximum 10 images ({media.images.length}/10 uploaded)
-                </p>
-                <input
-                  ref={multipleInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => handleMultipleUpload(e.target.files)}
-                  className="hidden"
-                  id="multiple-upload"
-                />
-                <label
-                  htmlFor="multiple-upload"
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
-                >
-                  <FaUpload className="w-4 h-4 mr-2" /> Choose Images
-                </label>
-              </div>
-            </div>
-
-            {errors.images && (
-              <p className="text-red-500 text-sm mt-2">{errors.images}</p>
-            )}
-
-            {media.images.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-lg font-medium text-gray-800 mb-4">
-                  Uploaded Images
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {media.images.map((img) => (
-                    <div key={img.id} className="relative group">
-                      <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          height={500}
-                          width={500}
-                          src={img.preview}
-                          alt={img.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Show "Existing" badge for pre-loaded images */}
-                      {img.isExisting && (
-                        <span className="absolute top-1 left-1 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">
-                          Existing
-                        </span>
-                      )}
-                      <button
-                        onClick={() => removeImage(img.id)}
-                        className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
-                      >
-                        <MdCancel className="w-7 h-7 text-white rounded-full bg-red-500" />
-                      </button>
-                      <p
-                        className="mt-1 text-xs text-gray-600 truncate"
-                        title={img.name}
-                      >
-                        {img.name}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <ImageUploadSections
+              media={media}
+              setMedia={setMedia}
+              error={errors}
+              clearError={clearError}
+              refs={{ imagesRef }}
+              showLogo={false}
+            />
           </section>
         );
 

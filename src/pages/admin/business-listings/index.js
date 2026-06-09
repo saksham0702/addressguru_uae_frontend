@@ -278,11 +278,12 @@ const BusinessListings = () => {
     }
   }
 
-  async function handleRejectSubmit({ listingId, reason }) {
+  async function handleRejectSubmit({ listingId, reason, note }) {
     try {
       const payload = {
         status: "rejected",
         rejectionReason: reason,
+        ...(note && { adminNote: note }),
       };
 
       await reject_listing(listingId, payload);
@@ -1109,40 +1110,77 @@ const BusinessListings = () => {
                           </button>
                         )}
                         {listing.status === "rejected" && (
-                          <button
-                            onClick={() => setConfirmAction(listing)}
-                            disabled={loadingId === listing._id}
-                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
-                          >
-                            {loadingId === listing._id ? (
-                              <>
-                                <svg
-                                  className="w-3 h-3 animate-spin"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    className="opacity-25"
-                                  />
-                                  <path
-                                    d="M22 12a10 10 0 00-10-10"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    className="opacity-75"
-                                  />
-                                </svg>
-                                Approving...
-                              </>
-                            ) : (
-                              <>
-                                <CheckIcon /> Approve
-                              </>
-                            )}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setConfirmAction(listing)}
+                              disabled={loadingId === listing._id}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors shadow-sm"
+                            >
+                              {loadingId === listing._id ? (
+                                <>
+                                  <svg
+                                    className="w-3 h-3 animate-spin"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-25"
+                                    />
+                                    <path
+                                      d="M22 12a10 10 0 00-10-10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-75"
+                                    />
+                                  </svg>
+                                  Approving...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckIcon /> Approve
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                handleApproveReject(listing, "unapproved")
+                              }
+                              disabled={loadingId === listing._id}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors shadow-sm"
+                            >
+                              {loadingId === listing._id ? (
+                                <>
+                                  <svg
+                                    className="w-3 h-3 animate-spin"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-25"
+                                    />
+                                    <path
+                                      d="M22 12a10 10 0 00-10-10"
+                                      stroke="currentColor"
+                                      strokeWidth="3"
+                                      className="opacity-75"
+                                    />
+                                  </svg>
+                                  Updating...
+                                </>
+                              ) : (
+                                "Unapprove"
+                              )}
+                            </button>
+                          </>
                         )}
                         {/* ❌ REJECTED → NO ACTION */}
                       </div>

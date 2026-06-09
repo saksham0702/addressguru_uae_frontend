@@ -430,7 +430,14 @@ function ThumbnailStrip({ images, activeIdx, onSelect, onRemove, onRecrop }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
+const ImageUploadSections = ({
+  media,
+  setMedia,
+  error,
+  clearError,
+  refs,
+  showLogo = true,
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadError, setUploadError] = useState({ logo: "", images: "" });
   const [activeIdx, setActiveIdx] = useState(null);
@@ -620,118 +627,124 @@ const ImageUploadSections = ({ media, setMedia, error, clearError, refs }) => {
       `}</style>
 
       {/* ── Logo Upload ── */}
-      <section ref={refs?.logoRef} style={{ marginBottom: 28 }}>
-        <Label
-          label="Logo / Feature Image"
-          required
-          error={uploadError.logo || error?.logo}
-        />
-        <div style={card}>
-          {!media?.logo ? (
-            <div style={{ textAlign: "center" }}>
-              <div style={iconCircle("#f0fdf4", "#16a34a")}>
-                <IconImage />
-              </div>
-              <p
-                style={{
-                  margin: "8px 0 2px",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: "#475569",
-                }}
-              >
-                Upload your logo
-              </p>
-              <p style={{ margin: "0 0 14px", fontSize: 12, color: "#94a3b8" }}>
-                PNG, JPG, WebP · Max 2MB
-              </p>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/jpg, image/webp"
-                onChange={handleLogoUpload}
-                id="logo-upload"
-                style={{ display: "none" }}
-              />
-              <label htmlFor="logo-upload" style={uploadBtn("#16a34a")}>
-                <span style={{ display: "inline-flex", width: 13, height: 13 }}>
-                  <IconUpload />
-                </span>
-                Choose File
-              </label>
-            </div>
-          ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ position: "relative", flexShrink: 0 }}>
-                <img
-                  src={
-                    media.logo.isExisting
-                      ? `${APP_URL}/${media.logo.preview}`
-                      : media.logo.preview
-                  }
-                  alt="Logo"
+      {showLogo && (
+        <section ref={refs?.logoRef} style={{ marginBottom: 28 }}>
+          <Label
+            label="Logo / Feature Image"
+            required
+            error={uploadError.logo || error?.logo}
+          />
+          <div style={card}>
+            {!media?.logo ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={iconCircle("#f0fdf4", "#16a34a")}>
+                  <IconImage />
+                </div>
+                <p
                   style={{
-                    width: 96,
-                    height: 96,
-                    objectFit: "contain",
-                    borderRadius: 12,
-                    border: "1px solid #e8edf3",
-                    background: "#f8fafc",
-                    padding: 6,
+                    margin: "8px 0 2px",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#475569",
                   }}
+                >
+                  Upload your logo
+                </p>
+                <p
+                  style={{ margin: "0 0 14px", fontSize: 12, color: "#94a3b8" }}
+                >
+                  PNG, JPG, WebP · Max 2MB
+                </p>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  onChange={handleLogoUpload}
+                  id="logo-upload"
+                  style={{ display: "none" }}
                 />
-                <button onClick={removeLogo} style={removeBtn}>
+                <label htmlFor="logo-upload" style={uploadBtn("#16a34a")}>
                   <span
+                    style={{ display: "inline-flex", width: 13, height: 13 }}
+                  >
+                    <IconUpload />
+                  </span>
+                  Choose File
+                </label>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <img
+                    src={
+                      media.logo.isExisting
+                        ? `${APP_URL}/${media.logo.preview}`
+                        : media.logo.preview
+                    }
+                    alt="Logo"
                     style={{
-                      display: "inline-flex",
-                      width: 9,
-                      height: 9,
-                      color: "#fff",
+                      width: 96,
+                      height: 96,
+                      objectFit: "contain",
+                      borderRadius: 12,
+                      border: "1px solid #e8edf3",
+                      background: "#f8fafc",
+                      padding: 6,
+                    }}
+                  />
+                  <button onClick={removeLogo} style={removeBtn}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        width: 9,
+                        height: 9,
+                        color: "#fff",
+                      }}
+                    >
+                      <IconX />
+                    </span>
+                  </button>
+                </div>
+                <div>
+                  <p
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: "#0f172a",
+                      margin: "0 0 2px",
                     }}
                   >
-                    <IconX />
-                  </span>
-                </button>
+                    {media.logo.name || "Logo"}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "#22c55e",
+                      margin: "0 0 8px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ✓ Uploaded
+                  </p>
+                  <button
+                    onClick={() => logoInputRef.current?.click()}
+                    style={textBtn("#16a34a")}
+                  >
+                    Change →
+                  </button>
+                </div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  onChange={handleLogoUpload}
+                  style={{ display: "none" }}
+                />
               </div>
-              <div>
-                <p
-                  style={{
-                    fontWeight: 700,
-                    fontSize: 13,
-                    color: "#0f172a",
-                    margin: "0 0 2px",
-                  }}
-                >
-                  {media.logo.name || "Logo"}
-                </p>
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: "#22c55e",
-                    margin: "0 0 8px",
-                    fontWeight: 600,
-                  }}
-                >
-                  ✓ Uploaded
-                </p>
-                <button
-                  onClick={() => logoInputRef.current?.click()}
-                  style={textBtn("#16a34a")}
-                >
-                  Change →
-                </button>
-              </div>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/jpg, image/webp"
-                onChange={handleLogoUpload}
-                style={{ display: "none" }}
-              />
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Images Upload ── */}
       <section ref={refs?.imagesRef}>
