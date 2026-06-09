@@ -46,7 +46,8 @@ const RejectReasonModal = ({ listing, onClose, onConfirm, onSubmit }) => {
     await new Promise((r) => setTimeout(r, 400)); // simulate async
     onSubmit({
       listingId: listing?._id,
-      reason: [...selected].join(", "), // or pick first
+      reason: [...selected].join(", "),
+      note: note.trim() || null,
     });
     setSubmitting(false);
     onClose();

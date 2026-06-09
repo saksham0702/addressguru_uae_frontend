@@ -234,6 +234,12 @@ export const COUNTRY_CODES = [
   { code: "+263", country: "Zimbabwe", flag: "🇿🇼" },
 ];
 
+export const CURRENCY_OPTIONS = [
+  { name: "AED", value: "AED", symbol: "د.إ" },
+  { name: "USD ($)", value: "USD", symbol: "$" },
+  { name: "INR (₹)", value: "INR", symbol: "₹" },
+];
+
 export const REGISTER_STEPS = [
   {
     icon: "/assets/register/create-account.png",
