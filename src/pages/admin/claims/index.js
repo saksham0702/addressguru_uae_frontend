@@ -13,14 +13,11 @@ import {
   X,
   UserPlus,
 } from "lucide-react";
-import {
-  getAllClaimsAdmin,
-  transferOwnership,
-} from "@/api/listing-features";
+import { getAllClaimsAdmin, transferOwnership } from "@/api/listing-features";
 import { API_URL } from "@/services/constants";
 
 const LIMIT = 10;
-const IMG_URL = API_URL.replace("/api", "") + "/"; // Base URL for images
+const IMG_URL = API_URL;
 
 const statusStyles = {
   approved: "bg-green-50 text-green-700 border border-green-200",
@@ -54,37 +51,39 @@ const Claims = () => {
   const [pagination, setPagination] = useState({ total: 0, pages: 0 });
   const [actionLoading, setActionLoading] = useState(null);
 
-  const fetchClaims = useCallback(async (overrides = {}) => {
-    try {
-      setLoading(true);
-      const res = await getAllClaimsAdmin({
-        page: overrides.page ?? page,
-        limit,
-        status: overrides.status ?? status,
-        search: overrides.search ?? search,
-      });
-      // Handle the response correctly based on the sample data structure
-      setClaims(res.data || []);
-      
-      // Calculate simple stats locally since the backend might not return them exactly like reviews
-      const total = res.pagination?.total || 0;
-      setPagination(res.pagination || { total: 0, pages: 0 });
-      
-      // If statistics aren't returned, we could calculate them or just use placeholders
-      // For now let's assume they might be there or build them
-      if (res.statistics) {
-        setStatistics(res.statistics);
-      } else {
-         // Fallback if statistics missing
-         setStatistics({ total });
-      }
+  const fetchClaims = useCallback(
+    async (overrides = {}) => {
+      try {
+        setLoading(true);
+        const res = await getAllClaimsAdmin({
+          page: overrides.page ?? page,
+          limit,
+          status: overrides.status ?? status,
+          search: overrides.search ?? search,
+        });
+        // Handle the response correctly based on the sample data structure
+        setClaims(res.data || []);
 
-    } catch (err) {
-      console.error("Fetch Claims Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, status, search, limit]);
+        // Calculate simple stats locally since the backend might not return them exactly like reviews
+        const total = res.pagination?.total || 0;
+        setPagination(res.pagination || { total: 0, pages: 0 });
+
+        // If statistics aren't returned, we could calculate them or just use placeholders
+        // For now let's assume they might be there or build them
+        if (res.statistics) {
+          setStatistics(res.statistics);
+        } else {
+          // Fallback if statistics missing
+          setStatistics({ total });
+        }
+      } catch (err) {
+        console.error("Fetch Claims Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, status, search, limit],
+  );
 
   useEffect(() => {
     fetchClaims();
@@ -97,8 +96,13 @@ const Claims = () => {
   };
 
   const handleTransfer = async (claimId) => {
-    if (!window.confirm("Are you sure you want to transfer ownership of this listing to this claimant?")) return;
-    
+    if (
+      !window.confirm(
+        "Are you sure you want to transfer ownership of this listing to this claimant?",
+      )
+    )
+      return;
+
     try {
       setActionLoading(claimId);
       const res = await transferOwnership(claimId);
@@ -209,7 +213,10 @@ const Claims = () => {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse" style={{ tableLayout: "fixed" }}>
+            <table
+              className="w-full text-sm border-collapse"
+              style={{ tableLayout: "fixed" }}
+            >
               <colgroup>
                 <col style={{ width: "20%" }} />
                 <col style={{ width: "18%" }} />
@@ -221,13 +228,27 @@ const Claims = () => {
               </colgroup>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Claimant</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Listing</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">ID Proof</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Reason</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Claimant
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Listing
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    ID Proof
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Reason
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -236,7 +257,9 @@ const Claims = () => {
                     <td colSpan="7" className="text-center py-14">
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-7 h-7 border-2 border-[#FF6E04] border-t-transparent rounded-full animate-spin" />
-                        <p className="text-sm text-gray-400">Loading claims...</p>
+                        <p className="text-sm text-gray-400">
+                          Loading claims...
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -251,70 +274,87 @@ const Claims = () => {
                     </td>
                   </tr>
                 )}
-                {!loading && claims.map((claim) => (
-                  <tr key={claim._id} className="hover:bg-orange-50/20 transition-colors duration-100">
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{claim.fullName}</p>
-                      <p className="text-xs text-gray-500 truncate">{claim.email}</p>
-                      <p className="text-xs text-gray-400 truncate">{claim.mobileNumber}</p>
-                    </td>
-                    <td className="px-4 py-4">
-                       <p className="text-sm font-medium text-gray-800 truncate" title={claim.listingSlug}>
-                        {claim.listingSlug}
-                      </p>
-                      <p className="text-xs text-gray-500">{claim.listingModel}</p>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <button 
-                         onClick={() => openImage(claim.idProofImage)}
-                         className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition"
-                         title="View ID Proof"
-                      >
-                        <Eye size={16} />
-                      </button>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="group relative">
-                        <p className="text-sm text-gray-700 line-clamp-2 cursor-help">
-                          {claim.reasonForClaim}
+                {!loading &&
+                  claims.map((claim) => (
+                    <tr
+                      key={claim._id}
+                      className="hover:bg-orange-50/20 transition-colors duration-100"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {claim.fullName}
                         </p>
-                        <div className="absolute z-10 hidden group-hover:block bg-gray-900 text-white p-2 rounded text-xs w-48 -top-2 left-full ml-2 shadow-xl">
-                          {claim.reasonForClaim}
+                        <p className="text-xs text-gray-500 truncate">
+                          {claim.email}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {claim.mobileNumber}
+                        </p>
+                      </td>
+                      <td className="px-4 py-4">
+                        <p
+                          className="text-sm font-medium text-gray-800 truncate"
+                          title={claim.listingSlug}
+                        >
+                          {claim.listingSlug}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {claim.listingModel}
+                        </p>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <button
+                          onClick={() => openImage(claim.idProofImage)}
+                          className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition"
+                          title="View ID Proof"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="group relative">
+                          <p className="text-sm text-gray-700 line-clamp-2 cursor-help">
+                            {claim.reasonForClaim}
+                          </p>
+                          <div className="absolute z-10 hidden group-hover:block bg-gray-900 text-white p-2 rounded text-xs w-48 -top-2 left-full ml-2 shadow-xl">
+                            {claim.reasonForClaim}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${statusStyles[claim.status] || statusStyles.pending}`}>
-                        {claim.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-xs text-gray-500">
-                      {new Date(claim.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <button
-                        onClick={() => handleTransfer(claim._id)}
-                        disabled={actionLoading === claim._id}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                          actionLoading === claim._id
-                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : "bg-red-50 text-red-600 hover:bg-red-100"
-                        }`}
-                      >
-                        {actionLoading === claim._id ? (
-                           <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <UserPlus size={14} />
-                        )}
-                        Transfer Ownership
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${statusStyles[claim.status] || statusStyles.pending}`}
+                        >
+                          {claim.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-xs text-gray-500">
+                        {new Date(claim.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <button
+                          onClick={() => handleTransfer(claim._id)}
+                          disabled={actionLoading === claim._id}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            actionLoading === claim._id
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-red-50 text-red-600 hover:bg-red-100"
+                          }`}
+                        >
+                          {actionLoading === claim._id ? (
+                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <UserPlus size={14} />
+                          )}
+                          Transfer Ownership
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -323,7 +363,11 @@ const Claims = () => {
           {pagination.pages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
               <p className="text-xs text-gray-500">
-                Total <span className="font-semibold text-gray-700">{pagination.total || 0}</span> claims
+                Total{" "}
+                <span className="font-semibold text-gray-700">
+                  {pagination.total || 0}
+                </span>{" "}
+                claims
               </p>
               <div className="flex items-center gap-2">
                 <button
