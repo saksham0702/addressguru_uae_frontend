@@ -62,3 +62,20 @@ export const updateReviewStatus = async (reviewId, status) => {
 
   return res.data;
 };
+
+export const getAllClaimsAdmin = async (params) => {
+  const res = await axios.get(`${API_URL}/admin/claims`, {
+    params,
+    headers: getAuthHeader(),
+  });
+  return res.data;
+};
+
+export const transferOwnership = async (claimId) => {
+  const res = await axios.patch(
+    `${API_URL}/admin/claims/${claimId}/transfer`,
+    {},
+    { headers: getAuthHeader() },
+  );
+  return res.data;
+};

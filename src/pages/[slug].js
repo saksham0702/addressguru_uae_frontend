@@ -771,9 +771,12 @@ const SeeDetails = ({ initialData, initialRooms }) => {
             {/* Transfer Ownership (admin only) */}
             {isAdmin && (
               <div className="px-3 pb-3">
-                <button className="w-full bg-[#e8363a] hover:bg-red-600 text-white text-xs font-semibold py-2 rounded-md transition">
+                <Link
+                  href="/admin/claims"
+                  className="block w-full bg-[#e8363a] hover:bg-red-600 text-white text-center text-xs font-semibold py-2 rounded-md transition"
+                >
                   Transfer Ownership
-                </button>
+                </Link>
               </div>
             )}
           </div>
