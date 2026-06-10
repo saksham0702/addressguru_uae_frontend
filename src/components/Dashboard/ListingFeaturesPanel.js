@@ -169,62 +169,8 @@ const ErrorState = ({ text }) => (
   </div>
 );
 
-// ─── Review Card ──────────────────────────────────────────────────────────────
-const ReviewCard = ({ item }) => (
-  <div className="bg-white rounded-lg p-5 border border-gray-200 hover:border-green-200 hover:shadow-sm transition-all">
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getStatusColor(item.status)}`}
-        >
-          {item.status?.toUpperCase()}
-        </span>
-        {item.rating && <StarRating rating={item.rating} />}
-      </div>
-      <span className="text-[11px] text-gray-400 font-mono">
-        #{item._id?.slice(-8)}
-      </span>
-    </div>
+// ReviewCard was removed
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-      <div className="flex items-center gap-2">
-        <User size={14} className="text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-800 font-medium truncate">
-          {item.fullName || item.name || "Anonymous"}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Mail size={14} className="text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-600 truncate">
-          {item.email || item.rating_email || "N/A"}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <FileText size={14} className="text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-600 truncate">
-          {item.title || item.listingId?.businessName || item.listingSlug || "N/A"}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Calendar size={14} className="text-gray-400 flex-shrink-0" />
-        <span className="text-sm text-gray-600">
-          {formatDate(item.createdAt)}
-        </span>
-      </div>
-    </div>
-
-    {(item.reviewText || item.message) && (
-      <div className="pt-3 border-t border-gray-100">
-        <div className="flex items-start gap-2">
-          <MessageSquare size={14} className="text-gray-400 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-            {item.reviewText || item.message}
-          </p>
-        </div>
-      </div>
-    )}
-  </div>
-);
 
 // ─── Claim Card ───────────────────────────────────────────────────────────────
 const ClaimCard = ({ item }) => (
@@ -350,16 +296,6 @@ const ReportCard = ({ item }) => (
 // ═══════════════════════════════════════════════════════════════════════════════
 const TABS = [
   {
-    key: "reviews",
-    label: "Reviews",
-    icon: Star,
-    color: "text-green-600",
-    activeBg: "bg-green-50 border-green-500 text-green-700",
-    fetcher: getMyReviews,
-    Card: ReviewCard,
-    emptyText: "No reviews yet",
-  },
-  {
     key: "claims",
     label: "Claims",
     icon: Shield,
@@ -385,7 +321,7 @@ const TABS = [
 //  MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 const ListingFeaturesPanel = () => {
-  const [activeTab, setActiveTab] = useState("reviews");
+  const [activeTab, setActiveTab] = useState("claims");
   const [tabData, setTabData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -456,10 +392,10 @@ const ListingFeaturesPanel = () => {
       {/* Header */}
       <div className="px-6 py-4 border-b bg-gradient-to-r from-orange-50 to-amber-50 border-gray-200">
         <h2 className="font-medium text-xl text-gray-900">
-          ACTIVITY & ENGAGEMENT
+          MY ENGAGEMENTS
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Reviews, claims, and reports across all your listings
+          Claims and reports across all your listings
         </p>
       </div>
 
@@ -512,7 +448,7 @@ const ListingFeaturesPanel = () => {
         {error && <ErrorState text={error} />}
         {!loading && !error && currentData.items.length === 0 && (
           <EmptyState
-            icon={currentTab?.icon || Star}
+            icon={currentTab?.icon || Shield}
             text={currentTab?.emptyText || "No data found"}
           />
         )}

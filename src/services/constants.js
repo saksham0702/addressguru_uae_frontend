@@ -927,7 +927,7 @@ export const NAV_ROUTES = [
     icon: User,
     children: [
       { name: "Reviews", href: "/admin/reviews" },
-      // { name: "Claims", href: "/admin/claims" },
+      { name: "Claims", href: "/admin/claims" },
       // { name: "Enquiries", href: "/admin/enquiries" },
     ],
   },

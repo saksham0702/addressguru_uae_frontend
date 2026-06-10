@@ -13,7 +13,8 @@ import {
   LucideHeadset,
   CreditCard,
   Star,
-  Globe, // 👈 add Globe
+  Globe,
+  Shield, // 👈 add Shield
 } from "lucide-react";
 import Image from "next/image";
 
@@ -72,7 +73,11 @@ const DashboardSidebar = () => {
       link: "/dashboard/my-profile",
       icon: <User size={18} />,
     },
-
+    {
+      label: "My Engagements",
+      link: "/dashboard/my-engagements",
+      icon: <Shield size={18} />,
+    },
     {
       label: "Payment History",
       link: "/dashboard/payment-history",
