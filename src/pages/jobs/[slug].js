@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Head from "next/head";
-import Link from "next/link";
 import { get_job_details } from "@/api/listings";
 import ApplyForJob from "@/components/Jobs/JdCardComponents/ApplyForJob";
 import Description from "@/components/Jobs/JdCardComponents/Description";
@@ -20,7 +19,12 @@ import {
   ChevronRight,
   CheckCircle,
   X,
+  Share2,
+  AlertTriangle,
 } from "lucide-react";
+import Report from "@/components/SeeDetails/Popups/Report";
+import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
+import { Share } from "@/components/SeeDetails/Popups/Share";
 
 /* ─── tiny helpers ─── */
 const Badge = ({ children, variant = "default" }) => {
@@ -62,6 +66,18 @@ const StatCell = ({
 const JobDetails = ({ jobData }) => {
   const [apply, setApply] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [activePop, setActivePop] = useState(null);
+  const [thanksPop, setThanksPop] = useState(false);
+  const [type, setType] = useState(null);
+
+  const handlePop = (name) => {
+    console.log("Opening popup:", name);
+    setActivePop(name);
+  };
+  const closePopup = () => {
+    console.log("Closing popup");
+    setActivePop(null);
+  };
 
   const city =
     jobData?.location?.city?.name || jobData?.company?.city?.name || "";
@@ -163,6 +179,24 @@ const JobDetails = ({ jobData }) => {
                     Apply Now
                     <ChevronRight className="w-4 h-4" />
                   </button>
+
+                  {/* Desktop Action Buttons: Share & Report */}
+                  <div className="hidden sm:flex flex-col gap-2">
+                    <button
+                      onClick={() => handlePop("share")}
+                      className="p-2.5 bg-zinc-50 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+                      title="Share Job"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handlePop("report")}
+                      className="p-2.5 bg-zinc-50 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors group"
+                      title="Report Job"
+                    >
+                      <AlertTriangle className="w-4 h-4 group-hover:text-amber-600" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Stats row */}
@@ -207,6 +241,24 @@ const JobDetails = ({ jobData }) => {
                 >
                   Apply Now
                 </button>
+
+                {/* Mobile Action Buttons: Share & Report */}
+                <div className="sm:hidden mt-3 flex items-center gap-3">
+                  <button
+                    onClick={() => handlePop("share")}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-600 text-sm font-semibold rounded-lg"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                  <button
+                    onClick={() => handlePop("report")}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-600 text-sm font-semibold rounded-lg"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    Report
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -262,6 +314,8 @@ const JobDetails = ({ jobData }) => {
           <div className="xl:w-[360px] w-full shrink-0 space-y-4 xl:sticky xl:top-6">
             <QuickInformation
               job={true}
+              handlePop={handlePop}
+              closePopup={closePopup}
               category={jobData?.category}
               positions={jobData?.totalPositions}
             />
@@ -322,6 +376,37 @@ const JobDetails = ({ jobData }) => {
             <p className="mt-6 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
               Verified by AddressGuru UAE
             </p>
+          </div>
+        </div>
+      )}
+      {/* Popups */}
+      {activePop && (
+        <div className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-[10000] items-center justify-center top-0">
+          <div onClick={(e) => e.stopPropagation()}>
+            {activePop === "share" && <Share onClose={closePopup} />}
+            {activePop === "report" && (
+              <Report
+                id={jobData?._id}
+                slug={jobData?.slug}
+                type="job"
+                setType={setType}
+                setThanksPop={setThanksPop}
+                onClose={closePopup}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Thanks Popup */}
+      {thanksPop && (
+        <div className="fixed min-h-screen w-full bg-black/60 backdrop-blur-sm left-0 p-3 flex z-[10000] items-center justify-center top-0">
+          <div onClick={(e) => e.stopPropagation()}>
+            <ThanksPop
+              type={type}
+              slug={jobData?.slug}
+              onClose={() => setThanksPop(false)}
+            />
           </div>
         </div>
       )}

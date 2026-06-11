@@ -15,7 +15,6 @@ const Report = ({ onClose, id, slug, type, setType, setThanksPop }) => {
     "Ad is in the wrong category",
     "Against Posting Rules",
     "Adult Content",
-    "Other",
   ]);
 
   const [formData, setFormData] = useState({
@@ -30,7 +29,7 @@ const Report = ({ onClose, id, slug, type, setType, setThanksPop }) => {
       try {
         const reasons = await get_report_reasons();
         if (reasons && reasons.length > 0) {
-          setReportReasons([...reasons, "Other"]);
+          setReportReasons([...reasons]);
         }
       } catch (err) {
         console.error("Failed to fetch report reasons:", err);
@@ -150,7 +149,9 @@ const Report = ({ onClose, id, slug, type, setType, setThanksPop }) => {
 
       <div className="flex items-center justify-center gap-2 mb-1">
         <AlertTriangle className="w-6 h-6 text-orange-500" />
-        <h2 className="text-xl font-bold text-gray-800">Report Ad</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          {type === "job" ? "Report Job" : "Report Ad"}
+        </h2>
       </div>
       <p className="text-sm text-gray-500 mb-3 text-center">
         Help us maintain quality by reporting issues
@@ -211,10 +212,11 @@ const Report = ({ onClose, id, slug, type, setType, setThanksPop }) => {
       <button
         onClick={handleSubmit}
         disabled={!isFormValid}
-        className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${isFormValid
-          ? "bg-red-600 hover:bg-red-700 text-white"
-          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+        className={`w-full py-2.5 rounded-lg font-semibold transition-colors shadow-md ${
+          isFormValid
+            ? "bg-red-600 hover:bg-red-700 text-white"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
       >
         Submit Report
       </button>

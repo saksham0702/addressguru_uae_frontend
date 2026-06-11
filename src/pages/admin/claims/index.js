@@ -12,9 +12,16 @@ import {
   Check,
   X,
   UserPlus,
+  AlertCircle,
+  Info,
 } from "lucide-react";
-import { getAllClaimsAdmin, transferOwnership } from "@/api/listing-features";
+import {
+  getAllClaimsAdmin,
+  transferOwnership,
+  adminReviewClaim,
+} from "@/api/listing-features";
 import { API_URL } from "@/services/constants";
+import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 
 const LIMIT = 10;
 const IMG_URL = API_URL;
@@ -107,20 +114,51 @@ const Claims = () => {
       setActionLoading(claimId);
       const res = await transferOwnership(claimId);
       if (res.success) {
-        alert(res.message);
+        setNotification({ type: "success", message: res.message });
         fetchClaims();
       }
     } catch (err) {
-      alert(err?.message || "Transfer failed");
+      setNotification({
+        type: "error",
+        message: err?.message || "Transfer failed",
+      });
       console.error("Transfer error:", err);
     } finally {
       setActionLoading(null);
     }
   };
 
+  const handleRejectSubmit = async ({ reason, note }) => {
+    if (!rejectModal) return;
+    try {
+      setActionLoading(rejectModal._id);
+      const res = await adminReviewClaim(rejectModal._id, {
+        status: "rejected",
+        adminNote: note ? `${reason}: ${note}` : reason,
+      });
+
+      if (res.success) {
+        setNotification({
+          type: "success",
+          message: "Claim rejected successfully",
+        });
+        fetchClaims();
+      }
+    } catch (err) {
+      setNotification({
+        type: "error",
+        message: err?.message || "Rejection failed",
+      });
+      console.error("Rejection error:", err);
+    } finally {
+      setActionLoading(null);
+      setRejectModal(null);
+    }
+  };
+
   const openImage = (path) => {
     if (!path) return;
-    const fullPath = path.startsWith("http") ? path : `${IMG_URL}${path}`;
+    const fullPath = path.startsWith("http") ? path : `${IMG_URL}/${path}`;
     window.open(fullPath, "_blank");
   };
 
@@ -336,22 +374,45 @@ const Claims = () => {
                         })}
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <button
-                          onClick={() => handleTransfer(claim._id)}
-                          disabled={actionLoading === claim._id}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            actionLoading === claim._id
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "bg-red-50 text-red-600 hover:bg-red-100"
-                          }`}
-                        >
-                          {actionLoading === claim._id ? (
-                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <UserPlus size={14} />
+                        <div className="flex items-center justify-end gap-2">
+                          {claim.status === "pending" && (
+                            <>
+                              <button
+                                onClick={() => handleTransfer(claim._id)}
+                                disabled={actionLoading === claim._id}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                                  actionLoading === claim._id
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-[#FF6E04] text-white hover:bg-[#e65f00] hover:shadow-md active:scale-95"
+                                }`}
+                              >
+                                {actionLoading === claim._id ? (
+                                  <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Check size={14} />
+                                )}
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => setRejectModal(claim)}
+                                disabled={actionLoading === claim._id}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-red-100 ${
+                                  actionLoading === claim._id
+                                    ? "bg-gray-50 text-gray-300 cursor-not-allowed"
+                                    : "bg-white text-red-600 hover:bg-red-50 hover:border-red-200 active:scale-95"
+                                }`}
+                              >
+                                <XCircle size={14} />
+                                Reject
+                              </button>
+                            </>
                           )}
-                          Transfer Ownership
-                        </button>
+                          {claim.status !== "pending" && (
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                              No Actions
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -392,6 +453,17 @@ const Claims = () => {
           )}
         </div>
       </div>
+
+      {rejectModal && (
+        <RejectReasonModal
+          listing={{
+            _id: rejectModal._id,
+            businessName: `Claim for ${rejectModal.listingSlug}`,
+          }}
+          onClose={() => setRejectModal(null)}
+          onSubmit={handleRejectSubmit}
+        />
+      )}
     </div>
   );
 };

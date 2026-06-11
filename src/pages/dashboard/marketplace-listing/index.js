@@ -942,14 +942,14 @@ const MarketPlaceListing = () => {
                   <DropDown
                     placeholder="Select Sub Category"
                     options={subSubCategories.map((item) => ({
-                      value: item.id,
+                      value: item._id, // FIXED: use _id
                       label: item.name,
                     }))}
                     value={
                       adInfo.subcategoryId
                         ? subSubCategories
                             .map((item) => ({
-                              value: item.id,
+                              value: item._id, // FIXED: use _id
                               label: item.name,
                             }))
                             .find((o) => o.value === adInfo.subcategoryId)
