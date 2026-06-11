@@ -1,13 +1,11 @@
 import { useState, useRef } from "react";
-import { X, Upload, FileText } from "lucide-react";
+import { X, Upload, FileText, XCircle, CheckCircle, Info } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { claim_business } from "@/api/queries";
 import RegistrationForm from "../../Register/RegistrationForm";
 import OTPPopup from "../../Register/OTPPopup";
 
 export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
-  console.log("type", type);
-  console.log("id", id);
   const recaptchaRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -88,18 +86,16 @@ export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
   const handleSubmit = async () => {
     if (validateForm()) {
       setIsSubmitting(true);
-
       const formDataToSend = new FormData();
-
       formDataToSend.append("fullName", formData.fullName);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("mobileNumber", formData.mobile);
       formDataToSend.append("reasonForClaim", formData.reason);
       formDataToSend.append("idProofImage", formData.idProofImage);
-
       const listingType = type === "listing" ? "business" : type;
 
       try {
+        setStatusMessage(null);
         const res = await claim_business(formDataToSend, listingType, slug);
         console.log(res);
 
@@ -127,7 +123,10 @@ export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
           setRegisterMessage("Please register first to submit a claim.");
           setShowRegister(true);
         } else {
-          alert(error?.message || "Failed to submit claim. Please try again.");
+          setStatusMessage({
+            type: "error",
+            text: error?.message || "Failed to submit claim. Please try again.",
+          });
         }
         console.error("Claim submission error:", error);
       } finally {
@@ -197,6 +196,31 @@ export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
               Claim This Business
             </h2>
           </div>
+
+          {statusMessage && (
+            <div
+              className={`mb-6 p-4 rounded-xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+                statusMessage.type === "error"
+                  ? "bg-red-50 border-red-100 text-red-700"
+                  : statusMessage.type === "success"
+                    ? "bg-green-50 border-green-100 text-green-700"
+                    : "bg-blue-50 border-blue-100 text-blue-700"
+              }`}
+            >
+              <div className="mt-0.5">
+                {statusMessage.type === "error" ? (
+                  <XCircle className="w-5 h-5 flex-shrink-0" />
+                ) : statusMessage.type === "success" ? (
+                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                ) : (
+                  <Info className="w-5 h-5 flex-shrink-0" />
+                )}
+              </div>
+              <p className="text-sm font-medium leading-relaxed">
+                {statusMessage.text}
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
             <div className="md:col-span-2">

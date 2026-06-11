@@ -72,10 +72,31 @@ export const getAllClaimsAdmin = async (params) => {
 };
 
 export const transferOwnership = async (claimId) => {
-  const res = await axios.patch(
-    `${API_URL}/admin/claims/${claimId}/transfer`,
-    {},
-    { headers: getAuthHeader() },
-  );
-  return res.data;
+  try {
+    const res = await axios.patch(
+      `${API_URL}/admin/claims/${claimId}/transfer`,
+      {},
+      { headers: getAuthHeader() },
+    );
+    return res.data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      "Failed to transfer ownership. Please try again.";
+    throw new Error(message);
+  }
+};
+
+export const adminReviewClaim = async (claimId, data) => {
+  try {
+    const res = await axios.patch(`${API_URL}/admin/claims/${claimId}`, data, {
+      headers: getAuthHeader(),
+    });
+    return res.data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      "Failed to review claim. Please try again.";
+    throw new Error(message);
+  }
 };

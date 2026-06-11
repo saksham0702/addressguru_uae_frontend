@@ -6,6 +6,7 @@ import {
   get_all_marketplace_listings,
   reject_marketplace_listing,
 } from "@/api/uae-marketplace";
+import Image from "next/image";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 import FollowUpModal from "@/components/admin/business/FollowUpModal";
 
@@ -507,7 +508,7 @@ const MarketplaceListings = () => {
                 </tr>
               )}
 
-              {paginated.map((listing, idx) => {
+              {paginated.map((listing) => {
                 const isSelected = selected.has(listing._id);
                 return (
                   <tr
@@ -529,13 +530,20 @@ const MarketplaceListings = () => {
                     <TD vAlign="top" className="min-w-[240px]">
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0">
-                          <img
+                          <Image
+                            height={500}
+                            width={500}
                             className="w-14 h-14 rounded-xl object-cover border border-slate-200 bg-white shadow-sm"
-                            src={`https://addressguru.ae/api/${listing.images?.[0]}`}
+                            src={
+                              listing.images?.[0]?.startsWith("http")
+                                ? listing.images[0]
+                                : `https://addressguru.ae/api/${listing.images?.[0]}`
+                            }
                             alt={listing.title}
                             onError={(e) => {
                               e.target.style.display = "none";
-                              e.target.nextSibling.style.display = "flex";
+                              if (e.target.nextSibling)
+                                e.target.nextSibling.style.display = "flex";
                             }}
                           />
                           <div
@@ -550,14 +558,18 @@ const MarketplaceListings = () => {
                           <a
                             className="font-semibold text-blue-600 text-md leading-snug truncate max-w-[210px] block"
                             href={`/marketplace/${listing?.slug}?preview=true`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {listing.title}
                           </a>
 
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[11px] text-slate-500">
-                              ({listing.category?.name})
-                            </span>
+                            {listing.category?.name && (
+                              <span className="text-[11px] text-slate-500">
+                                ({listing.category.name})
+                              </span>
+                            )}
                             {listing.subCategory?.name && (
                               <>
                                 <span className="text-slate-200 text-xs">
@@ -593,16 +605,6 @@ const MarketplaceListings = () => {
                               </span>
                             </div>
                           )}
-                          <div className="flex items-center font-medium text-black gap-1.5 mt-1">
-                            <CalIcon />
-                            <span className="text-[11px] text-black">
-                              Create Date: {fmtDate(listing.createdAt)}{" "}
-                              {fmtTime(listing.createdAt)}
-                            </span>
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-700 text-white leading-none ml-0.5">
-                              {daysAgo(listing.createdAt)}
-                            </span>
-                          </div>
                         </div>
                       </div>
                     </TD>
@@ -633,7 +635,7 @@ const MarketplaceListings = () => {
                         </div>
                       </div>
                       {listing.locality && (
-                        <div className="text-[11px] text-slate-400 mt-0.5 ml-5">
+                        <div className="text-[11px] text-slate-400 mt-0.5 ml-5 font-medium">
                           {listing.locality}
                         </div>
                       )}
@@ -655,67 +657,85 @@ const MarketplaceListings = () => {
                       </button>
                     </TD>
 
-                    {/* User */}
+                    {/* User & Moderation */}
                     <TD vAlign="top" className="min-w-[190px]">
-                      <div className="space-y-2">
-                        {[
-                          {
-                            label: "Created by",
-                            value:
-                              listing?.createdBy?.name ||
-                              listing.contactPersonName ||
-                              "Admin",
-                          },
-                          {
-                            label: "Status",
-                            value: listing.status,
-                            isStatus: true,
-                          },
-                          ...(["approved", "rejected"].includes(listing.status)
-                            ? [
-                                {
-                                  label:
-                                    listing.status === "approved"
-                                      ? "Approved by"
-                                      : "Rejected by",
-                                  value:
-                                    listing.approvedBy?.name ||
-                                    listing.rejectedBy?.name ||
-                                    "Admin",
-                                },
-                              ]
-                            : []),
-                        ].map(({ label, value, isStatus }) => {
-                          const statusColor =
-                            value === "approved"
-                              ? "text-green-600"
-                              : value === "rejected"
-                                ? "text-red-600"
-                                : value === "pending"
-                                  ? "text-yellow-500"
-                                  : "text-slate-700";
-                          return (
-                            <div
-                              key={label}
-                              className="flex items-center gap-1.5"
-                            >
+                      <div className="space-y-3">
+                        {/* Created By Section */}
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                              Created by:
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
                               <UserIcon />
-                              <span className="text-[11px] text-slate-400 font-medium">
-                                {label}:
-                              </span>
-                              <span
-                                className={`text-[11px] font-bold truncate max-w-[110px] ${isStatus ? statusColor : "text-slate-700"}`}
-                              >
-                                {value}
+                              <span className="text-[11px] font-bold text-gray-900 truncate max-w-[140px]">
+                                {listing?.createdBy?.name ||
+                                  listing.contactPersonName ||
+                                  "Admin"}
                               </span>
                             </div>
-                          );
-                        })}
-                        {listing.isSold && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-700 text-white">
-                            Sold
-                          </span>
-                        )}
+                            {listing?.createdBy?.email && (
+                              <div className="flex items-center gap-1.5 ml-0.5">
+                                <MailIcon className="w-3 h-3 text-slate-400" />
+                                <span className="text-[10px] text-slate-600 truncate max-w-[150px]">
+                                  {listing.createdBy.email}
+                                </span>
+                              </div>
+                            )}
+                            {listing?.createdBy?.phone && (
+                              <div className="flex items-center gap-1.5 ml-0.5">
+                                <PhoneIcon className="w-3 h-3 text-slate-400" />
+                                <span className="text-[10px] text-slate-600">
+                                  {listing.createdBy.phone}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status & Moderation */}
+                        <div className="pt-2 border-t border-slate-100">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                              Status:
+                            </span>
+                            <span
+                              className={`text-[10px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded
+                              ${
+                                listing.status === "approved"
+                                  ? "bg-green-50 text-green-600"
+                                  : listing.status === "rejected"
+                                    ? "bg-red-50 text-red-600"
+                                    : "bg-yellow-50 text-yellow-600"
+                              }`}
+                            >
+                              {listing.status}
+                            </span>
+                          </div>
+
+                          {(listing.approvedBy?.name ||
+                            listing.rejectedBy?.name) && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                              <span className="text-[10px] text-slate-500 font-medium italic">
+                                {listing.status === "approved"
+                                  ? "Approved by "
+                                  : "Rejected by "}
+                                <span className="text-slate-700 font-bold not-italic">
+                                  {listing.approvedBy?.name ||
+                                    listing.rejectedBy?.name}
+                                </span>
+                              </span>
+                            </div>
+                          )}
+                          {listing.isSold && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 mt-1 rounded text-[9px] font-bold bg-slate-800 text-white leading-none">
+                              SOLD
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TD>
 
@@ -799,7 +819,7 @@ const MarketplaceListings = () => {
                                     className="opacity-75"
                                   />
                                 </svg>
-                                Updating...
+                                Working...
                               </>
                             ) : (
                               "Unapprove"
