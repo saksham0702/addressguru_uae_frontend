@@ -57,6 +57,16 @@ const Claims = () => {
   const [searchInput, setSearchInput] = useState("");
   const [pagination, setPagination] = useState({ total: 0, pages: 0 });
   const [actionLoading, setActionLoading] = useState(null);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  // Auto-hide notification
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const fetchClaims = useCallback(
     async (overrides = {}) => {
@@ -463,6 +473,30 @@ const Claims = () => {
           onClose={() => setRejectModal(null)}
           onSubmit={handleRejectSubmit}
         />
+      )}
+
+      {/* Notification Toast */}
+      {notification && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border animate-in slide-in-from-bottom-5 duration-300 ${
+            notification.type === "error"
+              ? "bg-red-50 border-red-100 text-red-700"
+              : "bg-emerald-50 border-emerald-100 text-emerald-700"
+          }`}
+        >
+          {notification.type === "error" ? (
+            <XCircle size={18} className="text-red-500" />
+          ) : (
+            <CheckCircle size={18} className="text-emerald-500" />
+          )}
+          <p className="text-sm font-semibold">{notification.message}</p>
+          <button
+            onClick={() => setNotification(null)}
+            className="ml-2 p-1 hover:bg-black/5 rounded-full transition-colors"
+          >
+            <X size={14} className="opacity-50" />
+          </button>
+        </div>
       )}
     </div>
   );
