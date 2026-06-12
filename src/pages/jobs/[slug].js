@@ -1,6 +1,6 @@
+import SEOHead from "@/components/SEOHead";
 import React, { useState } from "react";
 import Image from "next/image";
-import Head from "next/head";
 import { get_job_details } from "@/api/listings";
 import ApplyForJob from "@/components/Jobs/JdCardComponents/ApplyForJob";
 import Description from "@/components/Jobs/JdCardComponents/Description";
@@ -25,6 +25,22 @@ import {
 import Report from "@/components/SeeDetails/Popups/Report";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
 import { Share } from "@/components/SeeDetails/Popups/Share";
+
+const SITE_URL = "https://addressguru.ae";
+
+// Map project job types to Schema.org employmentTypes
+const mapEmploymentType = (type) => {
+  const types = {
+    "Full Time": "FULL_TIME",
+    "Part Time": "PART_TIME",
+    Contract: "CONTRACTOR",
+    Temporary: "TEMPORARY",
+    Internship: "INTERN",
+    Volunteer: "VOLUNTEER",
+    Freelance: "OTHER",
+  };
+  return types[type] || "FULL_TIME";
+};
 
 /* ─── tiny helpers ─── */
 const Badge = ({ children, variant = "default" }) => {
@@ -71,11 +87,9 @@ const JobDetails = ({ jobData }) => {
   const [type, setType] = useState(null);
 
   const handlePop = (name) => {
-    console.log("Opening popup:", name);
     setActivePop(name);
   };
   const closePopup = () => {
-    console.log("Closing popup");
     setActivePop(null);
   };
 
@@ -94,13 +108,60 @@ const JobDetails = ({ jobData }) => {
       })
     : null;
 
+  // Google JobPosting Schema
+  const jobPostingSchema = {
+    "@context": "https://schema.org/",
+    "@type": "JobPosting",
+    title: jobData?.title,
+    description: jobData?.description,
+    datePosted: jobData?.createdAt?.split("T")[0],
+    validThrough: new Date(
+      new Date(jobData?.createdAt).getTime() + 60 * 24 * 60 * 60 * 1000,
+    )
+      .toISOString()
+      .split("T")[0], // Default 60 days
+    employmentType: mapEmploymentType(jobData?.jobType),
+    hiringOrganization: {
+      "@type": "Organization",
+      name: jobData?.company?.name,
+      sameAs: SITE_URL, // Replace with company website if available
+      logo: jobData?.company?.logo
+        ? `${APP_URL}/${jobData.company.logo}`
+        : undefined,
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: jobData?.company?.address || "UAE",
+        addressLocality: city || "Dubai",
+        addressRegion: city || "Dubai",
+        addressCountry: "AE",
+      },
+    },
+    baseSalary:
+      jobData?.salary?.from && jobData?.salary?.to
+        ? {
+            "@type": "MonetaryAmount",
+            currency: "AED",
+            value: {
+              "@type": "QuantitativeValue",
+              minValue: jobData.salary.from,
+              maxValue: jobData.salary.to,
+              unitText: "MONTH",
+            },
+          }
+        : undefined,
+  };
+
   return (
     <>
-      <Head>
-        <title>{seoTitle}</title>
-        <meta name="description" content={seoDesc} />
-        <link rel="canonical" href={`${APP_URL}/jobs/${jobData?.slug}`} />
-      </Head>
+      <SEOHead
+        title={seoTitle}
+        description={seoDesc}
+        canonical={`${SITE_URL}/jobs/${jobData?.slug}`}
+        schema={jobPostingSchema}
+      />
 
       <div className="max-w-[2000px] mx-auto 2xl:max-w-[80%]  sm:px-6  py-6">
         {/* Breadcrumb */}

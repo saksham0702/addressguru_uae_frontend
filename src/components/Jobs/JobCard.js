@@ -167,7 +167,7 @@ const JobCard = ({ data }) => {
             <IconKeyValue label={"Work Mode"} value={"On-site"} />
           </div>
           {/* skills */}
-          <div className="mt-1 max-md:hidden">
+          <div className="mt-1 max-md:hidden max-w-md  overflow-hidden">
             <IconKeyValue
               label={"Skills"}
               value={data?.skills?.join(", ")}
