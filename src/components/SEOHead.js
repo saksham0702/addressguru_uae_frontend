@@ -21,6 +21,7 @@ const TWITTER_HANDLE = "@AddressGuruUAE"; // TODO: update with real handle
 export default function SEOHead({
   title,
   description,
+  keywords,
   canonical,
   ogImage = DEFAULT_OG_IMAGE,
   ogType = "website",
@@ -45,6 +46,7 @@ export default function SEOHead({
       {/* ── Primary Meta ── */}
       <title>{fullTitle}</title>
       <meta name="description" content={safeDescription} />
+      {keywords && <meta name="keywords" content={keywords} />}
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
       {/* ── Robots ── */}
@@ -76,12 +78,21 @@ export default function SEOHead({
       <meta name="twitter:image" content={ogImageUrl} />
 
       {/* ── JSON-LD Structured Data ── */}
-      {schema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
-      )}
+      {schema &&
+        (Array.isArray(schema) ? (
+          schema.map((s, i) => (
+            <script
+              key={i}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }}
+            />
+          ))
+        ) : (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
     </Head>
   );
 }

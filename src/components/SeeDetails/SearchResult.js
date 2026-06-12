@@ -8,7 +8,7 @@ import BusinessCard from "@/components/BusinessListingComponents/BusinessCard";
 import RightBusinessCard from "@/components/BusinessListingComponents/RightBusinessCard";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef } from "react";
-import Head from "next/head";
+import SEOHead from "@/components/SEOHead";
 import FilterBar from "@/components/BusinessListingComponents/FilterBar";
 import Header from "@/layout/header";
 import MobileFooter from "@/components/MobileFooter";
@@ -405,6 +405,20 @@ const SearchResults = ({
     seoDescription ??
     `Checkout the top ${canonicalSlug} in ${canonicalCity}. Explore business listings, ratings, and contact details.`;
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: pageTitle,
+    url: canonicalUrl,
+    numberOfItems: ssrPageData?.total ?? ssrListings.length,
+    itemListElement: ssrListings.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item?.businessName ?? item?.name,
+      url: `${APP_URL}/${item?.slug}`,
+    })),
+  };
+
   return (
     <>
       <section className="md:hidden">
@@ -415,48 +429,14 @@ const SearchResults = ({
         ✅ Because this component is rendered on the SERVER first via getServerSideProps,
         all these tags will be in the HTML that Google/crawlers and Ctrl+U see.
       */}
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta name="keywords" content={pageKeywords} />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={canonicalUrl} />
-
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={ogDescription} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="AddressGuru" />
-        <meta property="og:image" content={absoluteOgImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={pageTitle} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={twitterDescription} />
-        <meta name="twitter:image" content={absoluteOgImage} />
-        <meta name="twitter:image:alt" content={pageTitle} />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              name: pageTitle,
-              url: canonicalUrl,
-              numberOfItems: ssrPageData?.total ?? ssrListings.length,
-              itemListElement: ssrListings.map((item, i) => ({
-                "@type": "ListItem",
-                position: i + 1,
-                name: item?.businessName ?? item?.name,
-                url: `${APP_URL}/${item?.slug}`,
-              })),
-            }),
-          }}
-        />
-      </Head>
+      <SEOHead
+        title={pageTitle}
+        description={pageDescription}
+        keywords={pageKeywords}
+        canonical={canonicalUrl}
+        ogImage={absoluteOgImage}
+        schema={itemListSchema}
+      />
 
       <div className="h-auto flex flex-col max-md:mt-1.5 items-center overflow-x-clip justify-center bg-[#F8F7F7]">
         <div className="flex flex-col min-md:w-[80%] max-md:min-w-full  bg-white md:px-3 mx-auto md:pb-20">

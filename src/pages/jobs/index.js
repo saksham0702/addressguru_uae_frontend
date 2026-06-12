@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import { APP_URL } from "@/services/constants";
-import Head from "next/head";
+import SEOHead from "@/components/SEOHead";
 import { get_job_filter } from "@/api/filter";
 import MobileJobFilter from "@/components/Jobs/MobileJobFilter";
 import Link from "next/link";
@@ -123,45 +123,32 @@ const JobsListings = () => {
   };
 
   // SEO Handling mirroring SearchResult.js logic
-  const firstJob = allJobs[0];
   const pageTitle = `Top Jobs in ${city} | Latest Openings & Vacancies`;
   const pageDescription = `Find the latest job openings in ${city}. Explore verified vacancies across ${filtersData?.industries?.length || "various"} sectors. Apply now on AddressGuru UAE.`;
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Top Jobs in ${city}`,
+    url: canonicalUrl,
+    numberOfItems: allJobs.length,
+    itemListElement: allJobs.map((job, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: job?.title,
+      url: `${APP_URL}/jobs/${job?.slug}`,
+    })),
+  };
+
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <link rel="canonical" href={canonicalUrl} />
-
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta
-          property="og:image"
-          content={`${APP_URL}/seo/default-job-og.jpg`}
-        />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              name: `Top Jobs in ${city}`,
-              url: canonicalUrl,
-              numberOfItems: allJobs.length,
-              itemListElement: allJobs.map((job, i) => ({
-                "@type": "ListItem",
-                position: i + 1,
-                name: job?.title,
-                url: `${APP_URL}/jobs/${job?.slug}`,
-              })),
-            }),
-          }}
-        />
-      </Head>
+      <SEOHead
+        title={pageTitle}
+        description={pageDescription}
+        canonical={canonicalUrl}
+        ogImage={`${APP_URL}/seo/default-job-og.jpg`}
+        schema={itemListSchema}
+      />
 
       <div className="flex flex-col items-center w-full h-full justify-center bg-[#F8F7F7]">
         <div className="md:w-[80%] w-full rounded-lg pb-10 bg-white md:pl-3 max-md:px-2">

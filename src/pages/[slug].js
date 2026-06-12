@@ -15,7 +15,7 @@ import Report from "@/components/SeeDetails/Popups/Report";
 import { useRouter } from "next/router";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
 import LandingPageSkeleton from "@/components/BusinessListingComponents/LandingPageSkeleton";
-import Head from "next/head";
+import SEOHead from "@/components/SEOHead";
 import { useAuth } from "@/context/AuthContext";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
 import {
@@ -255,6 +255,71 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const ogImage = `${IMG_URL}/${data?.images?.[0]}` ?? "";
   const openingHoursSchema = buildOpeningHours(data?.workingHours);
 
+  // Structured Data
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: data.businessName,
+    description: data.description || data.ad_description,
+    image: data.images?.map((img) => `${IMG_URL}/${img}`),
+    url: pageUrl,
+    telephone: data.mobileNumber
+      ? `${data.countryCode ?? ""}${data.mobileNumber}`.trim()
+      : undefined,
+    email: data.email || undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: data.businessAddress,
+      addressLocality: serverCity || "Dubai",
+      addressCountry: "AE",
+    },
+    geo:
+      data.location?.lat && data.location?.lng
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: data.location.lat,
+            longitude: data.location.lng,
+          }
+        : undefined,
+    openingHours: openingHoursSchema,
+    aggregateRating: avgRating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: avgRating,
+          reviewCount: data.ratings.length,
+          bestRating: "5",
+          worstRating: "1",
+        }
+      : undefined,
+    review: data.ratings?.slice(0, 5).map((r) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: r.name || "Anonymous" },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: "5",
+      },
+      reviewBody: r.comment || undefined,
+    })),
+    priceRange: "$$",
+  };
+
+  const faqSchema =
+    faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
+        }
+      : null;
+
   //  Toast helper
   function showToast(msg, toastType = "success") {
     setToast({ msg, type: toastType });
@@ -298,7 +363,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
         router.push("/404");
       })
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, router]);
 
   //  View tracking (once per mount)
   const viewTracked = useRef(false);
@@ -361,114 +426,15 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   return (
     <>
       {/*  SEO HEAD  */}
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDesc} />
-
-        {/* Robots — noindex unapproved listings */}
-        <meta
-          name="robots"
-          content={
-            data.status === "approved" ? "index, follow" : "noindex, nofollow"
-          }
-        />
-
-        {/* Open Graph */}
-        <meta property="og:type" content="business.business" />
-        <meta property="og:site_name" content="AddressGuru UAE" />
-        <meta property="og:locale" content="en_AE" />
-        <meta property="og:title" content={data.businessName ?? ""} />
-        <meta property="og:description" content={pageDesc} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:image:alt" content={data.businessName ?? ""} />
-        <meta property="og:url" content={pageUrl} />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={data.businessName ?? ""} />
-        <meta name="twitter:description" content={pageDesc} />
-        <meta name="twitter:image" content={ogImage} />
-        <meta name="twitter:image:alt" content={data.businessName ?? ""} />
-
-        {/* Canonical */}
-        <link rel="canonical" href={pageUrl} />
-
-        {/* JSON-LD — LocalBusiness */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: data.businessName,
-              description: data.description || data.ad_description,
-              image: data.images,
-              url: pageUrl,
-              telephone: data.mobileNumber
-                ? `${data.countryCode ?? ""}${data.mobileNumber}`.trim()
-                : undefined,
-              email: data.email || undefined,
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: data.businessAddress,
-                addressLocality: serverCity || "Dubai",
-                addressCountry: "AE",
-              },
-              geo:
-                data.location?.lat && data.location?.lng
-                  ? {
-                      "@type": "GeoCoordinates",
-                      latitude: data.location.lat,
-                      longitude: data.location.lng,
-                    }
-                  : undefined,
-              openingHours: openingHoursSchema,
-              aggregateRating: avgRating
-                ? {
-                    "@type": "AggregateRating",
-                    ratingValue: avgRating,
-                    reviewCount: data.ratings.length,
-                    bestRating: "5",
-                    worstRating: "1",
-                  }
-                : undefined,
-              review: data.ratings?.slice(0, 5).map((r) => ({
-                "@type": "Review",
-                author: { "@type": "Person", name: r.name || "Anonymous" },
-                reviewRating: {
-                  "@type": "Rating",
-                  ratingValue: r.rating,
-                  bestRating: "5",
-                },
-                reviewBody: r.comment || undefined,
-              })),
-              priceRange: "$$",
-            }),
-          }}
-        />
-        {/* JSON-LD — FAQPage */}
-        {faqs.length > 0 && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: faqs.map((faq) => ({
-                  "@type": "Question",
-                  name: faq.question,
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: faq.answer,
-                  },
-                })),
-              }),
-            }}
-          />
-        )}
-      </Head>
-
-      {/* MOBILE HEADER */}
+      <SEOHead
+        title={pageTitle}
+        description={pageDesc}
+        canonical={pageUrl}
+        ogImage={ogImage}
+        ogType="business.business"
+        noIndex={data.status !== "approved"}
+        schema={[localBusinessSchema, faqSchema].filter(Boolean)}
+      />
       <div className="md:hidden">
         <LandingPage />
       </div>
