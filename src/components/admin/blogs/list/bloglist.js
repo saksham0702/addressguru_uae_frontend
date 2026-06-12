@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
-import { getBlogs } from "@/api/uae-blogs";
+import { adminGetAllBlogs } from "@/api/uae-blogs";
 import Image from "next/image";
 
 export default function BlogList() {
@@ -23,7 +23,7 @@ export default function BlogList() {
   const fetchBlogs = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getBlogs({
+      const res = await adminGetAllBlogs({
         page: currentPage,
         limit: limit,
         search: searchQuery,
@@ -216,8 +216,16 @@ export default function BlogList() {
 
                     {/* Status */}
                     <td className="px-4 py-4 border-r border-gray-200">
-                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                        {blog.status === "published" ? "Active" : "published"}
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          blog.status === "published"
+                            ? "bg-green-100 text-green-700"
+                            : blog.status === "draft"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {blog.status.charAt(0).toUpperCase() + blog.status.slice(1)}
                       </span>
                     </td>
 
