@@ -963,7 +963,9 @@ const MarketPlaceListing = () => {
               )}
             </div>
             {errors.subcategoryId && (
-              <p className="text-red-500 text-sm mt-1">{errors.subcategoryId}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.subcategoryId}
+              </p>
             )}
 
             <div ref={titleRef}>
@@ -983,7 +985,7 @@ const MarketPlaceListing = () => {
                 required={true}
                 isTextarea={true}
                 rows={5}
-                maxLength={500}
+                maxLength={700}
                 value={adInfo.description}
                 onChange={(e) =>
                   handleAdInfoChange("description", e.target.value)
