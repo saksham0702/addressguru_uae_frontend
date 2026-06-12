@@ -163,7 +163,7 @@ const JobsListings = () => {
         title={pageTitle}
         description={pageDescription}
         canonical={canonicalUrl}
-        ogImage={`/assets/og/job.jpeg`}
+        ogImage={`https://addressguru.ae/assets/og/job.jpeg`}
         schema={itemListSchema}
       />
 
