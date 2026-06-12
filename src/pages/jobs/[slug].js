@@ -97,7 +97,7 @@ const JobDetails = ({ jobData }) => {
     jobData?.location?.city?.name || jobData?.company?.city?.name || "";
   const country = jobData?.location?.country || "UAE";
 
-  const seoTitle = `${jobData?.title} | ${jobData?.company?.name} | AddressGuru UAE`;
+  const seoTitle = `${jobData?.title} | ${jobData?.company?.name}`;
   const seoDesc = `Apply for ${jobData?.title} at ${jobData?.company?.name}. ${city ? `Location: ${city}, ` : ""}${country}. Salary: AED ${jobData?.salary?.from}–${jobData?.salary?.to}/month.`;
 
   const postedDate = jobData?.createdAt
@@ -114,31 +114,48 @@ const JobDetails = ({ jobData }) => {
     "@type": "JobPosting",
     title: jobData?.title,
     description: jobData?.description,
+    identifier: {
+      "@type": "PropertyValue",
+      name: jobData?.company?.name || "AddressGuru UAE",
+      value: jobData?._id || jobData?.slug,
+    },
     datePosted: jobData?.createdAt?.split("T")[0],
     validThrough: new Date(
-      new Date(jobData?.createdAt).getTime() + 60 * 24 * 60 * 60 * 1000,
+      new Date(jobData?.createdAt).getTime() + 90 * 24 * 60 * 60 * 1000,
     )
       .toISOString()
-      .split("T")[0], // Default 60 days
+      .split("T")[0], // Extended to 90 days as standard
     employmentType: mapEmploymentType(jobData?.jobType),
     hiringOrganization: {
       "@type": "Organization",
       name: jobData?.company?.name,
-      sameAs: SITE_URL, // Replace with company website if available
+      sameAs: SITE_URL,
       logo: jobData?.company?.logo
         ? `${APP_URL}/${jobData.company.logo}`
         : undefined,
     },
-    jobLocation: {
-      "@type": "Place",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: jobData?.company?.address || "UAE",
-        addressLocality: city || "Dubai",
-        addressRegion: city || "Dubai",
-        addressCountry: "AE",
-      },
-    },
+    jobLocation:
+      jobData?.workMode?.toLowerCase() === "remote"
+        ? undefined
+        : {
+            "@type": "Place",
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: jobData?.company?.address || "UAE",
+              addressLocality: city || "Dubai",
+              addressRegion: city || "Dubai",
+              addressCountry: "AE",
+            },
+          },
+    jobLocationType:
+      jobData?.workMode?.toLowerCase() === "remote" ? "TELECOMMUTE" : undefined,
+    applicantLocationRequirements:
+      jobData?.workMode?.toLowerCase() === "remote"
+        ? {
+            "@type": "Country",
+            name: "AE",
+          }
+        : undefined,
     baseSalary:
       jobData?.salary?.from && jobData?.salary?.to
         ? {
@@ -152,6 +169,7 @@ const JobDetails = ({ jobData }) => {
             },
           }
         : undefined,
+    directApply: true,
   };
 
   return (
@@ -159,6 +177,7 @@ const JobDetails = ({ jobData }) => {
       <SEOHead
         title={seoTitle}
         description={seoDesc}
+        ogImage={`${APP_URL}/${jobData?.company?.logo}`}
         canonical={`${SITE_URL}/jobs/${jobData?.slug}`}
         schema={jobPostingSchema}
       />

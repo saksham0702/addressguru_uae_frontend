@@ -12,6 +12,7 @@ import { get_job_filter } from "@/api/filter";
 import MobileJobFilter from "@/components/Jobs/MobileJobFilter";
 import Link from "next/link";
 import { useRouter } from "next/router";
+const SITE_URL = "https://addressguru.ae";
 
 const JobsListings = () => {
   const router = useRouter();
@@ -24,8 +25,7 @@ const JobsListings = () => {
   const [pagination, setPagination] = useState({ page: 1, hasMore: false });
   const [activeFilters, setActiveFilters] = useState({});
 
-  const canonicalCity = city?.toLowerCase().replace(/\s+/g, "-");
-  const canonicalUrl = `${APP_URL}/jobs/${canonicalCity}`;
+  const canonicalUrl = `${SITE_URL}/jobs`;
 
   // Fetch initial data
   useEffect(() => {
@@ -135,8 +135,25 @@ const JobsListings = () => {
     itemListElement: allJobs.map((job, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      name: job?.title,
-      url: `${APP_URL}/jobs/${job?.slug}`,
+      item: {
+        "@type": "JobPosting",
+        title: job?.title,
+        url: `${SITE_URL}/jobs/${job?.slug}`,
+        datePosted: job?.createdAt?.split("T")[0],
+        description: job?.description?.substring(0, 200) + "...",
+        hiringOrganization: {
+          "@type": "Organization",
+          name: job?.company?.name || "AddressGuru UAE",
+        },
+        jobLocation: {
+          "@type": "Place",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: job?.location?.city?.name || city,
+            addressCountry: "AE",
+          },
+        },
+      },
     })),
   };
 
@@ -146,7 +163,7 @@ const JobsListings = () => {
         title={pageTitle}
         description={pageDescription}
         canonical={canonicalUrl}
-        ogImage={`${APP_URL}/seo/default-job-og.jpg`}
+        ogImage={`/assets/og/job.jpeg`}
         schema={itemListSchema}
       />
 
