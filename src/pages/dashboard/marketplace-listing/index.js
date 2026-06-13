@@ -889,8 +889,9 @@ const MarketPlaceListing = () => {
           slug: slug,
           listingId: listingId,
         });
+        console.log("MARKETPLACE FINAL RESPONSE", finalResponse);
 
-        if (finalResponse?.data) {
+        if (finalResponse?.status) {
           clearSession();
           setShowSuccessPopup(true);
         }
@@ -927,7 +928,7 @@ const MarketPlaceListing = () => {
                 listingId: listingId,
               });
 
-              if (finalResponse?.data) {
+              if (finalResponse?.status) {
                 clearSession();
                 setShowSuccessPopup(true);
               }
@@ -1440,7 +1441,7 @@ const MarketPlaceListing = () => {
               </>
             }
             redirectTo="/dashboard"
-            // autoRedirect={true}
+            autoRedirect={true}
           />
           <Footer />
         </section>
