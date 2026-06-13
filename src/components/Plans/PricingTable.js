@@ -139,6 +139,8 @@ const PricingTable = ({
   selectedPlanId,
   setSelectedPlanId,
   onSelect,
+  title = "Listing Plans",
+  subTitle = "Boost your business visibility in UAE",
 }) => {
   const handleSelect = (plan) => {
     setSelectedPlanId?.(plan?._id ?? plan?.id);
@@ -157,10 +159,8 @@ const PricingTable = ({
     <div className="w-full px-4 py-6">
       {/* ── Section heading ── */}
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-bold text-gray-800">Listing Plans</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Boost your business visibility in UAE
-        </p>
+        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+        <p className="text-sm text-gray-500 mt-1">{subTitle}</p>
       </div>
 
       {/* ── Cards grid ── */}

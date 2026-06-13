@@ -1,6 +1,8 @@
 import { get_marketplace_subcategories } from "@/api/Categories";
 
 import { get_plans } from "@/api/plans";
+import { create_order, verify_payment } from "@/api/payment";
+import Script from "next/script";
 
 import DropDown from "@/components/Forms/DropDown";
 import InputWithTitle from "@/components/Forms/InputWithTitle";
@@ -79,7 +81,7 @@ const MarketPlaceListing = () => {
 
   const getPlansData = async () => {
     try {
-      const res = await get_plans();
+      const res = await get_plans("marketplace");
       setPlans(res?.data?.plans);
     } catch (error) {
       console.log("error in fetching plans", error);
@@ -863,7 +865,102 @@ const MarketPlaceListing = () => {
     }
   };
 
-  // Render step content
+  const handlePayment = async () => {
+    try {
+      if (!selectedPlanId) {
+        setErrors({ plan: "Please select a plan" });
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const orderResponse = await create_order({
+        plan_id: selectedPlanId,
+        listing_id: listingId,
+      });
+
+      if (orderResponse.free_plan) {
+        const formData = new FormData();
+        formData.append("plan_id", selectedPlanId);
+
+        const finalResponse = await add_marketplace_listing({
+          payload: formData,
+          step: 5,
+          slug: slug,
+          listingId: listingId,
+        });
+
+        if (finalResponse?.data) {
+          clearSession();
+          setShowSuccessPopup(true);
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { payment_id, order_id, amount, currency, key } = orderResponse.data;
+
+      const options = {
+        key,
+        amount,
+        currency,
+        name: "AddressGuru",
+        description: "Marketplace Plan Purchase",
+        order_id,
+        handler: async function (response) {
+          try {
+            const verifyResponse = await verify_payment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              paymentId: payment_id,
+            });
+
+            if (verifyResponse.success) {
+              const formData = new FormData();
+              formData.append("plan_id", selectedPlanId);
+
+              const finalResponse = await add_marketplace_listing({
+                payload: formData,
+                step: 5,
+                slug: slug,
+                listingId: listingId,
+              });
+
+              if (finalResponse?.data) {
+                clearSession();
+                setShowSuccessPopup(true);
+              }
+            }
+          } catch (error) {
+            console.log("verify payment error", error);
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        prefill: {
+          name: contact?.name || "",
+          email: contact?.email || "",
+          contact: contact?.number || "",
+        },
+        theme: {
+          color: "#FF6E04",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+      razorpay.on("payment.failed", function () {
+        alert("Payment failed. Please try again.");
+        setIsSubmitting(false);
+      });
+    } catch (error) {
+      console.log("handlePayment error", error);
+      alert("Something went wrong while initiating payment.");
+      setIsSubmitting(false);
+    }
+  };
   const renderStepContent = () => {
     // Show loader while fetching edit data
     if (editLoading) {
@@ -1135,7 +1232,11 @@ const MarketPlaceListing = () => {
                 plans={plans}
                 selectedPlanId={selectedPlanId}
                 setSelectedPlanId={setSelectedPlanId}
-                onSelect={() => clearError("plan")}
+                onSelect={() => {
+                  setErrors((prev) => ({ ...prev, plan: "" }));
+                }}
+                title="Marketplace Ad Plans"
+                subTitle="Reach more buyers with our marketplace promotion plans"
               />
               {errors.plan && (
                 <p className="text-red-500 mt-2">{errors.plan}</p>
@@ -1265,7 +1366,11 @@ const MarketPlaceListing = () => {
             <button
               onClick={async () => {
                 if (validateStep(currentStep)) {
-                  await handleStepSubmit(currentStep);
+                  if (currentStep === 5) {
+                    await handlePayment();
+                  } else {
+                    await handleStepSubmit(currentStep);
+                  }
                 }
               }}
               disabled={isSubmitting}
@@ -1340,6 +1445,10 @@ const MarketPlaceListing = () => {
           <Footer />
         </section>
       </div>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
     </>
   );
 };

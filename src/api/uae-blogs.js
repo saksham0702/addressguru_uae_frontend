@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://localhost:5001";
 const API = axios.create({
   baseURL: API_URL, // e.g. http://localhost:5000/api
@@ -61,7 +61,12 @@ export const getMostViewedBlogs = async (limit = 5) => {
 
 export const getBlogBySlug = async (slug) => {
   try {
-    const { data } = await API.get(`/blogs/get-blog-by-slug/${slug}`);
+    const token = localStorage.getItem("token");
+    const { data } = await API.get(`/blogs/get-blog-by-slug/${slug}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return data;
   } catch (error) {
     console.error("Error fetching blog:", error);
@@ -82,20 +87,20 @@ export const getBlogsByCategory = async (categoryId, params = {}) => {
   return data;
 };
 
-// ── Public Category APIs ──────────────────────────────────────────────────────
-
+// Public Category APIs
 export const getCategories = async () => {
   const { data } = await API.get("/blogs/get-blog-categories");
   console.log("response of categories:", data);
   return data;
 };
 
-// ── Admin Blog APIs ───────────────────────────────────────────────────────────
-
+// Admin Blog APIs
 export const adminGetAllBlogs = async (params = {}) => {
-  const { data } = await API.get("/admin/blogs", { params });
-  return data;
+  const { data } = await API.get("/blogs/admin/get-all-blogs", { params });
+  console.log("response of admin blogs:", data);
+  return data?.data;
 };
+
 export const createBlog = async (formData) => {
   const token = localStorage.getItem("token");
   const { data } = await API.post("/blogs/admin/create-blog", formData, {
@@ -125,8 +130,7 @@ export const deleteBlog = async (id) => {
   return data;
 };
 
-// ── Admin Category APIs ───────────────────────────────────────────────────────
-
+// Admin Category APIs
 export const createCategory = async (payload) => {
   const { data } = await API.post("/blogs/admin/create-category", payload);
   return data;
