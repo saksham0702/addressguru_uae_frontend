@@ -16,8 +16,6 @@ export default function BlogList() {
   const [totalBlogs, setTotalBlogs] = useState(0);
   const limit = 10;
 
-  //   const API_URL = "
-  // .168.29.191:5001";
   const API_URL = "https://addressguru.ae/api";
 
   const fetchBlogs = useCallback(async () => {
@@ -45,7 +43,6 @@ export default function BlogList() {
         slug: item.slug,
         image: `${API_URL}/${item.coverImage}`,
         category: item.category_id?.name || "—",
-        author: item.author?.name || "—",
         createdAt: new Date(item.createdAt).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "long",
@@ -137,7 +134,6 @@ export default function BlogList() {
                   "Title",
                   "Slug",
                   "Category",
-                  // "Author",
                   "Created",
                   "Status",
                   "Operation",
@@ -204,11 +200,6 @@ export default function BlogList() {
                       {blog?.category}
                     </td>
 
-                    {/* Author */}
-                    {/* <td className="px-4 py-4 border-r border-gray-200 text-gray-700">
-                      {blog.author?.name}
-                    </td> */}
-
                     {/* Date */}
                     <td className="px-4 py-4 border-r border-gray-200 text-gray-500 whitespace-nowrap">
                       {blog.createdAt}
@@ -225,7 +216,8 @@ export default function BlogList() {
                               : "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {blog.status.charAt(0).toUpperCase() + blog.status.slice(1)}
+                        {blog.status.charAt(0).toUpperCase() +
+                          blog.status.slice(1)}
                       </span>
                     </td>
 

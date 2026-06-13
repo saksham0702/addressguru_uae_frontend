@@ -2,6 +2,7 @@ import React from "react";
 import Steps from "@/components/Forms/Steps";
 import JobInfoSection from "./JobInfoSection";
 import CompanyInfoSection from "./CompanyInfoSection";
+import PricingTable from "@/components/Plans/PricingTable";
 
 const JobForm = ({
   steps,
@@ -21,6 +22,10 @@ const JobForm = ({
   setLogoPreview,
   API_URL,
   getSelectedOption,
+  plans,
+  selectedPlanId,
+  setSelectedPlanId,
+  handlePayment,
 }) => {
   const activeStep = steps.find((s) => s.active)?.step;
 
@@ -45,7 +50,7 @@ const JobForm = ({
               subCategories={subCategories}
               getSelectedOption={getSelectedOption}
             />
-          ) : (
+          ) : activeStep === 2 ? (
             <CompanyInfoSection
               postJobData={postJobData}
               setPostJobData={setPostJobData}
@@ -58,6 +63,20 @@ const JobForm = ({
               API_URL={API_URL}
               getSelectedOption={getSelectedOption}
             />
+          ) : (
+            <div className="w-full text-center">
+              <PricingTable
+                plans={plans}
+                selectedPlanId={selectedPlanId}
+                setSelectedPlanId={setSelectedPlanId}
+                onSelect={() => clearError("plan")}
+                title="Job Posting Plans"
+                subTitle="Choose the best plan to reach talent across UAE"
+              />
+              {errors.plan && (
+                <p className="text-red-500 mt-2">{errors.plan}</p>
+              )}
+            </div>
           )}
 
           {/* Validation Summary */}
@@ -103,7 +122,11 @@ const JobForm = ({
               <button
                 onClick={async () => {
                   if (validateStep(activeStep)) {
-                    await handleStepSubmit(activeStep);
+                    if (activeStep === 3) {
+                      await handlePayment();
+                    } else {
+                      await handleStepSubmit(activeStep);
+                    }
                   }
                 }}
                 disabled={loading}
@@ -135,8 +158,8 @@ const JobForm = ({
                   </>
                 ) : (
                   <>
-                    {activeStep === 2 ? "Submit Job" : "Next Step"}
-                    {activeStep < 2 && (
+                    {activeStep === 3 ? "Complete & Pay" : activeStep === 2 ? "Select Plan" : "Next Step"}
+                    {activeStep < 3 && (
                       <svg
                         className="w-4 h-4"
                         fill="none"

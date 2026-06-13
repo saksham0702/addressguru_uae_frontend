@@ -144,11 +144,6 @@ export default function CreateBlog() {
   const { user } = useAuth();
   const author = user?.data;
 
-  // Debug: Log API_URL on mount
-  useEffect(() => {
-    console.log("API_URL:", API_URL);
-  }, []);
-
   const [form, setForm] = useState({
     blogid: "",
     title: "",
@@ -463,7 +458,11 @@ export default function CreateBlog() {
               {submitting && form.status === "published" && (
                 <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
               )}
-              {form.status === "published" ? (id ? "Update" : "Publish") : "Publish Now"}
+              {form.status === "published"
+                ? id
+                  ? "Update"
+                  : "Publish"
+                : "Publish Now"}
             </button>
           </div>
         </div>
@@ -488,8 +487,6 @@ export default function CreateBlog() {
                     <p className="text-xs text-red-500 mt-1">{errors.title}</p>
                   )}
                 </Field>
-
-  
 
                 <Field label="Content" required>
                   <div
