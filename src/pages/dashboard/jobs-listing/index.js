@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef } from "react";
 import ResponseAlert from "@/components/ResponseAlert";
+import SuccessModal from "@/components/Forms/sucesspopup";
 import {
   saveToSession,
   getFromSession,
@@ -287,7 +288,10 @@ const JobListing = () => {
       education: res.education || "",
       openings: res.totalPositions || "",
       ageRange: res.ageRange ? `${res.ageRange.from}-${res.ageRange.to}` : "",
-      salaryRange: res.salary?.from && res.salary?.to ? `${res.salary.from}-${res.salary.to}` : "",
+      salaryRange:
+        res.salary?.from && res.salary?.to
+          ? `${res.salary.from}-${res.salary.to}`
+          : "",
       minExperience: res.noOfExperience || "",
       location: res.location?.city?._id || "",
       workMode: res.location?.isRemote ? "remote" : "on-site",
@@ -302,7 +306,8 @@ const JobListing = () => {
       email: res.contact?.email || "",
       phone: res.contact?.phone || "",
       city: res.company?.city?._id || "",
-      locality: res.company?.locality || res.locality || res.localities?.[0] || "",
+      locality:
+        res.company?.locality || res.locality || res.localities?.[0] || "",
       address: res.company?.address || "",
     }));
   };
@@ -342,13 +347,18 @@ const JobListing = () => {
     const savedData = getFromSession();
     if (savedData.postJobData) setPostJobData(savedData.postJobData);
     if (savedData.jobListingId) setJobListingId(savedData.jobListingId);
-    if (savedData.currentStep && savedData.currentStep > 1) setActiveStep(savedData.currentStep);
+    if (savedData.currentStep && savedData.currentStep > 1)
+      setActiveStep(savedData.currentStep);
     if (savedData.steps) setSteps(savedData.steps);
     if (savedData.selectedPlanId) setSelectedPlanId(savedData.selectedPlanId);
   }, []);
 
   useEffect(() => {
-    if (postJobData.title || postJobData.description || postJobData.companyName) {
+    if (
+      postJobData.title ||
+      postJobData.description ||
+      postJobData.companyName
+    ) {
       saveToSession("postJobData", postJobData);
       setLastSaved(new Date().toLocaleTimeString());
     }
@@ -418,27 +428,37 @@ const JobListing = () => {
   };
 
   const isBlank = (v) =>
-    v === undefined || v === null || (typeof v === "string" && v.trim() === "") || (Array.isArray(v) && v.length === 0);
+    v === undefined ||
+    v === null ||
+    (typeof v === "string" && v.trim() === "") ||
+    (Array.isArray(v) && v.length === 0);
 
   const validateStep = (stepNumber) => {
     let newErrors = {};
     if (stepNumber === 1) {
-      if (!postJobData.category_id) newErrors.category_id = "Job category is required";
-      if (subCategories.length > 0 && !postJobData.sub_category_id) newErrors.sub_category_id = "Sub category is required";
+      if (!postJobData.category_id)
+        newErrors.category_id = "Job category is required";
+      if (subCategories.length > 0 && !postJobData.sub_category_id)
+        newErrors.sub_category_id = "Sub category is required";
       if (!postJobData.jobType) newErrors.jobType = "Job type is required";
-      if (!postJobData.education) newErrors.education = "Education level is required";
+      if (!postJobData.education)
+        newErrors.education = "Education level is required";
       if (!postJobData.title.trim()) newErrors.title = "Job title is required";
-      if (!postJobData.description.trim()) newErrors.description = "Job description is required";
-      if (!postJobData.salaryRange) newErrors.salaryRange = "Salary range is required";
+      if (!postJobData.description.trim())
+        newErrors.description = "Job description is required";
+      if (!postJobData.salaryRange)
+        newErrors.salaryRange = "Salary range is required";
       if (isBlank(postJobData.openings)) {
         newErrors.openings = "Total positions is required";
       } else if (!/^\d+$/.test(postJobData.openings.toString().trim())) {
         newErrors.openings = "Openings must be a number";
       }
-      if (!postJobData.skills || postJobData.skills.length === 0) newErrors.skills = "Please add at least one skill";
+      if (!postJobData.skills || postJobData.skills.length === 0)
+        newErrors.skills = "Please add at least one skill";
     }
     if (stepNumber === 2) {
-      if (!postJobData.companyName.trim()) newErrors.companyName = "Company name is required";
+      if (!postJobData.companyName.trim())
+        newErrors.companyName = "Company name is required";
       if (!postJobData.email.trim()) {
         newErrors.email = "Email is required";
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(postJobData.email.trim())) {
@@ -483,7 +503,9 @@ const JobListing = () => {
     const mapping = errorMapping[stepNumber] || {};
     Object.keys(apiErrors).forEach((key) => {
       const frontendKey = mapping[key] || key;
-      mappedErrors[frontendKey] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
+      mappedErrors[frontendKey] = Array.isArray(apiErrors[key])
+        ? apiErrors[key][0]
+        : apiErrors[key];
     });
     return mappedErrors;
   };
@@ -502,12 +524,16 @@ const JobListing = () => {
 
     if (stepNumber === 1) {
       formData.append("category_id", postJobData.category_id);
-      if (postJobData.sub_category_id) formData.append("sub_category_id", postJobData.sub_category_id);
+      if (postJobData.sub_category_id)
+        formData.append("sub_category_id", postJobData.sub_category_id);
       formData.append("title", postJobData.title);
       formData.append("description", postJobData.description);
       formData.append("education", postJobData.education);
       formData.append("requirements", JSON.stringify(postJobData.requirements));
-      formData.append("responsibilities", JSON.stringify(postJobData.responsibilities));
+      formData.append(
+        "responsibilities",
+        JSON.stringify(postJobData.responsibilities),
+      );
       formData.append("benefits", JSON.stringify(postJobData.benefits));
       formData.append("skills", JSON.stringify(postJobData.skills));
       formData.append("sector", postJobData.sector);
@@ -515,8 +541,12 @@ const JobListing = () => {
       formData.append("experienceLevel", postJobData.experienceLevel);
       formData.append("total_positions", postJobData.openings);
       let salaryObj = {
-        from: null, to: null, currency: postJobData.salaryCurrency, period: postJobData.salaryPeriod,
-        isNegotiable: postJobData.salaryNegotiable, isHidden: postJobData.salaryHidden
+        from: null,
+        to: null,
+        currency: postJobData.salaryCurrency,
+        period: postJobData.salaryPeriod,
+        isNegotiable: postJobData.salaryNegotiable,
+        isHidden: postJobData.salaryHidden,
       };
       if (postJobData.salaryRange) {
         const [from, to] = postJobData.salaryRange.split("-");
@@ -525,10 +555,15 @@ const JobListing = () => {
       }
       formData.append("salary", JSON.stringify(salaryObj));
       formData.append("language", JSON.stringify(postJobData.languages || []));
-      formData.append("nationality", JSON.stringify(postJobData.nationality || []));
+      formData.append(
+        "nationality",
+        JSON.stringify(postJobData.nationality || []),
+      );
       formData.append("noOfExperience", postJobData.minExperience);
       formData.append("gender", postJobData.gender);
-      const selectedAge = AGE_OPTIONS.find((a) => a.value === postJobData.ageRange);
+      const selectedAge = AGE_OPTIONS.find(
+        (a) => a.value === postJobData.ageRange,
+      );
       let ageObj = {};
       if (selectedAge?.value) {
         const [from, to] = selectedAge.value.split("-");
@@ -537,21 +572,45 @@ const JobListing = () => {
       formData.append("ageRange", JSON.stringify(ageObj));
     } else if (stepNumber === 2) {
       formData.append("folder", "Jobs");
-      formData.append("contact", JSON.stringify({
-        name: postJobData.name, email: postJobData.email, phone: String(postJobData.phone), countryCode: postJobData.countryCode
-      }));
-      const selectedCity = cities.find(c => c._id === postJobData.city);
-      formData.append("company", JSON.stringify({
-        name: postJobData.companyName, description: postJobData.companyDescription,
-        website: postJobData.companyWebsite, address: postJobData.address, locality: postJobData.locality,
-        city: selectedCity ? { _id: selectedCity._id, name: selectedCity.name, slug: selectedCity.slug } : null
-      }));
-      if (postJobData.companyLogo instanceof File) formData.append("logo", postJobData.companyLogo);
-      else if (typeof postJobData.companyLogo === "string") formData.append("previous_company_logo", postJobData.companyLogo);
+      formData.append(
+        "contact",
+        JSON.stringify({
+          name: postJobData.name,
+          email: postJobData.email,
+          phone: String(postJobData.phone),
+          countryCode: postJobData.countryCode,
+        }),
+      );
+      const selectedCity = cities.find((c) => c._id === postJobData.city);
+      formData.append(
+        "company",
+        JSON.stringify({
+          name: postJobData.companyName,
+          description: postJobData.companyDescription,
+          website: postJobData.companyWebsite,
+          address: postJobData.address,
+          locality: postJobData.locality,
+          city: selectedCity
+            ? {
+                _id: selectedCity._id,
+                name: selectedCity.name,
+                slug: selectedCity.slug,
+              }
+            : null,
+        }),
+      );
+      if (postJobData.companyLogo instanceof File)
+        formData.append("logo", postJobData.companyLogo);
+      else if (typeof postJobData.companyLogo === "string")
+        formData.append("previous_company_logo", postJobData.companyLogo);
     }
 
     try {
-      const res = await save_job({ step: stepNumber, formData, isEdit: stepNumber === 2 || !!edit });
+      const res = await save_job({
+        step: stepNumber,
+        formData,
+        isEdit: stepNumber === 2 || !!edit,
+      });
       if (res?.errors) {
         setErrors(mapApiErrorsToState(res.errors, stepNumber));
         setLoading(false);
@@ -584,25 +643,38 @@ const JobListing = () => {
         return;
       }
       setLoading(true);
-      const orderResponse = await create_order({ plan_id: selectedPlanId, listing_id: jobListingId });
+      const orderResponse = await create_order({
+        plan_id: selectedPlanId,
+        listing_id: jobListingId,
+      });
       if (orderResponse.free_plan) {
         const formData = new FormData();
         formData.append("plan_id", selectedPlanId);
-        const res = await save_job({ formData, step: 3, slug, isEdit: true });
-        if (res?.success) {
+        formData.append("slug", slug);
+        if (jobListingId) formData.append("job_id", jobListingId);
+        const res = await save_job({ formData, step: 3, isEdit: true });
+
+        console.log(res?.data);
+        if (res?.data?.status) {
           clearSession();
           setSubmittedSlug(res.data?.data?.slug || slug);
           setShowThankYou(true);
         } else {
-          setResponse(res?.message || "Failed to finalize job");
+          setResponse(res?.data?.message || "Failed to finalize job");
         }
         setLoading(false);
         return;
       }
 
-      const { payment_id, order_id, amount, currency, key } = orderResponse.data;
+      const { payment_id, order_id, amount, currency, key } =
+        orderResponse.data;
       const options = {
-        key, amount, currency, name: "AddressGuru", description: "Job Listing Plan Purchase", order_id,
+        key,
+        amount,
+        currency,
+        name: "AddressGuru",
+        description: "Job Listing Plan Purchase",
+        order_id,
         handler: async function (response) {
           try {
             const verify = await verify_payment({
@@ -614,11 +686,17 @@ const JobListing = () => {
             if (verify.success) {
               const formData = new FormData();
               formData.append("plan_id", selectedPlanId);
-              const res = await save_job({ formData, step: 3, slug, isEdit: true });
-              if (res?.success) {
+              formData.append("slug", slug);
+              if (jobListingId) formData.append("job_id", jobListingId);
+              const res = await save_job({ formData, step: 3, isEdit: true });
+              if (res?.data?.status) {
                 clearSession();
                 setSubmittedSlug(res.data?.data?.slug || slug);
                 setShowThankYou(true);
+              } else {
+                setResponse(
+                  res?.data?.message || "Failed to finalize job listing",
+                );
               }
             }
           } catch (error) {
@@ -627,7 +705,11 @@ const JobListing = () => {
             setLoading(false);
           }
         },
-        prefill: { name: postJobData.name, email: postJobData.email, contact: postJobData.phone },
+        prefill: {
+          name: postJobData.name,
+          email: postJobData.email,
+          contact: postJobData.phone,
+        },
         theme: { color: "#FF6E04" },
       };
       const razorpay = new window.Razorpay(options);
@@ -644,58 +726,109 @@ const JobListing = () => {
   };
 
   const formOptions = {
-    categoryOptions: (categories || []).map(cat => ({ value: cat._id, label: cat.name, slug: cat.slug })),
-    cityOptions: cities?.map(city => ({ value: city._id, label: city.name, slug: city.slug })),
-    sectorOptions, jobTypeOptions, workModeOptions, experienceLevelOptions, salaryOptions, BenefitOptions,
-    educationLevels: (educationLevels || []).map(item => ({ value: item.value, label: item.name })),
-    ageOptions: AGE_OPTIONS.map(a => ({ value: a.value, label: a.name })),
-    genderOptions, nationalityOptions, languageOptions,
+    categoryOptions: (categories || []).map((cat) => ({
+      value: cat._id,
+      label: cat.name,
+      slug: cat.slug,
+    })),
+    cityOptions: cities?.map((city) => ({
+      value: city._id,
+      label: city.name,
+      slug: city.slug,
+    })),
+    sectorOptions,
+    jobTypeOptions,
+    workModeOptions,
+    experienceLevelOptions,
+    salaryOptions,
+    BenefitOptions,
+    educationLevels: (educationLevels || []).map((item) => ({
+      value: item.value,
+      label: item.name,
+    })),
+    ageOptions: AGE_OPTIONS.map((a) => ({ value: a.value, label: a.name })),
+    genderOptions,
+    nationalityOptions,
+    languageOptions,
   };
 
-  const getSelectedOption = (opts = [], val) => opts.find(o => o.value === val) || null;
+  const getSelectedOption = (opts = [], val) =>
+    opts.find((o) => o.value === val) || null;
 
   const refs = {
-    categoryRef, subCategoryRef, titleRef, descriptionRef, skillsRef, jobTypeRef, educationLevelRef, openingsRef,
-    companyLogoRef, companyNameRef, companyDescriptionRef, companyWebsiteRef, nameRef, emailRef, phoneRef, cityRef, addressRef,
+    categoryRef,
+    subCategoryRef,
+    titleRef,
+    descriptionRef,
+    skillsRef,
+    jobTypeRef,
+    educationLevelRef,
+    openingsRef,
+    companyLogoRef,
+    companyNameRef,
+    companyDescriptionRef,
+    companyWebsiteRef,
+    nameRef,
+    emailRef,
+    phoneRef,
+    cityRef,
+    addressRef,
   };
 
   return (
     <>
       <div className="min-h-screen w-full relative">
         <div className="fixed top-0 w-full bg-white z-40 flex justify-center border-b">
-          <div className="w-[90%] max-w-[1400px]"><Navbar /></div>
+          <div className="w-[90%] max-w-[1400px]">
+            <Navbar />
+          </div>
         </div>
         <div className="pt-20">
           <JobForm
-            steps={steps} setActiveStep={setActiveStep} postJobData={postJobData} setPostJobData={setPostJobData}
-            errors={errors} clearError={clearError} refs={refs} options={formOptions} subCategories={subCategories}
-            loading={loading} handleStepSubmit={handleStepSubmit} validateStep={validateStep}
-            handleUsePreviousCompany={handleUsePreviousCompany} logoPreview={logoPreview} setLogoPreview={setLogoPreview}
-            API_URL={API_URL} getSelectedOption={getSelectedOption} plans={plans}
-            selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} handlePayment={handlePayment}
+            steps={steps}
+            setActiveStep={setActiveStep}
+            postJobData={postJobData}
+            setPostJobData={setPostJobData}
+            errors={errors}
+            clearError={clearError}
+            refs={refs}
+            options={formOptions}
+            subCategories={subCategories}
+            loading={loading}
+            handleStepSubmit={handleStepSubmit}
+            validateStep={validateStep}
+            handleUsePreviousCompany={handleUsePreviousCompany}
+            logoPreview={logoPreview}
+            setLogoPreview={setLogoPreview}
+            API_URL={API_URL}
+            getSelectedOption={getSelectedOption}
+            plans={plans}
+            selectedPlanId={selectedPlanId}
+            setSelectedPlanId={setSelectedPlanId}
+            handlePayment={handlePayment}
           />
         </div>
       </div>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      {showThankYou && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-[90%] text-center shadow-2xl">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-500">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold mb-2">Thank You! 🎉</h2>
-            <p className="text-gray-600 mb-6">Your job has been submitted successfully with <span className="text-[#FF6E04] font-semibold">AddressGuru UAE</span>.</p>
-            <div className="flex flex-col gap-3">
-              {submittedSlug && (
-                <button onClick={() => router.push(`/jobs/${submittedSlug}`)} className="w-full py-3 bg-[#FF6E04] text-white font-semibold rounded-lg">Preview Job</button>
-              )}
-              <button onClick={() => router.push("/dashboard")} className="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg">Go to Dashboard</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
+      <SuccessModal
+        open={showThankYou}
+        onClose={() => setShowThankYou(false)}
+        title="Thank You! 🎉"
+        message={
+          <>
+            Your job has been successfully submitted with{" "}
+            <span className="font-semibold text-gray-800">AddressGuru UAE</span>
+            .
+            <br />
+            Our team will review it shortly.
+          </>
+        }
+        redirectTo="/dashboard"
+        autoRedirect={true}
+      />
       <ResponseAlert text={response} onClose={() => setResponse("")} />
     </>
   );

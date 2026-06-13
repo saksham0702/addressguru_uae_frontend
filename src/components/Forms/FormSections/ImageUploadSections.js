@@ -438,6 +438,7 @@ const ImageUploadSections = ({
   refs,
   showLogo = true,
 }) => {
+  console.log("media", media);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadError, setUploadError] = useState({ logo: "", images: "" });
   const [activeIdx, setActiveIdx] = useState(null);
@@ -678,7 +679,7 @@ const ImageUploadSections = ({
                   <img
                     src={
                       media.logo.isExisting
-                        ? `${APP_URL}/${media.logo.preview}`
+                        ? `${media.logo.preview}`
                         : media.logo.preview
                     }
                     alt="Logo"
