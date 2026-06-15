@@ -1,6 +1,5 @@
 import BreadCrumbs from "@/components/BreadCrumbs";
 import React, { useEffect, useState, useCallback } from "react";
-import TitleAndLogo from "@/components/SeeDetails/TitleAndLogo";
 import SliderCard from "@/components/SeeDetails/SliderCard";
 import QuickInformation from "@/components/SeeDetails/QuickInformation";
 import GetMoreInfo from "@/components/SeeDetails/GetMoreInfo";
@@ -8,10 +7,8 @@ import UserInformation from "@/components/SeeDetails/UserInformation";
 import RecentCustomerReviewCard from "@/components/BusinessListingComponents/RecentCustomerReviewCard";
 import TitleAndLogoMobile from "@/components/SeeDetails/TitleAndLogoMobile";
 import LandingPageSkeleton from "@/components/BusinessListingComponents/LandingPageSkeleton";
-import { get_marketplace_by_id } from "@/api/showlistings";
 import { useRouter } from "next/router";
-import Head from "next/head";
-import { APP_URL } from "@/services/constants";
+import SEOHead from "@/components/SEOHead";
 import LandingPage from "@/components/HeadersMobile/LandingPage";
 import ThanksPop from "@/components/SeeDetails/Popups/ThanksPop";
 import {
@@ -127,8 +124,8 @@ const MarketplaceSeeDetails = () => {
         setLoading(false);
       }
     },
-    [slug],
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+    [slug, router],
+  );
 
   const handleApprove = async () => {
     try {
@@ -187,53 +184,26 @@ const MarketplaceSeeDetails = () => {
   const services = parseList(data.services);
   return (
     <>
-      <Head>
-        <title>{data?.title} | Marketplace | AddressGuru</title>
-        <meta
-          name="description"
-          content={data?.description?.substring(0, 160)}
-        />
-        <meta property="og:title" content={data?.title} />
-        <meta
-          property="og:description"
-          content={data?.description?.substring(0, 160)}
-        />
-        <meta property="og:image" content={images?.[0]} />
-        <meta
-          property="og:url"
-          content={`https://${APP_URL}/marketplace/${data?.slug}`}
-        />
-        <meta property="og:type" content="product" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={data?.title} />
-        <meta
-          name="twitter:description"
-          content={data?.description?.substring(0, 160)}
-        />
-        <meta name="twitter:image" content={images?.[0]} />
-        <link
-          rel="canonical"
-          href={`https://${APP_URL}/marketplace/${data?.slug}`}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Product",
-              name: data?.title,
-              description: data?.description,
-              image: images,
-              offers: {
-                "@type": "Offer",
-                price: data?.price || "0",
-                priceCurrency: "INR",
-                availability: "https://schema.org/InStock",
-              },
-            }),
-          }}
-        />
-      </Head>
+      <SEOHead
+        title={`${data?.title} | Marketplace | AddressGuru`}
+        description={data?.description?.substring(0, 160)}
+        keywords={`${data?.title}, marketplace UAE, AddressGuru marketplace, ${data?.category?.name || ""}`}
+        canonical={`https://addressguru.ae/marketplace/${data?.slug}`}
+        ogImage={images?.[0] || "/home-og-image.jpg"}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: data?.title,
+          description: data?.description,
+          image: images,
+          offers: {
+            "@type": "Offer",
+            price: data?.price || "0",
+            priceCurrency: "AED",
+            availability: "https://schema.org/InStock",
+          },
+        }}
+      />
 
       {/* Mobile header */}
       <div className="md:hidden">

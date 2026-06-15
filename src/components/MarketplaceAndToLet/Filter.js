@@ -132,19 +132,37 @@
 //           </aside>
 //         </div>
 //       </div>
-//     </div>
-//   );
-// };
-
-// export default Filters;
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { get_marketplace_category_info } from "@/api/uae-marketplace";
 
 const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
   // Local state for temporary selections before applying
-  const [tempCategories, setTempCategories] = useState([]);
-  const [tempCities, setTempCities] = useState([]);
+  const [tempCategories, setTempCategories] = useState(selectedFilters.categories || []);
+  const [tempCities, setTempCities] = useState(selectedFilters.cities || []);
+  const [subCategories, setSubCategories] = useState([]);
   const [showAllCities, setShowAllCities] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(selectedFilters.search || "");
+
+  // Update temp state when selectedFilters change (e.g. on Reset)
+  useEffect(() => {
+    setTempCategories(selectedFilters.categories || []);
+    setTempCities(selectedFilters.cities || []);
+    setSearchTerm(selectedFilters.search || "");
+  }, [selectedFilters]);
+
+  // Fetch sub-categories when a category is selected
+  useEffect(() => {
+    if (tempCategories.length > 0) {
+      const fetchSubCats = async () => {
+        const catId = tempCategories[tempCategories.length - 1]; // fetch for the most recently selected
+        const res = await get_marketplace_category_info(catId);
+        setSubCategories(res?.subCategories || []);
+      };
+      fetchSubCats();
+    } else {
+      setSubCategories([]);
+    }
+  }, [tempCategories]);
 
   // Handle category selection
   const handleCategoryToggle = (categoryId) => {
@@ -206,10 +224,30 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
   const handleClearAllFilters = () => {
     setTempCategories([]);
     setTempCities([]);
+    setSearchTerm("");
     setSelectedFilters({
       categories: [],
       cities: [],
+      sub_category_id: null,
+      search: "",
     });
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      setSelectedFilters(prev => ({ ...prev, search: searchTerm }));
+    }
+  };
+
+  const handleSearchClick = () => {
+    setSelectedFilters(prev => ({ ...prev, search: searchTerm }));
+  };
+
+  const handleSubCategoryToggle = (subCatId) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      sub_category_id: prev.sub_category_id === subCatId ? null : subCatId
+    }));
   };
 
   // Get cities to display (sorted with selected ones first)
@@ -218,9 +256,9 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
 
     const sortedCities = [...filters.cities].sort((a, b) => {
       const aSelected =
-        tempCities.includes(a.id) || selectedFilters?.cities?.includes(a.id);
+        tempCities.includes(a._id) || selectedFilters?.cities?.includes(a._id);
       const bSelected =
-        tempCities.includes(b.id) || selectedFilters?.cities?.includes(b.id);
+        tempCities.includes(b._id) || selectedFilters?.cities?.includes(b._id);
 
       if (aSelected && !bSelected) return -1;
       if (!aSelected && bSelected) return 1;
@@ -235,7 +273,7 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
     selectedFilters?.cities?.length > 0;
 
   return (
-    <div className="border border-[#F5F5F5] rounded-xl">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-fit flex flex-col shadow-sm min-w-[220px]">
       {/* Filter heading */}
       <div className="bg-[#F5F5F5] flex justify-between items-center rounded-t-lg px-3 py-2">
         <span className="flex gap-2 items-center">
@@ -290,9 +328,13 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
           <input
             type="text"
             placeholder="Search Marketplace"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearchKeyPress}
             className="flex-grow bg-transparent outline-none font-[500] max-w-35 pr-1 placeholder-gray-400"
           />
           <svg
+            onClick={handleSearchClick}
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -314,14 +356,12 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
           <div className="space-y-1">
             {filters?.categories?.map((category) => {
               const isSelected =
-                tempCities.length === 0
-                  ? tempCategories.includes(category.id) ||
-                    selectedFilters?.categories?.includes(category.id)
-                  : tempCategories.includes(category.id);
+                tempCategories.includes(category._id) ||
+                selectedFilters?.categories?.includes(category._id);
 
               return (
                 <label
-                  key={category.id}
+                  key={category._id}
                   className={`flex items-center gap-2 py-1.5 pl-2 font-medium rounded-md text-[11px] cursor-pointer transition ${
                     isSelected
                       ? "bg-[#FFECDE] text-[#FF6E04]"
@@ -331,7 +371,7 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={() => handleCategoryToggle(category.id)}
+                    onChange={() => handleCategoryToggle(category._id)}
                     className="w-3.5 h-3.5 accent-orange-500 cursor-pointer"
                   />
                   <span>{category.name}</span>
@@ -373,20 +413,49 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
           </div>
         </div>
 
+        {/* Sub-categories Section */}
+        {subCategories.length > 0 && (
+          <div className="mt-6 pl-2">
+            <h2 className="text-sm font-semibold mb-3">Sub-categories</h2>
+            <div className="max-h-40 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
+              {subCategories.map((subCat) => {
+                const isSelected = selectedFilters.sub_category_id === subCat._id;
+                return (
+                  <label
+                    key={subCat._id}
+                    className={`flex items-center gap-2 py-1.5 pl-2 font-medium rounded-md text-[11px] cursor-pointer transition ${
+                      isSelected
+                        ? "bg-[#FFECDE] text-[#FF6E04]"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="subCategory"
+                      checked={isSelected}
+                      onChange={() => handleSubCategoryToggle(subCat._id)}
+                      className="w-3.5 h-3.5 accent-orange-500 cursor-pointer"
+                    />
+                    <span>{subCat.name}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Cities Section */}
         <div className="mt-6 pl-2">
           <h2 className="text-sm font-semibold mb-3">Cities</h2>
           <div className="space-y-1">
             {getCitiesToDisplay().map((city) => {
               const isSelected =
-                tempCategories.length === 0
-                  ? tempCities.includes(city.id) ||
-                    selectedFilters?.cities?.includes(city.id)
-                  : tempCities.includes(city.id);
+                tempCities.includes(city._id) ||
+                selectedFilters?.cities?.includes(city._id);
 
               return (
                 <label
-                  key={city.id}
+                  key={city._id}
                   className={`flex items-center gap-2 py-2 pl-2 font-medium rounded-md text-[11px] cursor-pointer transition ${
                     isSelected
                       ? "bg-[#FFECDE] text-[#FF6E04]"
@@ -396,10 +465,10 @@ const Filters = ({ filters, selectedFilters, setSelectedFilters }) => {
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={() => handleCityToggle(city.id)}
+                    onChange={() => handleCityToggle(city._id)}
                     className="w-3.5 h-3.5 accent-orange-500 cursor-pointer"
                   />
-                  <span>{city.city}</span>
+                  <span>{city.name}</span>
                 </label>
               );
             })}

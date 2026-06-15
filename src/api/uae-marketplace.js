@@ -16,22 +16,7 @@ export const get_marketplace_category = async () => {
   }
 };
 
-export const get_all_marketplace_listings = async (params) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/marketplace/get-all-listings`,
-      {
-        params, // ✅ dynamic query params
-      },
-    );
-
-    console.log("response of marketplace listings", response);
-    return response?.data;
-  } catch (error) {
-    console.log("error getting marketplace listings", error);
-    return error?.response?.data;
-  }
-};
+// Redundant get_all_marketplace_listings removed in favor of get_all_marketplace below
 
 // export const add_marketplace_listing = async ({ payload, step, slug }) => {
 //   try {
@@ -126,13 +111,18 @@ export const get_marketplace_by_slug = async (ID) => {
   }
 };
 
-export const get_all_marketplace = async () => {
+export const get_all_marketplace = async (params = {}) => {
   try {
+    const { page = 1, limit = 20, ...filters } = params;
     const response = await axios.get(
-      `${API_URL}/marketplace/get-all-listings?page=1&limit=10`,
+      `${API_URL}/marketplace/get-all-listings`,
+      {
+        params: { page, limit, ...filters },
+      }
     );
     return response?.data;
   } catch (error) {
+    console.error("error getting marketplace listings", error);
     return null;
   }
 };

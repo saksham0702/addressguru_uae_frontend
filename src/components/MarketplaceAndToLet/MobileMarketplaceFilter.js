@@ -14,14 +14,18 @@ const MobileMarketplaceFilter = ({
   // Temp state — only committed on Apply
   const [tempCategories, setTempCategories] = useState([]);
   const [tempCities, setTempCities] = useState([]);
+  const [tempSubCategoryId, setTempSubCategoryId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Sync temp state from real filters when drawer opens
   useEffect(() => {
     if (isOpen) {
       setTempCategories(selectedFilters?.categories || []);
       setTempCities(selectedFilters?.cities || []);
+      setTempSubCategoryId(selectedFilters?.sub_category_id || null);
+      setSearchTerm(selectedFilters?.search || "");
     }
-  }, [isOpen]);
+  }, [isOpen, selectedFilters]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -34,6 +38,8 @@ const MobileMarketplaceFilter = ({
   const activeCount = [
     selectedFilters?.categories?.length > 0,
     selectedFilters?.cities?.length > 0,
+    !!selectedFilters?.sub_category_id,
+    !!selectedFilters?.search,
   ].filter(Boolean).length;
 
   const handleCategoryToggle = (id) => {
@@ -52,6 +58,8 @@ const MobileMarketplaceFilter = ({
     setSelectedFilters({
       categories: tempCategories,
       cities: tempCities,
+      sub_category_id: tempSubCategoryId,
+      search: searchTerm,
     });
     setIsOpen(false);
   };
@@ -66,8 +74,8 @@ const MobileMarketplaceFilter = ({
   const citiesToShow = () => {
     if (!filters?.cities) return [];
     const sorted = [...filters.cities].sort((a, b) => {
-      const aSelected = tempCities.includes(a.id);
-      const bSelected = tempCities.includes(b.id);
+      const aSelected = tempCities.includes(a._id);
+      const bSelected = tempCities.includes(b._id);
       if (aSelected && !bSelected) return -1;
       if (!aSelected && bSelected) return 1;
       return 0;
@@ -137,32 +145,59 @@ const MobileMarketplaceFilter = ({
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-          <h3 className="text-base font-bold text-gray-900">Filters</h3>
-          <div className="flex items-center gap-3">
-            {(tempCategories.length > 0 ||
-              tempCities.length > 0 ||
-              hasActiveFilters) && (
+        <div className="px-5 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-bold text-gray-900">Filters</h3>
+            <div className="flex items-center gap-3">
+              {(tempCategories.length > 0 ||
+                tempCities.length > 0 ||
+                tempSubCategoryId ||
+                searchTerm ||
+                hasActiveFilters) && (
+                <button
+                  onClick={handleClearAll}
+                  className="text-sm font-semibold text-orange-500"
+                >
+                  Clear all
+                </button>
+              )}
               <button
-                onClick={handleClearAll}
-                className="text-sm font-semibold text-orange-500"
+                onClick={() => setIsOpen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600"
               >
-                Clear all
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path
+                    d="M1 1L13 13M13 1L1 13"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
-            )}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600"
+            </div>
+          </div>
+          {/* Mobile Search */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search Marketplace..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-10 pl-10 pr-4 bg-gray-100 rounded-full text-sm outline-none focus:ring-2 focus:ring-orange-500/20 transition-all font-medium"
+            />
+            <svg
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 font-bold"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M1 1L13 13M13 1L1 13"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
+              />
+            </svg>
           </div>
         </div>
 
@@ -207,16 +242,16 @@ const MobileMarketplaceFilter = ({
             {openAccordion === "categories" && (
               <div className="bg-gray-50 border-t border-gray-100 px-4 py-3 space-y-1">
                 {filters?.categories?.map((category) => {
-                  const isSelected = tempCategories.includes(category.id);
+                  const isSelected = tempCategories.includes(category._id);
                   return (
                     <label
-                      key={category.id}
+                      key={category._id}
                       className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
                         isSelected
                           ? "border-orange-500 bg-orange-50"
                           : "border-gray-200 bg-white"
                       }`}
-                      onClick={() => handleCategoryToggle(category.id)}
+                      onClick={() => handleCategoryToggle(category._id)}
                     >
                       <span
                         className={`font-semibold text-sm ${isSelected ? "text-orange-600" : "text-gray-700"}`}
@@ -296,21 +331,21 @@ const MobileMarketplaceFilter = ({
             {openAccordion === "cities" && (
               <div className="bg-gray-50 border-t border-gray-100 px-4 py-3 space-y-1">
                 {citiesToShow().map((city) => {
-                  const isSelected = tempCities.includes(city.id);
+                  const isSelected = tempCities.includes(city._id);
                   return (
                     <label
-                      key={city.id}
+                      key={city._id}
                       className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
                         isSelected
                           ? "border-orange-500 bg-orange-50"
                           : "border-gray-200 bg-white"
                       }`}
-                      onClick={() => handleCityToggle(city.id)}
+                      onClick={() => handleCityToggle(city._id)}
                     >
                       <span
                         className={`font-semibold text-sm ${isSelected ? "text-orange-600" : "text-gray-700"}`}
                       >
-                        {city.city}
+                        {city.name}
                       </span>
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
