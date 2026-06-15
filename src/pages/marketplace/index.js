@@ -10,7 +10,10 @@ import Head from "next/head";
 import { get_marketplace_filter } from "@/api/filter";
 import { useAuth } from "@/context/AuthContext";
 import MobileMarketplaceFilter from "@/components/MarketplaceAndToLet/MobileMarketplaceFilter";
-import { get_all_marketplace } from "@/api/uae-marketplace";
+import { get_all_marketplace, get_marketplace_category_info } from "@/api/uae-marketplace";
+import Login from "@/components/UserLogin/Login";
+import Image from "next/image";
+import SEOHead from "@/components/SEOHead";
 
 // ─── Skeleton Card (matches RecentListingCard dimensions) ───────────────────
 const MarketplaceCardSkeleton = () => (
@@ -39,13 +42,21 @@ const Marketplace = ({ initialCity }) => {
   const [selectedFilters, setSelectedFilters] = useState({
     categories: [],
     cities: [],
+    sub_category_id: null,
+    search: "",
   });
 
   const hasActiveFilters =
-    selectedFilters.categories.length > 0 || selectedFilters.cities.length > 0;
+    selectedFilters.categories.length > 0 || 
+    selectedFilters.cities.length > 0 || 
+    selectedFilters.sub_category_id || 
+    selectedFilters.search;
+
+  const [loginPop, setLoginPop] = useState(false);
+  const handleCloseLogin = () => setLoginPop(false);
 
   const handleReset = () => {
-    setSelectedFilters({ categories: [], cities: [] });
+    setSelectedFilters({ categories: [], cities: [], sub_category_id: null, search: "" });
   };
 
   // ── Fetch sidebar filters (once) ────────────────────────────────────────────
@@ -70,7 +81,15 @@ const Marketplace = ({ initialCity }) => {
         setListings([]); // 🔥 reset list
         setPageData(null); // 🔥 reset pagination
 
-        const res = await get_all_marketplace(selectedFilters, 1);
+        const params = {
+          category_id: selectedFilters.categories[0], // assume single for now or adjust backend
+          city_id: selectedFilters.cities[0],
+          sub_category_id: selectedFilters.sub_category_id,
+          search: selectedFilters.search,
+          page: 1,
+          limit: 20
+        };
+        const res = await get_all_marketplace(params);
 
         setListings(res?.data?.listings || []);
         console.log("market place respones :", res);
@@ -89,18 +108,25 @@ const Marketplace = ({ initialCity }) => {
 
   // ── Load more ────────────────────────────────────────────────────────────────
   const handleLoadMore = async () => {
-    if (!pageData?.has_more || isLoadingMore) return;
+    const nextPage = (pageData?.pagination?.page || 1) + 1;
+    if (nextPage > (pageData?.pagination?.totalPages || 1) || isLoadingMore) return;
 
     try {
       setIsLoadingMore(true);
 
-      const res = await get_marketplace_listing(
-        selectedFilters,
-        pageData.next_page, // use next_page from last API response
-      );
+      const params = {
+        category_id: selectedFilters.categories[0],
+        city_id: selectedFilters.cities[0],
+        sub_category_id: selectedFilters.sub_category_id,
+        search: selectedFilters.search,
+        page: nextPage,
+        limit: 20
+      };
 
-      if (res?.result?.length) {
-        setListings((prev) => [...prev, ...res.result]); // ✅ append
+      const res = await get_all_marketplace(params);
+
+      if (res?.data?.listings?.length) {
+        setListings((prev) => [...prev, ...res.data.listings]); // ✅ append
         setPageData(res); // update pagination meta
       }
     } catch (err) {
@@ -134,75 +160,29 @@ const Marketplace = ({ initialCity }) => {
   return (
     <div className="flex flex-col items-center w-full justify-center bg-[#F8F7F7]">
       {/* ── SEO Head ─────────────────────────────────────────────────────────── */}
-      <Head>
-        <title>{`Top Marketplace Listings in ${city || "UAE"} | Buy & Sell `}</title>
-        <meta
-          name="description"
-          content={`Browse the best marketplace listings in ${city || "UAE"}. Find products to buy and sell — electronics, furniture, fashion, and more on AddressGuru UAE.`}
-        />
-        <meta
-          name="keywords"
-          content={`marketplace UAE, buy sell UAE, second hand Dubai, online marketplace UAE, products for sale ${city}, AddressGuru marketplace`}
-        />
-        <link rel="canonical" href={`https://addressguru.ae/marketplace`} />
-
-        {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:title"
-          content={`Marketplace in ${city || "UAE"} `}
-        />
-        <meta
-          property="og:description"
-          content={`Discover products for sale in ${city || "UAE"}. Buy and sell with ease on AddressGuru.`}
-        />
-        <meta property="og:url" content="https://addressguru.ae/marketplace" />
-        <meta
-          property="og:image"
-          content="https://addressguru.ae/seo/default-marketplace-og.jpg"
-        />
-        <meta property="og:site_name" content="AddressGuru UAE" />
-        <meta property="og:locale" content="en_AE" />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={`Marketplace in ${city || "UAE"} `}
-        />
-        <meta
-          name="twitter:description"
-          content={`Find products to buy and sell in ${city || "UAE"} on AddressGuru.`}
-        />
-        <meta
-          name="twitter:image"
-          content="https://addressguru.ae/seo/default-marketplace-og.jpg"
-        />
-
-        {/* JSON-LD: ItemList */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              name: `Marketplace Listings in ${city || "UAE"}`,
-              url: "https://addressguru.ae/marketplace",
-              numberOfItems: listings?.length || 0,
-              itemListElement:
-                listings?.slice(0, 10).map((item, i) => ({
-                  "@type": "ListItem",
-                  position: i + 1,
-                  name: item?.title || item?.name,
-                  url: `https://addressguru.ae/marketplace/${item?.slug}`,
-                })) || [],
-            }),
-          }}
-        />
-      </Head>
-      <div className="md:w-[80%] max-md:w-[96%] bg-white max-md:border border-gray-200 max-md:rounded-lg pb-10 md:pl-3">
+      <SEOHead
+        title={listings?.[0]?.category?.name ? `Best ${listings[0].category.name} in ${city} | Marketplace` : `Top Marketplace Listings in ${city} | Buy & Sell`}
+        description={`Browse the best${listings?.[0]?.category?.name ? ` ${listings[0].category.name}` : ""} marketplace listings in ${city}. Find products to buy and sell on AddressGuru UAE.`}
+        keywords={`marketplace UAE, buy sell UAE, second hand Dubai, online marketplace UAE, products for sale ${city}, AddressGuru marketplace${listings?.[0]?.category?.name ? `, ${listings[0].category.name}` : ""}`}
+        canonical={`https://addressguru.ae/marketplace`}
+        ogImage={listings?.[0]?.images?.[0] || "https://addressguru.ae/seo/default-marketplace-og.jpg"}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: `Marketplace Listings in ${city}`,
+          url: "https://addressguru.ae/marketplace",
+          numberOfItems: pageData?.pagination?.total || listings?.length || 0,
+          itemListElement: listings?.slice(0, 10).map((item, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: item?.title || item?.name,
+            url: `https://addressguru.ae/marketplace/${item?.slug}`,
+          })),
+        }}
+      />
+      <div className="md:w-[80%] max-md:w-[96%] bg-white max-md:border border-gray-200 max-md:rounded-lg pb-10 md:px-3">
         <div className="flex items-center justify-between max-md:p-2 py-2 max-md:pt-3">
-          <BreadCrumbs length={pageData?.total} slug={"marketplace "} />
+          <BreadCrumbs length={pageData?.pagination?.total || 0} slug={"marketplace "} />
         </div>
 
         <section className="flex items-center justify-between max-md:p-2 py-2 max-md:pt-3">
@@ -221,9 +201,9 @@ const Marketplace = ({ initialCity }) => {
           </div>
         </section>
 
-        <div className="flex md:gap-1 mt-2 relative min-h-screen">
+        <div className="flex w-full md:gap-4 mt-2 relative min-h-screen pt-2">
           {/* ── Sticky Filter Sidebar ─────────────────────────────────────────── */}
-          <div className="mt-2 h-auto sticky max-md:hidden self-start top-20 w-[20%]">
+          <div className="sticky top-24 h-fit max-md:hidden w-[23%] z-10 mx-1">
             <Filters
               filters={marketplaceFilter}
               selectedFilters={selectedFilters}
@@ -244,7 +224,7 @@ const Marketplace = ({ initialCity }) => {
           </div>
 
           {/* ── Main Content Area ─────────────────────────────────────────────── */}
-          <div className="md:w-[80%] max-md:w-full flex flex-col">
+          <div className="md:w-[77%] max-md:w-full flex flex-col">
             {/* Cards grid */}
             <div className="flex lg:pl-3 md:gap-3 gap-2 flex-wrap max-md:justify-center">
               {/* LOADING STATE — skeletons */}
@@ -254,36 +234,94 @@ const Marketplace = ({ initialCity }) => {
                 ))
               ) : /* EMPTY STATE */
               listings.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[60vh] py-10 w-full bg-white text-center px-4">
-                  <div className="w-40 h-40 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-20 w-20 text-orange-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.75 9.75h.008v.008H9.75V9.75zm4.5 0h.008v.008h-.008V9.75zm-4.5 4.5h.008v.008H9.75v-.008zm4.5 0h.008v.008h-.008v-.008zM3 12a9 9 0 1118 0 9 9 0 01-18 0z"
-                      />
-                    </svg>
+                <div className="flex justify-center items-center py-12 px-4 w-full">
+                  <div className="flex flex-col items-center text-center max-w-md w-full">
+                    <div className="w-22 h-22 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center mb-6 p-5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-10 w-10 text-orange-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-full px-3 py-1 mb-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5 text-orange-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                        />
+                      </svg>
+                      <span className="text-xs font-medium text-orange-600">
+                        {city}
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                      Be the first to post an ad here!
+                    </h2>
+                    <p className="text-sm text-gray-500 mb-1 leading-relaxed">
+                      No products found in{" "}
+                      <span className="font-medium text-gray-700">
+                        {city}
+                      </span>{" "}
+                      {selectedFilters.categories.length > 0 && (
+                        <>
+                          matching your filters
+                        </>
+                      )}
+                      .
+                    </p>
+                    <p className="text-sm text-gray-500 mb-7 leading-relaxed">
+                      Get ahead of the competition — post your ad and
+                      start reaching local buyers today.
+                    </p>
+                    <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                      <button
+                        onClick={() => setLoginPop(true)}
+                        className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 4.5v15m7.5-7.5h-15"
+                          />
+                        </svg>
+                        Post your ad
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-5">
+                      Free to post &nbsp;·&nbsp; Reach local buyers
+                      &nbsp;·&nbsp; Takes under 2 minutes
+                    </p>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                    No Listings Found
-                  </h2>
-                  <p className="text-gray-500 max-w-md mb-6">
-                    We couldn&apos;t find any listings matching your search. Try
-                    adjusting your filters or check back later.
-                  </p>
-                  <Link
-                    href="/"
-                    className="bg-orange-500 hover:bg-orange-600 capitalize text-white px-6 py-2 rounded-lg shadow transition-all"
-                  >
-                    Go to Home
-                  </Link>
                 </div>
               ) : (
                 /* LISTINGS */
@@ -327,7 +365,7 @@ const Marketplace = ({ initialCity }) => {
             </div>
 
             {/* ── Load More Button ──────────────────────────────────────────── */}
-            {pageData?.has_more && (
+            {pageData?.pagination?.page < pageData?.pagination?.totalPages && (
               <div className="flex justify-center mt-4 lg:pl-3">
                 <button
                   onClick={handleLoadMore}
@@ -341,6 +379,36 @@ const Marketplace = ({ initialCity }) => {
           </div>
         </div>
       </div>
+      {loginPop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50 px-4">
+          <div className="h-[65vh] w-full max-w-xl m-auto flex flex-col relative rounded-xl bg-white shadow-2xl">
+              <button
+                onClick={handleCloseLogin}
+                className="absolute right-4 top-4 border rounded-full border-orange-500 p-1.5 z-[60] text-orange-500 hover:bg-orange-50 transition-colors"
+                aria-label="Close"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <div className="flex-1 overflow-y-auto w-full pt-4">
+                <Login setShowLogin={true} />
+              </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

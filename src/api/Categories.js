@@ -36,7 +36,7 @@ export const get_marketplace_subcategories = async (ID) => {
 export const get_sub_category = async (type) => {
   try {
     const res = await axios.get(`${API_URL}/categories/${type}`);
-    console.log(res?.data)
+    console.log(res?.data);
     return res?.data;
   } catch (error) {
     console.log(error);
@@ -47,10 +47,9 @@ export const get_sub_category = async (type) => {
 export const get_sub_category_marketplace = async () => {
   try {
     const res = await axios.get(`${API_URL}/marketplace/sub-categories`);
-    console.log(res?.data)
+    console.log(res?.data);
     return res?.data;
   } catch (error) {
     console.log(error);
   }
 };
-
