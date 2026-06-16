@@ -4,6 +4,7 @@ import BannerLast from "@/components/BannerLast";
 import Customers from "@/components/Customers";
 import PopularCategory from "@/components/PopularCategory";
 import PopularServices from "@/components/PopularServices";
+import PropertyShowcase from "@/components/PropertyShowcase";
 import RecentBusinessCard from "@/components/RecentBusinessCard";
 import RecentJobCard from "@/components/RecentJobCard";
 import RecentListingCard from "@/components/RecentListingCard";
@@ -176,6 +177,10 @@ export default function Home({ categories, cities, recentListings }) {
               <PopularServices />
             </div>
           </div>
+
+          {/* Properties Showcase */}
+          {/* <PropertyShowcase /> */}
+
           {/* Recent Listings */}
           <div className="flex flex-col w-full  mb-4">
             <div className="flex items-center justify-between px-5 max-md:px-2 mb-3">

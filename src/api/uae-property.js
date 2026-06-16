@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "@/services/constants"
+import { API_URL } from "@/services/constants";
 // const API_URL = "http://localhost:5001";
 
 export const add_property_listing = async ({
@@ -44,7 +44,7 @@ export const add_property_listing = async ({
         Authorization: `Bearer ${token}`,
       },
     });
-
+    console.log("Property listing API response:", response.data);
     return response.data;
   } catch (error) {
     console.log("Property listing API error:", error);
