@@ -4,8 +4,8 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const PropertiesCategory = () => {
-  const [rent, setRent] = useState(false);
-  const type = rent ? "rent" : "sale";
+  const [selectedType, setSelectedType] = useState("sale");
+  const type = selectedType;
 
   const [category, setCategory] = useState(null);
   const getCategoryMarketplace = async () => {
@@ -22,24 +22,22 @@ const PropertiesCategory = () => {
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
         Choose Your Category
       </h3>
-      <div className=" w-full flex capitalize justify-center text-base font-medium items-center">
-        <span
-          onClick={() => setRent(!rent)}
-          className={` ${
-            rent ? " bg-orange-600 text-white" : " bg-white"
-          }  px-4 py-1.5 rounded-l-full cursor-pointer`}
-        >
-          for rent
-        </span>
-
-        <span
-          onClick={() => setRent(!rent)}
-          className={` ${
-            rent ? " bg-white " : " bg-orange-600 text-white"
-          }  px-4 py-1.5 rounded-r-full cursor-pointer `}
-        >
-          for sale
-        </span>
+      <div className="w-full flex capitalize justify-center text-sm font-medium items-center mb-6">
+        <div className="bg-gray-100 p-1 rounded-full flex gap-1">
+          {["sale", "rent", "lease"].map((t) => (
+            <span
+              key={t}
+              onClick={() => setSelectedType(t)}
+              className={`px-6 py-2 rounded-full cursor-pointer transition-all ${
+                selectedType === t
+                  ? "bg-orange-600 text-white shadow-md"
+                  : "bg-transparent text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              For {t}
+            </span>
+          ))}
+        </div>
       </div>
       {/* all categories */}
 

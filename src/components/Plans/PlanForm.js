@@ -32,6 +32,8 @@ const PlanForm = ({ plan, onClose, refresh, defaultPlanType }) => {
       monthlyOptimisation: plan?.flags?.monthlyOptimisation || false,
       dedicatedSupport: plan?.flags?.dedicatedSupport || false,
     },
+    planCode: plan?.planCode || "",
+    durationInDays: plan?.durationInDays || 0,
     isActive: plan?.isActive ?? true,
     isHighlighted: plan?.isHighlighted || false,
     displayOrder: plan?.displayOrder || 1,
@@ -43,7 +45,20 @@ const PlanForm = ({ plan, onClose, refresh, defaultPlanType }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    const newValue = type === "checkbox" ? checked : value;
+    
+    setForm(prev => {
+      const updated = { ...prev, [name]: newValue };
+      // Auto-generate slug from name
+      if (name === "name") {
+        updated.slug = value.toLowerCase().trim().replace(/\s+/g, "-");
+        // Auto-generate planCode if empty
+        if (!prev.planCode) {
+          updated.planCode = value.toUpperCase().trim().replace(/\s+/g, "_");
+        }
+      }
+      return updated;
+    });
   };
 
   const handleLimitChange = (e) => {
@@ -232,6 +247,33 @@ const PlanForm = ({ plan, onClose, refresh, defaultPlanType }) => {
                   name="ctaLabel"
                   placeholder="Get Started"
                   value={form.ctaLabel}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Plan Code *
+                </label>
+                <input
+                  name="planCode"
+                  required
+                  placeholder="e.g., BUSINESS_PREMIUM"
+                  value={form.planCode}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (Days)
+                </label>
+                <input
+                  name="durationInDays"
+                  type="number"
+                  min="0"
+                  placeholder="e.g., 365"
+                  value={form.durationInDays}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />

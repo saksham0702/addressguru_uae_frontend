@@ -1,5 +1,4 @@
-import { add_properties_listing, get_service_facility } from "@/api/forms";
-
+import { get_service_facility } from "@/api/forms";
 // import { get_property_by_slug } from "@/api/showlistings";
 import CheckBox from "@/components/Forms/CheckBox";
 import DropDown from "@/components/Forms/DropDown";
@@ -26,8 +25,6 @@ import AdditionalPropertyFields, {
   FIELD_CONFIG as FIELD_CONFIG_REF,
 } from "@/components/Forms/FormSections/AdditionalPropertyFields";
 // import { APP_URL } from "@/services/constants";
-
-import axios from "axios";
 import { add_property_listing, get_property_by_slug } from "@/api/uae-property";
 import { get_plans } from "@/api/plans";
 import SuccessModal from "@/components/Forms/sucesspopup";
@@ -71,10 +68,10 @@ const PropertiesListing = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [redirectSlug, setRedirectSlug] = useState("");
   // Refs
-  const rentByRef = useRef(null);
+  const soldByRef = useRef(null);
   const availableRef = useRef(null);
-  const sizeRef = useRef(null);
-  const caeRef = useRef(null);
+  const area_sizeRef = useRef(null);
+  const cae_numberRef = useRef(null);
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const priceRef = useRef(null);
@@ -92,14 +89,14 @@ const PropertiesListing = () => {
 
   // Section 1: Property Information
   const [propertyInfo, setPropertyInfo] = useState({
-    rentBy: "",
-    size: "",
-    caeNumber: "",
+    soldBy: "", // fixed: was rentBy
+    area_size: "", // fixed: was size
+    cae_number: "", // fixed: was caeNumber
     title: "",
     description: "",
     priceType: "amount",
-    amount: "",
-    areaUnit: "sqft", // ✅ NEW
+    price_amount: "", // fixed: was amount
+    areaUnit: "sqft",
   });
 
   // Section 2: Media
@@ -184,13 +181,13 @@ const PropertiesListing = () => {
 
         // Pre-fill step 1 — Property Info
         setPropertyInfo({
-          rentBy: d.purpose || "", // ✅ FIXED
-          size: d.area?.size ? String(d.area.size) : "", // ✅ FIXED
-          caeNumber: d.cae_number || "",
+          soldBy: d.soldBy || "",
+          area_size: d.area?.size ? String(d.area.size) : "",
+          cae_number: d.cae_number || "",
           title: d.title || "",
           description: d.description || "",
           priceType: d.price?.amount ? "amount" : "contact_for_sale",
-          amount: d.price?.amount ? String(d.price.amount) : "", // ✅ FIXED
+          price_amount: d.price?.amount ? String(d.price.amount) : "",
           areaUnit: d.area?.unit || "sqft",
         });
         // Pre-fill available date
@@ -421,7 +418,7 @@ const PropertiesListing = () => {
     if (!isEditMode) saveToSession("currentStep", stepNumber);
   };
 
-  const rentByOptions = [
+  const soldByOptions = [
     { value: "owner", label: "Owner" },
     { value: "broker", label: "Broker" },
     { value: "agency", label: "Agency" },
@@ -444,7 +441,7 @@ const PropertiesListing = () => {
 
   const getPlansData = async () => {
     try {
-      const res = await get_plans();
+      const res = await get_plans("property");
       setPlans(res?.data?.plans);
     } catch (error) {
       console.log("error in fetching plans", error);
@@ -521,13 +518,13 @@ const PropertiesListing = () => {
 
   const scrollToError = (errorKey) => {
     const errorRefMap = {
-      rentBy: rentByRef,
+      soldBy: soldByRef,
       available: availableRef,
-      size: sizeRef,
-      caeNumber: caeRef,
+      area_size: area_sizeRef,
+      cae_number: cae_numberRef,
       title: titleRef,
       description: descriptionRef,
-      amount: priceRef,
+      price_amount: priceRef,
       facilities: facilitiesRef,
       images: imageFilesRef,
       contactName: contactNameRef,
@@ -554,16 +551,19 @@ const PropertiesListing = () => {
   const mapApiErrorsToState = (apiErrors, stepNumber) => {
     const errorMapping = {
       1: {
-        rent_by: "rentBy",
-        sale_by: "rentBy",
+        soldBy: "soldBy",
+        rent_by: "soldBy",
+        sale_by: "soldBy",
         available_date: "available",
         available: "available",
-        size: "size",
-        cae_number: "caeNumber",
+        area_size: "area_size",
+        size: "area_size",
+        cae_number: "cae_number",
         title: "title",
         description: "description",
         price_type: "priceType",
-        amount: "amount",
+        price_amount: "price_amount",
+        amount: "price_amount",
         facilities: "facilities",
         services: "services",
       },
@@ -607,17 +607,30 @@ const PropertiesListing = () => {
         }
       });
 
-      if (!propertyInfo.rentBy)
-        newErrors.rentBy = "Please select who is listing the property";
+      if (!propertyInfo.soldBy)
+        newErrors.soldBy = "Please select who is listing the property";
       if (!startDate) newErrors.available = "Available date is required";
-      if (!propertyInfo.size.trim()) newErrors.size = "Size is required";
+      
+      if (!propertyInfo.area_size || !propertyInfo.area_size.trim()) {
+        newErrors.area_size = "Size is required";
+      } else if (isNaN(Number(propertyInfo.area_size))) {
+        newErrors.area_size = "Size must be a valid number";
+      }
+
       if (!propertyInfo.title.trim()) newErrors.title = "Title is required";
       if (!propertyInfo.description.trim())
         newErrors.description = "Description is required";
-      if (propertyInfo.priceType === "amount" && !propertyInfo.amount.trim())
-        newErrors.amount = "Amount is required";
-      if (propertyInfo.rentBy === "agency" && !propertyInfo.caeNumber.trim())
-        newErrors.caeNumber = "CEA number is required for agency";
+
+      if (propertyInfo.priceType === "amount") {
+        if (!propertyInfo.price_amount || !propertyInfo.price_amount.trim()) {
+          newErrors.price_amount = "Amount is required";
+        } else if (isNaN(Number(propertyInfo.price_amount))) {
+          newErrors.price_amount = "Amount must be a valid number";
+        }
+      }
+
+      if (propertyInfo.soldBy === "agency" && (!propertyInfo.cae_number || !propertyInfo.cae_number.trim()))
+        newErrors.cae_number = "CEA number is required for agency";
       if (facility.length > 0 && selectedFacilities.length === 0)
         newErrors.facilities = "Please select at least one facility";
     }
@@ -692,19 +705,22 @@ const PropertiesListing = () => {
         formData.append("title", propertyInfo.title);
         formData.append("description", propertyInfo.description);
 
-        formData.append("purpose", resolvedType); // sale | rent | lease
+        formData.append("purpose", resolvedType);
+        formData.append("soldBy", propertyInfo.soldBy);
 
         // PRICE
-        if (propertyInfo.priceType === "amount") {
-          formData.append("price_amount", propertyInfo.amount);
+        if (propertyInfo.priceType === "amount" && propertyInfo.price_amount) {
+          formData.append("price_amount", Number(propertyInfo.price_amount));
         }
 
         formData.append("price_currency", "AED");
-        formData.append("price_negotiable", "true"); // or dynamic later
+        formData.append("price_negotiable", "true");
         formData.append("price_period", "one-time");
 
         // AREA
-        formData.append("area_size", propertyInfo.size);
+        if (propertyInfo.area_size) {
+          formData.append("area_size", Number(propertyInfo.area_size));
+        }
         formData.append("area_unit", propertyInfo.areaUnit || "sqft");
 
         // FACILITIES
@@ -894,26 +910,26 @@ const PropertiesListing = () => {
         return (
           <section className="space-y-4">
             <div className="flex justify-between gap-5 w-full items-center">
-              <div className="w-1/2" ref={rentByRef}>
+              <div className="w-1/2" ref={soldByRef}>
                 <h4 className="font-semibold text-gray-500 capitalize mb-1">
                   {resolvedType} BY *
                 </h4>
                 <DropDown
                   placeholder={`Select ${resolvedType} by`}
-                  options={rentByOptions}
+                  options={soldByOptions}
                   value={
-                    propertyInfo.rentBy
-                      ? rentByOptions.find(
-                          (o) => o.value === propertyInfo.rentBy,
+                    propertyInfo.soldBy
+                      ? soldByOptions.find(
+                          (o) => o.value === propertyInfo.soldBy,
                         )
                       : null
                   }
                   onChange={(selected) =>
-                    handlePropertyInfoChange("rentBy", selected.value)
+                    handlePropertyInfoChange("soldBy", selected.value)
                   }
                 />
-                {errors.rentBy && (
-                  <p className="text-red-500 text-sm mt-1">{errors.rentBy}</p>
+                {errors.soldBy && (
+                  <p className="text-red-500 text-sm mt-1">{errors.soldBy}</p>
                 )}
               </div>
               <div className="min-w-1/2" ref={availableRef}>
@@ -939,7 +955,7 @@ const PropertiesListing = () => {
               </div>
             </div>
 
-            <div ref={sizeRef}>
+            <div ref={area_sizeRef}>
               <label className="block text-sm font-semibold text-gray-600 mb-1">
                 Area *
               </label>
@@ -949,9 +965,9 @@ const PropertiesListing = () => {
                 <input
                   type="number"
                   placeholder="Enter size"
-                  value={propertyInfo.size}
+                  value={propertyInfo.area_size}
                   onChange={(e) =>
-                    handlePropertyInfoChange("size", e.target.value)
+                    handlePropertyInfoChange("area_size", e.target.value)
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-400 outline-none"
                 />
@@ -969,23 +985,23 @@ const PropertiesListing = () => {
                 </select>
               </div>
 
-              {errors.size && (
-                <p className="text-red-500 text-sm mt-1">{errors.size}</p>
+              {errors.area_size && (
+                <p className="text-red-500 text-sm mt-1">{errors.area_size}</p>
               )}
             </div>
 
-            {propertyInfo.rentBy === "agency" && (
-              <div ref={caeRef}>
+            {propertyInfo.soldBy === "agency" && (
+              <div ref={cae_numberRef}>
                 <InputWithTitle
                   title={"CEA Number *"}
-                  value={propertyInfo.caeNumber}
+                  value={propertyInfo.cae_number}
                   onChange={(e) =>
-                    handlePropertyInfoChange("caeNumber", e.target.value)
+                    handlePropertyInfoChange("cae_number", e.target.value)
                   }
                 />
-                {errors.caeNumber && (
+                {errors.cae_number && (
                   <p className="text-red-500 text-sm mt-1">
-                    {errors.caeNumber}
+                    {errors.cae_number}
                   </p>
                 )}
               </div>
@@ -1049,13 +1065,13 @@ const PropertiesListing = () => {
                   <InputWithTitle
                     title="Amount"
                     required={true}
-                    value={propertyInfo.amount}
+                    value={propertyInfo.price_amount}
                     onChange={(e) =>
-                      handlePropertyInfoChange("amount", e.target.value)
+                      handlePropertyInfoChange("price_amount", e.target.value)
                     }
                   />
-                  {errors.amount && (
-                    <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
+                  {errors.price_amount && (
+                    <p className="text-red-500 text-sm mt-1">{errors.price_amount}</p>
                   )}
                 </div>
               )}
