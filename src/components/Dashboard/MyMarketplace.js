@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 const MyMarketplaceListings = ({ data }) => {
-  console.log("Marketplace listings data:", data);
   const APP_URL = "https://addressguru.ae/api";
   // Helper to format price
   const formatPrice = (price) => {
     if (!price) return "Not Specified";
-    return `₹${Number(price).toLocaleString()}`;
+    return `AED ${Number(price).toLocaleString()}`;
   };
 
   // Helper to get condition label
@@ -39,23 +38,23 @@ const MyMarketplaceListings = ({ data }) => {
 
   // Helper to get status badge
   const getStatusBadge = (status) => {
-    if (status === "1" || status === 1) {
+    if (status === "approved" || status === "approved") {
       return {
-        label: "Published",
+        label: "Approved",
         color: "bg-green-500",
         textColor: "text-green-700",
       };
-    } else if (status === "0" || status === 0) {
+    } else if (status === "rejected" || status === "rejected") {
       return {
-        label: "Draft",
-        color: "bg-yellow-500",
-        textColor: "text-yellow-700",
+        label: "Rejected",
+        color: "bg-red-500",
+        textColor: "text-red-700",
       };
     } else {
       return {
-        label: "Inactive",
-        color: "bg-gray-500",
-        textColor: "text-gray-700",
+        label: "Pending",
+        color: "bg-yellow-500",
+        textColor: "text-yellow-700",
       };
     }
   };

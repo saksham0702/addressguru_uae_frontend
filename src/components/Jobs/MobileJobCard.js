@@ -358,7 +358,7 @@ const MobileJobCard = ({ data }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-between gap-2 pb-3">
-          <button className=" bg-white hover:bg-gray-50 py-2 text-gray-700 font-bold flex-1 rounded-sm border border-gray-300 transition-colors text-xs uppercase tracking-wide">
+        <button className=" bg-white hover:bg-gray-50 py-2 text-gray-700 font-bold flex-1 rounded-sm border border-gray-300 transition-colors text-xs uppercase tracking-wide">
           VISIT WEBSITE
         </button>
         <button className=" border border-orange-500 py-2 text-orange-500 font-bold flex-1 rounded-sm transition-colors flex items-center justify-center gap-1.5 text-xs uppercase tracking-wide">
@@ -377,7 +377,6 @@ const MobileJobCard = ({ data }) => {
             />
           </svg>
         </button>
-    
       </div>
     </div>
   );

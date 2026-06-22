@@ -6,28 +6,28 @@ const ThanksPop = ({ type, onClose }) => {
     claim: {
       title: "Business Claimed Successfully!",
       message: "Thank you for claiming your business on",
-      highlight: "AddressGuru",
+      highlight: "AddressGuru UAE",
       description:
         "Your business listing is now under your control. You can now manage and update your business information.",
     },
     report: {
       title: "Report Submitted!",
       message: "Thank you for reporting an issue on",
-      highlight: "AddressGuru",
+      highlight: "AddressGuru UAE",
       description:
         "We appreciate your help in keeping our information accurate. Our team will review your report shortly.",
     },
     rate: {
       title: "Rating Submitted!",
       message: "Thank you for rating this business on",
-      highlight: "AddressGuru",
+      highlight: "AddressGuru UAE",
       description:
         "Your feedback helps others make informed decisions and helps businesses improve their services.",
     },
     enquiry: {
       title: "Enquiry Received!",
       message: "Thank you for your enquiry on",
-      highlight: "AddressGuru",
+      highlight: "AddressGuru UAE",
       description:
         "We have received your message and will get back to you as soon as possible.",
     },

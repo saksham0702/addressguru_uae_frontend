@@ -170,7 +170,7 @@ export default function Home({ categories, cities, recentListings }) {
             </div>
             {/* popular services section */}
 
-            <h3 className=" mt-4 mb-3  text-[#212121] max-md:text-lg max-md:pl-2  pl-5">
+            <h3 className=" mt-4 mb-2  text-[#212121] max-md:text-lg max-md:pl-2  pl-5">
               Popular Home Services
             </h3>
             <div className="">
@@ -179,7 +179,7 @@ export default function Home({ categories, cities, recentListings }) {
           </div>
 
           {/* Properties Showcase */}
-          {/* <PropertyShowcase /> */}
+          <PropertyShowcase />
 
           {/* Recent Listings */}
           <div className="flex flex-col w-full  mb-4">

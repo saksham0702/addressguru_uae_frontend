@@ -143,8 +143,7 @@ const BusinessHeaderSection = ({ data }) => {
                           : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {data.status.charAt(0).toUpperCase() +
-                      data.status.slice(1)}
+                    {data.status.charAt(0).toUpperCase() + data.status.slice(1)}
                   </span>
                 )}
               </div>
@@ -308,8 +307,12 @@ const BusinessHeaderSection = ({ data }) => {
           >
             <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 bg-gray-50">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Manage Rooms</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{data?.businessName}</p>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Manage Rooms
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {data?.businessName}
+                </p>
               </div>
               <button
                 onClick={() => setShowRoomsModal(false)}

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Star, User, Calendar } from "lucide-react";
 import { getReviews } from "@/api/Reviews";
+import RecentCustomerReviewCard from "../BusinessListingComponents/RecentCustomerReviewCard";
 
 const ReviewSection = ({ slug, handlePop }) => {
   const [reviews, setReviews] = useState([]);
@@ -11,13 +12,7 @@ const ReviewSection = ({ slug, handlePop }) => {
     ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
   });
 
-  useEffect(() => {
-    if (slug) {
-      fetchReviews();
-    }
-  }, [slug]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getReviews(slug);
@@ -31,7 +26,13 @@ const ReviewSection = ({ slug, handlePop }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    if (slug) {
+      fetchReviews();
+    }
+  }, [slug, fetchReviews]);
 
   const calculateStats = (reviewsData) => {
     if (!reviewsData.length) {
@@ -173,90 +174,57 @@ const ReviewSection = ({ slug, handlePop }) => {
   return (
     <div className="w-full bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-gray-200">
-        <h2 className="text-2xl font-semibold text-gray-900">
+      <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-900 leading-none">
           Customer Reviews
         </h2>
+        <button
+          onClick={() => handlePop("rateus")}
+          className="px-5 py-2.5 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-all shadow-sm hover:shadow-md active:scale-95"
+        >
+          Write a Review
+        </button>
       </div>
 
-      {/* Stats Section */}
-      <div className="px-6 py-6 bg-gray-50 border-b border-gray-200">
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Overall Rating */}
-          <div className="flex flex-col items-center justify-center md:border-r border-gray-200">
-            <div className="text-5xl font-bold text-gray-900 mb-2">
-              {stats.averageRating}
-            </div>
-            <StarRating rating={parseFloat(stats.averageRating)} size={20} />
-            <p className="text-sm text-gray-600 mt-2">
-              Based on {stats.totalReviews}{" "}
-              {stats.totalReviews === 1 ? "review" : "reviews"}
-            </p>
+      {/* Rating Stats Summary */}
+      <div className="px-6 py-6 border-b border-gray-100 flex flex-wrap items-center gap-8 bg-gray-50/30">
+        <div className="flex flex-col items-center">
+          <div className="text-4xl font-black text-gray-900 leading-none">
+            {stats.averageRating}
           </div>
+          <StarRating rating={parseFloat(stats.averageRating)} size={16} />
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter mt-1">
+            {stats.totalReviews} REVIEWS
+          </p>
+        </div>
 
-          {/* Rating Distribution */}
-          <div className="space-y-2">
-            {[5, 4, 3, 2, 1].map((rating) => (
-              <RatingBar
-                key={rating}
-                rating={rating}
-                count={stats.ratingDistribution[rating]}
-                total={stats.totalReviews}
-              />
-            ))}
-          </div>
+        <div className="flex-1 max-w-xs space-y-1">
+          {[5, 4, 3, 2, 1].map((rating) => (
+            <RatingBar
+              key={rating}
+              rating={rating}
+              count={stats.ratingDistribution[rating]}
+              total={stats.totalReviews}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Reviews List */}
-      <div className="divide-y divide-gray-200">
-        {reviews.map((review) => (
-          <div
-            key={review._id}
-            className="px-6 py-6 hover:bg-gray-50 transition-colors"
-          >
-            {/* Review Header */}
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                {/* Avatar */}
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-semibold text-sm">
-                    {review.fullName.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-
-                {/* Name and Date */}
-                <div>
-                  <h4 className="font-semibold text-gray-900">
-                    {review.fullName}
-                  </h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                    <Calendar size={12} />
-                    <span>{formatDate(review.createdAt)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Rating */}
-              <StarRating rating={review.rating} size={16} />
-            </div>
-
-            {/* Review Text */}
-            <p className="text-gray-700 leading-relaxed pl-13">
-              {review.reviewText}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* View All Button (if you want to add pagination later) */}
-      {reviews.length >= 5 && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-          <button className="w-full py-2.5 text-blue-600 font-medium hover:text-blue-700 transition-colors">
-            View All Reviews ({stats.totalReviews})
-          </button>
+      {/* Reviews Horizontal Scroll */}
+      <div className="py-6 overflow-x-auto hide-scroll px-2">
+        <div className="flex gap-4 min-w-full">
+          {reviews.map((review) => (
+            <RecentCustomerReviewCard
+              key={review._id}
+              data={{
+                name: review.fullName,
+                rating: review.rating,
+                message: review.reviewText,
+              }}
+            />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 };

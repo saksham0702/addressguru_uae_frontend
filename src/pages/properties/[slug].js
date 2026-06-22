@@ -621,7 +621,7 @@ const PropertySeeDetails = () => {
   const isApproved = status === "approved";
 
   const isRejected = status === "rejected";
-  
+
   const isPending = !status || status === "pending";
 
   const parseImages = (raw) => {

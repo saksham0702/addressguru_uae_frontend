@@ -84,171 +84,323 @@ export function InvoiceModal({ payment, onClose }) {
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-[420px] overflow-hidden"
-        style={{
-          borderRadius: "2px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-        }}
+        className="w-full max-w-[370px] relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Receipt top tear */}
-        <div
-          className="w-full h-4 relative overflow-hidden"
-          style={{ background: "#1a1a2e" }}
-        >
-          <div className="absolute bottom-0 left-0 right-0 flex">
-            {Array.from({ length: 28 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex-1 h-2 rounded-t-full"
-                style={{ background: "#f8f7f4", margin: "0 1px" }}
-              />
-            ))}
+        {/* ── Scissors cut animation ── */}
+        <div className="invoice-cut-line absolute left-[-8px] right-[-8px] top-1/2 z-10 flex items-center gap-1.5 pointer-events-none">
+          <svg
+            className="invoice-scissor w-[22px] h-[22px] flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="6" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <line x1="20" y1="4" x2="8.12" y2="15.88" />
+            <line x1="14.47" y1="14.48" x2="20" y2="20" />
+            <line x1="8.12" y1="8.12" x2="12" y2="12" />
+          </svg>
+          <div className="flex-1 border-t-2 border-dashed border-white/60" />
+        </div>
+
+        {/* ── Top half ── */}
+        <div className="invoice-top overflow-hidden rounded-t-xl border border-slate-200 border-b-0">
+          {/* dark header tear */}
+          <div
+            className="w-full h-[13px] relative overflow-hidden"
+            style={{ background: "#1a1a2e" }}
+          >
+            <div className="absolute bottom-0 left-0 right-0 flex">
+              {Array.from({ length: 28 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-[7px] rounded-t-full"
+                  style={{ background: "#f8f7f4", margin: "0 1px" }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: "#f8f7f4" }} className="px-6 pt-3 pb-3">
+            {/* Logo */}
+            <div className="text-center mb-2">
+              <div className="text-[9px] tracking-[0.2em] text-slate-400 uppercase mb-0.5">
+                Payment Receipt
+              </div>
+              <div className="text-[19px] font-black tracking-tight text-orange-600">
+                AddressGuru UAE
+              </div>
+            </div>
+
+            <div className="border-t-2 border-dashed border-slate-300 mb-2.5" />
+
+            {/* Receipt No + Date */}
+            <div className="flex justify-between text-[11px] text-slate-500 mb-2.5">
+              <div>
+                <div className="text-[9px] uppercase tracking-[0.12em] text-slate-400 mb-0.5">
+                  Receipt No.
+                </div>
+                <div className="font-bold text-slate-700">
+                  {payment.receipt}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] uppercase tracking-[0.12em] text-slate-400 mb-0.5">
+                  Date
+                </div>
+                <div className="font-bold text-slate-700">
+                  {fmtDate(payment.createdAt)}
+                </div>
+                <div className="text-slate-400 text-[10px]">
+                  {fmtTime(payment.createdAt)}
+                </div>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="flex justify-center mb-2.5">
+              <StatusBadge status={payment.status} />
+            </div>
+
+            {/* Amount */}
+            <div className="text-center mb-3">
+              <div className="text-[9px] uppercase tracking-[0.15em] text-slate-400 mb-0.5">
+                Amount Charged
+              </div>
+              <div className="text-[28px] font-black text-slate-900 leading-none">
+                {fmtAmount(payment.amount, payment.currency)}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style={{ background: "#f8f7f4" }} className="px-8 pb-0 pt-6">
-          {/* Logo area */}
-          <div className="text-center mb-6">
-            <div className="text-[11px] tracking-[0.3em] text-slate-400 uppercase mb-1">
-              Payment Receipt
-            </div>
-            <div className="text-[22px] font-black tracking-tight text-slate-900">
-              AddressGuru
-            </div>
-            <div className="text-[10px] text-slate-400 mt-1 tracking-widest">
-              addressguru.ae
-            </div>
-          </div>
+        {/* ── Bottom half ── */}
+        <div className="invoice-bottom overflow-hidden rounded-b-xl border border-slate-200 border-t-0">
+          <div style={{ background: "#f8f7f4" }} className="px-6 pt-0 pb-0">
+            <div className="border-t-2 border-dashed border-slate-300 mb-2.5 mt-0" />
 
-          {/* Dashed divider */}
-          <div className="border-t-2 border-dashed border-slate-300 mb-5" />
-
-          {/* Receipt number + date */}
-          <div className="flex justify-between text-[11px] text-slate-500 mb-5">
-            <div>
-              <div className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">
-                Receipt No.
+            {/* Listing highlight */}
+            {payment.listing?.businessName && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mb-2.5 flex items-center gap-2">
+                <svg
+                  className="w-3.5 h-3.5 text-blue-500 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                  />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <div>
+                  <div className="text-[9px] uppercase tracking-[0.12em] text-blue-500 font-bold">
+                    Listing
+                  </div>
+                  <div className="text-[12px] font-bold text-blue-800">
+                    {payment.listing.businessName}
+                  </div>
+                </div>
               </div>
-              <div className="font-bold text-slate-700">{payment.receipt}</div>
+            )}
+
+            {/* Line items – 2-col grid */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-2.5">
+              {[
+                {
+                  label: "Plan",
+                  value: snap.name || payment.plan?.name || "—",
+                },
+                { label: "Billing", value: snap.billingCycle || "—" },
+                {
+                  label: "Method",
+                  value: payment.razorpay?.method || "Online",
+                },
+                { label: "Order ID", value: payment.razorpay?.orderId || "—" },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <div className="text-[9px] uppercase tracking-[0.1em] text-slate-400">
+                    {label}
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-700 break-all">
+                    {value}
+                  </div>
+                </div>
+              ))}
+              {payment.razorpay?.paymentId && (
+                <div className="col-span-2">
+                  <div className="text-[9px] uppercase tracking-[0.1em] text-slate-400">
+                    Payment ID
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-700 break-all">
+                    {payment.razorpay.paymentId}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="text-right">
-              <div className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">
-                Date
+
+            {/* Features – 2-col grid */}
+            {snap.features?.length > 0 && (
+              <>
+                <div className="border-t border-dashed border-slate-300 mb-2" />
+                <div className="mb-2.5">
+                  <div className="text-[9px] uppercase tracking-[0.12em] text-slate-400 mb-1.5">
+                    Included Features
+                  </div>
+                  <div className="grid grid-cols-2 gap-y-1 gap-x-2">
+                    {snap.features.map((f) => (
+                      <div
+                        key={f}
+                        className="flex items-center gap-1.5 text-[11px] text-slate-600"
+                      >
+                        <span className="text-emerald-500">✓</span> {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="border-t-2 border-dashed border-slate-300 mb-2.5" />
+
+            {/* Thank you */}
+            <div className="text-center mb-2.5">
+              <div className="text-[12px] font-bold text-slate-600">
+                Thank you for your payment!
               </div>
-              <div className="font-bold text-slate-700">
-                {fmtDate(payment.createdAt)}
+              <div className="text-[10px] text-slate-400 mt-0.5">
+                support@addressguru-uae.com
               </div>
-              <div className="text-slate-400">{fmtTime(payment.createdAt)}</div>
             </div>
-          </div>
 
-          {/* Status */}
-          <div className="flex justify-center mb-5">
-            <StatusBadge status={payment.status} />
-          </div>
-
-          {/* Amount — big */}
-          <div className="text-center mb-6">
-            <div className="text-[11px] uppercase tracking-widest text-slate-400 mb-1">
-              Amount Charged
-            </div>
-            <div className="text-[38px] font-black text-slate-900 leading-none">
-              {fmtAmount(payment.amount, payment.currency)}
-            </div>
-          </div>
-
-          <div className="border-t-2 border-dashed border-slate-300 mb-5" />
-
-          {/* Line items */}
-          <div className="space-y-3 mb-5">
-            {[
-              { label: "Plan", value: snap.name || payment.plan?.name || "—" },
-              { label: "Billing Cycle", value: snap.billingCycle || "—" },
-              { label: "Method", value: payment.razorpay?.method || "Online" },
-              { label: "Order ID", value: payment.razorpay?.orderId || "—" },
-              ...(payment.razorpay?.paymentId
-                ? [{ label: "Payment ID", value: payment.razorpay.paymentId }]
-                : []),
-              ...(payment.listing?.businessName
-                ? [{ label: "Listing", value: payment.listing.businessName }]
-                : []),
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                className="flex justify-between items-start gap-3"
+            {/* Buttons */}
+            <div className="no-print mb-2">
+              <button
+                onClick={() => window.print()}
+                className="w-full py-2.5 bg-emerald-600 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-emerald-700 transition-colors"
               >
-                <span className="text-[11px] uppercase tracking-wider text-slate-400 whitespace-nowrap">
-                  {label}
-                </span>
-                <span className="text-[11px] font-bold text-slate-700 text-right break-all max-w-[200px]">
-                  {value}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Features */}
-          {snap.features?.length > 0 && (
-            <>
-              <div className="border-t border-dashed border-slate-300 mb-4" />
-              <div className="mb-5">
-                <div className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">
-                  Included Features
-                </div>
-                <div className="space-y-1">
-                  {snap.features.map((f) => (
-                    <div
-                      key={f}
-                      className="flex items-center gap-2 text-[11px] text-slate-600"
-                    >
-                      <span className="text-emerald-500">✓</span> {f}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          <div className="border-t-2 border-dashed border-slate-300 mb-5" />
-
-          {/* Thank you */}
-          <div className="text-center mb-6">
-            <div className="text-[13px] font-bold text-slate-600">
-              Thank you for your payment!
+                Download / Print Invoice
+              </button>
             </div>
-            <div className="text-[10px] text-slate-400 mt-1">
-              For support: support@addressguru.ae
+            <div className="pb-4 no-print">
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 text-[11px] font-bold tracking-widest uppercase border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
 
-          {/* Close */}
-          <div className="pb-6">
-            <button
-              onClick={onClose}
-              className="w-full py-3 text-[12px] font-bold tracking-widest uppercase border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-
-        {/* Receipt bottom tear */}
-        <div
-          className="w-full h-4 relative overflow-hidden"
-          style={{ background: "#f8f7f4" }}
-        >
-          <div className="absolute top-0 left-0 right-0 flex">
-            {Array.from({ length: 28 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex-1 h-2 rounded-b-full"
-                style={{ background: "#e5e3dc", margin: "0 1px" }}
-              />
-            ))}
+          {/* bottom tear */}
+          <div
+            className="w-full h-[13px] relative overflow-hidden"
+            style={{ background: "#f8f7f4" }}
+          >
+            <div className="absolute top-0 left-0 right-0 flex">
+              {Array.from({ length: 28 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-[7px] rounded-b-full"
+                  style={{ background: "#e5e3dc", margin: "0 1px" }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .invoice-cut-line {
+          animation: invoiceCut 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0s both;
+        }
+        .invoice-scissor {
+          animation: scissorBlade 0.18s ease-in-out infinite;
+          transform-origin: 12px 12px;
+        }
+        .invoice-top {
+          animation: invoiceTopSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.6s
+            both;
+        }
+        .invoice-bottom {
+          animation: invoiceBottomSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1)
+            0.7s both;
+        }
+        @keyframes invoiceCut {
+          0% {
+            transform: translateX(-110%) scaleX(0.8);
+            opacity: 0;
+          }
+          40% {
+            transform: translateX(0%);
+            opacity: 1;
+          }
+          70% {
+            transform: translateX(0%);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(110%) scaleX(0.8);
+            opacity: 0;
+          }
+        }
+        @keyframes scissorBlade {
+          0%,
+          100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(15deg);
+          }
+        }
+        @keyframes invoiceTopSlide {
+          0% {
+            transform: translateY(-50px) rotate(-1.5deg);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        @keyframes invoiceBottomSlide {
+          0% {
+            transform: translateY(50px) rotate(1.5deg);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          body * {
+            visibility: hidden;
+          }
+          .fixed.inset-0,
+          .fixed.inset-0 * {
+            visibility: visible;
+          }
+          .fixed.inset-0 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -405,7 +557,12 @@ const PaymentHistory = () => {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await get_all_payments({ page, limit: showEntries });
+      const res = await get_all_payments({
+        page,
+        limit: showEntries,
+        status: "captured", // Only show paid ones for user
+        minAmount: 1, // Only show amount > 0
+      });
       setPayments(res?.data?.payments || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
       setTotalCount(res?.data?.pagination?.total || 0);
@@ -419,12 +576,27 @@ const PaymentHistory = () => {
   const fetchSummary = useCallback(async () => {
     try {
       const [all, captured, pending] = await Promise.all([
-        get_all_payments({ page: 1, limit: 1 }),
-        get_all_payments({ page: 1, limit: 1, status: "captured" }),
-        get_all_payments({ page: 1, limit: 1, status: "created" }),
+        get_all_payments({
+          page: 1,
+          limit: 1,
+          minAmount: 1,
+          status: "captured",
+        }),
+        get_all_payments({
+          page: 1,
+          limit: 1,
+          status: "captured",
+          minAmount: 1,
+        }),
+        get_all_payments({
+          page: 1,
+          limit: 1,
+          status: "created",
+          minAmount: 1,
+        }),
       ]);
       setSummary({
-        total: all?.data?.pagination?.total || 0,
+        total: captured?.data?.pagination?.total || 0, // Since we only show paid ones now
         captured: captured?.data?.pagination?.total || 0,
         pending: pending?.data?.pagination?.total || 0,
       });
