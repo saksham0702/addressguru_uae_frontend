@@ -83,7 +83,7 @@ const data2 = [
 
 const PopularServices = () => {
   return (
-    <div className="w-full flex flex-col gap-10 py-6 px-4 ">
+    <div className="w-full flex flex-col gap-10 py-3 px-4 ">
       {/* Top Section: CardB + Small Cards Grid */}
       <div className="flex flex-col lg:flex-row lg:items-stretch gap-8">
         {/* Large Card Section */}
@@ -102,7 +102,7 @@ const PopularServices = () => {
       </div>
 
       {/* Bottom Section: CardD Row */}
-      <div className="py-8">
+      <div className="py-3">
         <div className="w-full md:pl-4 flex md:pr-7 2xl:pr-10 overflow-x-scroll bg-[#FEF5EF] md:bg-transparent py-4 rounded-xl hide-scroll justify-between gap-4">
           {data2.map((item, index) => (
             <CardD key={index} data={item} />

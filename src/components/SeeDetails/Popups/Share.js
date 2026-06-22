@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import {
   Share2,
-  Facebook,
-  MessageCircle,
-  Twitter,
-  Instagram,
-  Music,
   X, // Close Icon
 } from "lucide-react";
 import {
@@ -13,7 +8,8 @@ import {
   FaWhatsapp,
   FaTwitter,
   FaInstagram,
-} from "react-icons/fa";
+  FaTiktok,
+} from "react-icons/fa6";
 
 // Share Component
 export const Share = ({ onClose }) => {
@@ -46,6 +42,12 @@ export const Share = ({ onClose }) => {
       icon: FaInstagram,
       url: "https://www.instagram.com/",
       color: "bg-gradient-to-tr from-[#f58529] via-[#dd2a7b] to-[#8134af]",
+    },
+    {
+      name: "TikTok",
+      icon: FaTiktok,
+      url: "https://www.tiktok.com/",
+      color: "bg-[#010101] hover:bg-[#2d2d2d]",
     },
   ];
 

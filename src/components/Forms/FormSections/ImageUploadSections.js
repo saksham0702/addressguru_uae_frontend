@@ -102,7 +102,9 @@ function ImagePreview({ image, onNavigate, totalCount, currentIdx, onRecrop }) {
   const src = !image
     ? null
     : image.isExisting
-      ? `${APP_URL}/${image.preview}`
+      ? image.preview.startsWith("http")
+        ? image.preview
+        : `${APP_URL}/${image.preview.replace(/\\/g, "/")}`
       : image.preview;
 
   return (
@@ -305,7 +307,11 @@ function ThumbnailStrip({ images, activeIdx, onSelect, onRemove, onRecrop }) {
     >
       {images.map((img, idx) => {
         const isActive = idx === activeIdx;
-        const src = img.isExisting ? `${APP_URL}/${img.preview}` : img.preview;
+        const src = img.isExisting
+          ? img.preview.startsWith("http")
+            ? img.preview
+            : `${APP_URL}/${img.preview.replace(/\\/g, "/")}`
+          : img.preview;
         return (
           <div
             key={img.id}
@@ -439,6 +445,7 @@ const ImageUploadSections = ({
   showLogo = true,
 }) => {
   console.log("media", media);
+
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadError, setUploadError] = useState({ logo: "", images: "" });
   const [activeIdx, setActiveIdx] = useState(null);
@@ -568,7 +575,11 @@ const ImageUploadSections = ({
 
   // ── Re-crop an existing image ──
   const handleRecrop = (img) => {
-    const src = img.isExisting ? `${APP_URL}/${img.preview}` : img.preview;
+    const src = img.isExisting
+      ? img.preview.startsWith("http")
+        ? img.preview
+        : `${APP_URL}/${img.preview.replace(/\\/g, "/")}`
+      : img.preview;
     setCropImageSrc(src);
     setCropType("images");
     setRecropId(img.id); // track which image we're replacing
@@ -679,7 +690,7 @@ const ImageUploadSections = ({
                   <img
                     src={
                       media.logo.isExisting
-                        ? `${media.logo.preview}`
+                        ? `${APP_URL}/${media.logo.preview}`
                         : media.logo.preview
                     }
                     alt="Logo"

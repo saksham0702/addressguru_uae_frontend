@@ -25,8 +25,8 @@ const TitleAndLogo = ({
 }) => {
   console.log("extra fields", extraFields);
   const message = `Hi,
-${data?.businessName}, i am looking for ${data?.category?.name}
-I found your business on AddressGuru UAE
+*${data?.businessName}*, i am looking for *${data?.category?.name}*
+I found your business on *AddressGuru UAE*
 https://addressguru.ae/${data?.slug}`;
 
   return (

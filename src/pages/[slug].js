@@ -181,6 +181,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [toast, setToast] = useState(null);
   const [showNumber, setShowNumber] = useState(false);
+  const [redirectWarning, setRedirectWarning] = useState(null); // stores the url to redirect to
 
   //  Derived values
   const isAdmin = user?.data?.roles?.[0] === 1;
@@ -376,6 +377,19 @@ const SeeDetails = ({ initialData, initialRooms }) => {
   //  Event handlers
   const handleWebsiteClick = (listingSlug) =>
     track_event("business", listingSlug, "website_visit").catch(() => {});
+
+  // Show redirect warning instead of navigating directly
+  const handleWebsiteRedirect = (url, listingSlug) => {
+    if (!url) return;
+    handleWebsiteClick(listingSlug);
+    setRedirectWarning(url);
+  };
+
+  // Called after enquiry is sent — show ThanksPop with "enquiry" type
+  const handleEnquirySuccess = () => {
+    setType("enquiry");
+    setThanksPop(true);
+  };
   const handleClick = (listingSlug) =>
     track_event("business", listingSlug, "call").catch(() => {});
   const handlePop = (name) => setActivePop(name);
@@ -955,7 +969,9 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                   category={data?.category}
                   link={data?.websiteLink}
                   handlePop={handlePop}
-                  handleWebsiteClick={handleWebsiteClick}
+                  handleWebsiteClick={(url) =>
+                    handleWebsiteRedirect(url, data?.slug)
+                  }
                   onContactClick={() => setEnquirePop(true)}
                   onShowNumberClick={handleShowNumber}
                 />
@@ -976,6 +992,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
                     id={data?._id}
                     slug={data?.slug}
                     setEnquirePop={setEnquirePop}
+                    onEnquirySuccess={handleEnquirySuccess}
                   />
                 )}
                 <UserInformation />
@@ -988,21 +1005,6 @@ const SeeDetails = ({ initialData, initialRooms }) => {
             <UserInformation />
           </div>
 
-          {/* REVIEWS */}
-          {data?.ratings?.length > 0 && (
-            <div className="h-70 w-full space-y-2 my-5">
-              <div className="flex w-full items-center justify-between">
-                <h2 className="text-xl font-semibold">
-                  Recent Customer Reviews
-                </h2>
-              </div>
-              <div className="py-2 md:pl-4 flex md:justify-between overflow-x-scroll hide-scroll w-full gap-5">
-                {data.ratings.map((item, index) => (
-                  <RecentCustomerReviewCard key={index} data={item} />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -1023,6 +1025,7 @@ const SeeDetails = ({ initialData, initialRooms }) => {
               id={data?._id}
               slug={data?.slug}
               setEnquirePop={setEnquirePop}
+              onEnquirySuccess={handleEnquirySuccess}
             />
           </div>
         </div>
@@ -1076,6 +1079,78 @@ const SeeDetails = ({ initialData, initialRooms }) => {
       {/* ── THANKS POPUP ───────────────────────────────────── */}
       {thanksPop && (
         <ThanksPop onClose={() => setThanksPop(false)} type={type} />
+      )}
+
+      {/* ── REDIRECT WARNING POPUP ─────────────────────────── */}
+      {redirectWarning && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10001] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative animate-[scale-in_0.25s_ease-out]">
+            {/* Close */}
+            <button
+              onClick={() => setRedirectWarning(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M5 5l10 10M15 5L5 15"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-orange-50 rounded-full p-4">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="text-orange-500"
+                >
+                  <path
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Text */}
+            <h2 className="text-lg font-bold text-center text-gray-800 mb-2">
+              You are leaving AddressGuru UAE
+            </h2>
+            <p className="text-sm text-center text-gray-500 mb-6">
+              You are about to visit an external website. AddressGuru UAE is not
+              responsible for the content of external sites.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setRedirectWarning(null)}
+                className="flex-1 py-2.5 rounded-lg border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
+              >
+                Go Back
+              </button>
+              <a
+                href={redirectWarning}
+                target="_blank"
+                rel="noreferrer noopener"
+                onClick={() => setRedirectWarning(null)}
+                className="flex-1 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm text-center transition-colors"
+              >
+                Continue
+              </a>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

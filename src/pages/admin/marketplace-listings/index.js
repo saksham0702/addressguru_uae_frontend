@@ -3,8 +3,8 @@ import Link from "next/link";
 import { get_marketplace_listings } from "@/api/uae-dashboard";
 import {
   approve_marketplace_listing,
-  get_all_marketplace_listings,
   reject_marketplace_listing,
+  get_all_marketplace,
 } from "@/api/uae-marketplace";
 import Image from "next/image";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
@@ -262,7 +262,7 @@ const MarketplaceListings = () => {
 
   const fetchListings = async () => {
     try {
-      const res = await get_all_marketplace_listings({
+      const res = await get_all_marketplace({
         page,
         limit: showEntries,
         status: statusFilter, // ✅ ALWAYS send

@@ -30,8 +30,9 @@ export const get_all_payments = async ({
   limit = 10,
   status,
   search,
+  minAmount,
 } = {}) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   try {
     const response = await axios.get(`${API_URL}/payment/get-payments`, {
       params: {
@@ -39,6 +40,7 @@ export const get_all_payments = async ({
         limit,
         ...(status && status !== "all" && { status }),
         ...(search && { search }),
+        ...(minAmount && { minAmount }),
       },
       headers: { Authorization: `Bearer ${token}` },
     });

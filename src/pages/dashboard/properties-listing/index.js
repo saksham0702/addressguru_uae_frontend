@@ -610,7 +610,7 @@ const PropertiesListing = () => {
       if (!propertyInfo.soldBy)
         newErrors.soldBy = "Please select who is listing the property";
       if (!startDate) newErrors.available = "Available date is required";
-      
+
       if (!propertyInfo.area_size || !propertyInfo.area_size.trim()) {
         newErrors.area_size = "Size is required";
       } else if (isNaN(Number(propertyInfo.area_size))) {
@@ -629,7 +629,10 @@ const PropertiesListing = () => {
         }
       }
 
-      if (propertyInfo.soldBy === "agency" && (!propertyInfo.cae_number || !propertyInfo.cae_number.trim()))
+      if (
+        propertyInfo.soldBy === "agency" &&
+        (!propertyInfo.cae_number || !propertyInfo.cae_number.trim())
+      )
         newErrors.cae_number = "CEA number is required for agency";
       if (facility.length > 0 && selectedFacilities.length === 0)
         newErrors.facilities = "Please select at least one facility";
@@ -1071,7 +1074,9 @@ const PropertiesListing = () => {
                     }
                   />
                   {errors.price_amount && (
-                    <p className="text-red-500 text-sm mt-1">{errors.price_amount}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.price_amount}
+                    </p>
                   )}
                 </div>
               )}

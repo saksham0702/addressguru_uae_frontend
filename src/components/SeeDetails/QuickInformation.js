@@ -190,15 +190,12 @@ const QuickInformation = ({
       {/* Footer Actions */}
       <div className="flex justify-between items-center bg-white p-1 max-md:p-3 border border-t-0 border-gray-200 rounded-b-lg">
         {link && (
-          <a
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => handleWebsiteClick(id, "website")}
-            className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded"
+          <button
+            onClick={() => handleWebsiteClick(link)}
+            className="bg-white border border-[#EEEEEE] text-[#838383] px-2 py-1 text-sm rounded hover:border-orange-300 hover:text-orange-500 transition-colors"
           >
             Visit Website
-          </a>
+          </button>
         )}
         <span
           onClick={() => handlePop("report")}

@@ -33,7 +33,9 @@ const RecentJobCard = ({ img, data }) => {
             {toK(data?.salary_from)}-{toK(data?.salary_to)}/monthly
           </span>
         </div>
-        <p className="text-[12px] capitalize text-gray-500 font-semibold">{data?.company?.name || "NA"}</p>
+        <p className="text-[12px] capitalize text-gray-500 font-semibold">
+          {data?.company?.name || "NA"}
+        </p>
         <p className="text-[9px] text-gray-500 w-40 truncate leading-tight">
           {data?.company?.address || "NA"}
         </p>

@@ -17,6 +17,7 @@ const GetMoreInfo = ({
   address,
   image,
   logo,
+  onEnquirySuccess,
 }) => {
   const recaptchaRef = useRef(null);
 
@@ -31,7 +32,7 @@ const GetMoreInfo = ({
     name: "",
     email: "",
     phone: "",
-    message: "",
+    message: `I want to enquire about ${name}. Please share more details.`,
   });
   const [formData, setFormData] = useState({
     captchaVerified: false,
@@ -137,7 +138,6 @@ const GetMoreInfo = ({
     try {
       const res = await query(listingType, slug, payload);
       console.log("response of query in frontend", res);
-      setRes(res?.message || "Enquiry sent successfully!");
 
       // Reset form
       setInfoQuery({
@@ -150,6 +150,14 @@ const GetMoreInfo = ({
       // Reset reCAPTCHA
       if (recaptchaRef.current) {
         recaptchaRef.current.reset();
+      }
+
+      // Show ThanksPop via parent callback, or fall back to inline message
+      if (onEnquirySuccess) {
+        onEnquirySuccess();
+        if (setEnquirePop) setEnquirePop(false);
+      } else {
+        setRes(res?.message || "Enquiry sent successfully!");
       }
     } catch (error) {
       console.error("Enquiry error:", error);
@@ -263,11 +271,9 @@ const GetMoreInfo = ({
                   Your Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={
-                    infoQuery.message ||
-                    `I want to enquire about ${name}. Please share more details.`
-                  }
+                  value={infoQuery.message}
                   onChange={(e) => handleFieldChange("message", e.target.value)}
+                  placeholder={`I want to enquire about ${name}. Please share more details.`}
                   className={`w-full px-3 py-2 border rounded-lg text-sm h-24 resize-none transition-all ${
                     errors.message
                       ? "border-red-500 bg-red-50"
@@ -317,7 +323,7 @@ const GetMoreInfo = ({
         </div>
       ) : isPop ? (
         // DESKTOP POPUP VIEW - Original design with sidebar
-        <div className="flex flex-col md:flex-row w-full">
+        <div className="flex flex-col md:flex-row max-w-5xl w-full">
           {/* Close Button */}
           <button
             onClick={() => setEnquirePop(false)}
@@ -446,13 +452,11 @@ const GetMoreInfo = ({
                     Your Message <span className="text-red-500">*</span>
                   </label>
                   <textarea
-                    value={
-                      infoQuery.message ||
-                      `I want to enquire about ${name}. Please share more details.`
-                    }
+                    value={infoQuery.message}
                     onChange={(e) =>
                       handleFieldChange("message", e.target.value)
                     }
+                    placeholder={`I want to enquire about ${name}. Please share more details.`}
                     className={`w-full px-3 py-2 border rounded-lg text-sm h-24 resize-none transition-all ${
                       errors.message
                         ? "border-red-500 bg-red-50"

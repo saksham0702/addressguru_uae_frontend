@@ -157,7 +157,7 @@ function InvoiceModal({ payment, onClose, isAdmin }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="bg-white rounded-2xl border border-slate-200 w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -167,8 +167,8 @@ function InvoiceModal({ payment, onClose, isAdmin }) {
               <ReceiptIcon />
             </div>
             <div>
-              <div className="text-white font-bold text-sm">
-                Payment Invoice
+              <div className="text-orange-500 font-bold text-sm">
+                AddressGuru UAE
               </div>
               <div className="text-slate-400 text-[11px]  mt-0.5">
                 {payment.receipt}
@@ -183,12 +183,12 @@ function InvoiceModal({ payment, onClose, isAdmin }) {
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="p-5 space-y-3">
           {/* Status + Amount */}
           <div className="flex items-center justify-between">
             <StatusBadge status={payment.status} />
             <div className="text-right">
-              <div className="text-2xl font-black text-slate-900">
+              <div className="text-xl font-black text-slate-900">
                 {fmtAmount(payment.amount, payment.currency)}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
@@ -204,7 +204,7 @@ function InvoiceModal({ payment, onClose, isAdmin }) {
             <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
               Plan Details
             </div>
-            <div className="bg-slate-50 rounded-xl p-4 space-y-2.5">
+            <div className="bg-slate-50 rounded-xl p-3 space-y-2">
               {[
                 { label: "Plan Name", value: snap.name || "—" },
                 { label: "Billing Cycle", value: snap.billingCycle || "—" },
@@ -315,13 +315,43 @@ function InvoiceModal({ payment, onClose, isAdmin }) {
               </span>
             </div>
           )}
+
+          {/* Print Button */}
+          <div className="pt-2">
+            <button
+              onClick={() => window.print()}
+              className="w-full py-3 bg-blue-600 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 no-print"
+            >
+              Print Invoice
+            </button>
+          </div>
         </div>
       </div>
+      <style jsx global>{`
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          body * {
+            visibility: hidden;
+          }
+          .fixed.inset-0,
+          .fixed.inset-0 * {
+            visibility: visible;
+          }
+          .fixed.inset-0 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
-// ── MAIN COMPONENT ────────────────────────────────────────────────────────────
+// MAIN COMPONENT
 // Pass isAdmin={true/false} as prop from your page
 const PaymentHistory = ({ isAdmin = false }) => {
   const [payments, setPayments] = useState([]);
@@ -334,6 +364,49 @@ const PaymentHistory = ({ isAdmin = false }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const handleExportCSV = () => {
+    if (payments.length === 0) return;
+
+    const headers = [
+      "Order ID",
+      "User",
+      "Email",
+      "Plan",
+      "Amount",
+      "Currency",
+      "Status",
+      "Date",
+    ];
+    const rows = payments.map((p) => [
+      p.razorpay?.orderId || "—",
+      p.user?.name || "—",
+      p.user?.email || "—",
+      p.planSnapshot?.name || p.plan?.name || "—",
+      p.amount,
+      p.currency,
+      p.status,
+      fmtDate(p.createdAt),
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((e) => e.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `payments_export_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Summary counts
   const [counts, setCounts] = useState({ captured: 0, failed: 0, created: 0 });
 
@@ -345,6 +418,7 @@ const PaymentHistory = ({ isAdmin = false }) => {
         limit: showEntries,
         status: statusFilter === "all" ? undefined : statusFilter,
         search: search || undefined,
+        minAmount: 1, // Exclude 0 AED payments
       });
       setPayments(res?.data?.payments || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
@@ -360,9 +434,19 @@ const PaymentHistory = ({ isAdmin = false }) => {
   const fetchCounts = useCallback(async () => {
     try {
       const [captured, failed, pending] = await Promise.all([
-        get_all_payments({ page: 1, limit: 1, status: "captured" }),
-        get_all_payments({ page: 1, limit: 1, status: "failed" }),
-        get_all_payments({ page: 1, limit: 1, status: "created" }),
+        get_all_payments({
+          page: 1,
+          limit: 1,
+          status: "captured",
+          minAmount: 1,
+        }),
+        get_all_payments({ page: 1, limit: 1, status: "failed", minAmount: 1 }),
+        get_all_payments({
+          page: 1,
+          limit: 1,
+          status: "created",
+          minAmount: 1,
+        }),
       ]);
       setCounts({
         captured: captured?.data?.pagination?.total || 0,
@@ -427,6 +511,27 @@ const PaymentHistory = ({ isAdmin = false }) => {
             ? "Manage and review all transactions"
             : "View your transaction history"}
         </p>
+        <div className="mt-4">
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Stat Filter Cards */}

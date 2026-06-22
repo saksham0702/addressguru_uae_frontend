@@ -43,7 +43,10 @@ const Foot1 = () => {
 
         {/* Social Icons */}
         <div className="flex gap-2 relative bottom-3 text-xl">
-          <Link href="https://linkedin.com" target="_blank">
+          <Link
+            href="https://www.linkedin.com/in/addressguru-uae-3a818440b/?skipRedirect=true"
+            target="_blank"
+          >
             <Image
               src="/assets/Png/footer/linkedin.png"
               alt="LinkedIn"
@@ -53,7 +56,7 @@ const Foot1 = () => {
             />
           </Link>
 
-          <Link href="https://instagram.com" target="_blank">
+          {/* <Link href="https://instagram.com" target="_blank">
             <Image
               src="/assets/Png/footer/insta.png"
               alt="Instagram"
@@ -61,9 +64,12 @@ const Foot1 = () => {
               height={100}
               className="h-7 w-7 cursor-pointer"
             />
-          </Link>
+          </Link> */}
 
-          <Link href="https://facebook.com" target="_blank">
+          <Link
+            href="https://www.facebook.com/profile.php?id=61581615214116"
+            target="_blank"
+          >
             <Image
               src="/assets/Png/footer/fb.png"
               alt="Facebook"
@@ -73,7 +79,7 @@ const Foot1 = () => {
             />
           </Link>
 
-          <Link href="https://twitter.com" target="_blank">
+          {/* <Link href="https://twitter.com" target="_blank">
             <Image
               src="/assets/Png/footer/twiter.png"
               alt="Twitter"
@@ -81,9 +87,9 @@ const Foot1 = () => {
               height={100}
               className="h-7 w-7 cursor-pointer"
             />
-          </Link>
+          </Link> */}
 
-          <Link href="https://youtube.com" target="_blank">
+          <Link href="https://www.youtube.com/@AddressGuruUAE" target="_blank">
             <Image
               src="/assets/Png/footer/youtube.png"
               alt="YouTube"
@@ -134,10 +140,10 @@ const Foot1 = () => {
         <h3 className="uppercase font-bold">Download our app here..</h3>
 
         <div className="flex flex-col px-2 gap-4 my-5 w-sm">
-          <p className="text-sm text-orange-600 font-semibold">
-            Coming Soon...
-          </p>
-          {/* <Link href="https://play.google.com" target="_blank">
+          <Link
+            href="https://play.google.com/store/apps/details?id=com.addressguruae.classified"
+            target="_blank"
+          >
             <Image
               src="/assets/Png/last-banner/play-store.png"
               alt="Play Store"
@@ -145,7 +151,7 @@ const Foot1 = () => {
               height={1000}
               className="w-40 h-12 cursor-pointer"
             />
-          </Link> */}
+          </Link>
 
           {/* <Link href="https://www.apple.com/app-store/" target="_blank">
             <Image
