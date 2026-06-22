@@ -1,8 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { get_all_payments } from "@/api/payment"; // adjust path
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
+import { useRef } from "react";
+import html2canvas from "html2canvas-pro";
+import jsPDF from "jspdf";
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+//HELPERS
+
+//HELPERS
+
 function fmtDate(iso) {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -74,7 +80,45 @@ export function StatusBadge({ status }) {
 
 // ── REUSABLE: INVOICE MODAL ───────────────────────────────────────────────────
 export function InvoiceModal({ payment, onClose }) {
+  const invoiceRef = useRef(null);
   if (!payment) return null;
+
+  const downloadPDF = async () => {
+    const element = invoiceRef.current;
+    if (!element) return;
+
+    const animatedEls = element.querySelectorAll(
+      ".invoice-top, .invoice-bottom, .invoice-cut-line, .invoice-scissor",
+    );
+
+    animatedEls.forEach((el) => {
+      el.style.animation = "none";
+      el.style.opacity = "1";
+      el.style.transform = "none";
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    pdf.addImage(
+      imgData,
+      "PNG",
+      0,
+      0,
+      210,
+      (canvas.height * 210) / canvas.width,
+    );
+
+    pdf.save("invoice.pdf");
+  };
   const snap = payment.planSnapshot || {};
 
   return (
@@ -84,6 +128,7 @@ export function InvoiceModal({ payment, onClose }) {
       onClick={onClose}
     >
       <div
+        ref={invoiceRef}
         className="w-full max-w-[370px] relative"
         onClick={(e) => e.stopPropagation()}
       >
@@ -281,15 +326,15 @@ export function InvoiceModal({ payment, onClose }) {
             </div>
 
             {/* Buttons */}
-            <div className="no-print mb-2">
+            <div className="no-print mb-2" data-html2canvas-ignore>
               <button
-                onClick={() => window.print()}
+                onClick={downloadPDF}
                 className="w-full py-2.5 bg-emerald-600 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-emerald-700 transition-colors"
               >
-                Download / Print Invoice
+                Download Invoice
               </button>
             </div>
-            <div className="pb-4 no-print">
+            <div className="pb-4 no-print" data-html2canvas-ignore>
               <button
                 onClick={onClose}
                 className="w-full py-2.5 text-[11px] font-bold tracking-widest uppercase border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
@@ -305,13 +350,16 @@ export function InvoiceModal({ payment, onClose }) {
             style={{ background: "#f8f7f4" }}
           >
             <div className="absolute top-0 left-0 right-0 flex">
-              {Array.from({ length: 28 }).map((_, i) => (
+              {/* {Array.from({ length: 28 }).map((_, i) => (
                 <div
                   key={i}
                   className="flex-1 h-[7px] rounded-b-full"
                   style={{ background: "#e5e3dc", margin: "0 1px" }}
                 />
-              ))}
+              ))} */}
+              <div className="text-[10px] text-slate-400 mx-auto mb-3 pb-2  text-center">
+                Powered by AdxVenture
+              </div>
             </div>
           </div>
         </div>
