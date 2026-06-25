@@ -6,9 +6,6 @@ import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
 //HELPERS
-
-//HELPERS
-
 function fmtDate(iso) {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -16,6 +13,7 @@ function fmtDate(iso) {
     year: "numeric",
   });
 }
+
 function fmtTime(iso) {
   return new Date(iso).toLocaleTimeString("en-GB", {
     hour: "2-digit",
@@ -26,7 +24,7 @@ function fmtAmount(amount, currency = "AED") {
   return `${currency} ${Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 }
 
-// ── STATUS CONFIG ─────────────────────────────────────────────────────────────
+// STATUS CONFIG
 const STATUS_CONFIG = {
   captured: {
     label: "Paid",
@@ -65,7 +63,7 @@ const STATUS_CONFIG = {
   },
 };
 
-// ── REUSABLE: STATUS BADGE ────────────────────────────────────────────────────
+// REUSABLE: STATUS BADGE
 export function StatusBadge({ status }) {
   const c = STATUS_CONFIG[status] || STATUS_CONFIG.created;
   return (
@@ -78,7 +76,7 @@ export function StatusBadge({ status }) {
   );
 }
 
-// ── REUSABLE: INVOICE MODAL ───────────────────────────────────────────────────
+// REUSABLE: INVOICE MODAL
 export function InvoiceModal({ payment, onClose }) {
   const invoiceRef = useRef(null);
   if (!payment) return null;
@@ -453,7 +451,7 @@ export function InvoiceModal({ payment, onClose }) {
   );
 }
 
-// ── REUSABLE: BILL CARD (user view row) ───────────────────────────────────────
+// REUSABLE: BILL CARD (user view row)
 export function BillCard({ payment, index, page, showEntries, onView }) {
   const snap = payment.planSnapshot || {};
   const cfg = STATUS_CONFIG[payment.status] || STATUS_CONFIG.created;
@@ -536,7 +534,7 @@ export function BillCard({ payment, index, page, showEntries, onView }) {
   );
 }
 
-// ── REUSABLE: PAGINATION ──────────────────────────────────────────────────────
+// REUSABLE: PAGINATION
 export function Pagination({
   page,
   totalPages,
@@ -589,7 +587,7 @@ export function Pagination({
   );
 }
 
-// ── MAIN: USER PAYMENT HISTORY ────────────────────────────────────────────────
+// MAIN: USER PAYMENT HISTORY
 const PaymentHistory = () => {
   const [payments, setPayments] = useState([]);
   const [page, setPage] = useState(1);
