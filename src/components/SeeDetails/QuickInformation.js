@@ -48,6 +48,23 @@ const CategoryIcon = () => (
     />
   </svg>
 );
+const formatFieldValue = (field) => {
+  if (!field?.value) return "";
+
+  if (field.type === "price") {
+    return `${field.value.currency} ${field.value.amount}`;
+  }
+
+  if (Array.isArray(field.value)) {
+    return field.value
+      .map((item) =>
+        typeof item === "object" ? item.name || item.label || item.value : item,
+      )
+      .join(", ");
+  }
+
+  return String(field.value);
+};
 
 const QuickInformation = ({
   handlePop,
@@ -117,10 +134,7 @@ const QuickInformation = ({
         )}
 
         {allFields.map((field, index) => {
-          const value =
-            field?.type === "price"
-              ? `${field?.value?.currency} ${field?.value?.amount}`
-              : field?.value;
+          const value = formatFieldValue(field);
           const isLong = value?.length > 20;
 
           return (
@@ -134,52 +148,64 @@ const QuickInformation = ({
                 {/* 🔥 IMPORTANT: group wrapper */}
                 <div className="relative group max-w-[180px]">
                   {/* Truncated text */}
-                  <span
-                    className={`block truncate font-medium text-[16px] text-orange-600 ${
-                      (field?.label?.toLowerCase()?.includes("phone") ||
-                        field?.label?.toLowerCase()?.includes("mobile") ||
-                        field?.label?.toLowerCase()?.includes("email")) &&
-                      (onContactClick || onShowNumberClick)
-                        ? "cursor-pointer hover:underline"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      const label = field?.label?.toLowerCase() || "";
-                      const isPhone =
-                        label.includes("phone") || label.includes("mobile");
-                      const isEmail = label.includes("email");
+                  {Array.isArray(field?.value) ? (
+                    <div className="relative group">
+                      <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-600 whitespace-nowrap">
+                        {typeof field.value[0] === "object"
+                          ? field.value[0]?.name ||
+                            field.value[0]?.label ||
+                            field.value[0]?.value
+                          : field.value[0]}
 
-                      if (isPhone && onShowNumberClick) {
-                        onShowNumberClick();
-                      } else if (isEmail && onContactClick) {
-                        onContactClick();
-                      }
-                    }}
-                  >
-                    {field?.label?.toLowerCase()?.includes("phone") ||
-                    field?.label?.toLowerCase()?.includes("mobile")
-                      ? maskPhone(value)
-                      : field?.label?.toLowerCase()?.includes("email")
-                        ? maskEmail(value)
-                        : value}
-                  </span>
-                  {/* ✅ Hover popup ONLY if long - positioned BELOW */}
-                  {(field?.label?.toLowerCase()?.includes("phone") ||
-                  field?.label?.toLowerCase()?.includes("mobile")
-                    ? maskPhone(value)
-                    : field?.label?.toLowerCase()?.includes("email")
-                      ? maskEmail(value)
-                      : value
-                  )?.length > 20 && (
-                    <div className="absolute left-0 top-full  hidden group-hover:block z-50 bg-white border border-gray-300 shadow-lg rounded px-3 py-2 text-[14px] text-orange-600 whitespace-normal break-words max-w-[280px]">
+                        {field.value.length > 1 &&
+                          ` +${field.value.length - 1}`}
+                      </span>
+
+                      {field.value.length > 1 && (
+                        <div className="absolute left-0 top-full mt-1 hidden group-hover:flex flex-wrap gap-1 z-50 bg-white border border-gray-300 shadow-lg rounded p-2 max-w-[280px]">
+                          {field.value.map((item, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-600"
+                            >
+                              {typeof item === "object"
+                                ? item.name || item.label || item.value
+                                : item}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span
+                      className={`block truncate font-medium text-[16px] text-orange-600`}
+                    >
                       {field?.label?.toLowerCase()?.includes("phone") ||
                       field?.label?.toLowerCase()?.includes("mobile")
                         ? maskPhone(value)
                         : field?.label?.toLowerCase()?.includes("email")
                           ? maskEmail(value)
                           : value}
-                    </div>
+                    </span>
                   )}
+                  {/* ✅ Hover popup ONLY if long - positioned BELOW */}
+                  {!Array.isArray(field?.value) &&
+                    (field?.label?.toLowerCase()?.includes("phone") ||
+                    field?.label?.toLowerCase()?.includes("mobile")
+                      ? maskPhone(value)
+                      : field?.label?.toLowerCase()?.includes("email")
+                        ? maskEmail(value)
+                        : value
+                    )?.length > 20 && (
+                      <div className="absolute left-0 top-full hidden group-hover:block z-50 bg-white border border-gray-300 shadow-lg rounded px-3 py-2 text-[14px] text-orange-600 whitespace-normal break-words max-w-[280px]">
+                        {field?.label?.toLowerCase()?.includes("phone") ||
+                        field?.label?.toLowerCase()?.includes("mobile")
+                          ? maskPhone(value)
+                          : field?.label?.toLowerCase()?.includes("email")
+                            ? maskEmail(value)
+                            : value}
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
