@@ -4,6 +4,7 @@ import {
   get_all_admin_listings,
   reject_listing,
   update_lead_status,
+  delete_admin_listing,
 } from "@/api/listing-form";
 import FollowUpModal from "@/components/admin/business/FollowUpModal";
 import RejectReasonModal from "@/components/admin/business/rejectreasonModal";
@@ -186,6 +187,22 @@ const XIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg
+    className="w-3.5 h-3.5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
 // ── REUSABLE TABLE CELLS ──────────────────────────────────────────────────────
 const TD = ({ children, className = "", vAlign = "top" }) => (
   <td
@@ -219,6 +236,7 @@ const BusinessListings = () => {
   const [rejectModalData, setRejectModalData] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [deleteConfirmListing, setDeleteConfirmListing] = useState(null);
   const [totallistings, settotallistings] = useState(0);
   const [approvedlisting, setapprovedlisting] = useState(0);
   const [rejectedlisting, setrejectedlisting] = useState(0);
@@ -302,6 +320,21 @@ const BusinessListings = () => {
     } catch (error) {
       console.error(error);
       showToast("Failed to reject listing", "error");
+    }
+  }
+
+  async function handleDeleteListing(listing) {
+    try {
+      setLoadingId(listing._id);
+      await delete_admin_listing(listing.slug);
+      showToast("Listing deleted successfully", "success");
+      // ✅ RELOAD DATA FROM BACKEND
+      await fetchListings();
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to delete listing", "error");
+    } finally {
+      setLoadingId(null);
     }
   }
   const [totalPages, setTotalPages] = useState(1);
@@ -1182,6 +1215,14 @@ const BusinessListings = () => {
                             </button>
                           </>
                         )}
+                        {viewType !== "deleted" && (
+                          <button
+                            onClick={() => setDeleteConfirmListing(listing)}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-sm mt-1"
+                          >
+                            <TrashIcon /> Delete
+                          </button>
+                        )}
                         {/* ❌ REJECTED → NO ACTION */}
                       </div>
                     </TD>
@@ -1298,6 +1339,76 @@ const BusinessListings = () => {
                   </svg>
                 )}
                 Yes, approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CONFIRM DELETE MODAL ── */}
+      {deleteConfirmListing && (
+        <div
+          className="fixed inset-0 z-[10001] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={() => setDeleteConfirmListing(null)}
+        >
+          <div
+            className="bg-white rounded-xl border border-gray-200 p-6 w-80"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M2 2L14 14M2 14L14 2"
+                  stroke="#dc2626"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h3 className="text-[15px] font-semibold text-gray-900 mb-1">
+              Delete this listing?
+            </h3>
+            <p className="text-[13px] text-gray-500 mb-5">
+              Are you sure you want to delete this listing? This action cannot
+              be easily undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setDeleteConfirmListing(null)}
+                className="px-4 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  const target = deleteConfirmListing;
+                  setDeleteConfirmListing(null);
+                  await handleDeleteListing(target);
+                }}
+                disabled={loadingId === deleteConfirmListing?._id}
+                className="px-4 py-1.5 text-sm rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition flex items-center gap-1.5"
+              >
+                {loadingId === deleteConfirmListing?._id && (
+                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-25"
+                    />
+                    <path
+                      d="M22 12a10 10 0 00-10-10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-75"
+                    />
+                  </svg>
+                )}
+                Yes, delete
               </button>
             </div>
           </div>

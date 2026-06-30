@@ -233,3 +233,18 @@ export const update_lead_status = async (id, leadStatus) => {
 
   return res.data;
 };
+
+export const delete_admin_listing = async (slug) => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.delete(
+    `${API_URL}/business-listing/delete-listing/${slug}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
