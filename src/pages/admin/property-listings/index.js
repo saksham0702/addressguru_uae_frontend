@@ -435,7 +435,7 @@ const PropertyListings = () => {
         payload.status = statusFilter;
       }
 
-      console.log("API PAYLOAD:", payload); // 👈 DEBUG
+      console.log("API PAYLOAD:", payload);
 
       const res = await get_all_property_listing({
         page,
@@ -443,9 +443,9 @@ const PropertyListings = () => {
         status: statusFilter,
       });
 
-      console.log("API RESPONSE:", res); // 👈 DEBUG
+      console.log("API RESPONSE:", res);
 
-      setListings(res?.data?.properties || []);
+      setListings(res?.data?.listings || []);
       setTotalPages(res?.data?.pagination?.totalPages || 1);
       setTotalCount(res?.data?.pagination?.total || 0);
       setTotalAll(res?.data?.totalAll || 0);

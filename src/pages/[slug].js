@@ -35,9 +35,6 @@ import { generateFAQs } from "@/utils/generateFAQs";
 import FAQSection from "@/components/SeeDetails/FAQSection";
 import ReviewSection from "@/components/SeeDetails/ReviewSection";
 
-// ─────────────────────────────────────────────────────────────
-// SSR — fetch listing + rooms in parallel, never double-fetch
-// ─────────────────────────────────────────────────────────────
 export async function getServerSideProps(context) {
   const { slug } = context.params;
 
@@ -1004,7 +1001,6 @@ const SeeDetails = ({ initialData, initialRooms }) => {
           <div className="md:hidden mt-10">
             <UserInformation />
           </div>
-
         </div>
       </div>
 

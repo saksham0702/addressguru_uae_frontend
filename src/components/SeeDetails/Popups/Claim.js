@@ -19,6 +19,7 @@ export const Claim = ({ onClose, type, id, slug, setThanksPop, setType }) => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
 
   const [showRegister, setShowRegister] = useState(false);
   const [registerMessage, setRegisterMessage] = useState("");
