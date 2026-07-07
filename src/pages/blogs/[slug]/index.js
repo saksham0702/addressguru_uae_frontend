@@ -244,10 +244,143 @@ const BlogDetail = ({ initialBlog }) => {
             content={blogDetail.category_id.name}
           />
         )}
+
+        {/* BlogPosting Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              mainEntityOfPage: {
+                "@type": "WebPage",
+                "@id": `${SITE_URL}/blogs/${blogDetail?.slug}`,
+              },
+              headline: blogDetail?.seo?.title || blogDetail?.title || "",
+              description:
+                blogDetail?.seo?.description || blogDetail?.excerpt || "",
+              image: ogImageUrl,
+              author: {
+                "@type": "Person",
+                name: blogDetail?.author?.name || "AddressGuru UAE",
+                ...(blogDetail?.author?.profile_bio && {
+                  description: blogDetail.author.profile_bio,
+                }),
+                ...(blogDetail?.author?.avatar && {
+                  image: `${API_URL}/${blogDetail.author.avatar}`,
+                }),
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "AddressGuru UAE",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://addressguru.ae/assets/logo.png",
+                },
+              },
+              datePublished:
+                blogDetail?.publishedAt ||
+                blogDetail?.createdAt ||
+                blogDetail?.created_at ||
+                "",
+              dateModified:
+                blogDetail?.updatedAt ||
+                blogDetail?.updated_at ||
+                blogDetail?.createdAt ||
+                "",
+              ...(blogDetail?.category_id?.name && {
+                articleSection: blogDetail.category_id.name,
+              }),
+              ...(blogDetail?.seo?.keywords && {
+                keywords: blogDetail.seo.keywords,
+              }),
+              url: `${SITE_URL}/blogs/${blogDetail?.slug}`,
+              isPartOf: {
+                "@type": "Blog",
+                name: "AddressGuru UAE Blog",
+                url: `${SITE_URL}/blogs`,
+              },
+            }),
+          }}
+        />
+
+        {/* BreadcrumbList Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: SITE_URL,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Blogs",
+                  item: `${SITE_URL}/blogs`,
+                },
+                ...(blogDetail?.category_id?.name
+                  ? [
+                      {
+                        "@type": "ListItem",
+                        position: 3,
+                        name: blogDetail.category_id.name,
+                      },
+                    ]
+                  : []),
+                {
+                  "@type": "ListItem",
+                  position: blogDetail?.category_id?.name ? 4 : 3,
+                  name: blogDetail?.title || "",
+                  item: `${SITE_URL}/blogs/${blogDetail?.slug}`,
+                },
+              ],
+            }),
+          }}
+        />
+
+        {/* FAQPage Schema — only if FAQs exist */}
+        {(() => {
+          try {
+            const faqs =
+              typeof blogDetail?.faqs === "string"
+                ? JSON.parse(blogDetail.faqs)
+                : blogDetail?.faqs;
+            if (faqs?.length > 0) {
+              return (
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "FAQPage",
+                      mainEntity: faqs.map((faq) => ({
+                        "@type": "Question",
+                        name: faq.question,
+                        acceptedAnswer: {
+                          "@type": "Answer",
+                          text: faq.answer,
+                        },
+                      })),
+                    }),
+                  }}
+                />
+              );
+            }
+          } catch (e) {
+            return null;
+          }
+          return null;
+        })()}
       </Head>
 
       {/* Outer container */}
-      <div className="min-h-screen bg-white w-full md:w-[90%] max-w-[1800px] 2xl:w-[80%] px-4 mx-auto py-8">
+      <div className="min-h-screen bg-white w-full md:w-[90%] max-w-[1800px] 2xl:w-[80%] px-4 mx-auto py-8 overflow-hidden">
         {/* Main Content Section - Left: Blog Detail, Right: Sidebar */}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Section - takes remaining space after 380px sidebar */}
@@ -302,10 +435,7 @@ const BlogDetail = ({ initialBlog }) => {
             </div>
 
             {/* Featured Image — full width of the left column, fixed 400px height, never cut */}
-            <div
-              className="mb-8 rounded-lg overflow-hidden shadow-lg w-full"
-              style={{ height: "400px" }}
-            >
+            <div className="mb-8 rounded-lg overflow-hidden shadow-lg w-full h-[200px] sm:h-[300px] md:h-[400px]">
               <Image
                 src={`${APP_URL}/${blogDetail?.coverImage}`}
                 alt={blogDetail?.title}
@@ -333,7 +463,6 @@ const BlogDetail = ({ initialBlog }) => {
                 >
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
-                Facebook
               </button>
               <button
                 onClick={() => handleShare("twitter")}
@@ -347,7 +476,6 @@ const BlogDetail = ({ initialBlog }) => {
                 >
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                X (twitter)
               </button>
               <button
                 onClick={() => handleShare("linkedin")}
@@ -361,7 +489,6 @@ const BlogDetail = ({ initialBlog }) => {
                 >
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                 </svg>
-                LinkedIn
               </button>
             </div>
 
@@ -504,8 +631,8 @@ const BlogDetail = ({ initialBlog }) => {
           </div>
 
           {/* Right Section - Sidebar: fixed 380px width */}
-          <div className="lg:w-[380px] flex-shrink-0">
-            <div className="lg:sticky lg:top-24 mt-32">
+          <div className="w-full lg:w-[380px] flex-shrink-0 max-w-full">
+            <div className="lg:sticky lg:top-24 lg:mt-32">
               {/* Categories Section */}
               <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4 mb-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-4 text-left">
@@ -580,10 +707,12 @@ const BlogDetail = ({ initialBlog }) => {
           .blog-content .TyagGW_tableWrapper {
             width: 100% !important;
             max-width: 100% !important;
+            overflow-x: auto !important;
           }
 
           .blog-content .TyagGW_tableContainer {
             width: 100% !important;
+            overflow-x: auto !important;
           }
 
           .blog-content img {
@@ -594,32 +723,54 @@ const BlogDetail = ({ initialBlog }) => {
             display: block !important;
           }
 
-          /* Table full width */
+          /* Table full width with mobile scroll */
           .blog-content table {
             width: 100% !important;
             min-width: 100% !important;
             table-layout: auto !important;
-            border-collapse: collapse !important; /* 🔥 important */
+            border-collapse: collapse !important;
           }
 
-          /* 🔥 Add borders properly */
+          @media (max-width: 640px) {
+            .blog-content table {
+              min-width: unset !important;
+              display: block !important;
+              overflow-x: auto !important;
+              -webkit-overflow-scrolling: touch;
+            }
+            .blog-content th,
+            .blog-content td {
+              padding: 6px 8px !important;
+              font-size: 0.85rem !important;
+              word-break: break-word !important;
+            }
+            .blog-content iframe {
+              max-width: 100% !important;
+              width: 100% !important;
+            }
+            .blog-content pre {
+              overflow-x: auto !important;
+              max-width: 100% !important;
+              white-space: pre-wrap !important;
+              word-break: break-word !important;
+            }
+          }
+
           .blog-content table,
           .blog-content th,
           .blog-content td {
             border: 1px solid #e5e7eb !important;
           }
 
-          /* Better spacing */
           .blog-content th,
           .blog-content td {
             padding: 8px 10px !important;
             text-align: left !important;
           }
 
-          /* Optional: header styling */
           .blog-content th {
             font-weight: 600;
-            background-color: #f9fafb; /* light gray */
+            background-color: #f9fafb;
           }
 
           .blog-content * {
@@ -627,6 +778,7 @@ const BlogDetail = ({ initialBlog }) => {
             font-size: inherit !important;
             line-height: inherit !important;
             text-align: left !important;
+            max-width: 100%;
           }
 
           .blog-content {
@@ -634,6 +786,8 @@ const BlogDetail = ({ initialBlog }) => {
             line-height: 1.875;
             color: #1f2937;
             text-align: left;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
           }
 
           .blog-content p {

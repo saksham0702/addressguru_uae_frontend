@@ -1,5 +1,6 @@
 import {
   DollarSign,
+  FileText,
   HomeIcon,
   Layers2,
   LayoutDashboard,
@@ -887,6 +888,11 @@ export const NAV_ROUTES = [
       { name: "All Categories", href: "/admin/categories" },
       { name: "Seo Content", href: "/admin/categories/seo-content" },
     ],
+  },
+  {
+    name: "logs",
+    href: "/admin/logs",
+    icon: FileText,
   },
   {
     name: "Cities",

@@ -26,33 +26,6 @@ const Blogs = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [loading, setLoading] = useState(false);
-
-  // Slider settings for recent blogs
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 3,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-        },
-      },
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-    ],
-  };
   const APP_URL = "https://addressguru.ae/api";
 
   const handleLoadMore = async () => {
@@ -176,10 +149,76 @@ const Blogs = ({
             }),
           }}
         />
-      </Head>
-      <div className="min-h-screen bg-white max-md:w-full max-w-[2000px] w-[80%] p-6 mx-auto py-8">
-        {/* ... (Slider remains unchanged) */}
 
+        {/* BreadcrumbList Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://addressguru.ae",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Blogs",
+                  item: "https://addressguru.ae/blogs",
+                },
+              ],
+            }),
+          }}
+        />
+
+        {/* WebPage Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: "UAE Blog - Food, Shopping, Real Estate & Lifestyle | AddressGuru",
+              description:
+                "Discover the best restaurants, shopping malls, real estate insights, health & fitness tips, and lifestyle guides in UAE.",
+              url: "https://addressguru.ae/blogs",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "AddressGuru UAE",
+                url: "https://addressguru.ae",
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "AddressGuru UAE",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://addressguru.ae/assets/logo.png",
+                },
+              },
+            }),
+          }}
+        />
+
+        {/* Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "AddressGuru UAE",
+              url: "https://addressguru.ae",
+              logo: "https://addressguru.ae/assets/logo.png",
+              sameAs: [],
+            }),
+          }}
+        />
+      </Head>
+      <div className="min-h-screen bg-white max-md:w-full max-w-[2000px] w-[80%] p-6 mx-auto py-8 overflow-hidden">
         {/* Main Content Section - Left: All Blogs, Right: Sidebar */}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Section - All Blogs (65% width) */}
@@ -195,11 +234,11 @@ const Blogs = ({
               {blogs?.map((blog) => (
                 <div
                   key={blog?._id}
-                  className="bg-white rounded-lg overflow-hidden max-h-48 shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col sm:flex-row"
+                  className="bg-white rounded-lg overflow-hidden sm:max-h-48 shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col sm:flex-row max-w-full"
                 >
                   <Link
                     href={`/blogs/${blog?.slug}`}
-                    className="sm:w-1/3 w-full aspect-[2/1] relative overflow-hidden bg-gray-100"
+                    className="sm:w-1/3 w-full aspect-[2/1] sm:aspect-auto relative overflow-hidden bg-gray-100 flex-shrink-0"
                   >
                     <Image
                       src={`${APP_URL}/${blog?.coverImage}`}
@@ -208,7 +247,7 @@ const Blogs = ({
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
-                  <div className="sm:w-2/3 px-6 py-4">
+                  <div className="sm:w-2/3 px-4 sm:px-6 py-4 min-w-0">
                     <Link
                       href={`/blogs/${blog?.slug}`}
                       className="text-lg font-semibold text-gray-800 mb-3 hover:text-[#FF6E04] transition-colors cursor-pointer"
@@ -231,7 +270,6 @@ const Blogs = ({
                 </div>
               ))}
             </div>
-
             {/* Load More Button */}
             {currentPage < totalPages && (
               <div className="flex justify-center mt-12 mb-8">
