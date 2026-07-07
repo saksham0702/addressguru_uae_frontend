@@ -79,6 +79,7 @@ const NAV_ROUTES = [
   { name: "Plans", href: "/admin/plans", icon: CreditCard },
   { name: "My Profile", href: "/admin/my-profile", icon: User },
   { name: "Payment History", href: "/admin/payment-history", icon: DollarSign },
+  { name: "Logs", href: "/admin/logs", icon: FileText },
 ];
 
 // ─── Sparkline ────────────────────────────────────────────────────────────────

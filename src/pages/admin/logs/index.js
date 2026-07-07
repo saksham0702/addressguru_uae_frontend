@@ -85,6 +85,8 @@ function MethodBadge({ method }) {
 export default function LogsPage() {
   const [logs, setLogs] = useState([]);
   const [selectedLog, setSelectedLog] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [search, setSearch] = useState("");
   const [method, setMethod] = useState("");
@@ -96,9 +98,20 @@ export default function LogsPage() {
   }, []);
 
   const loadLogs = async () => {
-    const data = await getLogs();
-    const logData = Array.isArray(data) ? data : data.logs || data.data || [];
-    setLogs(logData);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getLogs();
+      const logData = Array.isArray(data) ? data : data.logs || data.data || [];
+      setLogs(logData);
+    } catch (err) {
+      console.error("Failed to load logs:", err);
+      setError(
+        err?.message || "An error occurred while loading logs. Please verify your connection."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredLogs = useMemo(() => {
@@ -141,7 +154,13 @@ export default function LogsPage() {
         <div>
           <h1 className="text-2xl font-bold text-stone-600">System Logs</h1>
           <p className="text-sm text-black mt-0.5">
-            {filteredLogs.length} of {logs.length} requests
+            {loading ? (
+              <span className="text-stone-400 animate-pulse">Loading system logs…</span>
+            ) : error ? (
+              <span className="text-red-500 font-medium">Failed to load logs</span>
+            ) : (
+              `${filteredLogs.length} of ${logs.length} requests`
+            )}
           </p>
         </div>
         {activeFilterCount > 0 && (
@@ -244,42 +263,71 @@ export default function LogsPage() {
           </thead>
 
           <tbody>
-            {filteredLogs.map((log) => (
-              <tr
-                key={log._id}
-                className="border-t border-stone-100 hover:bg-orange-50/60 cursor-pointer transition-colors"
-                onClick={() => setSelectedLog(log)}
-              >
-                <td className="px-4 py-3 text-black whitespace-nowrap">
-                  {new Date(log.createdAt).toLocaleString()}
-                </td>
-                <td className="px-4 py-3">
-                  <ModuleBadge value={log.module} />
-                </td>
-                <td className="px-4 py-3">
-                  <MethodBadge method={log.method} />
-                </td>
-                <td className="px-4 py-3 text-black font-mono text-xs max-w-[260px] truncate">
-                  {log.endpoint}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge code={log.statusCode} />
-                </td>
-                <td className="px-4 py-3 text-black">
-                  {log.user?.name || (
-                    <span className="text-black/40">Guest</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-black">
-                  {log.browser} · {log.os}
-                </td>
-                <td className="px-4 py-3 text-black font-mono text-xs">
-                  {log.ip}
+            {loading ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={idx} className="border-t border-stone-100 animate-pulse">
+                  <td className="px-4 py-4"><div className="h-4 bg-stone-200 rounded w-28 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-5 bg-stone-200 rounded w-16 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-5 bg-stone-200 rounded w-12 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-stone-200 rounded w-48 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-5 bg-stone-200 rounded w-10 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-stone-200 rounded w-20 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-stone-200 rounded w-24 animate-pulse"></div></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-stone-200 rounded w-20 animate-pulse"></div></td>
+                </tr>
+              ))
+            ) : error ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-12 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <p className="text-red-500 font-medium">{error}</p>
+                    <button
+                      onClick={loadLogs}
+                      className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
+                    >
+                      Retry Loading Logs
+                    </button>
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredLogs.map((log) => (
+                <tr
+                  key={log._id}
+                  className="border-t border-stone-100 hover:bg-orange-50/60 cursor-pointer transition-colors"
+                  onClick={() => setSelectedLog(log)}
+                >
+                  <td className="px-4 py-3 text-black whitespace-nowrap">
+                    {new Date(log.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <ModuleBadge value={log.module} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <MethodBadge method={log.method} />
+                  </td>
+                  <td className="px-4 py-3 text-black font-mono text-xs max-w-[260px] truncate">
+                    {log.endpoint}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge code={log.statusCode} />
+                  </td>
+                  <td className="px-4 py-3 text-black">
+                    {log.user?.name || (
+                      <span className="text-black/40">Guest</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-black">
+                    {log.browser} · {log.os}
+                  </td>
+                  <td className="px-4 py-3 text-black font-mono text-xs">
+                    {log.ip}
+                  </td>
+                </tr>
+              ))
+            )}
 
-            {filteredLogs.length === 0 && (
+            {!loading && !error && filteredLogs.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-10 text-center text-black">
                   No logs match these filters.
