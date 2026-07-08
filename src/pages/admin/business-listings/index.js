@@ -974,7 +974,7 @@ const BusinessListings = () => {
                         {[
                           {
                             label: "Created by",
-                            value: "Admin",
+                            value: listing?.createdBy?.name,
                             isOnline: listing?.createdBy?.isOnline,
                           },
 
