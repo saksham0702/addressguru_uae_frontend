@@ -465,15 +465,15 @@ const SearchResults = ({
             />
           </div>
 
-          <h1 className="font-semibold text-[20px] max-md:hidden my-2 capitalize leading-tight whitespace-nowrap">
+          <h1 className="font-semibold text-[20px] max-md:hidden my-2  leading-tight whitespace-nowrap">
             Best {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
-            {canonicalCity}
+            <span className="capitalize">{canonicalCity}</span>
           </h1>
 
           <div className="flex  justify-between md:hidden border-b border-gray-200 pb-3  px-2.5 mt-2 w-full  mb-1">
             <h1 className="font-semibold text-[14px] capitalize leading-tight whitespace-nowrap">
               Best {apiListings?.[0]?.category?.name || canonicalSlug} in{" "}
-              {canonicalCity}
+              <span className="capitalize">{canonicalCity}</span>
             </h1>
             <FilterBar
               hasActiveFilters={hasActiveFilters}

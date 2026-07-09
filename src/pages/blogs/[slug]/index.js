@@ -65,6 +65,52 @@ const BlogDetail = ({ initialBlog }) => {
     );
   };
 
+  const getProcessedContent = () => {
+    const rawContent = cleanHtml(blogDetail?.content);
+    if (!rawContent) return "";
+
+    const isDigitalMarketing =
+      blogDetail?.category_id?.name?.toLowerCase() === "digital marketing";
+    if (!isDigitalMarketing) return rawContent;
+
+    const paragraphs = rawContent.split(/<\/p>/i);
+    // Remove the last empty element if it was a trailing </p>
+    const hasTrailing = paragraphs[paragraphs.length - 1] === "";
+    const cleanParagraphs = hasTrailing ? paragraphs.slice(0, -1) : paragraphs;
+
+    if (cleanParagraphs.length <= 1) {
+      return (
+        rawContent +
+        `
+    <div class="blog-ad-wrapper my-6 text-center">
+      <a href="https://addressguru.ae" target="_blank" rel="noopener noreferrer">
+        <img src="/assets/blog-digital-marketing-ad.png" alt="Digital Marketing Ad" class="mx-auto rounded-lg shadow-md max-w-full" style="max-height: 200px; object-fit: contain;" />
+      </a>
+    </div>
+  `
+      );
+    }
+
+    const middleIndex = Math.ceil(cleanParagraphs.length / 2);
+
+    // Rejoin the paragraphs with </p>
+    const firstHalf =
+      cleanParagraphs.slice(0, middleIndex).join("</p>") + "</p>";
+    const secondHalf =
+      cleanParagraphs.slice(middleIndex).join("</p>") +
+      (hasTrailing ? "</p>" : "");
+
+    const adHtml = `
+  <div class="blog-ad-wrapper my-6 text-center">
+    <a href="https://addressguru.ae" target="_blank" rel="noopener noreferrer">
+      <img src="/assets/blog-digital-marketing-ad.png" alt="Digital Marketing Ad" class="mx-auto w-full rounded-lg shadow-xs max-w-full" style="max-height: 250px; object-fit: contain;" />
+    </a>
+  </div>
+`;
+
+    return firstHalf + adHtml + secondHalf;
+  };
+
   const router = useRouter();
   const { slug } = router.query;
   const [blogDetail, setBlogDetail] = useState(initialBlog);
@@ -88,6 +134,9 @@ const BlogDetail = ({ initialBlog }) => {
       console.error("Error fetching categories:", error);
     }
   }, []);
+  useEffect(() => {
+    setBlogDetail(initialBlog);
+  }, [initialBlog]);
 
   const fetchMostViewedBlogs = useCallback(async () => {
     try {
@@ -496,7 +545,7 @@ const BlogDetail = ({ initialBlog }) => {
             <div
               className="blog-content mb-12"
               dangerouslySetInnerHTML={{
-                __html: cleanHtml(blogDetail?.content),
+                __html: getProcessedContent(),
               }}
             />
 
@@ -846,6 +895,15 @@ const BlogDetail = ({ initialBlog }) => {
             line-height: inherit !important;
             font-family: inherit !important;
             text-align: left !important;
+          }
+          .blog-content a {
+            color: #2563eb !important;
+            // text-decoration: underline !important;
+            text-underline-offset: 2px;
+          }
+
+          .blog-content a:hover {
+            color: #1d4ed8 !important;
           }
 
           .blog-content div,

@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
+const RoomsSection = ({
+  category = "hotel",
+  data,
+  enquirePop,
+  setEnquirePop,
+}) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerImages, setViewerImages] = useState([]);
@@ -36,6 +41,17 @@ const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
     setViewerIndex(index);
     setViewerOpen(true);
   };
+
+  useEffect(() => {
+    if (viewerOpen) {
+      document.body.classList.add("viewer-open");
+    } else {
+      document.body.classList.remove("viewer-open");
+    }
+    return () => {
+      document.body.classList.remove("viewer-open");
+    };
+  }, [viewerOpen]);
 
   return (
     <div className="w-full">
@@ -191,39 +207,6 @@ const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
                 </span>
               </div>
 
-              {/* Thumbnails */}
-              {/* {room.images?.length > 0 && (
-                <div className="flex gap-1.5 mt-2.5 ml-6">
-                  {room.images.slice(0, 3).map((img, imgIdx) => (
-                    <div
-                      key={imgIdx}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openViewer(room.images, imgIdx);
-                      }}
-                      className="w-14 h-10 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-orange-400 transition-all flex-shrink-0"
-                    >
-                      <img
-                        src={`${BASE_URL}${img}`}
-                        alt={`Room ${imgIdx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                  {room.images.length > 3 && (
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openViewer(room.images, 3);
-                      }}
-                      className="w-14 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500 cursor-pointer hover:bg-orange-50 hover:text-orange-600 transition-all flex-shrink-0"
-                    >
-                      +{room.images.length - 3}
-                    </div>
-                  )}
-                </div>
-              )} */}
-
               <div className="flex gap-2 mt-2.5">
                 {room.images?.length > 0 && (
                   <button
@@ -236,12 +219,6 @@ const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
                     View images
                   </button>
                 )}
-                {/* <button
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 text-xs bg-orange-500 text-white rounded-lg py-1.5 font-semibold hover:bg-orange-600 transition"
-                >
-                  Enquire now
-                </button> */}
               </div>
             </div>
           ))}
@@ -249,8 +226,11 @@ const RoomsSection = ({ category = "hotel", data,enquirePop,setEnquirePop}) => {
 
         <hr className="border-gray-100 mb-4" />
 
-        <button onClick={() => setEnquirePop(true)} className="w-full py-3 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 hover:text-orange-600 rounded-lg text-[15px] font-semibold transition mb-2">
-         Enquire Now
+        <button
+          onClick={() => setEnquirePop(true)}
+          className="w-full py-3 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 hover:text-orange-600 rounded-lg text-[15px] font-semibold transition mb-2"
+        >
+          Enquire Now
         </button>
       </div>
     </div>
