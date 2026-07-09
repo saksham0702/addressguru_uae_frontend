@@ -232,4 +232,15 @@ html {
   animation: marquee-reverse 20s linear infinite;
 }
 
+/* Hide headers and disable background scroll when image viewer is open */
+body.viewer-open {
+  overflow: hidden !important;
+}
+
+body.viewer-open .main-header-wrapper,
+body.viewer-open header {
+  display: none !important;
+}
+
+
 
