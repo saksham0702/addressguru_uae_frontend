@@ -8,11 +8,16 @@ import { useRouter } from "next/router";
 import { get_view } from "@/api/queries";
 import { MapPin } from "lucide-react";
 import BusinessCardMobile from "./BusinessCardMobile";
+import { useShowNumber } from "@/context/showNumberContext";
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data, index, isFilledCall }) => {
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showRegisterPopup, setShowRegisterPopup] = useState(false);
+  const { canReveal, registerReveal } = useShowNumber();
+  const router = useRouter();
+
   const message = `Hi
 I am looking for *${data?.category?.name}*.
 I found your business *${data?.businessName}* on *AddressGuru UAE*.
@@ -21,16 +26,23 @@ https://addressguru.ae/${data?.slug}`;
   const handleShowNumber = async (type) => {
     // If already loaded → don’t call API again
     if (number) return;
+    // Out of free reveals — show the register popup instead of calling the API
+    if (!canReveal()) {
+      setShowRegisterPopup(true);
+      return;
+    }
 
     setIsLoading(true);
     try {
       const res = await get_view("listing", data?.id, type);
       setNumber(res?.mobile_number); // Save API number
+      registerReveal();
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false); // was missing before — loading state never reset
     }
   };
-  const router = useRouter();
 
   return (
     <>
@@ -447,6 +459,47 @@ https://addressguru.ae/${data?.slug}`;
           </div>
         </div>
       </div>
+
+      {showRegisterPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6 relative">
+            <button
+              onClick={() => setShowRegisterPopup(false)}
+              className="absolute right-3 top-3 border rounded-full border-orange-500 p-1 text-[#FF6E04]"
+              aria-label="Close"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">
+              Register to see more numbers
+            </h3>
+            <p className="text-sm text-gray-600 mb-5">
+              You&apos;ve used your free number reveals. Create a free account
+              to keep viewing business contact numbers.
+            </p>
+            <button
+              onClick={() => router.push("/register")}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 rounded-lg transition-colors"
+            >
+              Register Now
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

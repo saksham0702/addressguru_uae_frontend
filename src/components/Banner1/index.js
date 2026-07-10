@@ -16,12 +16,12 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
           className="w-full h-[290px] "
         />
       </div>
-      <div className="absolute text-white top-[90px]   left-50 z-20">
+      <div className="absolute text-white top-[90px]   left-30 z-20">
         <h3 className=" mb-3 text-xl">
-          Explore over <strong className="text-[#FF6E04]">150K+ </strong>
+          Explore over <strong className="text-[#FF6E04]">1K+ </strong>
           Products & Services with ease
         </h3>
-        <div className="relative right-10 z-50">
+        <div className="relative  z-50">
           <SearchBar
             value={slug}
             setValue={setSlug}
@@ -42,7 +42,7 @@ const Banner1 = ({ data, isOpen, setIsOpen }) => {
       />
       <div className="flex-col flex  text-white top-20 pr-20 absolute  right-[-20]">
         {" "}
-        <h3 className="text-[65px] font-bold">150 K+ </h3>{" "}
+        <h3 className="text-[65px] font-bold">1000+ </h3>{" "}
         <p className="absolute  top-20 left-2"> Registered Businesess</p>
       </div>
     </div>
