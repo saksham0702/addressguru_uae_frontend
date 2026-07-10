@@ -71,6 +71,7 @@ const QuickInformation = ({
   category,
   businesshours,
   job,
+  marketplace,
   link,
   extraFields,
   handleWebsiteClick,
@@ -229,7 +230,7 @@ const QuickInformation = ({
         >
           Report
         </span>
-        {!job && (
+        {!job && !marketplace && (
           <span
             onClick={() => handlePop("claim")}
             className="font-medium bg-gray-100 text-gray-600 px-2 py-1 text-sm rounded cursor-pointer"

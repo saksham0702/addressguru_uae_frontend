@@ -15,6 +15,7 @@ import { GOOGLE_MEASUREMENT_ID } from "@/services/constants";
 import Head from "next/head";
 import CookieConsent from "@/components/CookieConsent";
 import UTMTracker from "@/components/UTMTracker";
+import { ShowNumberProvider } from "@/context/showNumberContext";
 
 // ─── GA4 Measurement ID (must match _document.js) ─────────────────────────────
 // TODO: Replace with your real GA4 Measurement ID
@@ -101,69 +102,71 @@ export default function App({ Component, pageProps }) {
   return (
     <GoogleOAuthProvider clientId="871031994880-ahvpqb13hj3j0i85c92iak7puefs15ke.apps.googleusercontent.com">
       <AuthProvider>
-        <UTMTracker />
-        <ErrorProvider>
-          {/* <Head>
+        <ShowNumberProvider>
+          <UTMTracker />
+          <ErrorProvider>
+            {/* <Head>
             <title>addressguru.ae | Find the best businesses in UAE</title>
           </Head> */}
-          <div className="flex justify-center">
-            <div
-              className={`w-full ${isAdmin || isDashboard ? "" : "max-w-[1750px]"} relative`}
-            >
-              {/* ---------------- HEADER ---------------- */}
-              {shouldShowHeader && (
-                <div className="main-header-wrapper fixed top-0 left-0 right-0 z-50 flex justify-center">
-                  <div className="w-[1750px]">
-                    <Header />
-                    {!isSeeDetails && !isCity && <MobileSearchBar />}
-                  </div>
-                </div>
-              )}
-              {/* ---------------- LOADER ---------------- */}
-
-              {loading && <Loader />}
-
-              {/* ---------------- PAGE CONTENT ---------------- */}
-
-              <div className={shouldShowHeader ? "" : ""}>
-                {isAdmin ? (
-                  <div className="flex h-screen overflow-hidden bg-gray-50">
-                    {/* Sidebar */}
-                    <SideNav />
-
-                    {/* Right Side */}
-                    <div className="flex flex-col flex-1 overflow-hidden">
-                      <AdminHeader />
-
-                      {/* Scrollable Content */}
-                      <main className="flex-1 overflow-y-auto  p-6">
-                        <Component {...pageProps} />
-                      </main>
+            <div className="flex justify-center">
+              <div
+                className={`w-full ${isAdmin || isDashboard ? "" : "max-w-[1750px]"} relative`}
+              >
+                {/* ---------------- HEADER ---------------- */}
+                {shouldShowHeader && (
+                  <div className="main-header-wrapper fixed top-0 left-0 right-0 z-50 flex justify-center">
+                    <div className="w-[1750px]">
+                      <Header />
+                      {!isSeeDetails && !isCity && <MobileSearchBar />}
                     </div>
                   </div>
-                ) : (
-                  <div
-                    className={
-                      shouldShowHeader ? "pt-[70px] max-md:pt-[105px]" : ""
-                    }
-                  >
-                    <Component {...pageProps} />
-                  </div>
                 )}
+                {/* ---------------- LOADER ---------------- */}
+
+                {loading && <Loader />}
+
+                {/* ---------------- PAGE CONTENT ---------------- */}
+
+                <div className={shouldShowHeader ? "" : ""}>
+                  {isAdmin ? (
+                    <div className="flex h-screen overflow-hidden bg-gray-50">
+                      {/* Sidebar */}
+                      <SideNav />
+
+                      {/* Right Side */}
+                      <div className="flex flex-col flex-1 overflow-hidden">
+                        <AdminHeader />
+
+                        {/* Scrollable Content */}
+                        <main className="flex-1 overflow-y-auto  p-6">
+                          <Component {...pageProps} />
+                        </main>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={
+                        shouldShowHeader ? "pt-[70px] max-md:pt-[105px]" : ""
+                      }
+                    >
+                      <Component {...pageProps} />
+                    </div>
+                  )}
+                </div>
+
+                {/* ---------------- FOOTER ---------------- */}
+                {shouldShowMobileFooter && (
+                  <>
+                    <MobileFooter />
+                  </>
+                )}
+
+                {shouldShowFooter && <Footer />}
               </div>
-
-              {/* ---------------- FOOTER ---------------- */}
-              {shouldShowMobileFooter && (
-                <>
-                  <MobileFooter />
-                </>
-              )}
-
-              {shouldShowFooter && <Footer />}
             </div>
-          </div>
-          <CookieConsent />
-        </ErrorProvider>
+            <CookieConsent />
+          </ErrorProvider>
+        </ShowNumberProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   ChevronDown,
   ChevronUp,
-  X,
+  Check,
   Filter,
   Briefcase,
   MapPin,
@@ -19,7 +19,7 @@ import { getSubCategoriesByCategory } from "@/api/uaeAdminCategories";
 const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
   const [expandedSections, setExpandedSections] = useState({
     workMode: true,
-    experience: false,
+    experience: true,
     salary: false,
     location: false,
     sector: false,
@@ -102,7 +102,6 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
         : [...currentFilters, value];
 
       const updated = { ...prev, [category]: newFilters };
-      // if (onApplyFilters) onApplyFilters(updated); // Removed automatic call
       return updated;
     });
   };
@@ -124,6 +123,7 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
     return Object.values(filters).flat().length;
   };
 
+  // ---- Naukri-style filter section ----
   const FilterSection = ({
     title,
     items,
@@ -147,71 +147,66 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
     const isExpanded = expandedSections[category];
 
     return (
-      <div
-        className={`border-b border-gray-100 last:border-0 ${compact ? "py-2" : "py-3"}`}
-      >
+      <div className="border-b border-gray-100 last:border-0 py-4">
         <button
           onClick={() => toggleSection(category)}
           className="flex items-center justify-between w-full group"
         >
-          <div className="flex items-center gap-2">
-            <div
-              className={`rounded-md transition-colors ${hasActiveFilters ? "bg-orange-50 text-orange-600" : "bg-gray-50 text-gray-400"}`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-            </div>
-            <h3
-              className={`font-bold tracking-tight text-[11px] uppercase ${hasActiveFilters ? "text-gray-900" : "text-gray-500"}`}
-            >
-              {title}
-            </h3>
-          </div>
-          <div className="flex items-center gap-1">
+          <h3 className="font-bold text-[13px] text-gray-900 flex items-center gap-1.5">
+            {title}
             {hasActiveFilters && (
-              <span className="w-4 h-4 bg-[#FF6E04] text-white text-[9px] font-black rounded-full flex items-center justify-center">
-                {filters[category].length}
+              <span className="text-[#FF6E04] text-[13px] font-bold">
+                ({filters[category].length})
               </span>
             )}
-            {isExpanded ? (
-              <ChevronUp className="w-3.5 h-3.5 text-gray-300" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-gray-300" />
-            )}
-          </div>
+          </h3>
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          )}
         </button>
 
         {isExpanded && (
-          <div className="mt-2 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="mt-3 space-y-2.5">
             {items.length > 6 && (
               <input
                 type="text"
-                placeholder={`Search...`}
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-2 py-1.5 text-[10px] bg-gray-50 border border-gray-100 rounded-md focus:bg-white outline-none mb-1"
+                className="w-full px-2.5 py-1.5 text-[12px] bg-gray-50 border border-gray-200 rounded-md focus:bg-white focus:border-gray-300 outline-none mb-1"
               />
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-2.5">
               {displayItems.map((item) => {
                 const id =
                   item[idKey] || item.id || item._id || item.city || item.value;
                 const label =
                   item[labelKey] || item.type || item.city || item.name || "";
+                const count = item.count ?? item.total ?? null;
                 const isSelected = filters[category]?.includes(id);
 
                 return (
                   <label
                     key={id}
-                    className={`flex items-center group cursor-pointer px-1.5 py-1.5 rounded-lg transition-all ${isSelected ? "bg-orange-50/30" : "hover:bg-gray-50/50"}`}
+                    className="flex items-center gap-2.5 cursor-pointer group"
                   >
-                    <div
-                      className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${isSelected ? "bg-[#FF6E04] border-[#FF6E04]" : "border-gray-200 bg-white"}`}
+                    <span
+                      className={`flex-shrink-0 w-[15px] h-[15px] rounded-[3px] border flex items-center justify-center transition-colors ${
+                        isSelected
+                          ? "border-[#FF6E04] bg-white"
+                          : "border-gray-300 bg-white group-hover:border-gray-400"
+                      }`}
                     >
                       {isSelected && (
-                        <X className="w-2.5 h-2.5 text-white" strokeWidth={4} />
+                        <Check
+                          className="w-[11px] h-[11px] text-[#FF6E04]"
+                          strokeWidth={3.5}
+                        />
                       )}
-                    </div>
+                    </span>
                     <input
                       type="checkbox"
                       className="hidden"
@@ -219,9 +214,19 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
                       onChange={() => handleFilterChange(category, id)}
                     />
                     <span
-                      className={`ml-2 text-[12px] font-semibold tracking-tight ${isSelected ? "text-orange-700" : "text-gray-900"}`}
+                      className={`text-[13px] leading-tight ${
+                        isSelected
+                          ? "font-bold text-gray-900"
+                          : "font-normal text-gray-700"
+                      }`}
                     >
                       {label}
+                      {count != null && (
+                        <span className="text-gray-400 font-normal">
+                          {" "}
+                          ({count})
+                        </span>
+                      )}
                     </span>
                   </label>
                 );
@@ -231,9 +236,9 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
             {filteredItems.length > 5 && (
               <button
                 onClick={() => setShowAll(!showAll)}
-                className="text-[10px] font-black text-orange-400 hover:text-orange-500 flex items-center gap-1 mt-1 uppercase tracking-tighter"
+                className="text-[12.5px] font-semibold text-[#1861BF] hover:underline pt-1"
               >
-                {showAll ? "Show less" : `+ ${filteredItems.length - 5} more`}
+                {showAll ? "Show less" : "View More"}
               </button>
             )}
           </div>
@@ -252,7 +257,7 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
 
   const salaryOptions = [
     { id: "0-3000", name: "AED 0 - 3,000" },
-    { id: "3000-7000", name: "AED 3000 - 7,000" },
+    { id: "3000-7000", name: "AED 3,000 - 7,000" },
     { id: "7000-15000", name: "AED 7,000 - 15,000" },
     { id: "25000+", name: "AED 25,000+" },
   ];
@@ -265,30 +270,40 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-gray-100  overflow-hidden ${compact ? "sticky top-20" : ""}`}
+      className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${compact ? "sticky top-20" : ""}`}
     >
-      <div className="p-5 border-b border-gray-50 flex items-center justify-between">
-        <div>
-          <h2 className="text-[13px] font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <Filter className="w-4 h-4 text-[#FF6E04]" /> ADVANCED SEARCH
-          </h2>
-        </div>
+      <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 className="text-[15px] font-bold text-gray-900 flex items-center gap-2">
+          <Filter className="w-4 h-4 text-[#FF6E04]" /> All Filters
+        </h2>
         {getTotalActiveFilters() > 0 && (
           <button
             onClick={clearAllFilters}
-            className="text-[10px] font-normal text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-1 rounded-md"
+            className="text-[12px] font-semibold text-[#1861BF] hover:underline"
           >
-            RESET
+            Clear all
           </button>
         )}
       </div>
 
-      <div className="p-3 pt-0 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
+      <div className="px-4 pb-1 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
         <FilterSection
           title="Work Mode"
           items={workModes}
           category="workMode"
           icon={Clock}
+        />
+        <FilterSection
+          title="Experience"
+          items={experienceOptions}
+          category="experience"
+          icon={Briefcase}
+        />
+        <FilterSection
+          title="Monthly Salary"
+          items={salaryOptions}
+          category="salary"
+          icon={DollarSign}
         />
         <FilterSection
           title="Job Category"
@@ -330,33 +345,15 @@ const JobFilters = ({ jobFilters, onApplyFilters, compact = false }) => {
           labelKey="name"
           idKey="_id"
         />
-        <FilterSection
-          title="Experience"
-          items={experienceOptions}
-          category="experience"
-          icon={Briefcase}
-        />
-        <FilterSection
-          title="Monthly Salary"
-          items={salaryOptions}
-          category="salary"
-          icon={DollarSign}
-        />
       </div>
 
-      <div className="p-4 bg-white border-t border-gray-50">
+      <div className="p-4 bg-white border-t border-gray-100">
         <button
           onClick={handleApply}
-          className="w-full py-3 bg-[#FF6E04] hover:bg-[#e66304] text-white text-[11px] font-black rounded-md transition-all   uppercase tracking-wider"
+          className="w-full py-2.5 bg-[#FF6E04] hover:bg-[#e66304] text-white text-[13px] font-bold rounded-md transition-colors"
         >
           Apply Filters
         </button>
-      </div>
-
-      <div className="p-3 bg-gray-50/50 border-t border-gray-50">
-        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest text-center">
-          Verified by AddressGuru UAE
-        </p>
       </div>
     </div>
   );

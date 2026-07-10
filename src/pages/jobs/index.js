@@ -42,6 +42,7 @@ const JobsListings = () => {
           page: 1,
           hasMore: jobsRes?.data?.pagination?.hasMore || false,
           nextPage: jobsRes?.data?.pagination?.nextPage,
+          total: jobsRes?.data?.pagination?.total,
         });
         setFiltersData(filtersRes?.filter || null);
       } catch (error) {
@@ -102,6 +103,7 @@ const JobsListings = () => {
         page,
         hasMore: res?.data?.pagination?.hasMore || false,
         nextPage: res?.data?.pagination?.nextPage,
+        total: res?.data?.pagination?.total,
       });
       setActiveFilters(filters);
     } catch (error) {
@@ -168,7 +170,7 @@ const JobsListings = () => {
       />
 
       <div className="flex flex-col items-center w-full h-full justify-center bg-[#F8F7F7]">
-        <div className="md:w-[80%] w-full rounded-lg pb-10 bg-white md:pl-3 max-md:px-2">
+        <div className="md:w-[80%] w-full rounded-lg pb-1 md:pl-3 max-md:px-2">
           <div className="max-md:hidden mt-3">
             <BreadCrumbs
               slug={"jobs"}
@@ -177,7 +179,7 @@ const JobsListings = () => {
             />
           </div>
 
-          <div className="flex items-center max-md:my-4 px-1 justify-between">
+          <div className="flex items-center max-md:my-3  md:mb-2 max-md:pt-4 justify-between">
             <h1 className="capitalize font-semibold max-md:text-lg text-2xl">
               top jobs in <span className="text-[#FF6E04]">{city}</span>
             </h1>
@@ -190,10 +192,24 @@ const JobsListings = () => {
             </div>
           </div>
 
+          {/* results bar - naukri style: count + sort */}
+          {/* <div className="max-md:hidden flex items-center justify-between px-1 mt-2 mb-4 pb-3 border-b border-gray-100">
+            <p className="text-[13px] text-gray-500 font-medium">
+              Showing{" "}
+              <span className="font-bold text-gray-800">{allJobs.length}</span>{" "}
+              {pagination?.total ? `of ${pagination.total}` : ""} jobs in{" "}
+              <span className="font-bold text-gray-800 capitalize">{city}</span>
+            </p>
+            <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-gray-600">
+              Sort by:
+              <span className="text-[#FF6E04]">Recommended</span>
+            </div>
+          </div> */}
+
           {/* main section */}
-          <div className="flex justify-between w-full md:pr-3 md:mt-5 items-start">
+          <div className="flex justify-between w-full md:pr-3 gap-5 items-start">
             {/* filter section */}
-            <div className="w-[19%] md:sticky max-md:hidden self-start top-20">
+            <div className="w-[23%] md:sticky max-md:hidden self-start top-20">
               <Filters
                 jobFilters={filtersData}
                 onApplyFilters={handleApplyFilters}
@@ -202,7 +218,7 @@ const JobsListings = () => {
             </div>
 
             {/* main card section */}
-            <div className="md:w-[55%] w-full flex flex-col gap-2">
+            <div className="md:w-[55%] w-full flex flex-col gap-3">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6E04]"></div>
@@ -268,12 +284,6 @@ const JobsListings = () => {
                   <span className="flex items-center text-white font-bold gap-1 text-base">
                     Looking for <span className="font-black">Candidates?</span>
                   </span>
-                  {/* <Link
-                    href="/dashboard/post-job"
-                    className="bg-white text-[#FF6E04] px-4 py-2 text-[11px] font-black rounded-lg  hover:scale-105 transition-transform uppercase tracking-wider text-center"
-                  >
-                    POST FREE JOB
-                  </Link> */}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
@@ -290,12 +300,6 @@ const JobsListings = () => {
                   <span className="flex items-center text-white font-bold gap-1 text-base drop-shadow-md">
                     Looking for <span className="font-black">Jobs?</span>
                   </span>
-                  {/* <Link
-                    href="/dashboard/profile"
-                    className="bg-[#FF6E04] text-white px-4 py-2 text-[11px] font-black rounded-lg  hover:scale-105 transition-transform uppercase tracking-wider text-center"
-                  >
-                    CREATE PROFILE
-                  </Link> */}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-2xl overflow-hidden pointer-events-none" />
                 <Image
@@ -307,11 +311,11 @@ const JobsListings = () => {
                 />
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-4">
-                <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4">
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 ">
+                <h4 className="text-[12px] font-black text-gray-900 tracking-tight mb-2">
                   Job Seekers Tip
                 </h4>
-                <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
+                <p className="text-[12px] text-gray-500 leading-relaxed font-medium">
                   Use advanced filters to find jobs matching your exact skills
                   and experience level in Dubai.
                 </p>
