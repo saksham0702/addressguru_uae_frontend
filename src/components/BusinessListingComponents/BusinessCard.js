@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
@@ -9,14 +9,24 @@ import { get_view } from "@/api/queries";
 import { MapPin } from "lucide-react";
 import BusinessCardMobile from "./BusinessCardMobile";
 import { useShowNumber } from "@/context/showNumberContext";
+import Login from "../UserLogin/Login";
+
 // import { MessageCircleMore } from "lucide-react"; // or use another icon
 
 const BusinessCard = ({ data, index, isFilledCall }) => {
   const [number, setNumber] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showRegisterPopup, setShowRegisterPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
   const { canReveal, registerReveal } = useShowNumber();
   const router = useRouter();
+  const [pendingCall, setPendingCall] = useState(false);
+
+  useEffect(() => {
+    if (pendingCall && number) {
+      window.location.href = `tel:${data?.countryCode || ""}${number}`;
+      setPendingCall(false);
+    }
+  }, [number, pendingCall]);
 
   const message = `Hi
 I am looking for *${data?.category?.name}*.
@@ -24,23 +34,20 @@ I found your business *${data?.businessName}* on *AddressGuru UAE*.
 https://addressguru.ae/${data?.slug}`;
 
   const handleShowNumber = async (type) => {
-    // If already loaded → don’t call API again
     if (number) return;
-    // Out of free reveals — show the register popup instead of calling the API
     if (!canReveal()) {
-      setShowRegisterPopup(true);
+      setShowLoginPopup(true);
       return;
     }
-
     setIsLoading(true);
     try {
       const res = await get_view("listing", data?.id, type);
-      setNumber(res?.mobile_number); // Save API number
+      setNumber(res?.mobile_number);
       registerReveal();
     } catch (err) {
       console.log(err);
     } finally {
-      setIsLoading(false); // was missing before — loading state never reset
+      setIsLoading(false);
     }
   };
 
@@ -208,7 +215,13 @@ https://addressguru.ae/${data?.slug}`;
                 <CustomButton
                   showToggle={true}
                   defaultText="SHOW NUMBER"
-                  toggledText={data?.countryCode + data?.mobileNumber}
+                  toggledText={
+                    isLoading
+                      ? "Loading..."
+                      : number
+                        ? `${data?.countryCode || ""}${number}`
+                        : "Login to view"
+                  }
                   icon={
                     <svg
                       width="17"
@@ -333,7 +346,13 @@ https://addressguru.ae/${data?.slug}`;
             <CustomButton
               showToggle={true}
               defaultText="CALL NOW"
-              toggledText={data?.mobile_number}
+              toggledText={
+                isLoading
+                  ? "Loading..."
+                  : number
+                    ? `${data?.countryCode || ""}${number}`
+                    : "Login to view"
+              }
               icon={
                 <svg
                   width="17"
@@ -372,9 +391,12 @@ https://addressguru.ae/${data?.slug}`;
               width="34%"
               fontWeight="800"
               onClick={() => {
-                if (data?.mobile_number) {
-                  window.location.href = `tel:${data.mobile_number}`;
+                if (!canReveal() && !number) {
+                  setShowLoginPopup(true);
+                  return;
                 }
+                setPendingCall(true);
+                handleShowNumber("phone");
               }}
             />
 
@@ -460,12 +482,12 @@ https://addressguru.ae/${data?.slug}`;
         </div>
       </div>
 
-      {showRegisterPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="bg-white rounded-xl max-w-sm w-full p-6 relative">
+      {showLoginPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="h-[70vh] w-full max-w-md m-auto rounded-xl  bg-white relative">
             <button
-              onClick={() => setShowRegisterPopup(false)}
-              className="absolute right-3 top-3 border rounded-full border-orange-500 p-1 text-[#FF6E04]"
+              onClick={() => setShowLoginPopup(false)}
+              className="absolute right-3 top-2 border rounded-full border-orange-500 p-1 z-50 text-[#FF6E04]"
               aria-label="Close"
             >
               <svg
@@ -484,19 +506,12 @@ https://addressguru.ae/${data?.slug}`;
                 />
               </svg>
             </button>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              Register to see more numbers
-            </h3>
-            <p className="text-sm text-gray-600 mb-5">
-              You&apos;ve used your free number reveals. Create a free account
-              to keep viewing business contact numbers.
+            <p className="text-center text-sm text-gray-600 pt-8 px-6">
+              Please login first to view all business numbers
             </p>
-            <button
-              onClick={() => router.push("/register")}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 rounded-lg transition-colors"
-            >
-              Register Now
-            </button>
+            <div className="px-2">
+              <Login setShowLogin={setShowLoginPopup} />
+            </div>
           </div>
         </div>
       )}

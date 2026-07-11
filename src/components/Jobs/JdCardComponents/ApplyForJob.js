@@ -14,6 +14,9 @@ import {
   Loader2,
 } from "lucide-react";
 
+const NAME_MAX_LENGTH = 50;
+const PHONE_MAX_LENGTH = 10;
+
 /* ─── tiny form input ─── */
 const FormInput = ({
   label,
@@ -23,6 +26,10 @@ const FormInput = ({
   error,
   icon,
   type = "text",
+  name,
+  autoComplete,
+  maxLength,
+  inputMode,
 }) => (
   <div className="space-y-1">
     <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide">
@@ -34,6 +41,10 @@ const FormInput = ({
       </span>
       <input
         type={type}
+        name={name}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
+        inputMode={inputMode}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -74,9 +85,16 @@ const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
   const validate = () => {
     const e = {};
     if (!jobQuery.name.trim()) e.name = "Required";
+    else if (jobQuery.name.trim().length > NAME_MAX_LENGTH)
+      e.name = `Max ${NAME_MAX_LENGTH} characters`;
+
     if (!jobQuery.email || !/\S+@\S+\.\S+/.test(jobQuery.email))
       e.email = "Valid email required";
+
     if (!jobQuery.phone.trim()) e.phone = "Required";
+    else if (jobQuery.phone.trim().length !== PHONE_MAX_LENGTH)
+      e.phone = `Enter a valid ${PHONE_MAX_LENGTH}-digit number`;
+
     if (!jobQuery.experience.trim()) e.experience = "Required";
     if (!jobQuery.skills.trim()) e.skills = "Required";
     setErrors(e);
@@ -88,6 +106,24 @@ const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
+  // Name: letters/spaces only, capped at NAME_MAX_LENGTH
+  const handleNameChange = (value) => {
+    const trimmed = value.slice(0, NAME_MAX_LENGTH);
+    handleFieldChange("name", trimmed);
+  };
+
+  // Phone: digits only, capped at PHONE_MAX_LENGTH
+  const handlePhoneChange = (e) => {
+    const digitsOnly = e.target.value
+      .replace(/\D/g, "")
+      .slice(0, PHONE_MAX_LENGTH);
+    handleFieldChange("phone", digitsOnly);
+  };
+
+  const handleExperienceChange = (value) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 2);
+    handleFieldChange("experience", digitsOnly);
+  };
   const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
@@ -147,14 +183,19 @@ const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
       <div className="space-y-3.5">
         <FormInput
           label="Full Name"
+          name="fullName"
+          autoComplete="name"
+          maxLength={NAME_MAX_LENGTH}
           placeholder="Your full name"
           value={jobQuery.name}
-          onChange={(v) => handleFieldChange("name", v)}
+          onChange={handleNameChange}
           error={errors.name}
           icon={<User className="w-4 h-4" />}
         />
         <FormInput
           label="Email"
+          name="email"
+          autoComplete="email"
           placeholder="you@example.com"
           value={jobQuery.email}
           onChange={(v) => handleFieldChange("email", v)}
@@ -169,12 +210,13 @@ const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
           </label>
           <CountryCodePhoneInput
             value={jobQuery.phone}
-            onChange={(e) => handleFieldChange("phone", e.target.value)}
+            onChange={handlePhoneChange}
             countryCode={countryCode}
             setCountryCode={setCountryCode}
             error={errors.phone}
             placeholder="Mobile number"
             variant="bordered"
+            maxLength={PHONE_MAX_LENGTH}
           />
         </div>
 
@@ -183,9 +225,10 @@ const ApplyForJob = ({ highlight, setHighlight, slug, onSuccess }) => {
             label="Experience (yrs)"
             placeholder="e.g. 2"
             value={jobQuery.experience}
-            onChange={(v) => handleFieldChange("experience", v)}
+            onChange={handleExperienceChange}
             error={errors.experience}
             icon={<Briefcase className="w-4 h-4" />}
+            inputMode="numeric"
           />
           <FormInput
             label="Top Skills"

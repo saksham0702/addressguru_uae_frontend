@@ -58,7 +58,7 @@ const InfoRow = ({ label, value, icon }) => {
 };
 
 /* ─── Price display component ─── */
-const PriceDisplay = ({ price }) => {
+const PriceDisplay = ({ price, condition }) => {
   if (!price?.amount) {
     return (
       <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
@@ -90,34 +90,34 @@ const PriceDisplay = ({ price }) => {
   const formattedPrice = new Intl.NumberFormat("en-AE").format(price.amount);
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 text-white">
+    <div className="bg-gray-50 rounded-xl p-4 text-white">
       <div className="flex items-baseline gap-1.5">
-        <span className="text-sm text-gray-400 font-medium">
+        <span className="text-sm text-gray-900 font-medium">
           {price.currency}
         </span>
-        <span className="text-3xl font-bold tracking-tight">
+        <span className="text-3xl font-bold text-black tracking-tight">
           {formattedPrice}
         </span>
       </div>
       <div className="flex items-center gap-3 mt-2">
         {price.isNegotiable && (
-          <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+          <span className="text-xs text-emerald-400 px-2 py-0.5 rounded-full font-medium">
             Negotiable
           </span>
         )}
         {price.isFixed && (
-          <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-medium">
+          <span className="text-xs  text-blue-400 px-2 py-0.5 rounded-full font-medium">
             Fixed Price
           </span>
         )}
         <span
           className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-            data?.condition === "new"
+            condition === "new"
               ? "bg-green-500/20 text-green-400"
               : "bg-amber-500/20 text-amber-400"
           }`}
         >
-          {data?.condition}
+          {condition}
         </span>
       </div>
     </div>
@@ -491,7 +491,10 @@ const MarketplaceSeeDetails = () => {
 
               {/* Mobile Price / Enquire */}
               <div className="md:hidden px-2 mt-3">
-                <PriceDisplay price={data?.price} />
+                <PriceDisplay
+                  price={data?.price}
+                  condition={data?.condition}
+                />{" "}
               </div>
 
               {/* Key Details Grid */}
@@ -774,8 +777,7 @@ const MarketplaceSeeDetails = () => {
             {/* RIGHT COLUMN */}
             <div className="md:w-[34%] max-md:hidden h-auto mb-10 flex flex-col gap-4">
               {/* Price Card */}
-              <PriceDisplay price={data?.price} />
-
+              <PriceDisplay price={data?.price} condition={data?.condition} />
               {/* Seller Card */}
               <SellerCard data={data} />
 
