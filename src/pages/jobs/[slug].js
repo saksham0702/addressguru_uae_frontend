@@ -81,6 +81,7 @@ const StatCell = ({
 /* ─── main component ─── */
 const JobDetails = ({ jobData }) => {
   const [apply, setApply] = useState(false);
+  const [showApplyPopup, setShowApplyPopup] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activePop, setActivePop] = useState(null);
   const [thanksPop, setThanksPop] = useState(false);
@@ -311,12 +312,7 @@ const JobDetails = ({ jobData }) => {
 
                 {/* Mobile apply button */}
                 <button
-                  onClick={() => {
-                    document
-                      .getElementById("apply-form-section")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                    setApply(true);
-                  }}
+                  onClick={() => setShowApplyPopup(true)}
                   className="sm:hidden mt-4 w-full py-3 bg-[#FF6E04] hover:bg-[#E65C00] text-white text-sm font-bold rounded-lg transition-colors"
                 >
                   Apply Now
@@ -486,6 +482,29 @@ const JobDetails = ({ jobData }) => {
               type={type}
               slug={jobData?.slug}
               onClose={() => setThanksPop(false)}
+            />
+          </div>
+        </div>
+      )}
+      {/* Mobile Apply Popup */}
+      {showApplyPopup && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:hidden bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-t-2xl w-full max-h-[90vh] overflow-y-auto relative animate-in slide-in-from-bottom duration-200">
+            <button
+              onClick={() => setShowApplyPopup(false)}
+              className="absolute top-4 right-4 p-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-full transition-colors z-10"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-zinc-500" />
+            </button>
+            <ApplyForJob
+              highlight={apply}
+              slug={jobData?.slug}
+              setHighlight={setApply}
+              onSuccess={() => {
+                setShowApplyPopup(false);
+                setShowSuccess(true);
+              }}
             />
           </div>
         </div>

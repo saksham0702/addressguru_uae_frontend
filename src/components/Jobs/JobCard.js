@@ -94,9 +94,10 @@ const JobCard = ({ data }) => {
           }
         />
         <span className="w-[1px] h-4 bg-gray-200 max-md:hidden"></span>
+
         <IconKeyValue
           label={"Location"}
-          value={data?.location?.city?.name}
+          value={data?.company?.address}
           icon={
             <svg
               width="12"
